@@ -1,0 +1,2175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Motion Mornings: a one-minute film of you, doing the things</title>
+<meta name="description" content="Make a short animated film of you doing the everyday things that build the life you want. Watch it each morning and train your mind to see you as the person who does them.">
+<meta name="theme-color" content="#FBF3E6">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://motionmornings.com/">
+<meta property="og:title" content="Motion Mornings">
+<meta property="og:description" content="A one-minute animated film of you, doing the things. Watch it every morning.">
+<meta property="og:image" content="https://motionmornings.com/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<style>html,body{margin:0}</style>
+</head>
+<body>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Poppins:ital,wght@0,600;0,700;1,400;1,500&display=swap">
+<style>
+/* Layout: a sunrise-warm workbench. Steps on the left, a phone-shaped stage on the right that always shows the movie. */
+:root{
+  --bg:#FBF3E6; --surface:#FFFDF8; --sunk:#F4E9D7; --ink:#1F2E4D; --muted:#5B6479; --line:#E6D8C2;
+  --coral:#E07B66; --coral-ink:#FFFFFF; --gold:#F2BC6B; --sea:#3F7FA3; --ok:#3E9A6A;
+  --display:"Poppins","Figtree",system-ui,sans-serif; --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#131A29; --surface:#1B2336; --sunk:#161D2D; --ink:#F5EDDF; --muted:#A8AFC1; --line:#2D3850;
+  --coral:#EE8C77; --coral-ink:#1B1310; --gold:#F2BC6B; --sea:#77B3D4; --ok:#6CC596; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#131A29; --surface:#1B2336; --sunk:#161D2D; --ink:#F5EDDF; --muted:#A8AFC1; --line:#2D3850;
+  --coral:#EE8C77; --coral-ink:#1B1310; --gold:#F2BC6B; --sea:#77B3D4; --ok:#6CC596; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--bg);color:var(--ink)}
+body{font:16px/1.55 var(--body);padding-inline:16px;padding-block:0 48px}
+h1,h2,h3{font-family:var(--display);line-height:1.2;text-wrap:balance;margin:0}
+p{margin:0}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--sea);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1120px;margin:0 auto}
+
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:22px 10px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.sun{width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 50% 50%,#FFF1CF 0 38%,var(--gold) 39% 52%,transparent 53%),linear-gradient(180deg,#9DB2DE 0 48%,#F9C9A0 48% 62%,#4F8FB0 62% 100%);flex:none;box-shadow:inset 0 0 0 2px rgba(255,255,255,.4)}
+.logo{width:52px;height:52px;flex:none;color:var(--ink);margin-left:-6px}
+.brand h1{font-style:italic;font-weight:500;font-size:1.6rem;letter-spacing:-.01em}
+.tag{color:var(--muted);font-size:.95rem;max-width:46ch}
+
+/* steps nav */
+.steps{display:flex;gap:6px;overflow-x:auto;padding-block:10px 4px;scrollbar-width:none}
+.steps button{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px 7px 8px;display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;font-size:.92rem;color:var(--muted)}
+.steps button .n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--sunk);font-size:.8rem;font-variant-numeric:tabular-nums}
+.steps button[aria-current="step"]{color:var(--ink);border-color:var(--coral)}
+.steps button[aria-current="step"] .n{background:var(--coral);color:var(--coral-ink)}
+.steps button.done .n{background:var(--ok);color:#fff}
+
+/* main grid */
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:40px;align-items:start;margin-top:14px}
+.stagecol{position:sticky;top:calc(env(safe-area-inset-top,0px) + 14px);display:flex;flex-direction:column;gap:10px;align-items:center}
+.phone{width:100%;max-width:320px;aspect-ratio:9/16;border-radius:28px;overflow:hidden;background:#1A1A1A;box-shadow:0 0 0 8px #1F2430,0 20px 50px -20px rgba(20,25,40,.55);position:relative}
+.phone canvas{width:100%;height:100%;display:block}
+.stagenote{font-size:.85rem;color:var(--muted);text-align:center;max-width:32ch}
+@media (max-width:860px){
+  .grid{grid-template-columns:minmax(0,1fr);gap:18px}
+  .stagecol{position:relative;top:0;order:-1}
+  .phone{max-width:min(210px,56vw);border-radius:20px;box-shadow:0 0 0 6px #1F2430,0 14px 30px -14px rgba(20,25,40,.5)}
+}
+
+/* panels */
+.panel{display:flex;flex-direction:column;gap:22px;min-width:0}
+.panel header{display:flex;flex-direction:column;gap:6px}
+.panel header h2{font-size:1.55rem;font-weight:700}
+.lede{color:var(--muted);max-width:62ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+label.q{display:flex;flex-direction:column;gap:6px;font-weight:600}
+label.q span.hint{font-weight:400;color:var(--muted);font-size:.9rem}
+textarea,input[type=text]{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:10px 12px;resize:vertical}
+textarea{min-height:76px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.between{justify-content:space-between}
+.btn{border:0;border-radius:999px;padding:11px 20px;font-weight:700;cursor:pointer;background:var(--ink);color:var(--bg);display:inline-flex;gap:8px;align-items:center}
+.btn.coral{background:var(--coral);color:var(--coral-ink)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.small{padding:7px 14px;font-size:.9rem}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.navrow{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-top:4px}
+.status{font-size:.92rem;color:var(--muted);min-height:1.4em}
+.status.err{color:var(--coral)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sea)}
+
+/* photos */
+.drop{border:2px dashed var(--line);border-radius:var(--r);padding:20px;text-align:center;color:var(--muted);cursor:pointer;background:var(--sunk)}
+.drop.over{border-color:var(--coral)}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.thumbs figure{margin:0;position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--sunk)}
+.thumbs img{width:100%;height:100%;object-fit:cover}
+.thumbs button{position:absolute;top:4px;right:4px;border:0;border-radius:50%;width:24px;height:24px;background:rgba(0,0,0,.6);color:#fff;cursor:pointer;line-height:1}
+.worlds{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:520px){.worlds{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.world{border:2px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;background:var(--surface);padding:0;display:flex;flex-direction:column}
+.world canvas{width:100%;aspect-ratio:3/4;display:block}
+.world span{padding:6px 8px;font-weight:600;font-size:.9rem;text-align:left}
+.world[aria-pressed="true"]{border-color:var(--coral)}
+
+/* character */
+.field{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:center}
+@media (max-width:520px){.field{grid-template-columns:minmax(0,1fr)}}
+.field > span{font-weight:600;font-size:.95rem}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:5px 12px;cursor:pointer;font-size:.9rem}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sw{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.sw button{width:30px;height:30px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line);cursor:pointer;padding:0}
+.sw button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--coral)}
+.sw input[type=color]{width:34px;height:34px;border:0;background:none;padding:0;cursor:pointer}
+.subhead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.subhead h3{font-size:1.1rem}
+.switch{display:flex;gap:8px;align-items:center;font-weight:600;cursor:pointer}
+.switch input{width:20px;height:20px;accent-color:var(--coral)}
+
+/* lines editor */
+.sec{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:14px;display:flex;flex-direction:column;gap:10px}
+.sec .sectitle{font-family:var(--display);font-weight:700;border:0;background:transparent;padding:2px 0;font-size:1.05rem}
+.line{display:flex;flex-direction:column;gap:6px;min-width:0}
+.line .ctl{display:flex;gap:6px;align-items:center;min-width:0}
+.line .ctl select{flex:1;min-width:0}
+.sec .titlerow{display:flex;gap:8px;align-items:center}
+.sec .titlerow input{flex:1;min-width:0;width:auto}
+.line textarea{background:var(--bg);min-height:0;resize:none}
+.line select{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:5px 8px;font-size:.88rem;max-width:100%;color:var(--muted)}
+.line.glimpse textarea{font-style:italic;border-color:color-mix(in srgb,var(--gold) 60%,var(--line))}
+.kind{font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.line.glimpse .kind{color:color-mix(in srgb,var(--gold) 70%,var(--ink))}
+.ib{border:1px solid var(--line);background:var(--bg);border-radius:8px;width:34px;height:34px;cursor:pointer;display:grid;place-items:center;font-size:.95rem;color:var(--muted)}
+.ib:hover{color:var(--ink)}
+.banner{background:color-mix(in srgb,var(--gold) 22%,var(--surface));border:1px solid color-mix(in srgb,var(--gold) 50%,var(--line));border-radius:12px;padding:12px 14px;font-size:.95rem}
+.meta{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.92rem}
+
+/* player */
+.player{display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px}
+.player .row{flex-wrap:nowrap}
+input[type=range]{flex:1;min-width:0;accent-color:var(--coral)}
+.time{font-variant-numeric:tabular-nums;font-size:.85rem;color:var(--muted);flex:none}
+.bar{height:10px;border-radius:99px;background:var(--sunk);overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--coral))}
+video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
+.foot{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:.88rem;display:flex;flex-direction:column;gap:6px;max-width:70ch}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+/* themes */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.tile{border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 12px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.tile b{font-family:var(--display);font-weight:600;font-size:.98rem}
+.tile small{color:var(--muted);font-size:.84rem;line-height:1.35}
+.tile[aria-pressed="true"]{border-color:var(--coral);background:color-mix(in srgb,var(--coral) 10%,var(--surface))}
+.tile[aria-pressed="true"] b::before{content:"\2713  ";color:var(--coral)}
+.fills{display:flex;flex-direction:column;gap:12px}
+.fillcard{border-left:3px solid var(--gold);padding-left:12px;display:flex;flex-direction:column;gap:8px}
+.fillcard h4{margin:0;font-family:var(--display);font-size:.98rem}
+.fillcard label{display:flex;flex-direction:column;gap:4px;font-size:.92rem;color:var(--muted)}
+/* people */
+.pcard{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:12px;background:var(--bg)}
+.pcard .subhead h4{margin:0;font-family:var(--display);font-size:1rem}
+.frompic{white-space:nowrap;border:1px dashed var(--line);background:transparent;border-radius:999px;padding:4px 10px;font-size:.82rem;cursor:pointer;color:var(--muted)}
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(15,18,28,.72);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal .box{background:var(--surface);border-radius:16px;padding:16px;max-width:560px;width:100%;display:flex;flex-direction:column;gap:12px;max-height:100%;overflow:auto}
+.modal canvas{width:100%;border-radius:10px;cursor:crosshair;touch-action:none;background:var(--sunk)}
+.modal .picks{display:flex;gap:6px;overflow-x:auto}
+.modal .picks img{width:56px;height:56px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid transparent}
+.modal .picks img.on{border-color:var(--coral)}
+.chip{display:inline-block;width:22px;height:22px;border-radius:50%;vertical-align:middle;box-shadow:0 0 0 1px var(--line)}
+
+/* full-size player */
+.phonebtn{padding:0;border:0;cursor:pointer;display:block;font:inherit}
+.phonebtn .expand{position:absolute;right:8px;bottom:8px;width:30px;height:30px;border-radius:50%;background:rgba(15,18,28,.6);color:#fff;display:grid;place-items:center}
+.fullview{position:fixed;inset:0;z-index:100;background:#0E121B;color:#F5EDDF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(14px + env(safe-area-inset-bottom,0px))}
+.fullview canvas{height:calc(100dvh - 150px);max-height:calc(100vh - 150px);width:auto;max-width:100%;aspect-ratio:9/16;border-radius:16px;background:#000}
+.fullbar{width:min(420px,90vw);height:5px;border-radius:99px;background:rgba(255,255,255,.15);overflow:hidden}
+.fullbar i{display:block;height:100%;width:0;background:var(--coral)}
+.fullctl{display:flex;gap:14px;align-items:center}
+.fullctl .btn.ghost{color:#F5EDDF;border-color:rgba(255,255,255,.3)}
+.fullctl .time{color:#C9C3B8}
+.tile .trackstate{color:var(--coral);font-weight:600;margin-top:2px}
+.fullnote{font-size:.9rem;color:#C9C3B8;min-height:1.3em;text-align:center}
+
+/* hero: the example film */
+.hero{display:grid;grid-template-columns:320px minmax(0,1fr);gap:48px;align-items:center;padding-block:18px 56px;border-bottom:1px solid var(--line);margin-bottom:36px}
+.herofilm{display:flex;flex-direction:column;align-items:center;gap:10px}
+.herobar{width:100%;max-width:320px;height:4px;border-radius:99px;background:var(--sunk);overflow:hidden}
+.herobar i{display:block;height:100%;width:0;background:var(--coral)}
+.herocopy{display:flex;flex-direction:column;gap:14px;align-items:flex-start}
+.herocopy h2{font-size:clamp(1.7rem,4vw,2.5rem);font-weight:700;letter-spacing:-.01em}
+.buildhead{display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
+.buildhead h2{font-size:1.7rem;font-weight:700}
+.builder{scroll-margin-top:8px}
+.stageside{display:flex;flex-direction:column;gap:10px;align-items:center;width:100%}
+@media (max-width:860px){
+  .hero{grid-template-columns:minmax(0,1fr);gap:22px;padding-block:6px 36px}
+  .hero .phone{max-width:min(240px,62vw)}
+  .herocopy{align-items:stretch}
+  .herocopy .btn{justify-content:center}
+  /* the builder preview stays pinned while choosing */
+  .stagecol{position:sticky;top:0;z-index:20;flex-direction:row;align-items:center;gap:14px;background:var(--bg);margin-inline:-16px;padding:10px 16px;border-bottom:1px solid var(--line)}
+  .stagecol .phone{max-width:96px;border-radius:12px;box-shadow:0 0 0 4px #1F2430}
+  .stageside{align-items:stretch;min-width:0;flex:1}
+  .stagecol .stagenote{text-align:left;font-size:.82rem}
+  .stagecol .player{max-width:none}
+}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <div class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><path d="M16.5 51 Q21.5 41.5 30 52 Q38.5 41.5 43.5 51" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M37.5 35 Q41.5 27.2 47 35.5 Q52.5 27.2 56.5 35" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M40 78 A28 28 0 0 1 96 78 Z" fill="var(--coral)"/><line x1="14" y1="78" x2="106" y2="78" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><line x1="54" y1="90" x2="84" y2="90" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/><line x1="61" y1="101" x2="77" y2="101" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/></svg><h1>Motion Mornings</h1></div>
+    <p class="tag"><strong>Life starts now.</strong> Make a short animated film of you doing the everyday things that build the life you want. Watch it each morning and train your mind to see you as the person who does them.</p>
+  </div>
+  <section class="hero" aria-labelledby="heroTitle">
+    <div class="herofilm">
+      <div class="phone"><canvas id="heroStage" width="720" height="1280" aria-label="Example film: a sunrise beach walk, the gym, a bush run, cooking together, working at a city cafe, cleaning the house, breathing by a mountain lake, dancing at a party and cuddling up at home"></canvas></div>
+      <div class="herobar"><i id="heroBar"></i></div>
+      <div class="row" style="justify-content:center"><button class="btn ghost small" id="heroPlay">Pause</button><button class="btn small" id="heroSound">Sound on</button></div>
+    </div>
+    <div class="herocopy">
+      <span class="pill">An example film</span>
+      <h2 id="heroTitle">A minute of you, doing the things</h2>
+      <p class="lede">A sunrise walk on the beach. The gym, a bush run, dinner cooked together. Focused work at a city cafe, a fresh clean home, five quiet minutes by the lake, dancing with a soda water in hand, a cuddle at the end of the day. Each run of small actions ends with a quick glimpse of where it leads: fit and strong, a home you love, work out in the world, a clear head, closer every year.</p>
+      <button class="btn coral" id="startBuild">Make your own film</button>
+    </div>
+  </section>
+
+  <div id="builder" class="builder">
+  <header class="buildhead"><span class="pill">Build your own</span><h2 id="buildTitle">Your film, starring you</h2><p class="lede">Pick what matters, set the scene, add your people. The preview updates as you go.</p></header>
+  <nav class="steps" id="steps" aria-label="Steps"></nav>
+
+  <div class="grid">
+    <main id="panels">
+      <section class="panel" data-step="0">
+        <header><h2>What matters to you this year</h2><p class="lede">Tick what you want to work on. A couple of quick questions turn each one into lines about you, in action.</p></header>
+        <div class="card"><div class="tiles" id="tiles"></div></div>
+        <div class="card" id="fillsCard"><div class="subhead"><h3>A few details</h3></div><div class="fills" id="fills"></div></div>
+        <div class="card"><label class="q" for="notes">Anything else? <span class="hint">Optional. Places, names, the feeling you're after.</span><textarea id="notes" rows="2" placeholder="e.g. living by the beach, a new chapter, more time outdoors"></textarea></label></div>
+        <div class="navrow"><span></span><button class="btn coral" data-next>Next: your world</button></div>
+      </section>
+
+      <section class="panel" data-step="1" hidden>
+        <header><h2>Your world</h2><p class="lede">Add a few photos of your life: you, your people, your pets, where you live. They tint your rooms, and on the next step you can tap them to pick exact colours for hair, skin and fur.</p></header>
+        <div class="card">
+          <div class="drop" id="drop" tabindex="0" role="button" aria-label="Add photos">Drop photos here or tap to choose (up to 8)</div>
+          <input type="file" id="photoInput" accept="image/*" multiple hidden>
+          <div class="thumbs" id="thumbs"></div>
+          <div class="row" id="aiPhotoRow" hidden><button class="btn ghost small" id="readPhotos">Or let Claude read them</button><span class="status" id="photoStatus"></span></div>
+        </div>
+        <div class="card"><div class="subhead"><h3>Where your film happens</h3></div><p class="lede">Pick as many as you like. Outdoor scenes move between them, so one film can have beach mornings, bush runs and city nights.</p><div class="worlds" id="worlds"></div></div>
+        <div class="navrow"><button class="btn ghost" data-prev>Back</button><button class="btn coral" data-next>Next: your people</button></div>
+      </section>
+
+      <section class="panel" data-step="2" hidden>
+        <header><h2>Who's in your life</h2><p class="lede">The people and pets you have now, and the ones you're hoping for. Simple and cartoony, recognisably yours.</p></header>
+        <div class="card"><div class="subhead"><h3>You</h3></div><p class="meta">Your name titles the film, like "Ben's Motion Mornings". The lines stay in your own voice: "I go for a run", never your name.</p><div id="meFields" class="panel" style="gap:12px"></div></div>
+        <div class="card">
+          <div class="subhead"><h3>A partner</h3><label class="switch"><input type="checkbox" id="partnerOn"> Include</label></div>
+          <div id="partnerFields" class="panel" style="gap:12px"></div>
+        </div>
+        <div class="card"><div class="subhead"><h3>Kids</h3><button class="btn ghost small" id="addKid">Add a child</button></div><div id="kidsBox" class="panel" style="gap:12px"></div></div>
+        <div class="card"><div class="subhead"><h3>Pets</h3><button class="btn ghost small" id="addPet">Add a pet</button></div><div id="petsBox" class="panel" style="gap:12px"></div></div>
+        <div class="navrow"><button class="btn ghost" data-prev>Back</button><button class="btn coral" data-next>Next: your lines</button></div>
+      </section>
+
+      <section class="panel" data-step="3" hidden>
+        <header><h2>Your lines</h2><p class="lede">Mostly you in action, doing the daily steps. Each theme ends with a short glimpse of where it leads, so it feels like a path, not a finish line.</p></header>
+        <div class="card">
+          <div class="row"><button class="btn coral" id="build">Build my lines</button><button class="btn ghost" id="writeAI" hidden>Write them with Claude</button></div>
+          <p class="status" id="writeStatus"></p>
+        </div>
+        <div class="banner" id="exampleBanner">These are example lines. Press Build my lines to make them yours, then edit anything.</div>
+        <div class="card"><label class="q">Opening line<input type="text" id="opening" maxlength="60"></label></div>
+        <div id="sections" class="panel" style="gap:14px"></div>
+        <div class="row between"><button class="btn ghost small" id="addSection">Add your own theme</button><span class="meta" id="lineMeta"></span></div>
+        <div class="card"><label class="q">Closing line<input type="text" id="closing" maxlength="70"></label></div>
+        <div class="navrow"><button class="btn ghost" data-prev>Back</button><button class="btn coral" data-next>Next: song and save</button></div>
+      </section>
+
+      <section class="panel" data-step="4" hidden>
+        <header><h2>Your music, then save it</h2><p class="lede">Pick one of our free tracks, or add a song of your own. Your film stretches to fit the music, and scenes change on the beat.</p></header>
+        <div class="card">
+          <div class="subhead"><h3>Free tracks</h3><button class="btn ghost small" data-mute aria-pressed="false">Mute</button></div>
+          <p class="meta">Original cinematic music, made right here for the length of your film. Free to use anywhere, including when you share it.</p>
+          <div class="tiles" id="tracks"></div>
+          <div class="subhead" style="margin-top:6px"><h3>Or your own song</h3></div>
+          <p class="meta">Buying a song on Bandcamp gets you the MP3 and pays the artist directly. Songs you add are for your own viewing; posting a film with someone else's song publicly can break copyright.</p>
+          <div class="row"><button class="btn" id="songBtn">Add your MP3</button><span class="status" id="songStatus">No music yet. The film plays silent until you pick some.</span></div>
+          <input type="file" id="songInput" accept="audio/*,.mp3,.m4a,.wav" hidden>
+          <a class="meta" href="https://bandcamp.com" target="_blank" rel="noopener">Find songs on Bandcamp</a>
+          <div id="songOpts" hidden class="panel" style="gap:12px">
+            <div class="field"><span>Start the song at</span><div class="row" style="flex-wrap:nowrap"><input type="range" id="songStart" min="0" max="60" step="0.5" value="0" aria-label="Song start"><span class="time" id="songStartLbl">0:00</span></div></div>
+            <div class="field"><span>Film length</span><div class="seg" id="fitSeg" role="group" aria-label="Film length"><button data-fit="song">The whole song</button><button data-fit="lines">Fit my lines, then fade out</button></div></div>
+            <label class="switch" id="beatRow"><input type="checkbox" id="beatSnap" checked> Change scenes on the beat <span class="meta" id="bpmLbl"></span></label>
+            <p class="meta" id="pace"></p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="subhead"><h3>Watch it</h3><span class="meta" id="movieLen"></span></div>
+          <p class="lede">Use the player under the preview. Go back and change anything; it updates straight away.</p>
+        </div>
+        <div class="card">
+          <div class="subhead"><h3>Save your video</h3></div>
+          <p class="lede">The film plays through once while it records, so it takes as long as the song. Keep this screen open and awake until it finishes.</p>
+          <div class="row"><button class="btn coral" id="recBtn">Make my video file</button><button class="btn ghost small" id="recStop" hidden>Stop</button></div>
+          <div class="bar" id="recBar" hidden><i></i></div>
+          <p class="status" id="recStatus"></p>
+          <div id="result" hidden class="panel" style="gap:10px">
+            <video class="result" id="resultVideo" controls playsinline></video>
+            <div class="row"><button class="btn coral" id="saveBtn">Save to my device</button></div>
+            <p class="status" id="saveStatus"></p>
+          </div>
+        </div>
+        <div class="navrow"><button class="btn ghost" data-prev>Back</button><span></span></div>
+      </section>
+    </main>
+
+    <aside class="stagecol">
+      <button class="phone phonebtn" id="stageOpen" aria-label="Watch your film full size with music"><canvas id="stage" width="720" height="1280" aria-hidden="true"></canvas><span class="expand" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></span></button>
+      <div class="stageside">
+        <div class="player"><div class="row"><button class="btn small" id="playBtn">Play my film</button><input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Position in film"><span class="time" id="timeLbl">0:00</span></div></div>
+        <div class="row"><button class="btn ghost small" id="fullBtn" aria-label="Watch full size with music">Full size</button><button class="btn ghost small" data-mute aria-pressed="false">Mute</button></div>
+        <p class="stagenote" id="stageNote">Preview</p>
+      </div>
+    </aside>
+  </div>
+  </div>
+
+  <footer class="foot">
+    <p>Your photos, music and film are made and kept on your device. Nothing is uploaded.</p>
+    <p>Watch your film once a day, ideally first thing in the morning. Feel each scene as something you're doing today.</p>
+  </footer>
+</div>
+
+<div class="fullview" id="fullview" hidden role="dialog" aria-modal="true" aria-label="Your film, full size">
+  <canvas id="fullStage" width="720" height="1280" aria-label="Your film"></canvas>
+  <div class="fullbar"><i id="fullProg"></i></div>
+  <div class="fullctl"><button class="btn coral" id="fullPlay">Play</button><span class="time" id="fullTime">0:00</span><button class="btn ghost" data-mute aria-pressed="false">Mute</button><button class="btn ghost" id="fullClose">Close</button></div>
+  <p class="fullnote" id="fullNote" aria-live="polite"></p>
+</div>
+
+<div class="modal" id="picker" hidden role="dialog" aria-modal="true" aria-labelledby="pickTitle">
+  <div class="box">
+    <div class="subhead"><h3 id="pickTitle">Tap the colour you want</h3><button class="btn ghost small" id="pickClose">Cancel</button></div>
+    <canvas id="pickCanvas" width="800" height="800"></canvas>
+    <div class="picks" id="pickThumbs"></div>
+    <p class="status" id="pickStatus">Tap on hair, skin or fur in your photo.</p>
+  </div>
+</div>
+
+<script>// ===== Motion Mornings: animation engine (logical canvas 1080 x 1920) =====
+const LSN = (() => {
+const W = 1080, H = 1920, PI = Math.PI;
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ease = x => { x = clamp(x); return x * x * (3 - 2 * x); };
+const mix = (a, b, k) => a.map((v, i) => v + (b[i] - v) * k);
+const hexCache = {};
+const C = h => {
+  if (Array.isArray(h)) return h;
+  if (hexCache[h]) return hexCache[h];
+  let s = String(h || '#888888').replace('#', '');
+  if (s.length === 3) s = s.split('').map(c => c + c).join('');
+  const v = [0, 2, 4].map(i => (parseInt(s.slice(i, i + 2), 16) || 0) / 255);
+  hexCache[h] = v; return v;
+};
+const css = (c, a = 1) => `rgba(${Math.round(c[0] * 255)},${Math.round(c[1] * 255)},${Math.round(c[2] * 255)},${a})`;
+const darken = (c, k) => mix(C(c), [0, 0, 0], k);
+function rng(seed) { let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+let X = null;
+const NAVY = [0.12, 0.18, 0.30], CREAM = [0.99, 0.95, 0.89], CORAL = [0.93, 0.52, 0.43], GOLD = [0.97, 0.76, 0.45];
+
+function fill(c, a = 1) { X.fillStyle = css(C(c), a); X.fill(); }
+function ell(cx, cy, rx, ry) { X.beginPath(); X.ellipse(cx, cy, Math.abs(rx) || 0.01, Math.abs(ry) || 0.01, 0, 0, 2 * PI); }
+function circ(x, y, r) { X.beginPath(); X.arc(x, y, Math.max(r, 0.01), 0, 2 * PI); }
+function rr(x, y, w, h, r) {
+  X.beginPath(); r = Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2);
+  X.moveTo(x + r, y); X.arcTo(x + w, y, x + w, y + h, r); X.arcTo(x + w, y + h, x, y + h, r);
+  X.arcTo(x, y + h, x, y, r); X.arcTo(x, y, x + w, y, r); X.closePath();
+}
+function line(pts, w, c, a = 1) {
+  X.beginPath(); X.lineWidth = w; X.lineCap = 'round'; X.lineJoin = 'round';
+  X.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) X.lineTo(pts[i][0], pts[i][1]);
+  X.strokeStyle = css(C(c), a); X.stroke();
+}
+function lin(x0, y0, x1, y1, stops) {
+  const g = X.createLinearGradient(x0, y0, x1, y1);
+  stops.forEach(s => g.addColorStop(s[0], css(C(s[1]), s[2] == null ? 1 : s[2]))); return g;
+}
+function rect(x, y, w, h, c, a = 1) { X.fillStyle = typeof c === 'object' && !Array.isArray(c) ? c : css(C(c), a); X.fillRect(x, y, w, h); }
+
+// ---------------------------------------------------------------- skies & worlds
+const SKIES = {
+  day: [[0.45, 0.68, 0.90], [0.84, 0.91, 0.96], null],
+  sunrise: [[0.52, 0.62, 0.84], [0.99, 0.82, 0.64], [1.0, 0.86, 0.62]],
+  sunset: [[0.36, 0.38, 0.62], [0.98, 0.63, 0.46], [1.0, 0.72, 0.45]],
+  dusk: [[0.14, 0.17, 0.34], [0.62, 0.42, 0.50], null],
+};
+const GROUND_TINT = { day: [0, null], sunrise: [0.08, [1, 0.8, 0.6]], sunset: [0.2, [0.85, 0.45, 0.38]], dusk: [0.55, [0.22, 0.2, 0.3]] };
+const gt = (c, tod) => { const [k, to] = GROUND_TINT[tod]; return k ? mix(C(c), to, k) : C(c); };
+const sunX = tod => tod === 'sunrise' ? 760 : 320;
+
+function sky(t, tod, sunY, horizon = 1060) {
+  const [top, bot, sun] = SKIES[tod];
+  rect(0, 0, W, horizon, lin(0, 0, 0, horizon, [[0, top], [1, bot]]));
+  if (tod === 'dusk') {
+    const r = rng(3);
+    for (let i = 0; i < 40; i++) { const x = r() * W, y = r() * 800, s = 1.5 + r() * 2; circ(x, y, s); fill([1, 1, 1], 0.4 + 0.4 * Math.sin(t * 2 + i)); }
+  }
+  if (sun) {
+    const sx = sunX(tod), sy = sunY == null ? 960 : sunY;
+    const g = X.createRadialGradient(sx, sy, 10, sx, sy, 420);
+    g.addColorStop(0, css(sun, 0.7)); g.addColorStop(1, css(sun, 0));
+    rect(0, 0, W, horizon, g);
+    circ(sx, sy, 78); fill([1, 0.95, 0.82]);
+  }
+  if (tod === 'day') {
+    [[200, 820], [760, 760]].forEach(([cx, cy]) => {
+      cx = ((cx + t * 12) % (W + 300)) - 150;
+      [[0, 0, 40], [45, -15, 50], [95, 0, 38], [45, 10, 42]].forEach(([dx, dy, r]) => { circ(cx + dx, cy + dy, r); fill([1, 1, 1], 0.7); });
+    });
+  }
+}
+
+function beach(t, tod, sunY) {
+  sky(t, tod, sunY);
+  const bot = SKIES[tod][1];
+  const hl = tod !== 'dusk' ? mix(mix([0.55, 0.57, 0.42], bot, 0.35), [0, 0, 0], 0) : [0.18, 0.18, 0.25];
+  X.beginPath(); X.moveTo(0, 1060); X.lineTo(0, 975); X.bezierCurveTo(80, 960, 180, 990, 300, 1060); X.closePath(); fill(hl);
+  const tint = { day: 0, sunrise: 0.25, sunset: 0.35, dusk: 0.55 }[tod];
+  let s1 = mix([0.22, 0.47, 0.64], bot, tint * 0.5), s2 = mix([0.33, 0.62, 0.72], bot, tint * 0.6);
+  if (tod === 'dusk') { s1 = mix(s1, [0.1, 0.12, 0.25], 0.5); s2 = mix(s2, [0.2, 0.2, 0.35], 0.5); }
+  rect(0, 1055, W, 270, lin(0, 1055, 0, 1325, [[0, s1], [1, s2]]));
+  if (SKIES[tod][2]) {
+    const sx = sunX(tod);
+    for (let i = 0; i < 8; i++) { const y = 1070 + i * 26, w = 160 - i * 12 + 20 * Math.sin(t * 2 + i); line([[sx - w / 2, y], [sx + w / 2, y]], 6, [1, 0.9, 0.7], 0.5); }
+  }
+  [[1130, 8, 1.2, 0.55], [1200, 10, 1.6, 0.7], [1270, 12, 2.0, 0.85]].forEach(([y0, amp, sp, a], k) => {
+    X.beginPath(); X.moveTo(-10, y0);
+    for (let x = -10; x < W + 20; x += 20) X.lineTo(x, y0 + amp * Math.sin(x / 70 + t * sp + k));
+    X.lineWidth = 10 + k * 3; X.lineCap = 'round'; X.strokeStyle = css([1, 1, 1], a * (tod === 'dusk' ? 0.6 : 1)); X.stroke();
+  });
+  const sand1 = gt([0.86, 0.73, 0.54], tod), sand2 = gt([0.80, 0.65, 0.46], tod);
+  rect(0, 1320, W, 600, lin(0, 1320, 0, H, [[0, sand1], [1, sand2]]));
+  const wi = 1325 + 18 * Math.sin(t * 1.3);
+  X.beginPath(); X.moveTo(0, 1320);
+  for (let x = 0; x <= W + 30; x += 30) X.lineTo(x, wi + 10 * Math.sin(x / 90 + t));
+  X.lineTo(W, 1320); X.closePath(); fill(mix(s2, [1, 1, 1], 0.4), 0.8);
+  const r = rng(7);
+  for (let i = 0; i < 26; i++) { ell(r() * W, 1450 + r() * 450, 14, 7); fill(sand2, 0.6); }
+}
+
+function tree(x, y, s, col, trunk) {
+  rect(x - 10 * s, y - 120 * s, 20 * s, 120 * s, trunk);
+  [[0, -170, 70], [-45, -140, 50], [45, -140, 52], [0, -215, 50]].forEach(([dx, dy, r]) => { circ(x + dx * s, y + dy * s, r * s); fill(col); });
+}
+function park(t, tod, sunY) {
+  sky(t, tod, sunY, 1100);
+  const bot = SKIES[tod][1];
+  const far = gt(mix([0.55, 0.7, 0.45], bot, 0.4), tod), mid = gt([0.47, 0.66, 0.38], tod);
+  X.beginPath(); X.moveTo(0, 1100); X.bezierCurveTo(250, 960, 500, 1060, 700, 1000); X.bezierCurveTo(850, 960, 1000, 1010, W, 990); X.lineTo(W, 1340); X.lineTo(0, 1340); X.closePath(); fill(far);
+  const tc = gt([0.32, 0.55, 0.32], tod), tk = gt([0.45, 0.32, 0.22], tod);
+  [[120, 1110, 0.8], [330, 1080, 0.6], [880, 1050, 0.75], [990, 1070, 0.55]].forEach(([x, y, s]) => tree(x, y, s, tc, tk));
+  X.beginPath(); X.moveTo(0, 1250); X.bezierCurveTo(300, 1170, 700, 1230, W, 1180); X.lineTo(W, 1340); X.lineTo(0, 1340); X.closePath(); fill(mid);
+  rect(0, 1320, W, 600, lin(0, 1320, 0, H, [[0, gt([0.55, 0.73, 0.4], tod)], [1, gt([0.42, 0.6, 0.32], tod)]]));
+  X.beginPath(); X.moveTo(380, 1320); X.bezierCurveTo(600, 1450, 100, 1650, 300, H); X.lineTo(700, H); X.bezierCurveTo(500, 1650, 900, 1450, 520, 1320); X.closePath();
+  fill(gt([0.87, 0.8, 0.62], tod), 0.75);
+  const r = rng(9);
+  for (let i = 0; i < 30; i++) {
+    const x = r() * W, y = 1360 + r() * 540;
+    line([[x, y], [x - 6, y - 20]], 4, gt([0.35, 0.55, 0.3], tod)); line([[x, y], [x + 6, y - 22]], 4, gt([0.35, 0.55, 0.3], tod));
+    if (i % 4 === 0) { circ(x + 14, y - 12, 7); fill(i % 8 ? [1, 0.85, 0.4] : [1, 0.6, 0.6]); }
+  }
+}
+
+function city(t, tod, sunY) {
+  sky(t, tod, sunY, 1260);
+  const bot = SKIES[tod][1];
+  const r = rng(21);
+  const lit = tod === 'dusk' || tod === 'sunset';
+  for (let layer = 0; layer < 2; layer++) {
+    let x = -40;
+    const base = 1270;
+    while (x < W + 40) {
+      const w = 90 + r() * 90, h = (layer ? 220 : 380) + r() * (layer ? 300 : 320);
+      const col = layer ? gt(mix([0.36, 0.42, 0.55], bot, 0.25), tod) : gt(mix([0.6, 0.66, 0.76], bot, 0.5), tod);
+      rect(x, base - h, w - 8, h, col);
+      if (layer) {
+        for (let yy = base - h + 30; yy < base - 40; yy += 46) for (let xx = x + 16; xx < x + w - 30; xx += 34) {
+          const on = r() > (lit ? 0.45 : 0.75);
+          rect(xx, yy, 16, 22, on ? (lit ? [1, 0.86, 0.5] : [0.85, 0.92, 1]) : col, on ? (lit ? 0.9 : 0.5) : 1);
+        }
+      }
+      x += w;
+    }
+  }
+  rect(0, 1260, W, 70, gt([0.55, 0.55, 0.58], tod));
+  rect(0, 1320, W, 600, lin(0, 1320, 0, H, [[0, gt([0.84, 0.79, 0.72], tod)], [1, gt([0.76, 0.7, 0.62], tod)]]));
+  for (let y = 1400; y < H; y += 120) line([[0, y], [W, y]], 3, gt([0.7, 0.64, 0.56], tod), 0.6);
+  [[90, 1360], [990, 1360]].forEach(([x, y]) => { tree(x, y, 0.8, gt([0.38, 0.6, 0.36], tod), gt([0.45, 0.32, 0.22], tod)); rr(x - 50, y - 10, 100, 60, 10); fill(gt([0.6, 0.5, 0.42], tod)); });
+  if (lit) [[300, 1330], [780, 1330]].forEach(([x, y]) => { line([[x, y], [x, y - 330]], 10, [0.2, 0.2, 0.24]); const g = X.createRadialGradient(x, y - 340, 4, x, y - 340, 120); g.addColorStop(0, css([1, 0.85, 0.5], 0.7)); g.addColorStop(1, css([1, 0.85, 0.5], 0)); circ(x, y - 340, 120); X.fillStyle = g; X.fill(); circ(x, y - 340, 18); fill([1, 0.9, 0.6]); });
+}
+
+function pine(x, y, s, col) {
+  rect(x - 7 * s, y - 40 * s, 14 * s, 40 * s, [0.35, 0.25, 0.18]);
+  for (let i = 0; i < 3; i++) { X.beginPath(); X.moveTo(x, y - (200 - i * 45) * s); X.lineTo(x - (55 + i * 12) * s, y - (40 + (2 - i) * 45) * s); X.lineTo(x + (55 + i * 12) * s, y - (40 + (2 - i) * 45) * s); X.closePath(); fill(col); }
+}
+function mountains(t, tod, sunY) {
+  sky(t, tod, sunY, 1160);
+  const bot = SKIES[tod][1];
+  const far = gt(mix([0.55, 0.62, 0.78], bot, 0.45), tod), near = gt(mix([0.38, 0.46, 0.6], bot, 0.2), tod);
+  const peaks = (pts, col, snow) => {
+    X.beginPath(); X.moveTo(0, 1180); pts.forEach(p => X.lineTo(p[0], p[1])); X.lineTo(W, 1180); X.closePath(); fill(col);
+    if (snow) pts.forEach((p, i) => { if (i % 2 === 1 && p[1] < 900) { X.beginPath(); X.moveTo(p[0], p[1]); X.lineTo(p[0] - 50, p[1] + 70); X.lineTo(p[0] - 15, p[1] + 55); X.lineTo(p[0] + 10, p[1] + 75); X.lineTo(p[0] + 50, p[1] + 70); X.closePath(); fill([1, 1, 1], tod === 'dusk' ? 0.5 : 0.9); } });
+  };
+  peaks([[0, 950], [180, 760], [330, 930], [520, 700], [700, 940], [860, 780], [W, 960]], far, true);
+  peaks([[0, 1080], [150, 960], [300, 1060], [480, 990], [650, 1080], [820, 970], [W, 1060]], near, false);
+  const tod2 = tod;
+  const l1 = gt(mix([0.35, 0.58, 0.72], bot, 0.3), tod2), l2 = gt([0.45, 0.66, 0.76], tod2);
+  rect(0, 1160, W, 170, lin(0, 1160, 0, 1330, [[0, l1], [1, l2]]));
+  for (let i = 0; i < 6; i++) { const y = 1185 + i * 24, w = 200 + 60 * Math.sin(t + i); line([[540 - w / 2 + 80 * Math.sin(i), y], [540 + w / 2 + 80 * Math.sin(i), y]], 5, [1, 1, 1], 0.35); }
+  const pc = gt([0.25, 0.45, 0.32], tod);
+  [[60, 1180, 0.9], [150, 1170, 0.7], [960, 1180, 0.9], [1040, 1170, 0.65]].forEach(([x, y, s]) => pine(x, y, s, pc));
+  rect(0, 1320, W, 600, lin(0, 1320, 0, H, [[0, gt([0.62, 0.68, 0.45], tod)], [1, gt([0.52, 0.55, 0.36], tod)]]));
+  const r = rng(13);
+  for (let i = 0; i < 14; i++) { ell(r() * W, 1420 + r() * 480, 26, 14); fill(gt([0.6, 0.58, 0.55], tod)); }
+}
+
+const WORLDS = { beach, park, city, mountains };
+function outdoor(cfg, t, tod, sunY) { (WORLDS[cfg.world] || beach)(t, tod, sunY); }
+
+function windowView(world, tod, x, y, w, h, t) {
+  const [top, bot, sun] = SKIES[tod];
+  rect(x, y, w, h, lin(0, y, 0, y + h, [[0, top], [1, bot]]));
+  if (sun) { circ(x + w * 0.65, y + h * 0.62, 34); fill([1, 0.95, 0.8]); }
+  if (world === 'park') { X.beginPath(); X.moveTo(x, y + h * 0.75); X.bezierCurveTo(x + w * 0.3, y + h * 0.6, x + w * 0.7, y + h * 0.8, x + w, y + h * 0.66); X.lineTo(x + w, y + h); X.lineTo(x, y + h); X.closePath(); fill([0.5, 0.7, 0.42]); }
+  else if (world === 'city') { const r = rng(5); let xx = x; while (xx < x + w) { const bw = 40 + r() * 40, bh = h * (0.25 + r() * 0.4); rect(xx, y + h - bh, bw - 5, bh, [0.45, 0.5, 0.62]); xx += bw; } }
+  else if (world === 'mountains') { X.beginPath(); X.moveTo(x, y + h * 0.8); X.lineTo(x + w * 0.3, y + h * 0.45); X.lineTo(x + w * 0.55, y + h * 0.72); X.lineTo(x + w * 0.8, y + h * 0.5); X.lineTo(x + w, y + h * 0.7); X.lineTo(x + w, y + h); X.lineTo(x, y + h); X.closePath(); fill([0.45, 0.55, 0.7]); }
+  else { rect(x, y + h * 0.75, w, h * 0.25, lin(0, y + h * 0.75, 0, y + h, [[0, [0.3, 0.55, 0.7]], [1, [0.4, 0.62, 0.72]]])); }
+}
+
+function room(cfg, t, o = {}) {
+  const tint = cfg.tint ? C(cfg.tint) : null;
+  let wall = o.wall || [0.93, 0.89, 0.83];
+  if (tint) wall = mix(wall, tint, 0.22);
+  const floor = o.floor || [0.72, 0.60, 0.48];
+  rect(0, 0, W, 1460, wall);
+  if (o.pattern) {
+    X.lineWidth = 2; X.strokeStyle = css([1, 1, 1], 0.35); X.beginPath();
+    for (let yy = 0; yy < 1460; yy += 90) for (let xx = 0; xx < W + 90; xx += 104) {
+      const cx = xx + ((yy / 90) % 2 ? 52 : 0), cy = yy;
+      X.moveTo(cx, cy - 45); X.lineTo(cx + 45, cy - 22); X.lineTo(cx + 45, cy + 22); X.lineTo(cx, cy + 45); X.lineTo(cx - 45, cy + 22); X.lineTo(cx - 45, cy - 22); X.closePath();
+      X.moveTo(cx, cy); X.lineTo(cx, cy + 45); X.moveTo(cx, cy); X.lineTo(cx + 45, cy - 22); X.moveTo(cx, cy); X.lineTo(cx - 45, cy - 22);
+    }
+    X.stroke();
+  }
+  if (o.window) {
+    const wx = 640, wy = 720, ww = 340, wh = 380;
+    X.save(); X.beginPath(); X.rect(wx, wy, ww, wh); X.clip(); windowView(cfg.world, o.window, wx, wy, ww, wh, t); if (o.inWindow) o.inWindow(); X.restore();
+    X.lineWidth = 16; X.strokeStyle = css([1, 1, 1]); X.strokeRect(wx, wy, ww, wh);
+    line([[wx + ww / 2, wy], [wx + ww / 2, wy + wh]], 10, [1, 1, 1]); line([[wx, wy + wh / 2], [wx + ww, wy + wh / 2]], 10, [1, 1, 1]);
+  }
+  if (o.lights) {
+    X.beginPath(); X.moveTo(-20, 760); X.bezierCurveTo(300, 880, 700, 880, W + 20, 760); X.lineWidth = 3; X.strokeStyle = css([0.2, 0.2, 0.2]); X.stroke();
+    for (let i = 0; i < 12; i++) {
+      const u = (i + 0.5) / 12, x = -20 + u * (W + 40), y = 760 + 4 * 120 * u * (1 - u) * 0.75 + 12, a = 0.6 + 0.4 * Math.sin(t * 3 + i * 1.7);
+      const g = X.createRadialGradient(x, y, 2, x, y, 40); g.addColorStop(0, css([1, 0.85, 0.5], 0.6 * a)); g.addColorStop(1, css([1, 0.85, 0.5], 0));
+      circ(x, y, 40); X.fillStyle = g; X.fill(); circ(x, y, 9); fill([1, 0.88, 0.6], a);
+    }
+  }
+  rect(0, 1460, W, 460, lin(0, 1460, 0, H, [[0, floor], [1, mix(floor, [0, 0, 0], 0.15)]]));
+  rect(0, 1450, W, 18, mix(wall, [1, 1, 1], 0.5));
+}
+function nightTint(a = 0.25) { rect(0, 0, W, H, [0.15, 0.1, 0.3], a); }
+
+// ---------------------------------------------------------------- characters
+const DEFAULT_ME = { body: 'm', hair: 'wavy', hairCol: '#383130', grey: true, skin: '#E8BA99', facial: 'moustache', facialCol: '#8F7D6B', outfit: 'jacket', top: '#30406E', inner: '#17171C', pants: '#333B4F' };
+const DEFAULT_PARTNER = { body: 'f', hair: 'long', hairCol: '#805438', grey: false, skin: '#E8BA99', facial: 'none', facialCol: '#555555', outfit: 'dress', top: '#ED856E', inner: '#ED856E', pants: '#ED856E' };
+const FRIEND1 = { body: 'm', hair: 'short', hairCol: '#261F1A', skin: '#C98E66', facial: 'none', outfit: 'jacket', top: '#5A8C73', inner: '#F2F2E6', pants: '#4D4D59' };
+const FRIEND2 = { body: 'f', hair: 'long', hairCol: '#D9B373', skin: '#F2D3BC', facial: 'none', outfit: 'tee', top: '#F2BF59', inner: '#F2BF59', pants: '#404D73' };
+
+function person(x, y, s, L, t, o = {}) {
+  const walk = o.walk || 0, speed = o.speed || 7, armL = o.armL || [0.15, 0.1], armR = o.armR || [0.15, 0.1];
+  const smile = o.smile !== false, bob = o.bob || 0, flip = o.flip || 1;
+  const hands = {};
+  X.save(); X.translate(x, y - bob); X.scale(s * flip, s);
+  const w = t * speed, hc = C(L.hairCol), skin = C(L.skin), skinD = darken(skin, 0.15);
+  const dress = L.outfit === 'dress';
+  const hs = o.head || 1; const headOn = () => { X.save(); if (hs !== 1) { X.translate(0, -470); X.scale(hs, hs); X.translate(0, 470); } };
+  headOn();
+  // back hair
+  if (L.hair === 'wavy') {
+    [[0, -535, 66], [-70, -500, 44], [70, -500, 44], [-82, -460, 40], [82, -460, 40], [-80, -420, 34], [80, -420, 34], [-66, -396, 26], [66, -396, 26]].forEach(([dx, dy, r]) => { circ(dx, dy, r); fill(hc); });
+    if (L.grey) [[-84, -470, 16], [78, -440, 14], [-74, -415, 12], [60, -510, 14]].forEach(([dx, dy, r]) => { circ(dx, dy, r); fill([0.62, 0.6, 0.57], 0.6); });
+  } else if (L.hair === 'long') { rr(-64, -565, 128, 205, 50); fill(hc); }
+  else if (L.hair === 'curly') {
+    for (let i = 0; i <= 12; i++) { const a = PI * (0.92 + 1.16 * i / 12); circ(Math.cos(a) * 60, -505 + Math.sin(a) * 66, 30); fill(hc); }
+  }
+  X.restore();
+  // legs
+  if (dress) {
+    [[-1, 0], [1, PI]].forEach(([side, ph]) => {
+      const a = walk * 0.34 * Math.sin(w + ph), hx = side * 22, hy = -170, fx = hx + 165 * Math.sin(a), fy = hy + 165 * Math.cos(a);
+      line([[hx, hy], [fx, fy]], 26, skin); ell(fx + 6, fy, 26, 12); fill([0.55, 0.3, 0.25]);
+    });
+  } else {
+    [[-1, 0], [1, PI]].forEach(([side, ph]) => {
+      const a = walk * 0.38 * Math.sin(w + ph), hx = side * 26, hy = -262, fx = hx + 248 * Math.sin(a), fy = hy + 248 * Math.cos(a);
+      line([[hx, hy], [fx, fy]], 48, L.pants); ell(fx + 8, fy + 4, 34, 16); fill([0.13, 0.11, 0.10]);
+    });
+  }
+  if (o.backpack) { rr(-118, -440, 56, 170, 16); fill(o.backpack); }
+  // torso
+  if (dress) { X.beginPath(); X.moveTo(-62, -448); X.lineTo(62, -448); X.lineTo(98, -165); X.lineTo(-98, -165); X.closePath(); fill(L.top); }
+  else {
+    X.beginPath(); X.moveTo(-82, -446); X.bezierCurveTo(-88, -380, -78, -300, -72, -250); X.lineTo(72, -250); X.bezierCurveTo(78, -300, 88, -380, 82, -446); X.closePath(); fill(L.top);
+    if (L.outfit === 'jacket') { X.beginPath(); X.moveTo(-26, -444); X.lineTo(26, -444); X.lineTo(22, -252); X.lineTo(-22, -252); X.closePath(); fill(L.inner || '#17171C'); }
+  }
+  // arms
+  [[-1, armL], [1, armR]].forEach(([side, [u, f]]) => {
+    const sx = side * 72, sy = -426, ex = sx + side * 112 * Math.sin(u), ey = sy + 112 * Math.cos(u), hx = ex + side * 104 * Math.sin(f), hy = ey + 104 * Math.cos(f);
+    const upper = dress ? skin : L.top, fore = (dress || L.outfit === 'tee') ? skin : L.top, wd = dress ? 30 : 38;
+    line([[sx, sy], [ex, ey]], wd, upper); line([[ex, ey], [hx, hy]], wd * (L.outfit === 'tee' ? 0.8 : 1), fore);
+    if (L.outfit === 'tee') { circ(ex, ey, wd / 2); fill(upper); }
+    circ(hx, hy, 20); fill(skin);
+    hands[side < 0 ? 'L' : 'R'] = [x + flip * s * hx, y - bob + s * hy];
+  });
+  // head
+  rect(-18, -472, 36, 32, skinD);
+  headOn();
+  ell(0, -502, 50, 58); fill(skin);
+  const fc = C(L.facialCol || L.hairCol);
+  if (L.facial === 'stubble' || L.facial === 'moustache') { X.save(); ell(0, -502, 50, 58); X.clip(); ell(0, -462, 56, 34); fill(fc, 0.42); X.restore(); }
+  if (L.facial === 'beard') {
+    X.beginPath(); X.moveTo(-50, -505); X.bezierCurveTo(-52, -440, -30, -410, 0, -408); X.bezierCurveTo(30, -410, 52, -440, 50, -505);
+    X.bezierCurveTo(40, -470, 20, -466, 0, -466); X.bezierCurveTo(-20, -466, -40, -470, -50, -505); X.closePath(); fill(fc);
+  }
+  // hair top
+  if (L.hair === 'short') {
+    // a natural short crop: a little height on top, a side part, short sideburns
+    X.beginPath(); X.moveTo(-53, -494);
+    X.bezierCurveTo(-60, -542, -40, -580, 2, -581);
+    X.bezierCurveTo(44, -582, 63, -548, 55, -494);
+    X.bezierCurveTo(51, -514, 42, -530, 24, -534);
+    X.bezierCurveTo(6, -538, -12, -524, -28, -532);
+    X.bezierCurveTo(-42, -528, -50, -514, -53, -494); X.closePath(); fill(hc);
+    rr(-53, -506, 9, 26, 4); fill(hc); rr(44, -506, 9, 26, 4); fill(hc);
+    X.beginPath(); X.moveTo(-24, -566); X.bezierCurveTo(-4, -574, 20, -572, 38, -560); X.lineWidth = 4; X.strokeStyle = css(mix(hc, [1, 1, 1], 0.25), 0.6); X.stroke();
+  } else if (L.hair !== 'bald') {
+    X.beginPath(); X.arc(0, -512, 58, PI, 2 * PI); X.lineTo(56, -500); X.bezierCurveTo(30, -545, -15, -540, -56, -498); X.closePath();
+    fill(hc, L.hair === 'buzz' ? 0.6 : 1);
+    if (L.hair === 'wavy' && L.grey) line([[-30, -560], [5, -548], [35, -530]], 6, [0.62, 0.6, 0.57], 0.7);
+    if (L.hair === 'bun') { circ(0, -585, 32); fill(hc); }
+    if (L.hair === 'curly') for (let i = 0; i < 5; i++) { circ(-44 + i * 22, -552 + Math.abs(i - 2) * 6, 22); fill(hc); }
+  } else { ell(-20, -540, 14, 7); fill([1, 1, 1], 0.25); }
+  // face
+  const brow = L.hair === 'bald' ? darken(skin, 0.5) : (L.body === 'f' ? mix(hc, [0.3, 0.2, 0.15], 0.4) : hc);
+  [-1, 1].forEach(side => { circ(side * 18, -505, 5.5); fill([0.15, 0.15, 0.18]); line([[side * 9, -523], [side * 30, -526]], 5, brow); });
+  line([[0, -500], [-4, -482], [3, -480]], 3, skinD);
+  const hasM = L.facial === 'moustache' || L.facial === 'beard';
+  if (smile) { X.beginPath(); X.arc(0, hasM ? -470 : -478, 13, 0.15 * PI, 0.85 * PI); X.lineWidth = 4; X.strokeStyle = css([0.55, 0.25, 0.22]); X.stroke(); }
+  if (hasM) {
+    X.beginPath(); X.moveTo(-30, -463); X.bezierCurveTo(-20, -481, 20, -481, 30, -463); X.lineTo(33, -444);
+    X.bezierCurveTo(26, -452, 24, -462, 13, -466); X.bezierCurveTo(5, -468, -5, -468, -13, -466); X.bezierCurveTo(-24, -462, -26, -452, -33, -444); X.closePath(); fill(fc);
+  } else if (L.facial !== 'stubble') { [-1, 1].forEach(sd => { circ(sd * 28, -480, 9); fill([0.95, 0.55, 0.5], 0.35); }); }
+  X.restore();
+  X.restore();
+  return hands;
+}
+
+function dog(x, y, s, t, P, o = {}) {
+  const walk = o.walk || 0, speed = o.speed || 9, flip = o.flip || 1, tongue = o.tongue !== false, lookUp = o.lookUp || 0;
+  const coat = C(P.coat || '#A14F26'), coatD = darken(coat, 0.25), muzzle = P.muzzle === 'same' ? darken(coat, 0.08) : mix(coat, [0.1, 0.06, 0.05], 0.75);
+  X.save(); X.translate(x, y); X.scale(s * flip, s);
+  const w = t * speed, wag = 0.35 * Math.sin(t * 11);
+  X.beginPath(); X.moveTo(-100, -160); X.bezierCurveTo(-130, -170, -145, -200, -150 + 30 * Math.sin(wag), -235 + 10 * Math.cos(wag * 2));
+  X.lineWidth = 16; X.lineCap = 'round'; X.strokeStyle = css(coat); X.stroke();
+  [[-80, 0, coatD], [55, PI, coatD], [-55, PI, coat], [82, 0, coat]].forEach(([lx, ph, c]) => {
+    const a = walk * 0.45 * Math.sin(w + ph), fx = lx + 125 * Math.sin(a), fy = -125 + 125 * Math.cos(a);
+    line([[lx, -130], [fx, fy]], 24, c); ell(fx + 6, fy, 16, 9); fill(c);
+  });
+  ell(0, -145, 118, 52); fill(coat); ell(85, -158, 48, 56); fill(coat);
+  X.save(); X.translate(0, -18 * lookUp);
+  ell(108, -195, 34, 48); fill(coat);
+  X.beginPath(); X.moveTo(80, -200); X.bezierCurveTo(95, -170, 115, -160, 138, -168); X.lineWidth = 10; X.strokeStyle = css(C(P.collar || '#26262E')); X.stroke();
+  ell(118, -152, 9, 11); fill([0.75, 0.85, 0.6]);
+  X.save(); X.translate(135, -225); X.rotate(-0.35 * lookUp);
+  circ(0, 0, 47); fill(coat);
+  ell(37, 17, 34, 26); fill(muzzle);
+  ell(63, 9, 11, 9); fill([0.05, 0.05, 0.05]);
+  circ(6, -12, 6.5); fill([0.12, 0.08, 0.06]); circ(8, -14, 2); fill([1, 1, 1]);
+  if (tongue) { ell(42, 46 + 3 * Math.sin(t * 8), 11, 19); fill([0.93, 0.5, 0.55]); }
+  X.save(); X.rotate(0.08 * Math.sin(t * 6));
+  X.beginPath();
+  if (P.ears === 'up') { X.moveTo(-28, -30); X.lineTo(-30, -95); X.lineTo(8, -42); X.closePath(); }
+  else { X.moveTo(-22, -34); X.bezierCurveTo(-50, -26, -52, 26, -36, 38); X.bezierCurveTo(-20, 24, -10, -10, -22, -34); }
+  fill(coatD); X.restore();
+  X.restore(); X.restore(); X.restore();
+}
+
+function cat(x, y, s, t, P, o = {}) {
+  const walk = o.walk || 0, speed = o.speed || 9, flip = o.flip || 1, lookUp = o.lookUp || 0;
+  const coat = C(P.coat || '#C47A3A'), coatD = darken(coat, 0.25);
+  X.save(); X.translate(x, y); X.scale(s * flip, s);
+  const w = t * speed, sw = Math.sin(t * 2.5);
+  X.beginPath(); X.moveTo(-85, -110); X.bezierCurveTo(-150, -120, -130, -220, -150 + 20 * sw, -250); X.lineWidth = 18; X.lineCap = 'round'; X.strokeStyle = css(coat); X.stroke();
+  [[-60, 0, coatD], [45, PI, coatD], [-40, PI, coat], [62, 0, coat]].forEach(([lx, ph, c]) => {
+    const a = walk * 0.45 * Math.sin(w + ph), fx = lx + 85 * Math.sin(a), fy = -85 + 85 * Math.cos(a);
+    line([[lx, -90], [fx, fy]], 20, c); ell(fx + 5, fy, 13, 8); fill(c);
+  });
+  ell(0, -105, 92, 42); fill(coat);
+  if (P.muzzle === 'dark') { for (let i = 0; i < 3; i++) line([[-40 + i * 30, -140], [-30 + i * 30, -110]], 10, coatD); }
+  X.save(); X.translate(88, -170 - 14 * lookUp); X.rotate(-0.3 * lookUp);
+  circ(0, 0, 44); fill(coat);
+  [[-30, -20, -36, -78, 2, -36], [12, -38, 34, -84, 40, -22]].forEach(([a, b, c2, d, e, f]) => { X.beginPath(); X.moveTo(a, b); X.lineTo(c2, d); X.lineTo(e, f); X.closePath(); fill(coat); });
+  [-1, 1].forEach(sd => { ell(sd * 15 + 6, -6, 6, 9); fill([0.2, 0.3, 0.15]); });
+  X.beginPath(); X.moveTo(22, 10); X.lineTo(34, 10); X.lineTo(28, 18); X.closePath(); fill([0.93, 0.55, 0.6]);
+  [[-1, 0], [1, 0]].forEach(([sd]) => { line([[28 + sd * 10, 22], [28 + sd * 55, 14]], 2.5, [1, 1, 1], 0.8); line([[28 + sd * 10, 26], [28 + sd * 55, 30]], 2.5, [1, 1, 1], 0.8); });
+  X.restore(); X.restore();
+}
+
+function petsOf(cfg) {
+  if (Array.isArray(cfg.pets)) return cfg.pets.filter(p => p && (p.type === 'dog' || p.type === 'cat'));
+  if (cfg.pet && (cfg.pet.type === 'dog' || cfg.pet.type === 'cat')) return [cfg.pet];
+  return [];
+}
+function pet(cfg, x, y, s, t, o = {}) {
+  petsOf(cfg).slice(0, 3).forEach((P, i) => {
+    const dir = o.flip || 1, off = i === 0 ? 0 : (i === 1 ? -160 : 160) * dir;
+    const oo = Object.assign({}, o, { speed: (o.speed || 9) * (1 + i * 0.07) }), tt = t + i * 0.37, ss = s * (i ? 0.85 : 1), yy = y + (i ? 14 : 0);
+    if (P.type === 'dog') dog(x + off, yy, ss, tt, P, oo); else cat(x + off, yy, ss * 0.95, tt, P, oo);
+  });
+}
+// ---- kids
+const DEFAULT_KID = { age: 'kid', status: 'have', hair: 'short', hairCol: '#6B4A33', skin: '#E8BA99', outfit: 'tee', top: '#F2C46F', pants: '#4F7FB0' };
+const kidsOf = cfg => (cfg.kids || []).filter(k => k.age !== 'baby');
+const babiesOf = cfg => (cfg.kids || []).filter(k => k.age === 'baby');
+const kidLook = k => Object.assign({ body: 'f', facial: 'none', inner: '#FFFFFF', grey: false }, DEFAULT_KID, k);
+const kidScale = k => k.age === 'teen' ? 0.8 : 0.6, kidHead = k => k.age === 'teen' ? 1.1 : 1.35;
+function drawKid(k, x, y, t, o = {}) { return person(x, y, kidScale(k) * (o.s || 1), kidLook(k), t, Object.assign({ head: kidHead(k) }, o)); }
+function baby(x, y, s, k, t) {
+  const L = kidLook(k || {});
+  X.save(); X.translate(x, y); X.scale(s, s);
+  ell(0, 14, 36, 50); fill(L.top || '#F7D9C4'); ell(0, 20, 26, 36); fill([1, 1, 1], 0.25);
+  circ(0, -40, 27); fill(L.skin);
+  X.beginPath(); X.arc(0, -46, 27, PI * 1.05, PI * 1.95); X.lineWidth = 7; X.strokeStyle = css(C(L.hairCol)); X.stroke();
+  [-1, 1].forEach(sd => { X.beginPath(); X.arc(sd * 10, -40, 5, 0.1 * PI, 0.9 * PI); X.lineWidth = 3; X.strokeStyle = css([0.2, 0.15, 0.15]); X.stroke(); });
+  X.beginPath(); X.arc(0, -30, 6, 0.15 * PI, 0.85 * PI); X.lineWidth = 3; X.strokeStyle = css([0.6, 0.3, 0.3]); X.stroke();
+  X.restore();
+}
+function pram(x, y, t, k) {
+  const L = kidLook(k || {});
+  [[x - 80, y - 32], [x + 70, y - 32]].forEach(([wx, wy], i) => { circ(wx, wy, 32); fill([0.18, 0.18, 0.2]); circ(wx, wy, 12); fill([0.7, 0.7, 0.72]); line([[wx, wy], [wx + 22 * Math.cos(t * 5 + i), wy + 22 * Math.sin(t * 5 + i)]], 4, [0.7, 0.7, 0.72]); });
+  line([[x - 80, y - 32], [x - 10, y - 150], [x + 70, y - 32]], 8, [0.3, 0.3, 0.32]);
+  circ(x + 40, y - 168, 24); fill(L.skin);
+  X.beginPath(); X.arc(x + 40, y - 174, 24, PI * 1.05, PI * 1.95); X.lineWidth = 6; X.strokeStyle = css(C(L.hairCol)); X.stroke();
+  X.beginPath(); X.arc(x, y - 150, 110, 0, PI); fill([0.35, 0.55, 0.6]);
+  X.beginPath(); X.moveTo(x - 110, y - 150); X.quadraticCurveTo(x - 110, y - 300, x + 20, y - 280); X.lineTo(x - 5, y - 150); X.closePath(); fill([0.28, 0.45, 0.5]);
+  rect(x - 110, y - 158, 220, 14, [0.3, 0.5, 0.55]);
+  line([[x + 105, y - 150], [x + 185, y - 320]], 9, [0.3, 0.3, 0.32]);
+  return [x + 185, y - 320];
+}
+function bed(x, y, w, k, t) {
+  const L = kidLook(k || {});
+  rr(x, y - 40, 30, 220, 8); fill([0.62, 0.45, 0.3]); rr(x + w - 30, y + 40, 30, 140, 8); fill([0.62, 0.45, 0.3]);
+  rect(x, y + 60, w, 90, [0.62, 0.45, 0.3]);
+  ell(x + 110, y + 40, 80, 30); fill([1, 1, 1]);
+  circ(x + 120, y + 10, 40); fill(L.skin);
+  X.beginPath(); X.arc(x + 120, y + 4, 42, PI * 1.0, PI * 2.0); fill(L.hairCol);
+  [-1, 1].forEach(sd => { X.beginPath(); X.arc(x + 120 + sd * 13, y + 14, 6, 0.1 * PI, 0.9 * PI); X.lineWidth = 3; X.strokeStyle = css([0.2, 0.15, 0.15]); X.stroke(); });
+  rr(x + 140, y + 20, w - 160, 70, 26); fill(L.top);
+  for (let i = 0; i < 3; i++) { const k2 = (t * 0.3 + i / 3) % 1; X.font = `700 ${40 + 10 * i}px Poppins, sans-serif`; X.textAlign = 'left'; X.fillStyle = css([1, 1, 1], Math.sin(k2 * PI) * 0.8); X.fillText('z', x + 180 + 30 * i + 40 * k2, y - 30 - 160 * k2); }
+}
+function easel(x, y, t) {
+  line([[x - 120, y], [x, y - 620]], 12, [0.55, 0.4, 0.28]); line([[x + 120, y], [x, y - 620]], 12, [0.55, 0.4, 0.28]); line([[x, y - 600], [x + 40, y]], 10, [0.5, 0.36, 0.24]);
+  rect(x - 170, y - 560, 340, 300, [1, 1, 1]); X.lineWidth = 6; X.strokeStyle = css([0.85, 0.82, 0.78]); X.strokeRect(x - 170, y - 560, 340, 300);
+  rect(x - 150, y - 540, 300, 260 * 0.45, [0.6, 0.78, 0.92], clamp(t / 1.2));
+  const k = clamp((t - 1) / 1.2); if (k > 0) { circ(x + 60, y - 470, 40); fill([1, 0.85, 0.5], k); }
+  const k2 = clamp((t - 2) / 1.5); if (k2 > 0) { X.save(); X.beginPath(); X.rect(x - 150, y - 540, 300 * k2, 260); X.clip(); X.beginPath(); X.moveTo(x - 150, y - 400); X.bezierCurveTo(x - 60, y - 450, x + 40, y - 380, x + 150, y - 420); X.lineTo(x + 150, y - 280); X.lineTo(x - 150, y - 280); X.closePath(); fill([0.5, 0.72, 0.45]); X.restore(); }
+  rect(x - 180, y - 262, 360, 16, [0.5, 0.36, 0.24]);
+}
+function table(x0, x1, y) { rr(x0, y, x1 - x0, 30, 10); fill([0.6, 0.44, 0.3]); rect(x0 + 10, y + 30, x1 - x0 - 20, 50, [0.6, 0.44, 0.3], 0.6); [x0 + 30, x1 - 60].forEach(lx => rect(lx, y + 30, 30, 220, [0.52, 0.38, 0.26])); }
+function familyRow(c, x, y, t, o = {}) {
+  // draws me, partner, kids, carried babies; returns rightmost x
+  const walk = o.walk || 0, s = o.s || 1, kids = kidsOf(c), babies = babiesOf(c);
+  let cx = x;
+  const hm = person(cx, y, 1.02 * s, ME(c), t, { walk, armL: [0.12, 0.05], armR: babies.length && !hasPartner(c) ? [0.5, 1.5] : [0.3, 0.2] });
+  if (babies.length && !hasPartner(c)) baby(hm.R[0] - 10, hm.R[1] - 20, 0.9 * s, babies[0], t);
+  cx += 170 * s;
+  if (hasPartner(c)) {
+    const hp = person(cx, y, 0.95 * s, PT(c), t, { walk, armL: [0.4, 0.3], armR: babies.length ? [0.5, 1.5] : [0.12, 0.05] });
+    if (babies.length) baby(hp.R[0] - 10, hp.R[1] - 20, 0.9 * s, babies[0], t);
+    cx += 160 * s;
+  }
+  kids.slice(0, 4).forEach((k, i) => { drawKid(k, cx, y + 6, t + i * 0.3, { walk, s, armL: [0.3, 0.2], armR: [0.3, 0.2] }); cx += (k.age === 'teen' ? 140 : 115) * s; });
+  return cx;
+}
+const hasPartner = cfg => cfg.partner && cfg.partner.on;
+
+// ---------------------------------------------------------------- props
+function glass(x, y, t) {
+  X.beginPath(); X.moveTo(x - 34, y - 120); X.lineTo(x + 34, y - 120); X.lineTo(x + 28, y + 10); X.lineTo(x - 28, y + 10); X.closePath();
+  fill([0.75, 0.9, 0.98], 0.55); X.lineWidth = 4; X.strokeStyle = css([1, 1, 1], 0.9); X.stroke();
+  for (let i = 0; i < 7; i++) { const by = y - ((t * 60 + i * 23) % 120); circ(x - 18 + (i * 13) % 36, by, 4); fill([1, 1, 1], 0.9); }
+  X.beginPath(); X.arc(x + 26, y - 118, 22, PI * 0.9, PI * 2.1); fill([0.55, 0.8, 0.35]);
+}
+function dumbbell(x, y) { line([[x - 55, y], [x + 55, y]], 12, [0.6, 0.6, 0.62]); [-55, 55].forEach(dx => { rr(x + dx - 14, y - 34, 28, 68, 8); fill([0.18, 0.18, 0.2]); }); }
+function counter(x0, x1, y = 1440, col = [0.95, 0.95, 0.94]) {
+  rect(x0, y, x1 - x0, 30, [0.55, 0.42, 0.32]); rect(x0 + 10, y + 30, x1 - x0 - 20, 220, col);
+  X.lineWidth = 4; X.strokeStyle = css(mix(col, [0, 0, 0], 0.15));
+  for (let xx = x0 + 20; xx < x1 - 20; xx += 150) X.strokeRect(xx, y + 45, Math.min(135, x1 - 20 - xx), 190);
+}
+function stove(x, y, t) {
+  ell(x, y, 110, 26); fill([0.2, 0.2, 0.22]); line([[x + 100, y - 6], [x + 220, y - 20]], 18, [0.2, 0.2, 0.22]);
+  [[0.3, 0.7, 0.3], [0.9, 0.3, 0.25], [0.98, 0.65, 0.2], [0.4, 0.75, 0.35], [0.95, 0.85, 0.3]].forEach((c, i) => { circ(x - 60 + i * 30, y - 12 - Math.abs(Math.sin(t * 4 + i * 1.3)) * 50, 13); fill(c); });
+  steam(x - 40, y, t, 3, 40);
+}
+function steam(x, y, t, n, gap) {
+  for (let i = 0; i < n; i++) {
+    const k = (t * 0.6 + i / n) % 1, sx = x + i * gap;
+    X.beginPath(); X.moveTo(sx, y - 40 - k * 200); X.bezierCurveTo(sx + 20, y - 80 - k * 200, sx - 20, y - 120 - k * 200, sx, y - 160 - k * 200);
+    X.lineWidth = 7; X.strokeStyle = css([1, 1, 1], 0.6 * (1 - k)); X.stroke();
+  }
+}
+function notes(x, y, t, n = 3, col = NAVY) {
+  for (let i = 0; i < n; i++) {
+    const k = (t * 0.4 + i / n) % 1, nx = x + 60 * Math.sin(k * 5 + i) + i * 30, ny = y - k * 300, a = Math.sin(k * PI);
+    ell(nx, ny, 14, 10); fill(col, a); line([[nx + 12, ny], [nx + 12, ny - 50], [nx + 30, ny - 40]], 5, col, a);
+  }
+}
+function recordPlayer(x, y, t) {
+  rr(x - 130, y - 60, 260, 60, 10); fill([0.6, 0.4, 0.25]);
+  X.save(); X.translate(x - 20, y - 66); X.scale(1, 0.3);
+  circ(0, 0, 95); fill([0.08, 0.08, 0.08]);
+  [75, 55].forEach(r => { circ(0, 0, r); X.lineWidth = 3; X.strokeStyle = css([0.3, 0.3, 0.3]); X.stroke(); });
+  circ(0, 0, 28); fill(CORAL);
+  line([[0, 0], [80 * Math.cos(t * 3.5), 80 * Math.sin(t * 3.5)]], 4, [0.5, 0.5, 0.5]);
+  X.restore();
+  line([[x + 100, y - 80], [x + 90, y - 110], [x + 30, y - 75]], 6, [0.8, 0.8, 0.82]);
+  notes(x + 60, y - 120, t);
+}
+function heart(hx, hy, s, c, a) {
+  X.beginPath(); X.moveTo(hx, hy + s);
+  X.bezierCurveTo(hx - 2 * s, hy - 0.3 * s, hx - s, hy - 1.6 * s, hx, hy - 0.6 * s);
+  X.bezierCurveTo(hx + s, hy - 1.6 * s, hx + 2 * s, hy - 0.3 * s, hx, hy + s); fill(c, a);
+}
+function hearts(x, y, t, n = 3) {
+  for (let i = 0; i < n; i++) {
+    const k = (t * 0.35 + i / n) % 1;
+    heart(x + 50 * Math.sin(k * 6 + i * 2) + (i - 1) * 40, y - k * 260, 16 + 8 * Math.sin(k * PI), [0.93, 0.4, 0.45], Math.sin(k * PI) * 0.9);
+  }
+}
+function laptop(x, y, screen) {
+  rr(x - 150, y - 210, 300, 195, 12); fill([0.25, 0.27, 0.3]);
+  rr(x - 136, y - 198, 272, 170, 6); fill([0.95, 0.97, 1]);
+  X.beginPath(); X.moveTo(x - 175, y - 15); X.lineTo(x + 175, y - 15); X.lineTo(x + 190, y); X.lineTo(x - 190, y); X.closePath(); fill([0.6, 0.62, 0.66]);
+  if (screen) screen(x - 136, y - 198, 272, 170);
+}
+function desk(x0, x1, y = 1440) { rect(x0, y, x1 - x0, 26, [0.62, 0.45, 0.3]); [x0 + 20, x1 - 40].forEach(lx => rect(lx, y + 26, 20, 210, [0.5, 0.36, 0.24])); }
+function tick(x, y, s, k, col = [0.3, 0.68, 0.45]) {
+  if (k <= 0) return;
+  const p = [[x - s, y], [x - s * 0.3, y + s * 0.7], [x + s, y - s * 0.8]];
+  if (k < 0.5) { const q = k / 0.5; line([p[0], [p[0][0] + (p[1][0] - p[0][0]) * q, p[0][1] + (p[1][1] - p[0][1]) * q]], s * 0.35, col); }
+  else { const q = (k - 0.5) / 0.5; line([p[0], p[1], [p[1][0] + (p[2][0] - p[1][0]) * q, p[1][1] + (p[2][1] - p[1][1]) * q]], s * 0.35, col); }
+}
+function checklist(x, y, w, n, t, start = 0.6, gap = 1) {
+  rr(x, y, w, 80 + n * 90, 24); fill([1, 1, 1], 0.95);
+  for (let i = 0; i < n; i++) {
+    const iy = y + 70 + i * 90;
+    rr(x + 36, iy - 28, 56, 56, 12); X.lineWidth = 5; X.strokeStyle = css([0.75, 0.75, 0.78]); X.stroke();
+    tick(x + 64, iy, 26, clamp((t - start - i * gap) / 0.35));
+    rr(x + 120, iy - 12, w - 170 - (i * 37) % 80, 24, 12); fill([0.85, 0.87, 0.9]);
+  }
+}
+function barchart(x, y, w, h, t, n = 5, col = [0.3, 0.6, 0.8]) {
+  const bw = w / n * 0.62;
+  for (let i = 0; i < n; i++) {
+    const target = h * (0.25 + 0.75 * (i + 1) / n), bh = target * ease((t - 0.4 - i * 0.35) / 0.6), bx = x + i * w / n + (w / n - bw) / 2;
+    if (bh > 1) { rr(bx, y - bh, bw, bh, Math.min(8, bh / 2)); fill(col); }
+  }
+  line([[x, y], [x + w, y]], 5, NAVY, 0.6);
+}
+function jar(x, y, coins) {
+  for (let i = 0; i < coins; i++) { const cx = x + ((i * 17) % 20) - 10, cy = y - 18 - i * 16; ell(cx, cy, 48, 12); fill([0.95, 0.75, 0.3]); ell(cx, cy - 3, 44, 9); fill([1, 0.85, 0.45]); }
+  rr(x - 80, y - 230, 160, 230, 26); fill([0.8, 0.92, 1], 0.3); X.lineWidth = 6; X.strokeStyle = css([1, 1, 1], 0.9); X.stroke();
+  rr(x - 70, y - 255, 140, 30, 8); fill([0.55, 0.42, 0.32]);
+}
+function coinDrop(x, y, k) { if (k > 0 && k < 1) { ell(x, y - 400 + 360 * ease(k), 30, 30 * Math.abs(Math.cos(k * 10))); fill([0.98, 0.78, 0.3]); } }
+function notebook(x, y, t, rows = 4) {
+  rr(x - 90, y - 120, 180, 230, 10); fill([1, 0.98, 0.9]); rect(x - 90, y - 120, 22, 230, CORAL);
+  for (let i = 0; i < rows; i++) { const k = clamp((t - 0.6 - i * 0.5) / 0.4); if (k > 0) line([[x - 50, y - 80 + i * 45], [x - 50 + 110 * k, y - 80 + i * 45]], 7, NAVY, 0.7); }
+}
+function book(x, y, t) {
+  X.save(); X.translate(x, y);
+  X.beginPath(); X.moveTo(0, 0); X.lineTo(-120, -20); X.lineTo(-120, -150); X.lineTo(0, -130); X.closePath(); fill([1, 0.98, 0.92]);
+  X.beginPath(); X.moveTo(0, 0); X.lineTo(120, -20); X.lineTo(120, -150); X.lineTo(0, -130); X.closePath(); fill([0.97, 0.94, 0.86]);
+  for (let i = 0; i < 4; i++) { line([[-100, -112 + i * 24 + i * 1.5], [-20, -100 + i * 24]], 4, NAVY, 0.35); line([[20, -100 + i * 24], [100, -112 + i * 24 + i * 1.5]], 4, NAVY, 0.35); }
+  X.lineWidth = 6; X.strokeStyle = css([0.35, 0.55, 0.6]); X.beginPath(); X.moveTo(-124, -16); X.lineTo(0, 4); X.lineTo(124, -16); X.stroke();
+  X.restore();
+}
+function bubble(x, y, w, h, a, col = [1, 1, 1], tail = -1) {
+  if (a <= 0) return;
+  rr(x, y, w, h, 30); fill(col, a);
+  const tx = x + w * (tail < 0 ? 0.25 : 0.75);
+  X.beginPath(); X.moveTo(tx - 20, y + h - 2); X.lineTo(tx + tail * -30, y + h + 40); X.lineTo(tx + 20, y + h - 2); X.closePath(); fill(col, a);
+  for (let i = 0; i < 3; i++) { circ(x + w / 2 - 40 + i * 40, y + h / 2, 9); fill(NAVY, a * 0.6); }
+}
+function suitcase(x, y) {
+  rr(x - 90, y - 230, 180, 230, 22); fill([0.3, 0.55, 0.55]);
+  rr(x - 40, y - 270, 80, 50, 14); X.lineWidth = 10; X.strokeStyle = css([0.2, 0.2, 0.22]); X.stroke();
+  [-40, 40].forEach(dx => line([[x + dx, y - 215], [x + dx, y - 15]], 8, [0.22, 0.42, 0.42]));
+  rr(x - 50, y - 160, 70, 46, 8); fill([0.95, 0.85, 0.4]);
+}
+function plane(x, y, s) {
+  X.save(); X.translate(x, y); X.scale(s, s);
+  ell(0, 0, 90, 18); fill([1, 1, 1]);
+  [[-10, 0, -40, 60, -15, 60, 25, 0], [-10, 0, -40, -60, -15, -60, 25, 0], [-70, 0, -90, -35, -75, -35, -55, 0]].forEach(p => { X.beginPath(); X.moveTo(p[0], p[1]); X.lineTo(p[2], p[3]); X.lineTo(p[4], p[5]); X.lineTo(p[6], p[7]); X.closePath(); fill([1, 1, 1]); });
+  X.restore();
+}
+function mapCard(x, y, t) {
+  rr(x, y, 300, 260, 18); fill([0.85, 0.93, 0.95]);
+  X.beginPath(); X.moveTo(x + 60, y + 90); X.bezierCurveTo(x + 120, y + 40, x + 200, y + 70, x + 240, y + 120); X.bezierCurveTo(x + 260, y + 170, x + 200, y + 220, x + 130, y + 200); X.bezierCurveTo(x + 70, y + 190, x + 40, y + 140, x + 60, y + 90); fill([0.6, 0.78, 0.5]);
+  X.setLineDash([10, 12]); line([[x + 90, y + 170], [x + 150, y + 110], [x + 205, y + 125]], 5, CORAL, 0.8); X.setLineDash([]);
+  const py = y + 120 - 10 * Math.abs(Math.sin(t * 3));
+  X.beginPath(); X.arc(x + 205, py - 26, 18, PI, 2 * PI); X.lineTo(x + 205, py); X.closePath(); fill(CORAL); circ(x + 205, py - 26, 7); fill([1, 1, 1]);
+}
+function guitar(x, y, ang) {
+  X.save(); X.translate(x, y); X.rotate(ang);
+  rect(0, -10, 230, 20, [0.45, 0.28, 0.18]); rr(225, -16, 50, 32, 6); fill([0.35, 0.22, 0.14]);
+  ell(-95, 0, 85, 72); fill([0.8, 0.56, 0.32]); ell(0, 0, 62, 55); fill([0.8, 0.56, 0.32]);
+  circ(-30, 0, 24); fill([0.18, 0.12, 0.1]); rect(-150, -14, 14, 28, [0.35, 0.22, 0.14]);
+  X.restore();
+}
+function micStand(x, y) {
+  [-60, 0, 60].forEach(dx => line([[x, y - 60], [x + dx, y]], 6, [0.15, 0.15, 0.17]));
+  line([[x, y - 60], [x, y - 520], [x - 90, y - 560]], 8, [0.15, 0.15, 0.17]); ell(x - 100, y - 566, 26, 16); fill([0.3, 0.3, 0.32]);
+}
+function bowl(x, y, t) {
+  X.beginPath(); X.arc(x, y, 70, 0, PI); fill([0.95, 0.95, 0.92]); ell(x, y, 70, 14); fill([0.5, 0.75, 0.35]);
+  [[0.9, 0.3, 0.25], [0.98, 0.7, 0.25], [0.35, 0.65, 0.3]].forEach((c, i) => { circ(x - 30 + i * 30, y - 6, 12); fill(c); });
+  steam(x - 15, y + 10, t, 2, 30);
+}
+function fruitBowl(x, y) {
+  [[-45, -30, [0.95, 0.4, 0.3], 30], [0, -45, [0.98, 0.75, 0.25], 32], [45, -30, [0.45, 0.72, 0.3], 30], [-20, -70, [0.6, 0.3, 0.5], 22], [25, -72, [0.95, 0.85, 0.35], 24]].forEach(([dx, dy, c, r]) => { circ(x + dx, y + dy, r); fill(c); });
+  X.beginPath(); X.arc(x, y - 20, 90, 0, PI); fill([0.35, 0.55, 0.6]);
+}
+function fridge(x, y, k) {
+  rr(x, y - 620, 280, 620, 20); fill([0.88, 0.9, 0.92]); rr(x + 15, y - 600, 250, 580, 12); fill([0.98, 0.98, 1]);
+  [y - 450, y - 300, y - 160].forEach(sy => line([[x + 25, sy], [x + 255, sy]], 6, [0.8, 0.85, 0.9]));
+  [[0.35, 0.7, 0.3], [0.95, 0.45, 0.25], [0.98, 0.8, 0.3], [0.5, 0.75, 0.35], [0.9, 0.3, 0.3]].forEach((c, i) => { circ(x + 60 + i * 42, y - 330 - (i % 2) * 10, 20); fill(c); });
+  rr(x + 50, y - 520, 60, 70, 8); fill([0.8, 0.9, 0.95]); rr(x + 140, y - 510, 50, 60, 8); fill([0.95, 0.9, 0.7]);
+  if (k > 0.01) rect(x + 280, y - 615, 260 * 0.35 * k, 610, [0.82, 0.85, 0.88]);
+  else rect(x + 274, y - 615, -260, 610, [0.82, 0.85, 0.88]);
+}
+function confetti(t, t0) {
+  if (t < t0) return;
+  const r = rng(11), k = t - t0;
+  for (let i = 0; i < 50; i++) {
+    const x0 = 150 + r() * 780, vy = -900 + r() * 400, vx = -200 + r() * 400, ci = Math.floor(r() * 4);
+    const x = x0 + vx * k, y = 1200 + vy * k + 900 * k * k;
+    if (y > 1900) continue;
+    X.save(); X.translate(x, y); X.rotate(k * 6 + i); rect(-10, -5, 20, 10, [CORAL, GOLD, [0.4, 0.7, 0.85], [0.5, 0.78, 0.45]][ci]); X.restore();
+  }
+}
+function campfire(x, y, t) {
+  [-0.4, 0.4].forEach(a => { X.save(); X.translate(x, y); X.rotate(a); rect(-70, -10, 140, 20, [0.45, 0.3, 0.2]); X.restore(); });
+  const g = X.createRadialGradient(x, y - 40, 5, x, y - 40, 300); g.addColorStop(0, css([1, 0.7, 0.3], 0.45)); g.addColorStop(1, css([1, 0.7, 0.3], 0));
+  circ(x, y - 40, 300); X.fillStyle = g; X.fill();
+  [[[0.95, 0.4, 0.2], 1], [[1, 0.7, 0.25], 0.7], [[1, 0.92, 0.6], 0.4]].forEach(([c, s], i) => {
+    const f = 1 + 0.12 * Math.sin(t * 9 + i * 2);
+    X.beginPath(); X.moveTo(x - 50 * s, y - 10); X.bezierCurveTo(x - 60 * s, y - 80 * s * f, x - 10 * s, y - 120 * s * f, x, y - 170 * s * f);
+    X.bezierCurveTo(x + 10 * s, y - 120 * s * f, x + 60 * s, y - 80 * s * f, x + 50 * s, y - 10); X.closePath(); fill(c);
+  });
+}
+function bulb(x, y, t) {
+  const a = 0.6 + 0.4 * Math.sin(t * 4);
+  const g = X.createRadialGradient(x, y, 5, x, y, 150); g.addColorStop(0, css([1, 0.85, 0.4], 0.6 * a)); g.addColorStop(1, css([1, 0.85, 0.4], 0));
+  circ(x, y, 150); X.fillStyle = g; X.fill(); circ(x, y, 44); fill([1, 0.88, 0.45]); rr(x - 22, y + 36, 44, 34, 6); fill([0.6, 0.6, 0.62]);
+}
+function clockRing(x, y, k) {
+  circ(x, y, 60); fill([1, 1, 1], 0.95);
+  X.beginPath(); X.arc(x, y, 60, -PI / 2, -PI / 2 + 2 * PI * clamp(k)); X.lineWidth = 12; X.strokeStyle = css([0.3, 0.68, 0.45]); X.stroke();
+  line([[x, y], [x, y - 36]], 6, NAVY);
+}
+function songCard(x, y, t) {
+  rr(x, y, 320, 200, 22); fill([1, 1, 1], 0.95);
+  for (let i = 0; i < 4; i++) { const hh = 30 + 25 * Math.abs(Math.sin(t * 5 + i)); rect(x + 30 + i * 22, y + 150 - hh, 14, hh, CORAL); }
+  for (let i = 0; i < 3; i++) line([[x + 140, y + 50 + i * 40], [x + 280 - i * 30, y + 50 + i * 40]], 8, NAVY, 0.6);
+  tick(x + 270, y + 150, 30, clamp((t - 2) / 0.4));
+}
+function calmRings(x, y, t) {
+  for (let i = 0; i < 3; i++) { const k = (t * 0.25 + i / 3) % 1; circ(x, y, 80 + k * 260); X.lineWidth = 6; X.strokeStyle = css([1, 1, 1], 0.5 * (1 - k)); X.stroke(); }
+}
+
+function discoBall(x, y, t) {
+  line([[x, 0], [x, y - 70]], 4, [0.6, 0.6, 0.65]);
+  const cols = [[1, 0.45, 0.55], [0.45, 0.75, 1], [1, 0.85, 0.35], [0.55, 0.9, 0.55]];
+  for (let i = 0; i < 4; i++) {
+    const a = t * 0.8 + i * PI / 2, ex = x + 900 * Math.cos(a), ey = y + 700 + 300 * Math.sin(a * 0.7);
+    X.beginPath(); X.moveTo(x, y); X.lineTo(ex - 120, ey); X.lineTo(ex + 120, ey); X.closePath(); fill(cols[i], 0.12);
+  }
+  circ(x, y, 70); fill([0.78, 0.8, 0.86]);
+  X.save(); circ(x, y, 70); X.clip();
+  for (let gx = -70; gx < 70; gx += 20) for (let gy = -70; gy < 70; gy += 20) { const k = (Math.sin(t * 5 + gx * 0.3 + gy * 0.5) + 1) / 2; rect(x + gx + 1, y + gy + 1, 18, 18, mix([0.6, 0.62, 0.7], [1, 1, 1], k)); }
+  X.restore();
+}
+function sparkle(x, y, s, a, col = [1, 1, 1]) {
+  if (a <= 0) return;
+  X.beginPath(); X.moveTo(x, y - s); X.quadraticCurveTo(x, y, x + s, y); X.quadraticCurveTo(x, y, x, y + s); X.quadraticCurveTo(x, y, x - s, y); X.quadraticCurveTo(x, y, x, y - s); fill(col, a);
+}
+function sparkles(t, pts, col = [1, 1, 1]) { pts.forEach(([x, y, s], i) => sparkle(x, y, s * (0.6 + 0.4 * Math.sin(t * 4 + i * 1.9)), Math.max(0, Math.sin(t * 2 + i * 1.3)), col)); }
+function lamp(x, y, t) {
+  const g = X.createRadialGradient(x, y - 380, 10, x, y - 380, 420); g.addColorStop(0, css([1, 0.82, 0.5], 0.4)); g.addColorStop(1, css([1, 0.82, 0.5], 0));
+  circ(x, y - 380, 420); X.fillStyle = g; X.fill();
+  line([[x, y], [x, y - 360]], 10, [0.25, 0.22, 0.2]); ell(x, y, 60, 14); fill([0.25, 0.22, 0.2]);
+  X.beginPath(); X.moveTo(x - 70, y - 340); X.lineTo(x + 70, y - 340); X.lineTo(x + 45, y - 450); X.lineTo(x - 45, y - 450); X.closePath(); fill([1, 0.9, 0.7]);
+}
+function sofa(x0, x1, y, col) {
+  rr(x0, y - 240, x1 - x0, 170, 40); fill(col);
+  rr(x0 - 30, y - 150, 90, 150, 30); fill(darken(col, 0.1)); rr(x1 - 60, y - 150, 90, 150, 30); fill(darken(col, 0.1));
+  rr(x0 + 40, y - 110, x1 - x0 - 80, 90, 24); fill(mix(col, [1, 1, 1], 0.12));
+}
+function plant(x, y) {
+  rr(x - 50, y - 110, 100, 110, 14); fill([0.85, 0.55, 0.4]);
+  [[-60, -260, -0.5], [0, -300, 0], [60, -250, 0.5], [-30, -200, -0.3], [35, -190, 0.35]].forEach(([dx, dy, a]) => { X.save(); X.translate(x, y - 110); X.rotate(a); ell(0, dy / 2 + 20, 26, -dy / 2 - 10); fill([0.32, 0.58, 0.38]); X.restore(); });
+}
+function weightRack(x, y) {
+  [x, x + 260].forEach(px => rect(px, y - 520, 22, 520, [0.25, 0.26, 0.3]));
+  rect(x - 10, y - 380, 300, 16, [0.35, 0.36, 0.4]);
+  [[x + 60, 70], [x + 130, 60], [x + 200, 50]].forEach(([px, r]) => { circ(px, y - 300 + (70 - r), r); fill([0.15, 0.15, 0.18]); circ(px, y - 300 + (70 - r), 12); fill([0.6, 0.6, 0.62]); });
+  rect(x - 10, y - 140, 300, 16, [0.35, 0.36, 0.4]);
+  for (let i = 0; i < 4; i++) dumbbell(x + 70 + (i % 2) * 140, y - 175 - Math.floor(i / 2) * 0);
+}
+
+// ---------------------------------------------------------------- scenes
+const walkX = (p, x0, x1, k0 = 0, k1 = 0.75) => { const q = clamp((p - k0) / (k1 - k0)); return [x0 + (x1 - x0) * ease(q), q > 0 && q < 1]; };
+const ME = cfg => cfg.me || DEFAULT_ME;
+const PT = cfg => cfg.partner || DEFAULT_PARTNER;
+const firstKid = cfg => kidsOf(cfg)[0] || DEFAULT_KID;
+const firstBaby = cfg => babiesOf(cfg)[0] || { age: 'baby', hairCol: '#6B4A33', skin: ME(cfg).skin, top: '#F7D9C4' };
+const typing = t => ({ armL: [0.45, 1.45 + 0.1 * Math.sin(t * 14)], armR: [0.45, 1.45 + 0.1 * Math.sin(t * 14 + 1)] });
+
+const SCENES = {
+  title: { label: 'Opening sunrise', fn(c, t, p) { outdoor(c, t, 'sunrise', 1080 - 140 * ease(p)); const q = clamp((p - 0.3) / 0.7), x = -480 + 1500 * q, m = q > 0 && q < 1; person(x, 1660, 1, ME(c), t, { walk: m ? 1 : 0, armL: [0.12, 0.05], armR: [0.3, 0.2] }); pet(c, x + 250, 1710, 0.9, t, { walk: m ? 1 : 0 }); } },
+  end: { label: 'Closing sunset walk', fn(c, t, p) { outdoor(c, t, 'sunset', 960 + 60 * p); const n = 1 + (hasPartner(c) ? 1 : 0) + kidsOf(c).length; const x0 = n > 1 ? 200 : 420; const x = x0 + (1100 + n * 150) * ease(clamp((p - 0.25) / 0.75)), m = p > 0.25; const right = familyRow(c, x, 1690, t, { walk: m ? 1 : 0, s: n > 3 ? 0.85 : 1 }); pet(c, right + 70, 1730, 0.85, t, { walk: m ? 1 : 0 }); } },
+
+  walk: { label: 'Walking outside with my pet', fn(c, t, p) { outdoor(c, t, 'day'); const x = 80 + 560 * p; person(x, 1660, 1, ME(c), t, { walk: 1, armL: [0.12, 0.05], armR: [0.3, 0.2] }); pet(c, x + 250 + 60 * Math.sin(t * 1.5), 1720, 0.85, t, { walk: 1, speed: 12 }); } },
+  start: { label: 'Stepping out at sunrise', fn(c, t, p) { outdoor(c, t, 'sunrise', 940); const [x, m] = walkX(p, -120, 420, 0, 0.6); person(x, 1660, 1.05, ME(c), t, { walk: m ? 1 : 0 }); pet(c, x + 250, 1700, 0.9, t, { walk: m ? 1 : 0 }); } },
+  sunrise: { label: 'Standing tall at sunrise', fn(c, t) { outdoor(c, t, 'sunrise', 920); person(400, 1680, 1.1, ME(c), t, { armL: [0.6, 0.6], armR: [0.6, 0.6], bob: 4 * Math.sin(t * 2) }); pet(c, 700, 1740, 0.9, t, { flip: -1, lookUp: 0.6 }); } },
+  celebrate: { label: 'Arms up, feeling great', fn(c, t) { outdoor(c, t, 'day'); person(400, 1680, 1.05, ME(c), t, { armL: [2.6, 2.7], armR: [2.6, 2.7], bob: Math.abs(Math.sin(t * 3)) * 60 }); pet(c, 520 + 260 * Math.sin(t * 0.9), 1760, 0.85, t, { walk: 1, speed: 14, flip: Math.cos(t * 0.9) > 0 ? 1 : -1 }); } },
+  strong: { label: 'Strong pose', fn(c, t) { outdoor(c, t, 'day'); const f = ease(clamp((t - 0.5) / 0.6)); person(420, 1690, 1.12, ME(c), t, { armL: [1.6 * f + 0.15, 0.1 + 2.9 * f], armR: [1.6 * f + 0.15, 0.1 + 2.9 * f] }); pet(c, 720, 1750, 0.9, t, { flip: -1, lookUp: 0.6 }); } },
+  jog: { label: 'Running', fn(c, t, p) { outdoor(c, t, 'day'); const x = -150 + 1100 * p; person(x, 1660, 1, ME(c), t, { walk: 1.3, speed: 12, armL: [-0.5 * Math.sin(t * 12), 1.3], armR: [0.5 * Math.sin(t * 12), 1.3], bob: 8 * Math.abs(Math.sin(t * 12)) }); pet(c, x + 260, 1700, 0.85, t, { walk: 1.3, speed: 15 }); } },
+  unwind: { label: 'Sunset stroll to wind down', fn(c, t, p) { outdoor(c, t, 'sunset'); const x = 120 + 520 * p; person(x, 1660, 1, ME(c), t, { walk: 1, armL: [0.12, 0.05], armR: [0.12, 0.05] }); pet(c, x + 230 + 30 * Math.sin(t), 1700, 0.85, t, { walk: 1 }); } },
+  steady: { label: 'Calm, looking ahead', fn(c, t) { outdoor(c, t, 'sunrise', 900); person(520, 1700, 1.05, ME(c), t, { flip: -1 }); pet(c, 260, 1740, 0.9, t); } },
+  selflove: { label: 'Hand on heart', fn(c, t) { outdoor(c, t, 'sunrise', 930); const k = ease(clamp((t - 0.5) / 0.6)); person(440, 1680, 1.08, ME(c), t, { armR: [0.15 + 0.05 * k, 0.1 - 2.52 * k], bob: 3 * Math.sin(t * 2) }); hearts(440, 1040, t); pet(c, 730, 1740, 0.9, t, { flip: -1, lookUp: 0.7 }); } },
+  friends: { label: 'Out with friends', fn(c, t) { outdoor(c, t, 'day'); const wv = 0.4 * Math.sin(t * 6); person(250, 1680, 1, ME(c), t, { armR: [2.5, 2.9 + wv] }); person(640, 1660, 0.95, FRIEND2, t, { flip: -1, armR: [2.4, 2.9 - wv] }); person(880, 1650, 0.97, FRIEND1, t, { flip: -1 }); pet(c, 430, 1760, 0.8, t); } },
+  campfire: { label: 'Evening with my people', fn(c, t) { outdoor(c, t, 'dusk'); campfire(540, 1740, t); person(200, 1700, 0.95, ME(c), t, { armR: [0.6, 1.2] }); person(420, 1640, 0.85, FRIEND1, t); person(680, 1640, 0.85, FRIEND2, t, { flip: -1 }); if (hasPartner(c)) person(900, 1700, 0.93, PT(c), t, { flip: -1 }); pet(c, 70, 1840, 0.7, t); nightTint(0.15); } },
+  couple: { label: 'Walking together', fn(c, t, p) { outdoor(c, t, 'sunset'); const x = 160 + 380 * p; person(x, 1680, 1, ME(c), t, { walk: 1, armL: [0.12, 0.05], armR: [0.5, 0.3] }); if (hasPartner(c)) person(x + 160, 1680, 0.94, PT(c), t, { walk: 1, armL: [0.5, 0.3], armR: [0.12, 0.05] }); pet(c, x + 380, 1720, 0.85, t, { walk: 1 }); hearts(x + 80, 1050, t); } },
+  together: { label: 'Side by side at sunset', fn(c, t) { outdoor(c, t, 'sunset'); const n = 1 + (hasPartner(c) ? 1 : 0) + kidsOf(c).length; const s = n > 4 ? 0.85 : 1; const right = familyRow(c, n > 2 ? 170 : 330, 1690, t, { s }); pet(c, Math.min(right + 90, 900), 1745, 0.85 * s, t, { flip: -1 }); } },
+  family: { label: 'The whole family together', fn(c, t) { outdoor(c, t, 'sunset', 980); const n = 1 + (hasPartner(c) ? 1 : 0) + kidsOf(c).length; const s = n > 4 ? 0.85 : 1; const right = familyRow(c, n > 2 ? 170 : 330, 1700, t, { s }); hearts(540, 1000, t); pet(c, Math.min(right + 90, 900), 1750, 0.85 * s, t, { flip: -1 }); } },
+  pram: { label: 'Pram walk', fn(c, t, p) { outdoor(c, t, 'day'); const x = 40 + 380 * p; const h = person(x, 1680, 1, ME(c), t, { walk: 1, armR: [1.05, 1.35], armL: [0.9, 1.4] }); pram(x + 300, 1700, t, firstBaby(c)); if (hasPartner(c)) person(x - 170, 1660, 0.94, PT(c), t, { walk: 1 }); pet(c, x + 560, 1730, 0.8, t, { walk: 1 }); } },
+  holdbaby: { label: 'Holding a baby', fn(c, t) { room(c, t, { wall: [0.95, 0.9, 0.86], window: 'sunrise' }); const sw = 0.08 * Math.sin(t * 1.6); const h = person(400, 1660, 1, ME(c), t, { armL: [0.6 + sw, 1.7], armR: [0.6 - sw, 1.7] }); baby((h.L[0] + h.R[0]) / 2, h.R[1] - 40, 1.5, firstBaby(c), t); hearts(400, 1000, t); pet(c, 760, 1760, 0.8, t, { flip: -1, lookUp: 0.6 }); } },
+  schoolrun: { label: 'School run', fn(c, t, p) { outdoor(c, t, 'sunrise', 900); const x = 80 + 440 * p; person(x, 1670, 1, ME(c), t, { walk: 1, armR: [0.55, 0.15] }); drawKid(firstKid(c), x + 190, 1676, t + 0.4, { walk: 1, speed: 9, armL: [0.9, 0.1], backpack: '#E07B66' }); pet(c, x - 190, 1720, 0.8, t, { walk: 1 }); } },
+  parkday: { label: 'Playing with the kids', fn(c, t) { outdoor(c, t, 'day'); const kids = kidsOf(c).length ? kidsOf(c) : [DEFAULT_KID]; const k0 = 640 + 120 * Math.sin(t * 1.3); kids.slice(0, 3).forEach((k, i) => drawKid(k, k0 + i * 130, 1700 + i * 10, t + i, { walk: 1.2, speed: 10, armL: [1.5, 1.2], armR: [1.2 + 0.4 * Math.sin(t * 6 + i), 1.4], flip: Math.cos(t * 1.3) > 0 ? 1 : -1 })); person(250, 1680, 1, ME(c), t, { armL: [1.3, 1.1], armR: [1.3, 1.1], bob: 6 * Math.abs(Math.sin(t * 3)) }); const q = (t * 0.7) % 1, bx = 330 + (k0 - 330) * (Math.floor(t * 0.7) % 2 ? 1 - q : q), by = 1330 - 300 * Math.sin(q * PI); circ(bx, by, 34); fill(CORAL); X.beginPath(); X.arc(bx, by, 34, -0.5, 1.2); X.lineWidth = 6; X.strokeStyle = css([1, 1, 1], 0.8); X.stroke(); pet(c, 470, 1780, 0.8, t, { walk: 1, speed: 13 }); } },
+  bedtime: { label: 'Bedtime story', fn(c, t) { room(c, t, { wall: [0.45, 0.45, 0.62], floor: [0.42, 0.36, 0.38], window: 'dusk' }); X.save(); X.translate(470, 1440); X.scale(1.3, 1.3); bed(0, 0, 440, firstKid(c), t); X.restore(); const h = person(280, 1680, 1, ME(c), t, { armL: [0.5, 1.75], armR: [0.5, 1.75] }); book((h.L[0] + h.R[0]) / 2, h.R[1] + 70, t); const g = X.createRadialGradient(300, 1250, 10, 300, 1250, 420); g.addColorStop(0, css([1, 0.85, 0.55], 0.35)); g.addColorStop(1, css([1, 0.85, 0.55], 0)); circ(300, 1250, 420); X.fillStyle = g; X.fill(); pet(c, 820, 1840, 0.6, t, { flip: -1, tongue: false }); } },
+  familydinner: { label: 'Family dinner', fn(c, t) { room(c, t, { wall: [0.42, 0.34, 0.36], floor: [0.42, 0.32, 0.28], lights: true }); person(200, 1680, 1, ME(c), t, { armR: [0.6, 1.4] }); if (hasPartner(c)) person(880, 1680, 0.95, PT(c), t, { flip: -1, armR: [0.6, 1.4] }); const kids = kidsOf(c); kids.slice(0, 3).forEach((k, i) => drawKid(k, 420 + i * 130, 1560, t + i, { armL: [0.6, 1.5], armR: [0.6, 1.5] })); const bb = babiesOf(c); if (bb.length) baby(420 + Math.min(kids.length, 3) * 130, 1420, 0.8, bb[0], t); table(110, 970, 1450); [300, 540, 780].forEach(bx => bowl(bx, 1440, t)); hearts(540, 1000, t, 2); pet(c, 80, 1840, 0.65, t, { lookUp: 0.8 }); } },
+  paint: { label: 'Painting or making art', fn(c, t) { room(c, t, { wall: [0.94, 0.92, 0.88], window: 'day' }); easel(720, 1700, t); const s = 0.25 * Math.sin(t * 4); const h = person(380, 1670, 1, ME(c), t, { armR: [1.35 + s, 1.05 - s] }); line([[h.R[0], h.R[1]], [h.R[0] + 60, h.R[1] - 50]], 8, [0.55, 0.4, 0.28]); circ(h.R[0] + 64, h.R[1] - 54, 9); fill(CORAL); pet(c, 140, 1790, 0.7, t, { tongue: false }); } },
+  songs_outdoor: { label: 'Playing music outside at dusk', fn(c, t) { outdoor(c, t, 'dusk'); const s = 0.2 * Math.sin(t * 9); person(440, 1700, 1.05, ME(c), t, { armL: [0.9, 1.9], armR: [0.35 + s, 1 + s] }); guitar(430, 1320, -0.55); line([[512, 1265], [472, 1325]], 38, ME(c).outfit === 'dress' ? ME(c).skin : ME(c).top); pet(c, 760, 1760, 0.85, t, { flip: -1, tongue: false }); notes(600, 1050, t, 3, [1, 1, 1]); } },
+  calm: { label: 'Breathing, calm mind', fn(c, t) { outdoor(c, t, 'sunrise', 930); calmRings(440, 1200, t); const b = Math.sin(t * 1.2); person(440, 1680, 1.05, ME(c), t, { armL: [0.5 + 0.1 * b, 0.6], armR: [0.5 + 0.1 * b, 0.6], bob: 4 * b }); pet(c, 740, 1750, 0.85, t, { flip: -1, tongue: false }); } },
+
+  wake: { label: 'Waking up fresh', fn(c, t) { room(c, t, { wall: [0.95, 0.9, 0.84], window: 'sunrise' }); const u = ease(clamp((t - 0.6) / 0.8)) * (0.85 + 0.15 * Math.sin(t * 2)); person(380, 1660, 1, ME(c), t, { armL: [0.15 + 2.7 * u, 0.1 + 2.8 * u], armR: [0.15 + 2.7 * u, 0.1 + 2.8 * u], bob: 6 * u }); pet(c, 760, 1760, 0.85, t, { flip: -1 }); } },
+  idea: { label: 'Lightbulb moment, planning', fn(c, t) { room(c, t, { window: 'day' }); person(330, 1650, 1, ME(c), t, { armL: [0.4, 1.2], armR: [0.3, 1.5] }); bulb(330, 940 - 10 * Math.sin(t * 2), t); desk(130, 620); notebook(380, 1340, t); pet(c, 760, 1720, 0.85, t, { flip: -1 }); } },
+  checklist: { label: 'Ticking off small wins', fn(c, t) { room(c, t, { wall: [0.92, 0.9, 0.86] }); const u = ease(clamp((t - 2.6) / 0.5)); person(280, 1660, 1, ME(c), t, { armR: [0.4 + 2.2 * u, 0.4 + 2 * u] }); checklist(530, 760, 460, 3, t, 0.8, 0.6); pet(c, 700, 1760, 0.8, t, { flip: -1 }); } },
+  read: { label: 'Reading and learning', fn(c, t) { room(c, t, { wall: [0.93, 0.9, 0.85], window: 'day' }); const h = person(420, 1660, 1, ME(c), t, { armL: [0.5, 1.7], armR: [0.5, 1.7] }); book((h.L[0] + h.R[0]) / 2, h.R[1] + 10, t); pet(c, 780, 1760, 0.8, t, { flip: -1, tongue: false }); } },
+  soda: { label: 'Choosing a soda water', fn(c, t) { room(c, t, { wall: [0.33, 0.3, 0.42], floor: [0.4, 0.3, 0.26], lights: true }); const l = ease(clamp((t - 1.2) / 0.8)); const h = person(420, 1680, 1.05, ME(c), t, { armR: [0.35 + 0.6 * l, 1.4 + 0.9 * l] }); glass(h.R[0] + 5, h.R[1] + 20, t); counter(640, 1100, 1470, [0.45, 0.33, 0.27]); pet(c, 160, 1760, 0.8, t); } },
+  fridge: { label: 'Stocking up on good food', fn(c, t) { room(c, t, { wall: [0.92, 0.94, 0.9] }); fridge(60, 1640, ease(clamp((t - 0.4) / 0.8))); const r = ease(clamp((t - 1.4) / 0.7)); person(560, 1660, 1, ME(c), t, { armL: [0.3 + 0.9 * r, 0.5 + 0.8 * r] }); counter(700, 1100); fruitBowl(900, 1440); pet(c, 760, 1780, 0.75, t, { flip: -1, lookUp: 0.5 }); } },
+  cook: { label: 'Cooking a real meal', fn(c, t) { room(c, t, { wall: [0.94, 0.9, 0.84], window: 'day' }); counter(380, 1100); stove(640, 1420, t); const s = 0.25 * Math.sin(t * 5); person(260, 1660, 1, ME(c), t, { armR: [0.6 + s, 1.5 + s] }); pet(c, 120, 1780, 0.75, t, { lookUp: 0.7 }); } },
+  eat: { label: 'Eating well', fn(c, t) { room(c, t, { wall: [0.93, 0.9, 0.85], window: 'day' }); const h = person(400, 1660, 1, ME(c), t, { armR: [0.4, 1.6], armL: [0.4, 1.6] }); bowl((h.L[0] + h.R[0]) / 2, h.R[1] - 10, t); pet(c, 700, 1760, 0.85, t, { flip: -1, lookUp: 0.8 }); } },
+  gym: { label: 'Training with weights', fn(c, t, p) { room(c, t, { wall: [0.86, 0.9, 0.93], floor: [0.4, 0.42, 0.45] }); rect(0, 980, W, 70, [0.95, 0.55, 0.42]); weightRack(700, 1460); rect(0, 1600, W, 10, [1, 1, 1], 0.25); const k = (Math.sin(t * 3.2) + 1) / 2; const h = person(400, 1660, 1, ME(c), t, { armL: [0.15, 0.2 + 2.3 * k], armR: [0.15, 0.2 + 2.3 * (1 - k)] }); dumbbell(h.L[0], h.L[1]); dumbbell(h.R[0], h.R[1]); } },
+  progress: { label: 'Watching my progress grow', fn(c, t) { room(c, t, { wall: [0.9, 0.92, 0.9] }); rr(470, 720, 560, 520, 26); fill([1, 1, 1], 0.95); barchart(510, 1190, 480, 400, t, 5, [0.35, 0.68, 0.5]); person(260, 1660, 1, ME(c), t, { armR: [1.9, 1.7] }); pet(c, 760, 1780, 0.75, t, { flip: -1 }); } },
+  money: { label: 'Checking my numbers', fn(c, t) { room(c, t, { wall: [0.93, 0.91, 0.86], window: 'day' }); desk(150, 700); person(420, 1650, 1, ME(c), t, { armL: [0.4, 1.3], armR: [0.4, 1.3] }); notebook(430, 1360, t); rr(540, 1350, 120, 90, 10); fill([0.3, 0.32, 0.35]); for (let i = 0; i < 6; i++) rect(555 + (i % 3) * 32, 1365 + Math.floor(i / 3) * 32, 24, 24, [0.85, 0.85, 0.85]); pet(c, 860, 1780, 0.75, t, { flip: -1 }); } },
+  jar: { label: 'Saving a little every pay', fn(c, t) { room(c, t, { wall: [0.94, 0.9, 0.82] }); desk(450, 1000); const drops = [0.8, 1.8, 2.8, 3.6]; const coins = 3 + drops.filter(d => t > d + 0.6).length; jar(720, 1440, coins); drops.forEach(d => coinDrop(720, 1440 - coins * 16, (t - d) / 0.6)); person(280, 1660, 1, ME(c), t, { armR: [1.4, 1.5] }); pet(c, 120, 1780, 0.7, t); } },
+  laptop: { label: 'Focused work on my laptop', fn(c, t, p) { room(c, t, { wall: [0.88, 0.9, 0.93], window: 'sunrise' }); person(380, 1650, 1, ME(c), t, typing(t)); desk(120, 720); laptop(400, 1440, (x, y, w, h) => barchart(x + 20, y + h - 15, w - 40, h - 40, t, 6, [0.4, 0.62, 0.85])); rr(600, 1370, 50, 70, 8); fill([0.95, 0.95, 0.92]); clockRing(870, 640, p); pet(c, 860, 1780, 0.75, t, { flip: -1 }); } },
+  hardfirst: { label: 'Doing the hard task first', fn(c, t) { room(c, t, { wall: [0.92, 0.9, 0.86] }); checklist(520, 700, 460, 3, t, 1.2, 99); person(300, 1650, 1, ME(c), t, typing(t)); desk(60, 620); laptop(320, 1440); pet(c, 800, 1780, 0.75, t, { flip: -1 }); } },
+  ship: { label: 'Finishing and launching', fn(c, t) { room(c, t, { wall: [0.9, 0.92, 0.95] }); const u = ease(clamp((t - 1.8) / 0.4)); desk(520, 1040); laptop(780, 1440, (x, y, w, h) => tick(x + w / 2, y + h / 2, 50, clamp((t - 1) / 0.6))); person(300, 1660, 1, ME(c), t, { armL: [0.2 + 2.5 * u, 0.2 + 2.6 * u], armR: [0.2 + 2.5 * u, 0.2 + 2.6 * u], bob: 20 * u * Math.abs(Math.sin(t * 6)) }); confetti(t, 1.8); pet(c, 140, 1790, 0.7, t, { lookUp: 0.6 }); } },
+  talk: { label: 'Talking with someone', fn(c, t) { room(c, t, { wall: [0.95, 0.88, 0.8], floor: [0.6, 0.46, 0.36] }); person(300, 1660, 1, ME(c), t, { armR: [0.5 + 0.2 * Math.sin(t * 3), 1] }); person(780, 1660, 0.98, FRIEND1, t, { flip: -1, armR: [0.4, 1 + 0.2 * Math.sin(t * 2.5)] }); const ph = Math.floor(t / 1.2) % 2, a = Math.sin(((t % 1.2) / 1.2) * PI); ph ? bubble(640, 820, 280, 140, a, [0.88, 0.95, 0.9], 1) : bubble(120, 820, 280, 140, a); } },
+  excited: { label: 'Heading out, excited for the day', fn(c, t, p) { room(c, t, { wall: [0.95, 0.9, 0.84], window: 'sunrise' }); const [x, m] = walkX(p, 200, 520, 0.2, 0.8); person(x, 1660, 1, ME(c), t, { walk: m ? 1 : 0 }); pet(c, x + 240, 1740, 0.85, t, { walk: m ? 1 : 0 }); } },
+  date: { label: 'Date night', fn(c, t) { room(c, t, { wall: [0.38, 0.32, 0.4], floor: [0.42, 0.32, 0.28], lights: true }); person(300, 1660, 1, ME(c), t, { armR: [0.45, 1.2] }); if (hasPartner(c)) person(760, 1660, 0.94, PT(c), t, { flip: -1, armR: [0.4, 1.2] }); rr(420, 1420, 240, 24, 10); fill([0.6, 0.45, 0.32]); rect(530, 1444, 20, 230, [0.6, 0.45, 0.32]); glass(470, 1410, t); glass(610, 1410, t); hearts(530, 1000, t); } },
+  guitar: { label: 'Recording music', fn(c, t) { room(c, t, { wall: [0.55, 0.74, 0.85], floor: [0.72, 0.62, 0.52], pattern: true }); micStand(760, 1680); const s = 0.2 * Math.sin(t * 9); person(420, 1680, 1, ME(c), t, { armL: [0.9, 1.9], armR: [0.35 + s, 1 + s] }); guitar(410, 1300, -0.55); line([[490, 1250], [450, 1310]], 36, ME(c).outfit === 'dress' ? ME(c).skin : ME(c).top); notes(700, 1000, t); pet(c, 160, 1790, 0.7, t, { tongue: false }); } },
+  songcard: { label: 'Finishing a song', fn(c, t) { room(c, t, { wall: [0.55, 0.74, 0.85], floor: [0.72, 0.62, 0.52], pattern: true }); songCard(560, 760, t); const u = ease(clamp((t - 2.2) / 0.4)); person(300, 1680, 1, ME(c), t, { armR: [0.15 + 2 * u, 0.4 + 2.4 * u] }); guitar(760, 1640, -1.35); notes(650, 1100, t, 3, [1, 1, 1]); pet(c, 120, 1800, 0.65, t); } },
+  travel: { label: 'Planning a trip', fn(c, t) { room(c, t, { wall: [0.95, 0.9, 0.82], window: 'day', inWindow: () => plane(-200 + 1500 * ((t * 0.18) % 1), 820 + 20 * Math.sin(t), 0.6) }); mapCard(120, 700, t); jar(900, 1440, 6); person(360, 1660, 1, ME(c), t, { armR: [0.3, 0.3] }); suitcase(600, 1700); pet(c, 850, 1800, 0.7, t, { flip: -1 }); } },
+  party: { label: 'Dancing at a party', fn(c, t) { room(c, t, { wall: [0.2, 0.18, 0.3], floor: [0.26, 0.22, 0.3], lights: true }); discoBall(540, 330, t); const dn = (ph, sp = 6) => ({ armL: [2.3 + 0.4 * Math.sin(t * sp + ph), 2.6 + 0.3 * Math.sin(t * sp + ph)], armR: [1.1 + 0.6 * Math.sin(t * sp + ph + 1.5), 1.6], bob: 22 * Math.abs(Math.sin(t * sp / 2 + ph)) }); person(900, 1620, 0.85, FRIEND1, t, { flip: -1, ...dn(1.2) }); person(120, 1630, 0.85, FRIEND2, t, dn(2.4)); if (hasPartner(c)) person(680, 1690, 0.95, PT(c), t, { flip: -1, ...dn(0.6) }); const h = person(360, 1700, 1.02, ME(c), t, { armR: [2.3 + 0.4 * Math.sin(t * 6), 2.6], armL: [0.75, 1.95], bob: 22 * Math.abs(Math.sin(t * 3)) }); glass(h.L[0] - 4, h.L[1] + 16, t); confetti(t % 3, 0); } },
+  clean: { label: 'Cleaning the house', fn(c, t) { room(c, t, { wall: [0.88, 0.94, 0.95], floor: [0.82, 0.72, 0.58], window: 'day' }); plant(150, 1460); sofa(560, 1000, 1460, [0.45, 0.62, 0.68]); const sw = Math.sin(t * 3); const h = person(380, 1680, 1, ME(c), t, { armL: [0.55 + 0.1 * sw, 1.35], armR: [0.75 + 0.15 * sw, 1.25] }); const mx = 520 + 80 * sw; line([[h.L[0] - 20, h.L[1] - 50], [mx, 1840]], 10, [0.6, 0.45, 0.3]); rr(mx - 70, 1830, 140, 28, 10); fill([0.35, 0.7, 0.85]); rr(820, 1720, 110, 120, 14); fill([0.95, 0.75, 0.3]); sparkles(t, [[300, 1600, 30], [560, 1820, 34], [700, 1500, 26], [900, 1350, 30], [220, 1420, 24]]); pet(c, 940, 1860, 0.6, t, { flip: -1 }); } },
+  cuddle: { label: 'Cuddling up together', fn(c, t) { room(c, t, { wall: [0.5, 0.42, 0.48], floor: [0.42, 0.32, 0.3], window: 'dusk' }); lamp(170, 1460, t); sofa(220, 960, 1500, [0.78, 0.55, 0.45]); const sw = 6 * Math.sin(t * 1.2); if (hasPartner(c)) person(600 + sw, 1690, 0.95, PT(c), t, { flip: -1, armL: [1.25, 1.75], armR: [0.4, 0.5] }); person(480 + sw, 1690, 1.02, ME(c), t, { armR: [0.95, 2.2], armL: [0.3, 0.4] }); hearts(540, 1000, t); pet(c, 860, 1850, 0.65, t, { flip: -1, tongue: false }); } },
+  cafe: { label: 'Focused work at a cafe', fn(c, t) { outdoor(c, t, 'day'); rect(0, 1180, W, 40, [0.95, 0.55, 0.42]); for (let i = 0; i < 9; i++) rect(i * 130, 1220, 65, 40, [1, 1, 1], 0.9); person(420, 1660, 1, ME(c), t, typing(t)); table(200, 760, 1440); laptop(470, 1440, (x, y, w, h) => { for (let i = 0; i < 4; i++) rr(x + 24, y + 26 + i * 34, (w - 80) * (0.5 + 0.5 * ((i * 37 + Math.floor(t * 2)) % 7) / 7), 14, 7); fill([0.55, 0.65, 0.85]); }); rr(650, 1370, 54, 70, 10); fill([1, 1, 1]); steam(660, 1370, t, 2, 22); pet(c, 900, 1760, 0.75, t, { flip: -1 }); } },
+  cook_together: { label: 'Cooking together, record playing', fn(c, t) { room(c, t, { wall: [0.97, 0.88, 0.76], floor: [0.62, 0.5, 0.4], window: 'sunset' }); counter(250, 1100, 1440, [0.5, 0.38, 0.3]); stove(560, 1420, t); recordPlayer(900, 1440, t); const s = 0.25 * Math.sin(t * 5); person(200, 1660, 1, ME(c), t, { armR: [0.6 + s, 1.5 + s] }); if (hasPartner(c)) person(360, 1700, 0.94, PT(c), t, { armR: [0.3, 0.6] }); pet(c, 100, 1820, 0.7, t, { lookUp: 0.8 }); hearts(300, 1000, t, 2); } },
+};
+const PICKABLE = Object.keys(SCENES).filter(k => k !== 'title' && k !== 'end');
+
+// ---------------------------------------------------------------- captions
+function wrap(text, maxw) {
+  const words = String(text).split(/\s+/).filter(Boolean), lines = []; let cur = '';
+  words.forEach(wd => { const test = (cur + ' ' + wd).trim(); if (X.measureText(test).width > maxw && cur) { lines.push(cur); cur = wd; } else cur = test; });
+  lines.push(cur); return lines;
+}
+function caption(text, t) {
+  const a = ease(t / 0.9);
+  let size = 60; X.font = `700 ${size}px Poppins, "Figtree", sans-serif`;
+  let lines = wrap(text, 850);
+  if (lines.length > 3) { size = 50; X.font = `700 ${size}px Poppins, "Figtree", sans-serif`; lines = wrap(text, 860); }
+  const lh = size * 1.33, h = lines.length * lh + 80, y0 = 230 + (1 - a) * 30;
+  rr(70, y0, 940, h, 40); fill([1, 0.99, 0.96], 0.86 * a);
+  X.textBaseline = 'alphabetic'; X.textAlign = 'center';
+  lines.forEach((ln, i) => { const la = ease((t - 0.15 - i * 0.18) / 0.6); X.fillStyle = css(NAVY, la); X.fillText(ln, W / 2, y0 + 40 + size + i * lh + (1 - la) * 16); });
+}
+const LOGO = { b1: 'M16.5 51 Q21.5 41.5 30 52 Q38.5 41.5 43.5 51', b2: 'M37.5 35 Q41.5 27.2 47 35.5 Q52.5 27.2 56.5 35', sun: 'M40 78 A28 28 0 0 1 96 78 Z' };
+function drawLogo(cx, cy, s, a) {
+  if (a <= 0) return;
+  X.save(); X.globalAlpha = a; X.translate(cx - 60 * s, cy - 60 * s); X.scale(s, s);
+  X.shadowColor = 'rgba(40,25,20,0.3)'; X.shadowBlur = 8;
+  const cream = css([1, 0.97, 0.92]);
+  X.lineCap = 'butt'; X.lineJoin = 'miter'; X.strokeStyle = cream;
+  X.lineWidth = 3.6; X.stroke(new Path2D(LOGO.b1)); X.lineWidth = 3.2; X.stroke(new Path2D(LOGO.b2));
+  X.fillStyle = css(CORAL); X.fill(new Path2D(LOGO.sun));
+  X.lineCap = 'round'; X.lineWidth = 7; X.beginPath(); X.moveTo(14, 78); X.lineTo(106, 78); X.stroke();
+  X.strokeStyle = css([0.47, 0.7, 0.83]); X.lineWidth = 6;
+  X.beginPath(); X.moveTo(54, 90); X.lineTo(84, 90); X.moveTo(61, 101); X.lineTo(77, 101); X.stroke();
+  X.restore();
+}
+function glimpseCaption(text, t, size = 78) {
+  rect(0, 0, W, H, lin(0, 0, 0, H, [[0, [0.99, 0.75, 0.42], 0.22], [0.5, [0.99, 0.7, 0.5], 0.05], [1, [0.99, 0.6, 0.45], 0.15]]));
+  rect(0, 0, W, 1000, lin(0, 0, 0, 1000, [[0, [0.3, 0.18, 0.14], 0.38], [0.6, [0.3, 0.18, 0.14], 0.18], [1, [0.3, 0.18, 0.14], 0]]));
+  X.font = `italic 400 ${size}px Poppins, "Figtree", sans-serif`; X.textAlign = 'center';
+  const lines = wrap(text, 880), lh = size * 1.3, y0 = 520 - lines.length * lh / 2;
+  lines.forEach((ln, i) => {
+    const la = ease((t - 0.3 - i * 0.35) / 0.9), y = y0 + i * lh + (1 - la) * 20;
+    [[0, 5, 0.35], [2, 3, 0.35], [-2, 3, 0.3]].forEach(([dx, dy, al]) => { X.fillStyle = css([0.3, 0.15, 0.1], al * la); X.fillText(ln, W / 2 + dx, y + dy); });
+    X.fillStyle = css([1, 1, 1], la); X.fillText(ln, W / 2, y);
+  });
+  const la = ease((t - 0.2) / 0.8), ww = 120 * la;
+  if (ww > 0.5) line([[W / 2 - ww, y0 - lh * 1.05], [W / 2 + ww, y0 - lh * 1.05]], 4, [1, 1, 1], 0.8 * la);
+}
+
+// ---------------------------------------------------------------- timeline
+function petName(cfg) {
+  const ps = petsOf(cfg); if (!ps.length) return '';
+  const names = ps.map(p => (p.name || '').trim()).filter(Boolean);
+  const join = a => a.length === 1 ? a[0] : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+  if (names.length === ps.length) return join(names);
+  if (ps.length === 1) return 'my ' + ps[0].type;
+  return ps.every(p => p.type === ps[0].type) ? 'my ' + ps[0].type + 's' : 'my pets';
+}
+function fillText(text, cfg) { return String(text || '').replace(/\{pet\}/g, petName(cfg) || 'my pet'); }
+function timeline(cfg, targetDur) {
+  const items = [{ kind: 'g', text: cfg.opening || 'My life starts now', scene: 'title', d: 6, size: 100 }];
+  (cfg.sections || []).forEach(sec => {
+    (sec.actions || []).forEach(a => { if (a.text && a.text.trim()) items.push({ kind: 'a', text: a.text, scene: a.scene, world: a.world, d: 5 }); });
+    if (sec.glimpse && sec.glimpse.text && sec.glimpse.text.trim()) items.push({ kind: 'g', text: sec.glimpse.text, scene: sec.glimpse.scene, world: sec.glimpse.world, d: sec.glimpse.d || 5.5 });
+  });
+  // more than one place picked: outdoor scenes move between them through the film
+  const ws = (cfg.worlds || []).filter(w => WORLDS[w]);
+  if (ws.length > 1) items.forEach((it, k) => { if (!it.world) it.world = ws[k % ws.length]; });
+  items.push({ kind: 'g', text: cfg.closing || "My life starts now. Let's go.", scene: 'end', d: 8, last: true });
+  const raw = items.reduce((s, i) => s + i.d, 0), k = targetDur ? targetDur / raw : 1;
+  let s = 0; items.forEach(i => { i.d *= k; i.start = s; s += i.d; });
+  return { items, total: s };
+}
+function render(ctx, cfg, tl, T) {
+  X = ctx;
+  T = clamp(T, 0, tl.total - 0.001);
+  let i = 0; while (i < tl.items.length - 1 && tl.items[i + 1].start <= T) i++;
+  const it = tl.items[i], t = T - it.start, p = t / it.d, d = it.d;
+  X.save(); X.fillStyle = css(CREAM); X.fillRect(0, 0, W, H);
+  const sc = it.world && it.world !== cfg.world ? Object.assign({}, cfg, { world: it.world }) : cfg;
+  try { (SCENES[it.scene] || SCENES.sunrise).fn(sc, t, p); } catch (e) { console.error(e); }
+  X.restore();
+  X.save();
+  const txt = fillText(it.text, cfg);
+  if (it.kind === 'a') caption(txt, t); else glimpseCaption(txt, t, it.size || 78);
+  if (it.scene === 'title') {
+    // the brand, as on the home page: the birds-and-sunrise mark over the name in italic Poppins
+    const nm = cfg.me && (cfg.me.name || '').trim(), ka = ease((t - 0.2) / 0.8);
+    drawLogo(W / 2, 108, 1.65, ka);
+    X.font = 'italic 500 50px Poppins, "Figtree", sans-serif'; X.textAlign = 'center';
+    X.shadowColor = 'rgba(40,25,20,0.35)'; X.shadowBlur = 12;
+    X.fillStyle = css([1, 0.97, 0.92], 0.95 * ka);
+    X.fillText((nm ? nm + (/s$/i.test(nm) ? '’' : '’s') + ' ' : '') + 'Motion Mornings', W / 2, 248);
+    X.shadowBlur = 0;
+  }
+  let a = 0;
+  if (i === 0) a = 1 - clamp(t / 1.5); else if (t < 0.4) a = 1 - t / 0.4;
+  if (d - t < 0.4 && !it.last) a = Math.max(a, 1 - (d - t) / 0.4);
+  if (it.last) a = Math.max(a, clamp((t - (d - 2)) / 2));
+  if (a > 0) rect(0, 0, W, H, it.last && t > d / 2 ? [0.05, 0.04, 0.06] : CREAM, a);
+  X.restore();
+}
+function drawScene(ctx, cfg, key, t, p = 0.5) { X = ctx; X.save(); X.fillStyle = css(CREAM); X.fillRect(0, 0, W, H); (SCENES[key] || SCENES.sunrise).fn(cfg, t, p); X.restore(); }
+
+return { W, H, SCENES, DEFAULT_KID, petsOf, PICKABLE, WORLDS: Object.keys(WORLDS), DEFAULT_ME, DEFAULT_PARTNER, timeline, render, drawScene, fillText, petName };
+})();
+</script>
+<script>
+// ===== Free tracks: original music composed on the device, so there is nothing to license =====
+const MUSIC = (() => {
+// Cinematic sketches: felt piano, a string ensemble, low drones, a little percussion, all in a big reverb.
+// Every track rises and falls: piano alone, strings join, the full theme, a breath, then a last swell.
+const STYLES = {
+  sunrise: { name: 'Sunrise', mood: 'Hopeful and warm', bpm: 80, key: 60, prog: [[5, 9, 12], [0, 4, 7], [7, 11, 14], [9, 12, 16]], roots: [5, 0, 7, 9], piano: 'arp', perc: 'heart', scale: [0, 2, 4, 5, 7, 9, 11] },
+  upbeat: { name: 'Rise up', mood: 'Epic and driving', bpm: 96, key: 57, prog: [[0, 3, 7], [-4, 0, 3], [3, 7, 10], [-2, 2, 5]], roots: [0, -4, 3, -2], piano: 'octaves', perc: 'taiko', ostinato: true, scale: [0, 2, 3, 5, 7, 8, 10] },
+  chill: { name: 'Still water', mood: 'Tender and calm', bpm: 66, key: 60, prog: [[5, 9, 12, 16], [9, 12, 16, 19], [2, 5, 9, 12], [7, 11, 14, 19]], roots: [5, 9, 2, 7], piano: 'sparse', perc: 'none', scale: [0, 2, 4, 5, 7, 9, 11] },
+  acoustic: { name: 'Open road', mood: 'Warm, moving forward', bpm: 92, key: 55, prog: [[0, 4, 7], [7, 11, 14], [9, 12, 16], [5, 9, 12]], roots: [0, 7, 9, 5], piano: 'harp', perc: 'soft', scale: [0, 2, 4, 5, 7, 9, 11] }
+};
+const mtof = n => 440 * Math.pow(2, (n - 69) / 12);
+const rng = s => () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+
+async function render(id, seconds, seed = 11) {
+  const st = STYLES[id] || STYLES.sunrise, spb = 60 / st.bpm, bar = spb * 4;
+  // up to 16 bars are performed; longer films repeat the middle, which keeps phones quick
+  const total = Math.max(6, Math.ceil(seconds / bar)), bars = Math.min(total, 12), end = bars * bar;
+  const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  let ctx, sr = 22050;
+  try { ctx = new OAC(2, Math.ceil((end + 4) * sr), sr); } catch (e) { sr = 44100; ctx = new OAC(2, Math.ceil((end + 4) * sr), sr); }
+  const R = rng(seed);
+
+  // ---- mix: dry + a long dark hall reverb, glued with a compressor
+  const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -20; comp.ratio.value = 3; comp.attack.value = 0.02; comp.release.value = 0.3; comp.connect(ctx.destination);
+  const out = ctx.createGain(); out.connect(comp);
+  out.gain.setValueAtTime(0.0001, 0); out.gain.linearRampToValueAtTime(1, 2); out.gain.setValueAtTime(1, end - 3.5); out.gain.linearRampToValueAtTime(0.0001, end + 2.5);
+  const dry = ctx.createGain(); dry.gain.value = 0.8; dry.connect(out);
+  const rev = ctx.createConvolver(), irLen = Math.floor(sr * 2.9), ir = ctx.createBuffer(2, irLen, sr);
+  for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); let lp = 0; for (let i = 0; i < irLen; i++) { const k = i / irLen; lp += ((R() * 2 - 1) - lp) * (0.5 - 0.42 * k); d[i] = lp * Math.pow(1 - k, 2.6) * (i < sr * 0.02 ? i / (sr * 0.02) : 1); } }
+  rev.buffer = ir; const wet = ctx.createGain(); wet.gain.value = 0.9; rev.connect(wet); wet.connect(out);
+  const pan = (node, p) => { if (ctx.createStereoPanner) { const s = ctx.createStereoPanner(); s.pan.value = p; node.connect(s); return s; } return node; };
+  const send = (node, p, amt) => { const n = pan(node, p); n.connect(dry); const g = ctx.createGain(); g.gain.value = amt; n.connect(g); g.connect(rev); };
+  const noise = ctx.createBuffer(1, sr * 2, sr), nd = noise.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = R() * 2 - 1;
+
+  // ---- instruments
+  const piano = (n, t, vel = 1, p = 0) => {
+    const f = mtof(n), g = ctx.createGain(), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1800 + vel * 1600; lp.connect(g);
+    [[1, 1, 3.2], [2, 0.38, 1.6], [3, 0.14, 0.9]].forEach(([m, a, d]) => {
+      const o = ctx.createOscillator(); o.frequency.value = f * m; o.detune.value = (R() - 0.5) * 4;
+      const e = ctx.createGain(); e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(a * 0.22 * vel, t + 0.006); e.gain.exponentialRampToValueAtTime(0.0001, t + d * (n < 60 ? 1.3 : 1));
+      o.connect(e); e.connect(lp); o.start(t); o.stop(t + d * 1.3 + 0.1);
+    });
+    send(g, p || Math.max(-0.5, Math.min(0.5, (n - 64) / 30)), 0.45);
+  };
+  const harp = (n, t, vel = 1) => {
+    const o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = mtof(n);
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(3200, t); lp.frequency.exponentialRampToValueAtTime(700, t + 1.2);
+    const e = ctx.createGain(); e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(0.12 * vel, t + 0.004); e.gain.exponentialRampToValueAtTime(0.0001, t + 1.8);
+    o.connect(lp); lp.connect(e); o.start(t); o.stop(t + 1.9); send(e, (n - 62) / 26, 0.55);
+  };
+  const strings = (notes, t, d, vol, att = 1.2, bright = 1600) => {
+    const lfo = ctx.createOscillator(); lfo.frequency.value = 4.6; const lg = ctx.createGain(); lg.gain.value = 5; lfo.connect(lg); lfo.start(t); lfo.stop(t + d + 2);
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + att); g.gain.setValueAtTime(vol, t + d); g.gain.linearRampToValueAtTime(0.0001, t + d + 1.4);
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(bright * 0.6, t); lp.frequency.linearRampToValueAtTime(bright, t + att); lp.Q.value = 0.4; lp.connect(g);
+    notes.forEach((n, k) => [-12, 2, 13].forEach((dt, v) => {
+      const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtof(n); o.detune.value = dt; lg.connect(o.detune);
+      const pv = ctx.createGain(); pv.gain.value = 0.32; o.connect(pv);
+      pan(pv, (v - 1) * 0.45 + (k - notes.length / 2) * 0.08).connect(lp); o.start(t); o.stop(t + d + 1.5);
+    }));
+    send(g, 0, 0.6);
+  };
+  const spicc = (n, t, vol) => { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtof(n); const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1500; const e = ctx.createGain(); e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(vol, t + 0.01); e.gain.exponentialRampToValueAtTime(0.0001, t + 0.2); o.connect(lp); lp.connect(e); o.start(t); o.stop(t + 0.25); send(e, (R() - 0.5) * 0.6, 0.4); };
+  const bass = (n, t, d, vol) => {
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + 0.4); g.gain.setValueAtTime(vol, t + d - 0.2); g.gain.linearRampToValueAtTime(0.0001, t + d + 0.8);
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 220; lp.connect(g);
+    [['sine', 0], ['triangle', 0.4]].forEach(([ty, dt]) => { const o = ctx.createOscillator(); o.type = ty; o.frequency.value = mtof(n); o.detune.value = dt; o.connect(lp); o.start(t); o.stop(t + d + 1); });
+    send(g, 0, 0.15);
+  };
+  const boom = (t, vol = 0.9, f0 = 95) => {
+    const o = ctx.createOscillator(); o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.45);
+    const e = ctx.createGain(); e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(vol, t + 0.008); e.gain.exponentialRampToValueAtTime(0.0001, t + 1.1); o.connect(e); o.start(t); o.stop(t + 1.2);
+    const s = ctx.createBufferSource(); s.buffer = noise; const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 500; const ne = ctx.createGain(); ne.gain.setValueAtTime(vol * 0.5, t); ne.gain.exponentialRampToValueAtTime(0.0001, t + 0.25); s.connect(f); f.connect(ne); s.start(t); s.stop(t + 0.3);
+    const g = ctx.createGain(); e.connect(g); ne.connect(g); send(g, 0, 0.5);
+  };
+  const heart = (t, vol) => { [0, 0.22].forEach((o, i) => { const s = ctx.createOscillator(); s.frequency.setValueAtTime(70, t + o); s.frequency.exponentialRampToValueAtTime(40, t + o + 0.2); const e = ctx.createGain(); e.gain.setValueAtTime(0.0001, t + o); e.gain.exponentialRampToValueAtTime(vol * (i ? 0.6 : 1), t + o + 0.01); e.gain.exponentialRampToValueAtTime(0.0001, t + o + 0.4); s.connect(e); s.start(t + o); s.stop(t + o + 0.5); send(e, 0, 0.2); }); };
+  const swell = (t, d, vol) => { const s = ctx.createBufferSource(); s.buffer = noise; s.loop = true; const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.setValueAtTime(800, t); f.frequency.exponentialRampToValueAtTime(7000, t + d); const e = ctx.createGain(); e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(vol, t + d); e.gain.linearRampToValueAtTime(0.0001, t + d + 0.05); s.connect(f); f.connect(e); s.start(t); s.stop(t + d + 0.1); send(e, 0, 0.8); };
+
+  // ---- a simple singing melody: chord tones and steps, slow notes, the same idea twice
+  const sc = st.scale, near = (m, ch) => { let best = m, bd = 99; for (let o = -1; o <= 2; o++) ch.forEach(c => { const v = c + 12 * o + st.key + 12; if (Math.abs(v - m) < bd) { bd = Math.abs(v - m); best = v; } }); return best; };
+  const RH = [[[0, 2], [2, 1], [3, 1]], [[0, 3], [3, 1]], [[0, 1.5], [1.5, 0.5], [2, 2]], [[0, 4]]];
+  const motif = []; for (let i = 0; i < 4; i++) motif.push(RH[Math.floor(R() * RH.length)]);
+  // ---- arrangement
+  const part = b => { const f = (b + 0.5) / bars; return b < 1 || f < 0.12 ? 'intro' : f < 0.36 ? 'build' : f < 0.74 ? 'full' : f < 0.86 ? 'breath' : 'finale'; };
+  let mel = st.key + 16;
+  for (let b = 0; b < bars; b++) {
+    const t0 = b * bar, ch = st.prog[b % 4].map(n => n + st.key), root = st.roots[b % 4] + st.key - 24, P = part(b), nextP = b + 1 < bars ? part(b + 1) : null;
+    const lift = P === 'full' || P === 'finale';
+    // piano
+    if (st.piano === 'arp') { const seq = [root + 12, ch[0], ch[1], ch[2], ch[0] + 12, ch[2], ch[1], ch[0]]; seq.forEach((n, i) => piano(n, t0 + i * spb / 2, (i === 0 ? 0.9 : 0.55) * (P === 'breath' ? 0.8 : 1))); }
+    else if (st.piano === 'octaves') { for (let q = 0; q < 4; q++) { piano(root + 12, t0 + q * spb, 0.7); piano(root + 24, t0 + q * spb, 0.5); } if (lift) ch.forEach(n => piano(n + 12, t0, 0.5)); }
+    else if (st.piano === 'sparse') { piano(root + 12, t0, 0.8); [ch[0], ch[1], ch[2], ch[3] || ch[0] + 12].forEach((n, i) => piano(n, t0 + [0.5, 1.5, 2, 3][i] * spb, 0.5)); }
+    else { const seq = [ch[0], ch[1], ch[2], ch[0] + 12, ch[1] + 12, ch[2], ch[1], ch[0] + 12]; seq.forEach((n, i) => harp(n, t0 + i * spb / 2, i % 4 === 0 ? 1 : 0.7)); if (!lift) piano(root + 12, t0, 0.6); }
+    // strings and low end
+    if (P !== 'intro') strings(ch, t0, bar, P === 'build' ? 0.05 + 0.03 * (b / bars) : P === 'breath' ? 0.05 : 0.085, b === 0 || part(b - 1) !== P ? 1.6 : 0.4, P === 'breath' ? 1100 : 1700);
+    if (lift) strings([ch[0] + 12, ch[2] + 12], t0, bar, 0.04, 0.8, 2600);
+    if (P !== 'intro') bass(root, t0, bar, P === 'breath' ? 0.12 : 0.22);
+    if (st.ostinato && (P === 'full' || P === 'finale' || P === 'build')) for (let i = 0; i < 8; i++) spicc([ch[0], ch[2], ch[0] + 12, ch[2]][i % 4] - 12, t0 + i * spb / 2, P === 'build' ? 0.035 : 0.06);
+    // percussion
+    if (st.perc === 'taiko' && lift) { boom(t0, 0.9); boom(t0 + spb * 1.5, 0.5, 120); boom(t0 + spb * 2, 0.75); if (b % 2) { boom(t0 + spb * 3, 0.45, 130); boom(t0 + spb * 3.5, 0.55, 120); } }
+    if (st.perc === 'heart' && (lift || P === 'build')) { heart(t0, lift ? 0.5 : 0.3); heart(t0 + spb * 2, lift ? 0.4 : 0.25); }
+    if (st.perc === 'soft' && lift) { boom(t0, 0.45, 80); boom(t0 + spb * 2, 0.35, 80); }
+    if (P === 'finale' && b > 0 && part(b - 1) !== 'finale') boom(t0, 1, 70);
+    if (nextP && nextP !== P && (nextP === 'full' || nextP === 'finale')) swell(t0 + bar * 0.5, bar * 0.5, 0.12);
+    // melody over the full theme and the finale
+    if (lift && st.piano !== 'octaves') {
+      motif[b % 4].forEach(([bt, len], i) => {
+        const step = sc.length; const di = Math.floor(R() * 3) - 1; mel = near(mel + [0, 2, -2, 1, -1][Math.floor(R() * 5)] * (i ? 1 : 0) + di, ch); if (mel > st.key + 26) mel -= 12; if (mel < st.key + 9) mel += 12;
+        piano(mel, t0 + bt * spb, 0.85, 0.15); if (P === 'finale') piano(mel + 12, t0 + bt * spb, 0.35, 0.2);
+      });
+    } else if (lift) strings([ch[2] + 24], t0, bar, 0.03, 0.6, 3000);
+  }
+  const buffer = await new Promise((res, rej) => { ctx.oncomplete = e => res(e.renderedBuffer); const p = ctx.startRendering(); if (p && p.then) p.then(res, rej); });
+  let chans = [buffer.getChannelData(0), buffer.getChannelData(1)];
+  if (total > bars) {
+    const at = b => Math.round(b * bar * sr);
+    // the middle (build through full) repeats; intro and the breath-and-finale stay once
+    const loopA = 2, loopB = Math.max(loopA + 2, Math.round(bars * 0.74));
+    chans = chans.map(data => {
+      const parts = [data.subarray(0, at(loopB))]; let b = loopB;
+      while (b < total - (bars - loopB)) { const n = Math.min(loopB - loopA, total - (bars - loopB) - b); parts.push(data.subarray(at(loopA), at(loopA + n))); b += n; }
+      parts.push(data.subarray(at(loopB)));
+      const o = new Float32Array(parts.reduce((s, p) => s + p.length, 0)); let pos = 0; parts.forEach(p => { o.set(p, pos); pos += p.length; }); return o;
+    });
+  }
+  return { blob: wav(chans, sr), bpm: st.bpm, period: spb, duration: total * bar, name: st.name };
+}
+function wav(chans, rate) {
+  const n = chans[0].length, nc = chans.length, ab = new ArrayBuffer(44 + n * 2 * nc), v = new DataView(ab);
+  const ws = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  ws(0, 'RIFF'); v.setUint32(4, 36 + n * 2 * nc, true); ws(8, 'WAVE'); ws(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, nc, true);
+  v.setUint32(24, rate, true); v.setUint32(28, rate * 2 * nc, true); v.setUint16(32, 2 * nc, true); v.setUint16(34, 16, true); ws(36, 'data'); v.setUint32(40, n * 2 * nc, true);
+  let peak = 0; chans.forEach(d => { for (let i = 0; i < n; i++) peak = Math.max(peak, Math.abs(d[i])); });
+  const k = peak > 0 ? 0.92 / peak : 1;
+  for (let i = 0, p = 44; i < n; i++) for (let c = 0; c < nc; c++, p += 2) v.setInt16(p, Math.max(-1, Math.min(1, chans[c][i] * k)) * 32767, true);
+  return new Blob([ab], { type: 'audio/wav' });
+}
+return { STYLES, make: render, wav };
+})();
+</script>
+<script>
+(() => {
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const el = (tag, attrs = {}, ...kids) => { const e = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') e.className = v; else if (k.startsWith('on')) e.addEventListener(k.slice(2), v); else if (v === true) e.setAttribute(k, ''); else if (v !== false && v != null) e.setAttribute(k, v); } kids.flat().forEach(k => k != null && e.append(k)); return e; };
+const rand = a => a[Math.floor(Math.random() * a.length)];
+
+// ------------------------------------------------ themes
+// {key|fallback} is filled from the theme's answers. Scenes starting with @ are picked from answers.
+const THEMES = [
+  { id: 'start', title: 'A fresh start', hint: 'A new chapter, a reset', qs: [],
+    a: [["I understand how I work now, and I work with it", 'idea'], ["I'm building better days, one small win at a time", 'checklist'], ['I wake up clear-headed and ready to go', 'wake'], ['I start each morning with one small win', 'checklist'], ['I plan my day and keep it simple', 'idea']],
+    g: [['Calm, clear and proud of myself', 'sunrise'], ['My new chapter, well underway', 'start']] },
+  { id: 'drink', title: 'Better drinks', hint: 'Soda water, clear mornings', qs: [['swap', 'What do you love to reach for?', 'soda water, kombucha, tea']],
+    a: [['I choose a cold {swap|soda water} and enjoy it', 'soda'], ['I wind down and celebrate in ways that feel good', 'unwind'], ['I wake up clear-headed and ready for the day', 'wake'], ['I dance all night with a {swap|soda water} in hand', 'party']],
+    g: [['Sharp. Rested. Proud of myself.', 'sunrise'], ['Clear head, full of energy', 'celebrate']] },
+  { id: 'food', title: 'Eating well', hint: 'Good food, more energy', qs: [['meal', 'A healthy meal you love?', 'salmon and greens']],
+    a: [['I keep good food in the house, so the easy choice is the healthy one', 'fridge'], ['I cook {meal|real meals} and enjoy making it', 'cook'], ['I eat to feel good, and I notice the difference', 'eat'], ['I plan my meals for the week', 'idea']],
+    g: [['More energy. Feeling great.', 'celebrate'], ['Light, strong and full of energy', 'strong']] },
+  { id: 'move', title: 'Moving my body', hint: 'Training you enjoy', qs: [['activity', 'What kind of movement?', 'gym, running, yoga, surfing'], ['freq', 'How often?', '3 times a week']],
+    a: [['I make time for {activity|exercise} {freq|most days}, even when I don’t feel like it', '@move'], ['I find workouts I actually enjoy, and I mix them up', 'jog'], ['I show up, even for a short session, and that counts', 'gym'], ['I track my progress and watch myself get stronger', 'progress']],
+    g: [['Fit. Strong. A big smile.', 'strong'], ['Stronger every month', 'celebrate']] },
+  { id: 'money', title: 'Money', hint: 'Steady, saving, growing', qs: [['saving', 'What are you saving for?', 'a house deposit, a holiday']],
+    a: [['I check my money every week and know my numbers', 'money'], ['I put something aside every pay for {saving|my future}', 'jar'], ['I spend on what matters most to me', 'money'], ['I build skills that can earn me more', 'laptop']],
+    g: [['Steady and calm, with real upside ahead', 'steady'], ['Money working for me', 'progress']] },
+  { id: 'work', title: 'Work I care about', hint: 'A job, business or project', qs: [['work', 'What are you building or working toward?', 'my own business, a promotion']],
+    a: [['I spend focused hours on {work|work that matters to me}', 'cafe'], ['I show up and do the hard part first', 'hardfirst'], ['I finish what I start, and I ship it', 'ship'], ['I talk to people and learn from them', 'talk']],
+    g: [['Excited to get up for work that’s growing', 'excited'], ['{work|My work}, gaining real traction', 'progress']] },
+  { id: 'love', title: 'Finding love', hint: 'Open to the right person', qs: [],
+    a: [['I put myself out there', 'friends'], ['I\u2019m open to meeting the right {pw|person}', 'friends'], ['I love myself, and I have a lot to offer', 'selflove'], ['I deserve love, and I have so much love to give', 'date'], ['I’m kind and present with the people I meet', 'talk']],
+    g: [['Falling for each other. Easy and real.', 'couple']] },
+  { id: 'partner', title: 'My relationship', hint: 'Closer with my partner', qs: [['pname', 'Partner’s name?', 'Sam']],
+    a: [['I make time for {pname|my partner}, just the two of us', 'date'], ['I listen properly and say what I appreciate', 'cuddle'], ['I show up for {pname|us} every day', 'cook_together'], ['We plan our future together', 'couple']],
+    g: [['Closer every year', 'together']] },
+  { id: 'family', title: 'Being a present parent', hint: 'Time with my kids', qs: [['kids', 'Kids’ names?', 'Mia and Jack']],
+    a: [['I’m present with {kids|my kids}, phone away', 'parkday'], ['I read to {kids|my kids} at bedtime', 'bedtime'], ['I do the school run with a smile', 'schoolrun'], ['We eat dinner together most nights', 'familydinner']],
+    g: [['A home full of laughter', 'family']] },
+  { id: 'grow', title: 'Growing our family', hint: 'Getting ready for kids', qs: [],
+    a: [['I create a calm, loving home', 'cook_together'], ['I get my health ready for the family I’m building', 'jog'], ['I get our money ready for a family', 'money'], ['I make room in my life for little ones', 'excited']],
+    g: [['Our family, growing', 'pram'], ['A little one in my arms', 'holdbaby']] },
+  { id: 'people', title: 'Friends and family', hint: 'My people, my values', qs: [['who', 'Who do you want more time with?', 'my parents, old friends']],
+    a: [['I make time for {who|the people who share my values}', 'campfire'], ['I reach out first and keep in touch', 'talk'], ['I say yes to plans with people I love', 'friends']],
+    g: [['Surrounded by people I love', 'campfire']] },
+  { id: 'create', title: 'Making things', hint: 'Music, art, writing', qs: [['craft', 'What do you create?', 'music, painting, writing']],
+    a: [['I make {craft|something creative} most days, even when it’s rough', '@craft'], ['I finish what I start and enjoy the done feeling', '@craftdone'], ['I share my {craft|work} with people', '@craftshare']],
+    g: [['{craft|Work} I’m proud of', '@craftshare']] },
+  { id: 'learn', title: 'Learning and growing', hint: 'A skill, a language', qs: [['learn', 'What are you learning?', 'Spanish, coding, guitar']],
+    a: [['I practise {learn|something new} a little every day', 'read'], ['I read and learn something every day', 'read'], ['I ask questions and keep growing', 'idea']],
+    g: [['Growing into who I want to be', 'sunrise']] },
+  { id: 'calm', title: 'A calm mind', hint: 'Rest, sleep, peace', qs: [],
+    a: [['I stop, breathe and come back to now', 'calm'], ['I protect my sleep and wind down early', 'unwind'], ['I put my phone down and notice what’s around me', 'walk']],
+    g: [['Calm, clear and present', 'sunrise']] },
+  { id: 'travel', title: 'Adventure', hint: 'A trip to plan for', qs: [['place', 'Where to?', 'Vietnam']],
+    a: [['I’m saving and planning for {place|my next adventure}', 'travel'], ['I put a little aside for {place|the trip} every pay', 'jar']],
+    g: [['{place|Adventure}, here I come', 'start']] },
+  { id: 'home', title: 'Home', hint: 'A place I love', qs: [['home', 'Your dream home or place?', 'a house by the beach']],
+    a: [['I walk {pet} and take in where I live', 'walk'], ['I keep my home fresh and a place I love coming back to', 'clean'], ['I’m working toward {home|a home I love}', 'money']],
+    g: [['Home, just how I want it', 'cook_together']] },
+];
+const TH = id => THEMES.find(t => t.id === id);
+const MOVE_SCENE = v => /run|jog/.test(v) ? 'jog' : /yoga|stretch|pilates|medit/.test(v) ? 'calm' : /walk|hike/.test(v) ? 'walk' : /gym|weight|lift|strength/.test(v) ? 'gym' : 'gym';
+const isMusic = v => /music|song|guitar|sing|band|piano|beat/.test(v);
+function sceneFor(sc, fills) {
+  if (!sc.startsWith('@')) return sc;
+  const craft = (fills.craft || '').toLowerCase(), act = (fills.activity || '').toLowerCase();
+  if (sc === '@move') return MOVE_SCENE(act);
+  if (sc === '@craft') return isMusic(craft) ? 'guitar' : /paint|draw|art|sketch/.test(craft) ? 'paint' : 'laptop';
+  if (sc === '@craftdone') return isMusic(craft) ? 'songcard' : /paint|draw|art/.test(craft) ? 'paint' : 'ship';
+  if (sc === '@craftshare') return isMusic(craft) ? 'songs_outdoor' : 'friends';
+  return 'sunrise';
+}
+function fillT(tpl, fills, cfg) {
+  // names from "Your people" fill in when the theme's own question is left blank
+  const kidNames = (cfg.kids || []).filter(k => k.status !== 'hoping' && (k.name || '').trim()).map(k => k.name.trim());
+  const joinN = a => a.length === 1 ? a[0] : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+  const auto = { pname: cfg.partner && cfg.partner.on && cfg.partner.status !== 'hoping' ? (cfg.partner.name || '').trim() : '', kids: kidNames.length ? joinN(kidNames) : '' };
+  let out = tpl.replace(/\{(\w+)\|([^}]*)\}/g, (m, k, fb) => { const v = (fills[k] || '').trim() || auto[k] || ''; return v || fb; });
+  out = out.replace(/\{pet\}/g, LSN.petName(cfg) || 'outside');
+  if (/I walk outside/.test(out)) out = out.replace('I walk outside and', 'I get outside and');
+  out = out.replace(/\s+/g, ' ').trim();
+  return out.charAt(0).toUpperCase() + out.slice(1);
+}
+function autoFills(cfg) {
+  const p = cfg.partner || {}, pw = p.sex === 'm' ? 'man' : p.sex === 'f' ? 'woman' : 'person';
+  const ks = (cfg.kids || []).filter(k => k.status !== 'hoping');
+  let kids = 'my kids';
+  if (ks.length === 1) kids = ks[0].sex === 'm' ? 'my son' : ks[0].sex === 'f' ? 'my daughter' : 'my child';
+  else if (ks.length > 1 && ks.every(k => k.sex === 'm')) kids = 'my boys';
+  else if (ks.length > 1 && ks.every(k => k.sex === 'f')) kids = 'my girls';
+  return { pw, kids };
+}
+function buildSection(th, fills, cfg) {
+  const own = {}; Object.entries(fills || {}).forEach(([k, v]) => { if (String(v || '').trim()) own[k] = v; });
+  fills = Object.assign(autoFills(cfg), own);
+  const n = Math.min(th.a.length, th.a.length >= 4 ? 3 : th.a.length);
+  const idx = [...th.a.keys()].sort(() => Math.random() - 0.5).slice(0, n).sort((a, b) => a - b);
+  const g = rand(th.g);
+  return { theme: th.id, title: th.title, actions: idx.map(i => ({ text: fillT(th.a[i][0], fills, cfg), scene: sceneFor(th.a[i][1], fills) })), glimpse: { text: fillT(g[0], fills, cfg), scene: sceneFor(g[1], fills) } };
+}
+
+// ------------------------------------------------ palettes & state
+const SKIN = ['#F6D5BF', '#E8BA99', '#D49A72', '#B27449', '#8A5434', '#5E3A24'];
+const HAIR = ['#1F1A18', '#383130', '#6B4A33', '#A0703F', '#D9B26A', '#B5452B', '#9C9894', '#E8E4DE'];
+const CLOTH = ['#30406E', '#17171C', '#ED856E', '#F2C46F', '#5A8C73', '#4F7FB0', '#EFE8DC', '#8E4B5C'];
+const COAT = ['#A14F26', '#6B3A1E', '#1E1A18', '#D9B07A', '#F2EDE4', '#8C8A86', '#C47A3A'];
+const WORLD_LABELS = { beach: 'Beach', park: 'Green and leafy', city: 'City', mountains: 'Mountains and lake' };
+const DEFAULT_ME = { body: 'm', hair: 'short', hairCol: '#6B4A33', grey: false, skin: '#E8BA99', facial: 'stubble', facialCol: '#6B4A33', outfit: 'tee', top: '#4F7FB0', inner: '#EFE8DC', pants: '#30406E' };
+const EXAMPLE = ['move', 'food', 'people', 'calm', 'create'];
+const fresh = () => {
+  const cfg = { world: 'beach', tint: null, me: { ...DEFAULT_ME }, pets: [{ type: 'dog', name: '', coat: '#A14F26', muzzle: 'dark', ears: 'floppy' }], kids: [], partner: { on: false, status: 'have', ...LSN.DEFAULT_PARTNER, on: false }, opening: 'My life starts now', closing: "My life starts now. Let's go.", sections: [] };
+  return { v: 2, step: 0, themes: [], fills: {}, notes: '', isExample: false, linesTouched: false, cfg };
+};
+let S = fresh();
+try { const raw = localStorage.getItem('lsn-draft-v2'); if (raw) { const d = JSON.parse(raw); if (d && d.v === 2 && d.cfg && d.cfg.me) S = Object.assign(fresh(), d); } } catch (e) {}
+if (S.isExample) { S.isExample = false; S.linesTouched = false; liveLines(); }
+let saveTimer;
+const save = () => { clearTimeout(saveTimer); saveTimer = setTimeout(() => { try { localStorage.setItem('lsn-draft-v2', JSON.stringify(S)); } catch (e) {} }, 400); };
+const photos = [];
+let song = null;
+
+// ------------------------------------------------ Claude (optional)
+let sample = null, downloads = null, canImages = false, imageMax = 4;
+(async () => {
+  try { if (window.claude && window.claude.use) {
+    sample = await window.claude.use('sample');
+    if (sample) { $('#writeAI').hidden = false; try { const lim = await sample.limits(); if (lim && lim.images) { canImages = true; imageMax = lim.images.maxCount || 4; } } catch (e) {} updatePhotoAI(); }
+    downloads = await window.claude.use('downloads');
+  } } catch (e) {}
+})();
+function errCopy(e) {
+  const c = e && e.code;
+  if (c === 'not_granted' || c === 'sampling_disabled') return "Claude isn't available here. Build my lines works without it.";
+  if (c === 'rate_limited') return 'Claude is busy or your usage limit is reached. Build my lines works without it.';
+  if (c === 'invalid_json') return "Claude's answer didn't come through cleanly. Try again.";
+  if (c === 'image_rejected') return 'One of the photos could not be read. Try different photos.';
+  if (c === 'cancelled') return '';
+  return 'Something went wrong reaching Claude. Build my lines works without it.';
+}
+
+// ------------------------------------------------ steps
+const STEP_NAMES = ['What matters', 'Your world', 'Your people', 'Your lines', 'Song and save'];
+function renderSteps() {
+  const nav = $('#steps'); nav.innerHTML = '';
+  STEP_NAMES.forEach((n, i) => nav.append(el('button', { 'aria-current': i === S.step ? 'step' : false, class: i < S.step ? 'done' : '', onclick: () => go(i) }, el('span', { class: 'n' }, String(i + 1)), n)));
+  $$('.panel[data-step]').forEach(p => p.hidden = +p.dataset.step !== S.step);
+  if (S.step === 1) renderWorlds();
+  if (S.step === 2) renderPeople();
+  if (S.step === 3) renderLines();
+  if (S.step === 4) renderSongOpts();
+  setPreviewForStep();
+}
+function go(i) { S.step = Math.max(0, Math.min(4, i)); save(); renderSteps(); const b = $('#builder'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+$$('[data-next]').forEach(b => b.onclick = () => go(S.step + 1));
+$$('[data-prev]').forEach(b => b.onclick = () => go(S.step - 1));
+
+// ------------------------------------------------ step 1: themes
+function renderThemes() {
+  const box = $('#tiles'); box.innerHTML = '';
+  THEMES.forEach(th => {
+    const on = S.themes.includes(th.id);
+    box.append(el('button', { class: 'tile', 'aria-pressed': on ? 'true' : 'false', onclick: () => { S.themes = on ? S.themes.filter(x => x !== th.id) : [...S.themes, th.id]; liveLines(); save(); renderThemes(); if (!on) { const sec = S.cfg.sections.find(s => s.theme === th.id); const a = sec && sec.actions.find(x => x.text && x.text.trim()); if (a) { preview('action', a); $('#stageNote').textContent = 'Added to your film: ' + th.title; } } else { $('#stageNote').textContent = 'Taken out of your film: ' + th.title; } } }, el('b', {}, th.title), el('small', {}, th.hint)));
+  });
+  const fills = $('#fills'); fills.innerHTML = '';
+  const withQs = THEMES.filter(t => S.themes.includes(t.id) && t.qs.length);
+  $('#fillsCard').hidden = !withQs.length;
+  withQs.forEach(th => {
+    S.fills[th.id] = S.fills[th.id] || {};
+    const card = el('div', { class: 'fillcard' }, el('h4', {}, th.title));
+    th.qs.forEach(([k, label, ph]) => {
+      const id = `f-${th.id}-${k}`, inp = el('input', { type: 'text', id, placeholder: 'e.g. ' + ph, maxlength: 50 });
+      inp.value = S.fills[th.id][k] || '';
+      inp.oninput = () => { S.fills[th.id][k] = inp.value; liveLines(); save(); };
+      card.append(el('label', { for: id }, label, inp));
+    });
+    fills.append(card);
+  });
+}
+$('#notes').oninput = e => { S.notes = e.target.value; save(); };
+// Until someone edits their lines by hand, the film follows what they tick, so the preview always shows their choices.
+function liveLines() {
+  if (S.linesTouched) return;
+  const ids = THEMES.map(t => t.id).filter(id => S.themes.includes(id));
+  const keep = {}; (S.cfg.sections || []).forEach(s => { if (s.theme) keep[s.theme] = s; });
+  const names = [S.cfg.partner.on && S.cfg.partner.name, (S.cfg.kids || []).map(k => k.name)];
+  const key = id => JSON.stringify([S.fills[id] || {}, names]);
+  S.cfg.sections = ids.map(id => keep[id] && key(id) === keep[id]._fills ? keep[id] : Object.assign(buildSection(TH(id), S.fills[id] || {}, S.cfg), { _fills: key(id) }));
+  S.isExample = false;
+}
+
+// ------------------------------------------------ step 2: photos + world
+const photoInput = $('#photoInput'), drop = $('#drop');
+drop.onclick = () => photoInput.click();
+drop.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); photoInput.click(); } };
+drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = () => drop.classList.remove('over');
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); addPhotos(e.dataTransfer.files); };
+photoInput.onchange = () => { addPhotos(photoInput.files); photoInput.value = ''; };
+function addPhotos(files) { [...files].filter(f => f.type.startsWith('image/')).slice(0, 8 - photos.length).forEach(f => photos.push({ file: f, url: URL.createObjectURL(f) })); renderThumbs(); computeTint(); }
+function renderThumbs() {
+  const box = $('#thumbs'); box.innerHTML = '';
+  photos.forEach((p, i) => box.append(el('figure', {}, el('img', { src: p.url, alt: 'Your photo ' + (i + 1) }), el('button', { 'aria-label': 'Remove photo', onclick: () => { URL.revokeObjectURL(p.url); photos.splice(i, 1); renderThumbs(); computeTint(); } }, '×'))));
+  updatePhotoAI();
+}
+function updatePhotoAI() { $('#aiPhotoRow').hidden = !(sample && canImages && photos.length); }
+async function loadImg(url) { const im = new Image(); im.src = url; await im.decode(); return im; }
+async function computeTint() {
+  if (!photos.length) { S.cfg.tint = null; save(); return; }
+  const c = document.createElement('canvas'); c.width = c.height = 40; const x = c.getContext('2d', { willReadFrequently: true }); const px = [];
+  for (const p of photos) { try { const im = await loadImg(p.url); x.drawImage(im, 0, 0, 40, 40); const d = x.getImageData(0, 0, 40, 40).data; for (let i = 0; i < d.length; i += 4) px.push([d[i], d[i + 1], d[i + 2]]); } catch (e) {} }
+  if (!px.length) return;
+  px.sort((a, b) => (b[0] + b[1] + b[2]) - (a[0] + a[1] + a[2]));
+  const top = px.slice(Math.floor(px.length * 0.1), Math.floor(px.length * 0.4)).filter(p => Math.max(...p) - Math.min(...p) > 12);
+  if (!top.length) return;
+  S.cfg.tint = '#' + [0, 1, 2].map(k => Math.round(top.reduce((s, p) => s + p[k], 0) / top.length).toString(16).padStart(2, '0')).join(''); save();
+}
+async function toJpeg(file, max = 1024) {
+  const url = URL.createObjectURL(file); try {
+    const im = await loadImg(url), k = Math.min(1, max / Math.max(im.naturalWidth, im.naturalHeight));
+    const c = document.createElement('canvas'); c.width = Math.round(im.naturalWidth * k); c.height = Math.round(im.naturalHeight * k);
+    c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); return await new Promise(r => c.toBlob(r, 'image/jpeg', 0.85));
+  } finally { URL.revokeObjectURL(url); }
+}
+const isHex = v => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v);
+const EN = { hair: ['short', 'wavy', 'long', 'curly', 'bun', 'buzz', 'bald'], facial: ['none', 'stubble', 'moustache', 'beard'], outfit: ['jacket', 'tee', 'dress'] };
+$('#readPhotos').onclick = async () => {
+  const btn = $('#readPhotos'), st = $('#photoStatus'); btn.disabled = true; st.className = 'status'; st.textContent = 'Claude is looking at your photos...';
+  try {
+    const imgs = []; for (const p of photos.slice(0, Math.min(imageMax, 6))) imgs.push(await toJpeg(p.file));
+    const r = await sample.json(`These photos show someone's life: probably the person, where they live, maybe their pets. I will draw them as a simple flat cartoon.
+Reply with only JSON: {"world":"beach|park|city|mountains","me":{"hair":"short|wavy|long|curly|bun|buzz|bald","hairCol":"#rrggbb","grey":true|false,"skin":"#rrggbb","facial":"none|stubble|moustache|beard","facialCol":"#rrggbb","outfit":"jacket|tee|dress","top":"#rrggbb","inner":"#rrggbb","pants":"#rrggbb"},"pets":[{"type":"dog|cat","coat":"#rrggbb","muzzle":"dark|same","ears":"floppy|up"}]}
+"wavy" is long wavy hair, "long" is long straight hair. Use an empty pets list if no pet is visible. Pleasant flat colours close to what you see.`, { images: imgs });
+    if (r && typeof r === 'object') {
+      if (LSN.WORLDS.includes(r.world)) S.cfg.world = r.world;
+      const m = r.me || {}, me = S.cfg.me;
+      ['hair', 'facial', 'outfit'].forEach(k => { if (EN[k].includes(m[k])) me[k] = m[k]; });
+      ['hairCol', 'skin', 'facialCol', 'top', 'inner', 'pants'].forEach(k => { if (isHex(m[k])) me[k] = m[k]; });
+      if (typeof m.grey === 'boolean') me.grey = m.grey;
+      if (Array.isArray(r.pets)) S.cfg.pets = r.pets.filter(p => p && (p.type === 'dog' || p.type === 'cat')).slice(0, 3).map((p, i) => ({ type: p.type, name: (S.cfg.pets[i] && S.cfg.pets[i].name) || '', coat: isHex(p.coat) ? p.coat : '#A14F26', muzzle: p.muzzle === 'same' ? 'same' : 'dark', ears: p.ears === 'up' ? 'up' : 'floppy' }));
+      save(); renderWorlds(); st.textContent = 'Done. Fine-tune everything on the next step.';
+    }
+  } catch (e) { st.className = 'status err'; st.textContent = errCopy(e); }
+  btn.disabled = false;
+};
+function renderWorlds() {
+  const box = $('#worlds'); box.innerHTML = '';
+  LSN.WORLDS.forEach(w => {
+    const c = el('canvas', { width: 180, height: 240 });
+    const ws = (S.cfg.worlds && S.cfg.worlds.length) ? S.cfg.worlds : [S.cfg.world];
+    box.append(el('button', { class: 'world', 'aria-pressed': ws.includes(w) ? 'true' : 'false', onclick: () => {
+      let next = ws.includes(w) ? ws.filter(x => x !== w) : [...ws, w];
+      if (!next.length) next = [w];
+      S.cfg.worlds = LSN.WORLDS.filter(x => next.includes(x)); S.cfg.world = next.includes(S.cfg.world) ? S.cfg.world : S.cfg.worlds[0];
+      save(); renderWorlds(); preview('glimpse', { text: ' ', scene: 'walk', world: w }); $('#stageNote').textContent = S.cfg.worlds.length > 1 ? 'Your film moves between ' + S.cfg.worlds.map(x => WORLD_LABELS[x].toLowerCase()).join(', ') : 'Your film is set here';
+    } }, c, el('span', {}, WORLD_LABELS[w])));
+    const x = c.getContext('2d'); x.setTransform(180 / 1080, 0, 0, 180 / 1080, 0, -300 * 180 / 1080);
+    LSN.drawScene(x, { ...S.cfg, world: w }, 'sunrise', 1.2);
+  });
+}
+
+// ------------------------------------------------ colour picker from photos
+let pickCb = null, pickIdx = 0;
+const pc = $('#pickCanvas'), pctx = pc.getContext('2d', { willReadFrequently: true });
+async function openPicker(cb, label) {
+  pickCb = cb; $('#pickTitle').textContent = 'Tap the ' + label.toLowerCase(); $('#picker').hidden = false;
+  const th = $('#pickThumbs'); th.innerHTML = '';
+  photos.forEach((p, i) => th.append(el('img', { src: p.url, alt: 'Photo ' + (i + 1), class: i === pickIdx ? 'on' : '', onclick: () => { pickIdx = i; openPicker(cb, label); } })));
+  pickIdx = Math.min(pickIdx, photos.length - 1);
+  const im = await loadImg(photos[pickIdx].url), k = Math.min(800 / im.naturalWidth, 800 / im.naturalHeight);
+  pc.width = Math.round(im.naturalWidth * k); pc.height = Math.round(im.naturalHeight * k);
+  pctx.drawImage(im, 0, 0, pc.width, pc.height);
+  $('#pickStatus').textContent = 'Tap on hair, skin, clothes or fur in your photo.';
+}
+pc.onpointerdown = e => {
+  const r = pc.getBoundingClientRect(), x = Math.round((e.clientX - r.left) * pc.width / r.width), y = Math.round((e.clientY - r.top) * pc.height / r.height);
+  const d = pctx.getImageData(Math.max(0, x - 3), Math.max(0, y - 3), 7, 7).data; let rr = 0, gg = 0, bb = 0, n = 0;
+  for (let i = 0; i < d.length; i += 4) { rr += d[i]; gg += d[i + 1]; bb += d[i + 2]; n++; }
+  const hex = '#' + [rr, gg, bb].map(v => Math.round(v / n).toString(16).padStart(2, '0')).join('');
+  if (pickCb) pickCb(hex); closePicker();
+};
+function closePicker() { $('#picker').hidden = true; pickCb = null; }
+$('#pickClose').onclick = closePicker;
+$('#picker').onclick = e => { if (e.target.id === 'picker') closePicker(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#picker').hidden) closePicker(); });
+
+// ------------------------------------------------ step 3: people
+const LOOK_FIELDS = [
+  ['hair', 'Hair', 'seg', [['short', 'Short'], ['wavy', 'Long wavy'], ['long', 'Long straight'], ['curly', 'Curly'], ['bun', 'Bun'], ['buzz', 'Buzz cut'], ['bald', 'Bald']]],
+  ['hairCol', 'Hair colour', 'color', HAIR],
+  ['grey', 'Grey streaks', 'seg', [[false, 'No'], [true, 'Yes']], L => L.hair === 'wavy'],
+  ['skin', 'Skin tone', 'color', SKIN],
+  ['facial', 'Facial hair', 'seg', [['none', 'None'], ['stubble', 'Stubble'], ['moustache', 'Moustache'], ['beard', 'Beard']]],
+  ['facialCol', 'Facial hair colour', 'color', HAIR, L => L.facial !== 'none'],
+  ['outfit', 'Outfit', 'seg', [['jacket', 'Jacket'], ['tee', 'T-shirt'], ['dress', 'Dress']]],
+  ['top', 'Top colour', 'color', CLOTH],
+  ['inner', 'Shirt under jacket', 'color', CLOTH, L => L.outfit === 'jacket'],
+  ['pants', 'Pants colour', 'color', CLOTH, L => L.outfit !== 'dress'],
+];
+function applySex(o, v, kid) {
+  o.body = v === 'm' ? 'm' : 'f';
+  if (v === 'm') { o.hair = 'short'; o.outfit = 'tee'; if (!kid) { o.facial = 'stubble'; o.facialCol = o.hairCol; } }
+  else if (v === 'f') { o.hair = 'long'; o.outfit = 'dress'; o.facial = 'none'; }
+  else { o.facial = 'none'; o.outfit = 'tee'; if (o.hair === 'bald') o.hair = 'short'; }
+}
+const PARTNER_SEX = ['sex', 'Sex', 'seg', [['m', 'Man'], ['f', 'Woman'], ['x', 'Don\u2019t specify']], null, (o, v) => applySex(o, v, false)];
+const ME_FIELDS = [['name', 'Your first name', 'text', 'e.g. Ben'], PARTNER_SEX, ...LOOK_FIELDS];
+const PARTNER_NAME = ['name', 'Their name', 'text', 'e.g. Sam', P => P.status !== 'hoping'];
+const KID_FIELDS = [
+  ['name', 'Name', 'text', 'e.g. Mia', K => K.status !== 'hoping'],
+  ['sex', 'Sex', 'seg', [['m', 'Boy'], ['f', 'Girl'], ['x', 'Don\u2019t specify']], null, (o, v) => applySex(o, v, true)],
+  ['age', 'Age', 'seg', [['baby', 'Baby'], ['kid', 'Child'], ['teen', 'Teen']]],
+  ['status', 'In my life', 'seg', [['have', 'Now'], ['hoping', 'Hoping for']]],
+  ['hair', 'Hair', 'seg', [['short', 'Short'], ['long', 'Long'], ['curly', 'Curly'], ['bun', 'Bun'], ['buzz', 'Buzz cut']], K => K.age !== 'baby'],
+  ['hairCol', 'Hair colour', 'color', HAIR],
+  ['skin', 'Skin tone', 'color', SKIN],
+  ['outfit', 'Outfit', 'seg', [['tee', 'T-shirt'], ['dress', 'Dress']], K => K.age !== 'baby'],
+  ['top', 'Top colour', 'color', CLOTH],
+  ['pants', 'Pants colour', 'color', CLOTH, K => K.age !== 'baby' && K.outfit !== 'dress'],
+];
+const PET_FIELDS = [
+  ['type', 'Type', 'seg', [['dog', 'Dog'], ['cat', 'Cat']]],
+  ['name', 'Name', 'text', 'e.g. Max'],
+  ['coat', 'Coat colour', 'color', COAT],
+  ['muzzle', 'Face', 'seg', [['dark', 'Darker face'], ['same', 'Same colour']]],
+  ['ears', 'Ears', 'seg', [['floppy', 'Floppy'], ['up', 'Pointy']], P => P.type === 'dog'],
+];
+function fieldUI(obj, fields, box, prefix, onChange) {
+  box.innerHTML = '';
+  fields.forEach(([k, label, type, opts, show, onPick]) => {
+    if (show && !show(obj)) return;
+    let ctl;
+    if (type === 'seg') ctl = el('div', { class: 'seg', role: 'group', 'aria-label': label }, opts.map(([v, l]) => el('button', { 'aria-pressed': obj[k] === v ? 'true' : 'false', onclick: () => { obj[k] = v; if (onPick) onPick(obj, v); onChange(); } }, l)));
+    else if (type === 'color') {
+      const pick = el('input', { type: 'color', value: isHex(obj[k]) ? obj[k] : '#888888', 'aria-label': label + ', any colour' });
+      pick.oninput = () => { obj[k] = pick.value; save(); };
+      pick.onchange = () => { obj[k] = pick.value; onChange(); };
+      ctl = el('div', { class: 'sw' }, opts.map(c => el('button', { style: `background:${c}`, 'aria-label': c, 'aria-pressed': String(obj[k]).toLowerCase() === c.toLowerCase() ? 'true' : 'false', onclick: () => { obj[k] = c; onChange(); } })), pick,
+        photos.length ? el('button', { class: 'frompic', onclick: () => openPicker(hex => { obj[k] = hex; onChange(); }, label) }, 'Pick from photo') : null);
+    } else {
+      ctl = el('input', { type: 'text', id: prefix + k, value: obj[k] || '', maxlength: 24, placeholder: opts || '', autocomplete: 'off' });
+      ctl.oninput = () => { obj[k] = ctl.value; namesChanged(); save(); };
+      ctl.onchange = () => peopleChanged();
+    }
+    box.append(el('div', { class: 'field' }, el('span', {}, label), ctl));
+  });
+}
+function peopleChanged() { liveLines(); save(); renderPeople(); setPreviewForStep(); }
+// "Ben's Motion Mornings": the film is titled with the person's name, the lines stay in their own voice
+const possessive = n => n + (/s$/i.test(n) ? '’' : '’s');
+function filmTitle() { const n = (S.cfg.me.name || '').trim(); return n ? possessive(n) + ' Motion Mornings' : 'Your film, starring you'; }
+function namesChanged() { const h = $('#buildTitle'); if (h) h.textContent = filmTitle(); liveLines(); }
+function renderPeople() {
+  if (!S.cfg.me.sex) S.cfg.me.sex = S.cfg.me.body === 'f' ? 'f' : 'm';
+  if (!S.cfg.partner.sex) S.cfg.partner.sex = S.cfg.partner.body === 'm' ? 'm' : 'f';
+  fieldUI(S.cfg.me, ME_FIELDS, $('#meFields'), 'me-', peopleChanged);
+  $('#partnerOn').checked = !!S.cfg.partner.on;
+  const pf = $('#partnerFields'); pf.innerHTML = '';
+  if (S.cfg.partner.on) {
+    const st = el('div', {}); fieldUI(S.cfg.partner, [['status', 'Status', 'seg', [['have', 'Together now'], ['hoping', 'Hoping to meet']]], PARTNER_NAME, PARTNER_SEX], st, 'pts-', peopleChanged);
+    const lk = el('div', { class: 'panel', style: 'gap:12px' }); fieldUI(S.cfg.partner, LOOK_FIELDS, lk, 'pt-', peopleChanged);
+    pf.append(st, lk);
+  } else pf.append(el('p', { class: 'lede' }, 'Off. Love scenes show you on your own.'));
+  const kb = $('#kidsBox'); kb.innerHTML = '';
+  if (!S.cfg.kids.length) kb.append(el('p', { class: 'lede' }, 'None added. Add kids you have now or hope to have.'));
+  S.cfg.kids.forEach((k, i) => {
+    const body = el('div', { class: 'panel', style: 'gap:10px' }); fieldUI(k, KID_FIELDS, body, `k${i}-`, peopleChanged);
+    kb.append(el('div', { class: 'pcard' }, el('div', { class: 'subhead' }, el('h4', {}, (k.name || '').trim() || `Child ${i + 1}`), el('button', { class: 'ib', 'aria-label': 'Remove child', onclick: () => { S.cfg.kids.splice(i, 1); peopleChanged(); } }, '×')), body));
+  });
+  $('#addKid').disabled = S.cfg.kids.length >= 4;
+  const pb = $('#petsBox'); pb.innerHTML = '';
+  if (!S.cfg.pets.length) pb.append(el('p', { class: 'lede' }, 'No pets.'));
+  S.cfg.pets.forEach((p, i) => {
+    const body = el('div', { class: 'panel', style: 'gap:10px' }); fieldUI(p, PET_FIELDS, body, `p${i}-`, peopleChanged);
+    pb.append(el('div', { class: 'pcard' }, el('div', { class: 'subhead' }, el('h4', {}, p.name || `Pet ${i + 1}`), el('button', { class: 'ib', 'aria-label': 'Remove pet', onclick: () => { S.cfg.pets.splice(i, 1); peopleChanged(); } }, '×')), body));
+  });
+  $('#addPet').disabled = S.cfg.pets.length >= 3;
+}
+$('#partnerOn').onchange = e => { S.cfg.partner.on = e.target.checked; peopleChanged(); };
+$('#addKid').onclick = () => { S.cfg.kids.push({ ...LSN.DEFAULT_KID, sex: 'x', skin: S.cfg.me.skin, hairCol: S.cfg.me.hairCol, top: rand(['#F2C46F', '#ED856E', '#5A8C73', '#4F7FB0']) }); peopleChanged(); };
+$('#addPet').onclick = () => { S.cfg.pets.push({ type: 'dog', name: '', coat: rand(COAT), muzzle: 'dark', ears: 'floppy' }); peopleChanged(); };
+
+// ------------------------------------------------ step 4: lines
+const sceneSelect = (val, onchange) => { const s = el('select', { 'aria-label': 'Scene' }, LSN.PICKABLE.map(k => el('option', { value: k, selected: k === val }, LSN.SCENES[k].label))); s.onchange = () => onchange(s.value); return s; };
+function lineRow(kind, item, onRemove) {
+  const inp = el('textarea', { rows: 2, maxlength: 110, 'aria-label': kind === 'glimpse' ? 'Glimpse line' : 'Action line' }); inp.value = item.text;
+  inp.oninput = () => { item.text = inp.value; markEdited(); preview(kind, item); };
+  inp.onfocus = () => preview(kind, item);
+  const ctl = el('div', { class: 'ctl' }, sceneSelect(item.scene, v => { item.scene = v; markEdited(); preview(kind, item); }), el('button', { class: 'ib', title: 'Preview this line', 'aria-label': 'Preview this line', onclick: () => preview(kind, item) }, '▶'));
+  if (onRemove) ctl.append(el('button', { class: 'ib', title: 'Remove', 'aria-label': 'Remove line', onclick: onRemove }, '×'));
+  return el('div', { class: 'line ' + (kind === 'glimpse' ? 'glimpse' : '') }, el('span', { class: 'kind' }, kind === 'glimpse' ? 'Glimpse of where it leads' : 'Action'), inp, ctl);
+}
+function markEdited() { S.isExample = false; S.linesTouched = true; $('#exampleBanner').hidden = true; save(); updateMeta(); }
+function renderLines() {
+  $('#exampleBanner').hidden = !S.isExample;
+  $('#opening').value = S.cfg.opening; $('#closing').value = S.cfg.closing;
+  const box = $('#sections'); box.innerHTML = '';
+  S.cfg.sections.forEach((sec, si) => {
+    const title = el('input', { type: 'text', class: 'sectitle', value: sec.title || '', 'aria-label': 'Theme name', maxlength: 40 });
+    title.oninput = () => { sec.title = title.value; markEdited(); };
+    const tools = el('div', { class: 'row' });
+    if (sec.theme && TH(sec.theme)) tools.append(el('button', { class: 'btn ghost small', title: 'New wording for this theme', onclick: () => { S.cfg.sections[si] = buildSection(TH(sec.theme), S.fills[sec.theme] || {}, S.cfg); markEdited(); renderLines(); } }, 'Shuffle wording'));
+    const card = el('div', { class: 'sec' }, el('div', { class: 'titlerow' }, title, el('button', { class: 'ib', 'aria-label': 'Remove theme', title: 'Remove theme', onclick: () => { S.cfg.sections.splice(si, 1); markEdited(); renderLines(); } }, '×')));
+    sec.actions.forEach((a, ai) => card.append(lineRow('action', a, () => { sec.actions.splice(ai, 1); markEdited(); renderLines(); })));
+    if (sec.actions.length < 4) tools.prepend(el('button', { class: 'btn ghost small', onclick: () => { sec.actions.push({ text: '', scene: 'checklist' }); markEdited(); renderLines(); } }, 'Add an action'));
+    card.append(tools, lineRow('glimpse', sec.glimpse));
+    box.append(card);
+  });
+  updateMeta();
+}
+$('#opening').oninput = e => { S.cfg.opening = e.target.value; markEdited(); preview('glimpse', { text: S.cfg.opening, scene: 'title' }); };
+$('#closing').oninput = e => { S.cfg.closing = e.target.value; markEdited(); preview('glimpse', { text: S.cfg.closing, scene: 'end' }); };
+$('#addSection').onclick = () => { S.cfg.sections.push({ title: 'My own theme', actions: [{ text: '', scene: 'checklist' }], glimpse: { text: '', scene: 'sunrise' } }); markEdited(); renderLines(); };
+const fmt = s => { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+function updateMeta() {
+  const n = S.cfg.sections.reduce((s, x) => s + x.actions.filter(a => a.text.trim()).length + (x.glimpse.text.trim() ? 1 : 0), 0);
+  $('#lineMeta').textContent = `${n} lines · about ${fmt(LSN.timeline(S.cfg).total)} without a song`;
+}
+function chosenThemes() {
+  const ids = [...S.themes], added = [];
+  const kidsNow = S.cfg.kids.some(k => k.status !== 'hoping'), kidsHope = S.cfg.kids.some(k => k.status === 'hoping');
+  const auto = (cond, id) => { if (cond && !ids.includes(id)) { ids.push(id); added.push(TH(id).title); } };
+  auto(kidsNow, 'family'); auto(kidsHope && !kidsNow, 'grow');
+  auto(S.cfg.partner.on && S.cfg.partner.status === 'have', 'partner'); auto(S.cfg.partner.on && S.cfg.partner.status === 'hoping', 'love');
+  return { ids: THEMES.map(t => t.id).filter(id => ids.includes(id)), added };
+}
+$('#build').onclick = () => {
+  let { ids, added } = chosenThemes(); const st = $('#writeStatus'); st.className = 'status';
+  if (!ids.length) { ids = EXAMPLE; st.textContent = 'You haven’t ticked anything on the first step, so these are general lines. Tick what matters to you for lines that fit.'; }
+  else st.textContent = `Built ${ids.length} themes.${added.length ? ' Added ' + added.join(' and ') + ' from your people.' : ''} Shuffle any theme for new wording, or edit lines directly.`;
+  S.cfg.sections = ids.map(id => buildSection(TH(id), S.fills[id] || {}, S.cfg));
+  S.isExample = false; save(); renderLines();
+};
+$('#writeAI').onclick = async () => {
+  const st = $('#writeStatus'), btn = $('#writeAI');
+  const { ids } = chosenThemes();
+  const picked = ids.map(id => { const t = TH(id), f = S.fills[id] || {}; const det = t.qs.map(([k, l]) => f[k] ? `${l} ${f[k]}` : '').filter(Boolean).join('; '); return `- ${t.title}${det ? ' (' + det + ')' : ''}`; }).join('\n');
+  if (!picked && !S.notes.trim()) { st.className = 'status err'; st.textContent = 'Tick a few things on the first step first.'; return; }
+  btn.disabled = true; st.className = 'status'; st.textContent = 'Claude is writing your lines. This can take up to a minute...';
+  const pets = LSN.petName(S.cfg), kidsNow = S.cfg.kids.filter(k => k.status !== 'hoping').length, kidsHope = S.cfg.kids.some(k => k.status === 'hoping');
+  const people = [S.cfg.partner.on ? (S.cfg.partner.status === 'hoping' ? 'hoping to meet a partner' : 'has a partner') : '', kidsNow ? `has ${kidsNow} kid${kidsNow > 1 ? 's' : ''}` : '', kidsHope ? 'hoping to have kids' : '', pets ? 'pets: ' + pets : ''].filter(Boolean).join(', ');
+  const prompt = `Write the lines for a short animated film someone watches every morning. It shows them IN ACTION doing the everyday steps toward their goals, not already having the result. Each theme ends with a brief "glimpse" of where it leads, so it feels like a path, not a finish line.
+
+What matters to them:
+${picked || '(nothing ticked)'}
+${S.notes.trim() ? 'Other notes: ' + S.notes.trim() : ''}
+Their life: ${people || 'not specified'}.
+
+Write one theme per item above (4 to 8 themes). Each theme: 2 or 3 action lines, then 1 glimpse line.
+Action lines: first person, present tense, concrete repeatable behaviours (for example "I train even on days I don't feel like it"), at most 75 characters, warm and natural, no hype, no em dashes, nothing self-judging. Every line describes something they DO, never something they avoid, cut out or stop doing: "I order a soda water and enjoy the night", not "I don't drink". Use their own words and names.
+Glimpse lines: a short sensory snapshot, at most 45 characters, like "Fit. Strong. A big smile."
+Also an opening line (at most 30 characters) and a closing line (at most 40 characters).
+Choose the best scene key for every line from:
+${LSN.PICKABLE.map(k => `${k}: ${LSN.SCENES[k].label}`).join('\n')}
+
+Reply with only JSON: {"opening":"...","closing":"...","sections":[{"title":"...","actions":[{"text":"...","scene":"key"}],"glimpse":{"text":"...","scene":"key"}}]}`;
+  try {
+    const r = await sample.json(prompt);
+    const ok = k => LSN.PICKABLE.includes(k) ? k : 'sunrise', str = (v, n) => String(v || '').replace(/\s*[—–]\s*/g, ', ').trim().slice(0, n);
+    if (!r || !Array.isArray(r.sections) || !r.sections.length) throw { code: 'invalid_json' };
+    S.cfg.sections = r.sections.slice(0, 8).map(s => ({ title: str(s.title, 40) || 'Theme', actions: (Array.isArray(s.actions) ? s.actions : []).slice(0, 4).map(a => ({ text: str(a.text, 110), scene: ok(a.scene) })).filter(a => a.text), glimpse: { text: str(s.glimpse && s.glimpse.text, 80), scene: ok(s.glimpse && s.glimpse.scene) } })).filter(s => s.actions.length);
+    if (r.opening) S.cfg.opening = str(r.opening, 60); if (r.closing) S.cfg.closing = str(r.closing, 70);
+    S.isExample = false; save(); renderLines(); st.textContent = 'Here are your lines. Change anything that doesn’t feel true.';
+  } catch (e) { st.className = 'status err'; st.textContent = errCopy(e); }
+  btn.disabled = false;
+};
+
+// ------------------------------------------------ stage
+const stage = $('#stage'), sx = stage.getContext('2d'); sx.setTransform(720 / 1080, 0, 0, 720 / 1080, 0, 0);
+let mode = { type: 'scene', scene: 'title' }, t0 = performance.now(), playing = false, movieT = 0, lastFrame = performance.now(), recording = false;
+const audio = new Audio(); audio.preload = 'auto';
+function preview(kind, item) { if (recording) return; stopMovie(); mode = { type: 'line', kind, item }; t0 = performance.now(); $('#stageNote').textContent = 'Previewing this line'; }
+function setPreviewForStep() {
+  if (recording || playing) return;
+  if (S.step === 0) { mode = { type: 'scene', scene: 'title', text: S.cfg.opening }; $('#stageNote').textContent = 'Your film opens like this'; }
+  else if (S.step === 1) { mode = { type: 'scene', scene: 'walk' }; $('#stageNote').textContent = 'Your world'; }
+  else if (S.step === 2) { mode = { type: 'scene', scene: 'together' }; $('#stageNote').textContent = 'Your people'; }
+  else if (S.step === 3) { mode = { type: 'line', kind: 'glimpse', item: { text: S.cfg.opening, scene: 'title' } }; $('#stageNote').textContent = 'Tap ▶ on a line to preview it'; }
+  else { mode = { type: 'movie' }; $('#stageNote').textContent = song ? 'Press play to watch with your song' : 'Press play to watch'; }
+  t0 = performance.now();
+}
+S.song = Object.assign({ offset: 0, fit: 'song', snap: true }, S.song || {});
+let tlKey = '', tlCache = null;
+// The example film in the hero: a fixed couple-and-dog character, a range of life scenes.
+const DEMO_SECTIONS = [
+  // each pair of actions is followed by a short glimpse of where it leads
+  { title: 'Body', actions: [
+    { text: 'I train at the gym and feel strong', scene: 'gym' },
+    { text: 'I run the bush track and feel alive', scene: 'jog', world: 'park' }
+  ], glimpse: { text: 'Fit, strong, full of energy', scene: 'strong', world: 'beach', d: 4 } },
+  { title: 'Home', actions: [
+    { text: 'We cook dinner together with a record on', scene: 'cook_together' },
+    { text: 'I keep our home fresh and easy to live in', scene: 'clean' }
+  ], glimpse: { text: 'A home we love coming back to', scene: 'familydinner', d: 4 } },
+  { title: 'Work', actions: [
+    { text: 'I do focused work that matters to me', scene: 'cafe', world: 'city' }
+  ], glimpse: { text: 'My work, finished and out in the world', scene: 'ship', d: 4 } },
+  { title: 'Mind', actions: [
+    { text: 'I take five quiet minutes to breathe', scene: 'calm', world: 'mountains' },
+    { text: 'I dance all night with a soda water in hand', scene: 'party' }
+  ], glimpse: { text: 'Clear head, bright mornings', scene: 'wake', d: 4 } },
+  { title: 'Love', actions: [
+    { text: 'I make time to just be close', scene: 'cuddle' }
+  ], glimpse: { text: 'Closer every year', scene: 'couple', world: 'city', d: 4 } }
+];
+const DEMO_ME = { body: 'm', hair: 'short', hairCol: '#2E2622', grey: false, skin: '#E3B08E', facial: 'stubble', facialCol: '#2E2622', outfit: 'tee', top: '#4F7FB0', inner: '#EFE8DC', pants: '#30406E' };
+const DEMO_CFG = { world: 'beach', tint: null, me: DEMO_ME, pets: [{ type: 'dog', name: '', coat: '#A14F26', muzzle: 'dark', ears: 'floppy' }], kids: [], partner: { ...LSN.DEFAULT_PARTNER, on: true, status: 'have' }, opening: 'My life starts now', closing: "My life starts now. Let's go.", sections: DEMO_SECTIONS };
+const heroTL = LSN.timeline(DEMO_CFG);
+const filmCfg = () => S.cfg;
+function movieTL() {
+  const o = S.song, key = JSON.stringify([S.cfg.sections, S.cfg.opening, S.cfg.closing, o, song && song.duration, song && !!song.beat]);
+  if (key === tlKey && tlCache) return tlCache;
+  const fc = filmCfg();
+  const base = LSN.timeline(fc);
+  let tl = base;
+  if (song && song.duration) {
+    const remain = Math.max(10, song.duration - o.offset);
+    tl = LSN.timeline(fc, o.fit === 'song' ? remain : Math.min(base.total, remain));
+    if (o.snap && song.beat) tl = snapTL(tl, song.beat, o.offset);
+  }
+  tlKey = key; tlCache = tl; return tl;
+}
+function snapTL(tl, beat, offset) {
+  let unit = beat.period * 4; while (unit > 3.2) unit /= 2; while (unit < 1.6) unit *= 2;
+  const b0 = beat.barPhase - offset, it = tl.items.map(x => ({ ...x })), n = it.length;
+  for (let i = 1; i < n; i++) {
+    const s = it[i].start, c = b0 + Math.round((s - b0) / unit) * unit;
+    if (Math.abs(c - s) <= unit / 2 + 0.01 && c - it[i - 1].start >= 2.5 && tl.total - c >= (i === n - 1 ? 5 : 2.5)) it[i].start = c;
+  }
+  for (let i = 0; i < n; i++) it[i].d = (i < n - 1 ? it[i + 1].start : tl.total) - it[i].start;
+  return it.every(x => x.d >= 2.4) ? { items: it, total: tl.total, snapped: true } : tl;
+}
+const clamp01 = x => Math.max(0, Math.min(1, x));
+function songGain(T, total) {
+  const fin = S.song.offset > 0 ? clamp01(T / 0.8) : 1, fout = clamp01((total - T) / (S.song.fit === 'lines' ? 4 : 1.5));
+  return Math.min(fin, fout);
+}
+function setGain(v) { if (gainNode) gainNode.gain.value = v; }
+async function analyseBeat(file) {
+  const AC = window.OfflineAudioContext || window.webkitOfflineAudioContext; if (!AC) return null;
+  const ctx = new AC(1, 44100, 44100);
+  const data = await file.arrayBuffer();
+  const buf = await new Promise((res, rej) => { const p = ctx.decodeAudioData(data, res, rej); if (p && p.then) p.then(res, rej); });
+  const sr = buf.sampleRate, hop = 1024, len = buf.length, chs = [...Array(buf.numberOfChannels).keys()].map(c => buf.getChannelData(c));
+  const frames = Math.floor(len / hop), env = new Float32Array(frames);
+  for (let f = 0; f < frames; f++) { let e = 0; const a = f * hop; for (let i = a; i < a + hop; i += 2) { let v = 0; for (const ch of chs) v += ch[i]; e += v * v; } env[f] = Math.log(1e-6 + e); }
+  const on = new Float32Array(frames); for (let f = 1; f < frames; f++) on[f] = Math.max(0, env[f] - env[f - 1]);
+  const fps = sr / hop; let best = 0, bestLag = 0;
+  const minLag = Math.floor(fps * 60 / 180), maxLag = Math.ceil(fps * 60 / 65), acs = [];
+  for (let lag = minLag; lag <= maxLag; lag++) {
+    let a = 0; for (let f = 0; f + lag < frames; f++) a += on[f] * on[f + lag];
+    const bpm = 60 * fps / lag, w = Math.exp(-0.5 * Math.pow(Math.log2(bpm / 115), 2) / 0.36);
+    acs[lag] = a; if (a * w > best) { best = a * w; bestLag = lag; }
+  }
+  if (!bestLag) return null;
+  const y0 = acs[bestLag - 1] || 0, y1 = acs[bestLag], y2 = acs[bestLag + 1] || 0, den = y0 - 2 * y1 + y2;
+  const lag = bestLag + (den ? 0.5 * (y0 - y2) / den : 0), period = lag / fps;
+  let bp = 0, bs = -1;
+  for (let p = 0; p < bestLag; p++) { let sc = 0; for (let t = p; t < frames; t += lag) sc += on[Math.round(t)] || 0; if (sc > bs) { bs = sc; bp = p; } }
+  let bb = 0, bbs = -1;
+  for (let b = 0; b < 4; b++) { let sc = 0; for (let t = bp + b * lag; t < frames; t += 4 * lag) sc += (on[Math.round(t)] || 0) + 0.5 * (on[Math.round(t) + 1] || 0); if (sc > bbs) { bbs = sc; bb = b; } }
+  return { bpm: 60 / period, period, barPhase: (bp + bb * lag) / fps };
+}
+function frame(now) {
+  if (!recording) {
+    if (mode.type === 'movie' || playing) {
+      const tl = movieTL();
+      if (playing) { movieT = song ? audio.currentTime - S.song.offset : movieT + (now - lastFrame) / 1000; if (song) setGain(songGain(movieT, tl.total)); if (movieT >= tl.total - 0.05) { stopMovie(); movieT = 0; } }
+      LSN.render(fullOpen ? fx : sx, filmCfg(), tl, !playing && movieT === 0 ? 2 : movieT);
+      if (fullOpen) { $('#fullProg').style.width = (100 * movieT / tl.total).toFixed(2) + '%'; $('#fullTime').textContent = fmt(movieT) + ' / ' + fmt(tl.total); $('#fullPlay').textContent = playing ? 'Pause' : 'Play'; }
+      $('#scrub').value = Math.round(1000 * movieT / tl.total); $('#timeLbl').textContent = fmt(movieT) + ' / ' + fmt(tl.total);
+    } else if (mode.type === 'line') {
+      const it = mode.item, t = ((now - t0) / 1000) % 5.5;
+      LSN.render(sx, S.cfg, { items: [{ kind: mode.kind === 'glimpse' ? 'g' : 'a', text: it.text || ' ', scene: it.scene, world: it.world, d: 5.5, start: 0, size: it.scene === 'title' ? 100 : 78 }], total: 5.5 }, t);
+    } else {
+      const t = ((now - t0) / 1000) % 6;
+      if (mode.text) LSN.render(sx, S.cfg, { items: [{ kind: 'g', text: mode.text, scene: mode.scene, d: 6, start: 0, size: 100 }], total: 6 }, t);
+      else LSN.drawScene(sx, S.cfg, mode.scene, t, t / 6);
+    }
+  }
+  if (!recording) heroFrame(Math.min(0.1, (now - lastFrame) / 1000));
+  lastFrame = now; requestAnimationFrame(frame);
+}
+
+// ------------------------------------------------ player + song
+let actx = null, srcNode = null, gainNode = null, spkNode = null, muted = false;
+function ensureAudioGraph() {
+  if (!song) return null;
+  // the speaker gain sits after the recording tap, so muting the preview never mutes a saved video
+  if (!actx) { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null; actx = new AC(); srcNode = actx.createMediaElementSource(audio); gainNode = actx.createGain(); spkNode = actx.createGain(); spkNode.gain.value = muted ? 0 : 1; srcNode.connect(gainNode); gainNode.connect(spkNode); spkNode.connect(actx.destination); }
+  if (actx.state === 'suspended') actx.resume(); return actx;
+}
+function setMuted(m) {
+  muted = m; if (spkNode) spkNode.gain.value = m ? 0 : 1; else audio.muted = m;
+  $$('[data-mute]').forEach(b => { b.textContent = m ? 'Unmute' : 'Mute'; b.setAttribute('aria-pressed', m ? 'true' : 'false'); });
+}
+// iOS only lets a sound start from a tap, so the first tap plays a moment of silence to unlock the player
+let audioUnlocked = false;
+function unlockAudio() {
+  if (audioUnlocked || song) return;
+  try { audio.src = URL.createObjectURL(MUSIC.wav([new Float32Array(2205)], 22050)); const u = audio.src; const p = audio.play(); if (p && p.then) p.then(() => { if (audio.src === u) audio.pause(); audioUnlocked = true; }).catch(() => {}); } catch (e) {}
+}
+async function playMovie() {
+  if (heroSound) { heroSound = false; heroAudio.pause(); soundLabel(); }
+  mode = { type: 'movie' }; if (movieT >= movieTL().total - 0.1) movieT = 0;
+  playing = true; $('#playBtn').textContent = 'Pause'; if (S.step === 4) renderTracks();
+  if (song) { ensureAudioGraph(); audio.currentTime = S.song.offset + movieT; try { await audio.play(); } catch (e) { stopMovie(); } }
+}
+function stopMovie() { if (!playing) return; playing = false; audio.pause(); setGain(1); $('#playBtn').textContent = 'Play my film'; if (S.step === 4) renderTracks(); }
+$('#playBtn').onclick = () => { if (!recording) playing ? stopMovie() : playMovie(); };
+$$('[data-mute]').forEach(b => b.onclick = () => setMuted(!muted));
+// ------------------------------------------------ hero example film
+const heroCv = $('#heroStage'), hx = heroCv.getContext('2d'); hx.setTransform(720 / 1080, 0, 0, 720 / 1080, 0, 0);
+let heroT = 0, heroPlaying = true, heroVisible = true;
+try { if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { heroPlaying = false; heroT = 2; } } catch (e) {}
+const heroBtn = $('#heroPlay');
+const heroLabel = () => { heroBtn.textContent = heroPlaying ? 'Pause' : 'Play'; heroBtn.setAttribute('aria-label', heroPlaying ? 'Pause example film' : 'Play example film'); };
+heroBtn.onclick = () => { heroPlaying = !heroPlaying; heroLabel(); if (heroSound) { if (heroPlaying) heroAudio.play().catch(() => {}); else heroAudio.pause(); } }; heroLabel();
+// the example film's own free track, composed in the background so Sound on starts straight away
+const heroAudio = new Audio(); heroAudio.preload = 'auto';
+let heroSound = false, heroTrack = null, heroTLm = heroTL;
+const soundBtn = $('#heroSound');
+const soundLabel = () => { soundBtn.textContent = heroSound ? 'Sound off' : (heroTrack ? 'Sound on' : 'Sound on'); };
+const heroReady = (async () => {
+  await new Promise(r => setTimeout(r, 400));
+  const tr = await MUSIC.make('sunrise', heroTL.total);
+  heroTrack = tr; heroAudio.src = URL.createObjectURL(tr.blob);
+  const raw = LSN.timeline(DEMO_CFG, tr.duration);
+  heroTLm = snapTL(raw, { period: tr.period, barPhase: 0 }, 0);
+  heroT = Math.min(heroT * heroTLm.total / heroTL.total, heroTLm.total - 0.1);
+})().catch(() => { soundBtn.hidden = true; });
+heroAudio.onended = () => { heroT = 0; if (heroSound && heroPlaying) { heroAudio.currentTime = 0; heroAudio.play().catch(() => {}); } };
+soundBtn.onclick = () => {
+  if (heroSound) { heroSound = false; heroAudio.pause(); soundLabel(); return; }
+  if (playing) stopMovie();
+  heroSound = true; heroPlaying = true; heroLabel(); soundLabel();
+  const go = () => { heroAudio.currentTime = Math.min(heroT, Math.max(0, heroTLm.total - 0.2)); heroAudio.play().catch(() => { heroSound = false; soundLabel(); }); };
+  if (heroTrack) go(); else { soundBtn.textContent = 'Loading...'; heroReady.then(() => { if (heroSound) { go(); soundLabel(); } }); }
+};
+try { new IntersectionObserver(es => { heroVisible = es[0].isIntersecting; if (heroSound) { if (heroVisible && heroPlaying) heroAudio.play().catch(() => {}); else heroAudio.pause(); } }).observe(heroCv); } catch (e) {}
+$('#startBuild').onclick = () => { const b = $('#builder'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+function heroFrame(dt) {
+  if (!heroVisible) return;
+  const tl = heroTLm;
+  if (heroSound && !heroAudio.paused) heroT = heroAudio.currentTime;
+  else if (heroPlaying) { heroT += dt; if (heroT >= tl.total) heroT = 0; }
+  LSN.render(hx, DEMO_CFG, tl, Math.min(heroT, tl.total - 0.01));
+  $('#heroBar').style.width = (100 * Math.min(1, heroT / tl.total)).toFixed(2) + '%';
+}
+$('#scrub').oninput = e => { if (recording) return; mode = { type: 'movie' }; movieT = movieTL().total * e.target.value / 1000; if (song) audio.currentTime = S.song.offset + movieT; };
+$('#songBtn').onclick = () => $('#songInput').click();
+function useSong(f, name, beat, andPlay) {
+  // music arriving while the film plays silent joins in rather than stopping it
+  const join = playing && !song;
+  if (!join) stopMovie();
+  if (song) URL.revokeObjectURL(song.url);
+  const url = URL.createObjectURL(f); audio.src = url; song = { url, name, duration: 0 };
+  $('#songStatus').textContent = 'Loading...';
+  audio.onloadedmetadata = () => {
+    song.duration = audio.duration; S.song.offset = 0;
+    const nat = LSN.timeline(S.cfg).total; S.song.fit = beat ? 'song' : (audio.duration > nat * 1.5 ? 'lines' : 'song');
+    $('#songStatus').textContent = `${name} \u00b7 ${fmt(audio.duration)}`;
+    if (beat) song.beat = beat;
+    if (join && playing) { ensureAudioGraph(); audio.currentTime = Math.min(movieT, audio.duration - 1); audio.play().catch(() => {}); if (fullOpen) $('#fullNote').textContent = 'Music: ' + name; }
+    else { movieT = 0; setPreviewForStep(); if (andPlay && !recording) { playMovie(); $('#stageNote').textContent = 'Now playing: ' + name; } }
+    renderSongOpts();
+    if (beat) { /* beat known from the composer */ }
+    else analyseBeat(f).then(b => { if (song && song.url === url) { song.beat = b && b.bpm > 50 && b.bpm < 200 ? b : null; renderSongOpts(); } }).catch(() => { if (song) { song.beat = null; renderSongOpts(); } });
+  };
+  audio.onerror = () => { song = null; $('#songStatus').textContent = "That file couldn't be played. Try an MP3."; };
+}
+$('#songInput').onchange = () => {
+  const f = $('#songInput').files[0]; if (!f) return;
+  S.song.track = null; save(); renderTracks();
+  useSong(f, f.name.replace(/\.[^.]+$/, ''), null);
+  $('#songInput').value = '';
+};
+// free tracks, composed to fit the length of this film
+let composing = null;
+function renderTracks() {
+  const box = $('#tracks'); if (!box) return; box.innerHTML = '';
+  Object.entries(MUSIC.STYLES).forEach(([id, st]) => {
+    const on = S.song.track === id, state = !on ? '' : composing === id ? 'Composing...' : playing ? 'Playing. Tap to pause' : 'Tap to play';
+    box.append(el('button', { class: 'tile', 'aria-pressed': on ? 'true' : 'false', onclick: () => tapTrack(id) }, el('b', {}, st.name), el('small', {}, st.mood), state ? el('small', { class: 'trackstate' }, state) : null));
+  });
+}
+// tapping a track composes it and plays it with the film; tapping it again pauses or plays
+function tapTrack(id) {
+  if (S.song.track === id && song && !composing) { if (playing) stopMovie(); else playMovie(); renderTracks(); return; }
+  unlockAudio(); pickTrack(id, true);
+}
+async function pickTrack(id, andPlay) {
+  S.song.track = id; composing = id; save(); renderTracks();
+  $('#songStatus').textContent = 'Composing your track...';
+  try {
+    const len = Math.max(20, LSN.timeline(S.cfg).total);
+    const tr = await MUSIC.make(id, len);
+    composing = null;
+    if (S.song.track !== id) return;
+    useSong(tr.blob, tr.name + ' (free track)', { bpm: tr.bpm, period: tr.period, barPhase: 0 }, andPlay);
+    renderTracks();
+  } catch (e) { composing = null; renderTracks(); const m = "Couldn't make the track on this device. Try adding an MP3 instead."; $('#songStatus').textContent = m; const fn = $('#fullNote'); if (fn && !$('#fullview').hidden) fn.textContent = m + ' The film still plays silent.'; }
+}
+renderTracks();
+if (S.song.track) setTimeout(() => pickTrack(S.song.track), 600);
+
+// ------------------------------------------------ full-size player
+const full = $('#fullview'), fcv = $('#fullStage'), fx = fcv.getContext('2d'); fx.setTransform(720 / 1080, 0, 0, 720 / 1080, 0, 0);
+let fullOpen = false, lastFocus = null;
+const songReady = () => new Promise(res => { const tick = () => (song && song.duration) ? res() : setTimeout(tick, 150); tick(); });
+function openFull() {
+  if (recording) return;
+  lastFocus = document.activeElement; fullOpen = true; full.hidden = false; document.body.style.overflow = 'hidden';
+  try { const rq = full.requestFullscreen || full.webkitRequestFullscreen; if (rq) { const r = rq.call(full); if (r && r.catch) r.catch(() => {}); } } catch (e) {}
+  stopMovie(); mode = { type: 'movie' }; movieT = 0;
+  const note = $('#fullNote'), btn = $('#fullPlay');
+  btn.disabled = false;
+  if (song && song.duration) { note.textContent = ''; playMovie(); }
+  else {
+    note.textContent = 'Getting your music ready. You can press play now and watch it silent.';
+    const want = S.song.track || 'sunrise'; if (!song) pickTrack(want);
+    songReady().then(() => { if (!fullOpen || playing) return; note.textContent = 'Music ready: ' + MUSIC.STYLES[S.song.track || want].name + '. Press play. You can change it on the last step.'; });
+  }
+  btn.focus();
+}
+function closeFull() {
+  stopMovie(); fullOpen = false; full.hidden = true; document.body.style.overflow = '';
+  try { if (document.fullscreenElement) document.exitFullscreen(); else if (document.webkitFullscreenElement) document.webkitExitFullscreen(); } catch (e) {}
+  setPreviewForStep(); if (lastFocus && lastFocus.focus) lastFocus.focus();
+}
+$('#stageOpen').onclick = openFull; $('#fullBtn').onclick = openFull;
+$('#fullClose').onclick = closeFull;
+$('#fullPlay').onclick = () => { if (playing) stopMovie(); else { $('#fullNote').textContent = S.song.track ? 'Music: ' + MUSIC.STYLES[S.song.track].name : ''; playMovie(); } };
+fcv.onclick = () => { if (!$('#fullPlay').disabled) { if (playing) stopMovie(); else playMovie(); } };
+full.addEventListener('keydown', e => { if (e.key === 'Escape') closeFull(); });
+function renderSongOpts() {
+  $('#songOpts').hidden = !song || !song.duration;
+  if (!song || !song.duration) return;
+  const r = $('#songStart'); r.max = Math.max(0, Math.min(90, Math.floor(song.duration - 30))); r.value = S.song.offset; $('#songStartLbl').textContent = fmt(S.song.offset);
+  $$('#fitSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.fit === S.song.fit ? 'true' : 'false'));
+  $('#beatSnap').checked = !!S.song.snap;
+  $('#beatRow').hidden = song.beat === null;
+  $('#bpmLbl').textContent = song.beat ? `(${Math.round(song.beat.bpm)} BPM)` : song.beat === undefined ? 'Finding the beat...' : '';
+  const tl = movieTL(), n = tl.items.length;
+  $('#movieLen').textContent = 'Length ' + fmt(tl.total);
+  $('#pace').textContent = `About ${(tl.total / n).toFixed(1)} seconds per screen.` + (tl.total / n > 7.5 ? (S.song.fit === 'song' ? ' That\u2019s slow. Add more lines, or fit the film to your lines.' : ' That\u2019s slow. Add more lines.') : tl.total / n < 3.8 ? (S.song.fit === 'song' ? ' That\u2019s quick. Remove a few lines, or pick a longer song.' : ' That\u2019s quick. Remove a few lines.') : '');
+}
+$('#songStart').oninput = e => { S.song.offset = +e.target.value; $('#songStartLbl').textContent = fmt(S.song.offset); movieT = 0; if (song) audio.currentTime = S.song.offset; save(); renderSongOpts(); };
+$$('#fitSeg button').forEach(b => b.onclick = () => { S.song.fit = b.dataset.fit; save(); renderSongOpts(); });
+$('#beatSnap').onchange = e => { S.song.snap = e.target.checked; save(); renderSongOpts(); };
+
+// ------------------------------------------------ record + save
+let recorder = null, wake = null, resultBlob = null, resultExt = 'webm';
+const pickMime = () => ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'].find(m => window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m)) || '';
+$('#recBtn').onclick = async () => {
+  const st = $('#recStatus'); st.className = 'status';
+  if (!window.MediaRecorder || !stage.captureStream) { st.className = 'status err'; st.textContent = "This browser can't record video. Try Chrome or Safari on a recent phone or computer."; return; }
+  stopMovie(); recording = true; $('#recBtn').disabled = true; $('#recStop').hidden = false; $('#recBar').hidden = false; $('#result').hidden = true;
+  try { wake = await navigator.wakeLock?.request('screen'); } catch (e) { wake = null; }
+  await document.fonts.ready;
+  const tl = movieTL(), mime = pickMime(), stream = stage.captureStream(30);
+  let dest = null;
+  if (song) { const ac = ensureAudioGraph(); if (ac) { dest = ac.createMediaStreamDestination(); gainNode.connect(dest); stream.addTrack(dest.stream.getAudioTracks()[0]); } }
+  const chunks = [];
+  try { recorder = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: 6000000 } : { videoBitsPerSecond: 6000000 }); }
+  catch (e) { recording = false; $('#recBtn').disabled = false; $('#recStop').hidden = true; st.className = 'status err'; st.textContent = "This browser couldn't start recording. Try Chrome or Safari."; return; }
+  resultExt = (recorder.mimeType || mime).includes('mp4') ? 'mp4' : 'webm';
+  recorder.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+  const done = new Promise(r => recorder.onstop = r);
+  recorder.start(1000);
+  const start = performance.now();
+  if (song) { setGain(S.song.offset > 0 ? 0 : 1); audio.currentTime = S.song.offset; try { await audio.play(); } catch (e) {} }
+  let stopped = false, early = false;
+  const finish = () => { if (stopped) return; stopped = true; audio.pause(); if (recorder.state !== 'inactive') recorder.stop(); };
+  $('#recStop').onclick = () => { early = true; finish(); };
+  const loop = () => {
+    if (stopped) return;
+    const T = song ? Math.max(0, audio.currentTime - S.song.offset) : (performance.now() - start) / 1000;
+    if (song) setGain(songGain(T, tl.total));
+    LSN.render(sx, S.cfg, tl, T);
+    $('#recBar i').style.width = (100 * T / tl.total).toFixed(1) + '%';
+    st.textContent = `Recording ${fmt(T)} of ${fmt(tl.total)}. Keep this screen open.`;
+    if (T >= tl.total - 0.05 || (song && audio.ended)) { finish(); return; }
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+  await done;
+  if (dest) { try { gainNode.disconnect(dest); } catch (e) {} } setGain(1);
+  try { wake && wake.release(); } catch (e) {}
+  recording = false; $('#recBtn').disabled = false; $('#recStop').hidden = true;
+  resultBlob = new Blob(chunks, { type: recorder.mimeType || mime || 'video/webm' });
+  $('#resultVideo').src = URL.createObjectURL(resultBlob); $('#result').hidden = false;
+  st.textContent = (early ? 'Stopped early. ' : 'Done. ') + `${(resultBlob.size / 1048576).toFixed(1)} MB, ${resultExt.toUpperCase()} video.`;
+  $('#saveStatus').textContent = ''; $('#saveBtn').hidden = false;
+  movieT = 0; setPreviewForStep();
+};
+$('#saveBtn').onclick = async () => {
+  const st = $('#saveStatus'); st.className = 'status';
+  if (!resultBlob) return;
+  const filename = `${(n => n ? n + '-motion-mornings' : 'motion-mornings')((S.cfg.me.name || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''))}.${resultExt}`;
+  const done = () => { st.textContent = resultExt === 'webm' ? 'Saved. If your phone won’t play WEBM files, open it in VLC or convert it to MP4 with a free converter.' : 'Saved. Add it to your favourites and watch it every morning.'; };
+  if (downloads) {
+    try { await downloads.save({ filename, data: resultBlob }); done(); }
+    catch (e) { st.className = 'status err'; st.textContent = e && e.code === 'declined' ? 'Not saved. Press the button again whenever you are ready.' : e && e.code === 'too_large' ? 'That file is too big to save here. Try a shorter song.' : 'Saving failed. Try again.'; }
+    return;
+  }
+  // on the open web: the phone's share sheet (Save Video) where it exists, otherwise a normal download
+  try {
+    const file = new File([resultBlob], filename, { type: resultBlob.type });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: (S.cfg.me.name || '').trim() ? filmTitle() : 'Motion Mornings' }); done(); return; }
+  } catch (e) { if (e && e.name === 'AbortError') { st.textContent = 'Not saved. Press the button again whenever you are ready.'; return; } }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(resultBlob); a.download = filename; document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 60000); done();
+};
+
+// ------------------------------------------------ boot
+document.fonts.load('italic 400 40px Poppins').catch(() => {}); document.fonts.load('700 40px Poppins').catch(() => {});
+$('#notes').value = S.notes || '';
+renderThemes(); renderThumbs(); renderSteps(); $('#buildTitle').textContent = filmTitle();
+requestAnimationFrame(frame);
+window.__lsn = { S, go, tl: () => movieTL(), song: () => song };
+})();
+
+</script>
+
+</body>
+</html>
