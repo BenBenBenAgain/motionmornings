@@ -129,6 +129,31 @@ textarea{min-height:76px}
 .sec{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:14px;display:flex;flex-direction:column;gap:10px}
 .sec .sectitle{font-family:var(--display);font-weight:700;border:0;background:transparent;padding:2px 0;font-size:1.05rem}
 .line{display:flex;flex-direction:column;gap:6px;min-width:0}
+.scene{display:grid;grid-template-columns:84px minmax(0,1fr);gap:12px;align-items:start;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.scene.lead{border-color:color-mix(in srgb,var(--gold) 65%,var(--line));background:color-mix(in srgb,var(--gold) 10%,var(--bg))}
+.thumb{width:84px;aspect-ratio:9/16;border-radius:10px;overflow:hidden;padding:0;border:0;cursor:pointer;background:#1A1A1A;display:block;position:relative}
+.thumb canvas{width:100%;height:100%;display:block}
+.scene .body{display:flex;flex-direction:column;gap:6px;min-width:0}
+.scene .kind{font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.scene.lead .kind{color:color-mix(in srgb,var(--gold) 70%,var(--ink))}
+.scene textarea{width:100%;min-height:0;resize:none;overflow:hidden;field-sizing:content;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 10px}
+.scene.lead textarea{font-style:italic}
+.scene .acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.scene .picname{font-size:.82rem;color:var(--muted)}
+.linkbtn{border:0;background:none;padding:4px 2px;font-size:.88rem;font-weight:600;color:var(--sea);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.linkbtn.quiet{color:var(--muted);font-weight:500}
+.addscene{border:2px dashed var(--line);background:transparent;border-radius:12px;padding:12px;font-weight:600;color:var(--muted);cursor:pointer;width:100%}
+.modal .box.wide{max-width:760px}
+.scenegroup{margin:14px 0 6px;font-family:var(--display);font-size:.95rem}
+.scenegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px}
+.scenegrid button{border:2px solid transparent;background:var(--sunk);border-radius:12px;padding:0 0 6px;cursor:pointer;display:flex;flex-direction:column;gap:4px;overflow:hidden;text-align:left}
+.scenegrid button[aria-pressed="true"]{border-color:var(--coral)}
+.scenegrid canvas{width:100%;aspect-ratio:9/16;display:block}
+.scenegrid span{font-size:.76rem;line-height:1.25;padding:0 6px;color:var(--ink)}
+.sw .frompic{width:auto;height:auto;border-radius:999px;box-shadow:none;border:1px dashed var(--line);padding:5px 12px;background:transparent}
+.photoslot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px;border:1px dashed var(--line);border-radius:12px}
+.photoslot img{width:56px;height:56px;border-radius:50%;object-fit:cover}
+.photoslot .meta{flex:1;min-width:160px}
 .line .ctl{display:flex;gap:6px;align-items:center;min-width:0}
 .line .ctl select{flex:1;min-width:0}
 .sec .titlerow{display:flex;gap:8px;align-items:center}
@@ -260,8 +285,8 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
       </section>
 
       <section class="panel" data-step="1" hidden>
-        <header><h2>Your world</h2><p class="lede">Add a few photos of your life: you, your people, your pets, where you live. They tint your rooms, and on the next step you can tap them to pick exact colours for hair, skin and fur.</p></header>
-        <div class="card">
+        <header><h2>Your world</h2><p class="lede">Where does your film happen? Pick the places that feel like your life.</p></header>
+        <div class="card" hidden>
           <div class="drop" id="drop" tabindex="0" role="button" aria-label="Add photos">Drop photos here or tap to choose (up to 8)</div>
           <input type="file" id="photoInput" accept="image/*" multiple hidden>
           <div class="thumbs" id="thumbs"></div>
@@ -281,20 +306,17 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
         </div>
         <div class="card"><div class="subhead"><h3>Kids</h3><button class="btn ghost small" id="addKid">Add a child</button></div><div id="kidsBox" class="panel" style="gap:12px"></div></div>
         <div class="card"><div class="subhead"><h3>Pets</h3><button class="btn ghost small" id="addPet">Add a pet</button></div><div id="petsBox" class="panel" style="gap:12px"></div></div>
-        <div class="navrow"><button class="btn ghost" data-prev>Back</button><button class="btn coral" data-next>Next: your lines</button></div>
+        <div class="navrow"><button class="btn ghost" data-prev>Back</button><button class="btn coral" data-next>Next: your scenes</button></div>
       </section>
 
       <section class="panel" data-step="3" hidden>
-        <header><h2>Your lines</h2><p class="lede">Actions are what you do now, every day. Each theme ends with a glimpse of where it's heading, however long it takes, so it feels like a path, not a finish line.</p></header>
-        <div class="card">
-          <div class="row"><button class="btn coral" id="build">Build my lines</button><button class="btn ghost" id="writeAI" hidden>Write them with Claude</button></div>
-          <p class="status" id="writeStatus"></p>
-        </div>
-        <div class="banner" id="exampleBanner">These are example lines. Press Build my lines to make them yours, then edit anything.</div>
-        <div class="card"><label class="q">Opening line<input type="text" id="opening" maxlength="60"></label></div>
+        <header><h2>Your scenes</h2><p class="lede">These are the scenes in your film, built from what you picked. Keep them, tweak the words, or change the picture. Each theme ends with where it leads, however long that takes.</p></header>
+        <div class="row" style="gap:8px"><button class="btn ghost small" id="build">Start again from my picks</button><button class="btn ghost small" id="writeAI" hidden>Write them with Claude</button><span class="status" id="writeStatus"></span></div>
+        <div class="banner" id="exampleBanner" hidden></div>
+        <div class="card"><label class="q">Opening words <span class="hint">Shown over the sunrise as your film starts.</span><input type="text" id="opening" maxlength="60"></label></div>
         <div id="sections" class="panel" style="gap:14px"></div>
         <div class="row between"><button class="btn ghost small" id="addSection">Add your own theme</button><span class="meta" id="lineMeta"></span></div>
-        <div class="card"><label class="q">Closing line<input type="text" id="closing" maxlength="70"></label></div>
+        <div class="card"><label class="q">Closing words <span class="hint">The last thing you see before you go and do it.</span><input type="text" id="closing" maxlength="70"></label></div>
         <div class="navrow"><button class="btn ghost" data-prev>Back</button><button class="btn coral" data-next>Next: song and save</button></div>
       </section>
 
@@ -358,6 +380,14 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
   <div class="fullbar"><i id="fullProg"></i></div>
   <div class="fullctl"><button class="btn coral" id="fullPlay">Play</button><span class="time" id="fullTime">0:00</span><button class="btn ghost" data-mute aria-pressed="false">Mute</button><button class="btn ghost" id="fullClose">Close</button></div>
   <p class="fullnote" id="fullNote" aria-live="polite"></p>
+</div>
+
+<div class="modal" id="scenePick" hidden role="dialog" aria-modal="true" aria-labelledby="scenePickTitle">
+  <div class="box wide">
+    <div class="subhead"><h3 id="scenePickTitle">Choose the picture</h3><button class="btn ghost small" id="scenePickClose">Cancel</button></div>
+    <p class="meta">Tap the scene that fits. This is what you'll see while the words are on screen.</p>
+    <div id="sceneGrid"></div>
+  </div>
 </div>
 
 <div class="modal" id="picker" hidden role="dialog" aria-modal="true" aria-labelledby="pickTitle">
@@ -676,7 +706,7 @@ function person(x, y, s, L, t, o = {}) {
   } else { ell(-20, -540, 14, 7); fill([1, 1, 1], 0.25); }
   // face
   const brow = L.hair === 'bald' ? darken(skin, 0.5) : (L.body === 'f' ? mix(hc, [0.3, 0.2, 0.15], 0.4) : hc);
-  [-1, 1].forEach(side => { circ(side * 18, -505, 5.5); fill([0.15, 0.15, 0.18]); line([[side * 9, -523], [side * 30, -526]], 5, brow); });
+  [-1, 1].forEach(side => { if (o.eyesClosed) { X.beginPath(); X.arc(side * 18, -508, 8, 0.15 * PI, 0.85 * PI); X.lineWidth = 4; X.strokeStyle = css([0.15, 0.15, 0.18]); X.stroke(); } else { circ(side * 18, -505, 5.5); fill([0.15, 0.15, 0.18]); } line([[side * 9, -523], [side * 30, -526]], 5, brow); });
   line([[0, -500], [-4, -482], [3, -480]], 3, skinD);
   const hasM = L.facial === 'moustache' || L.facial === 'beard';
   if (smile) { X.beginPath(); X.arc(0, hasM ? -470 : -478, 13, 0.15 * PI, 0.85 * PI); X.lineWidth = 4; X.strokeStyle = css([0.55, 0.25, 0.22]); X.stroke(); }
@@ -692,6 +722,7 @@ function person(x, y, s, L, t, o = {}) {
 function dog(x, y, s, t, P, o = {}) {
   const walk = o.walk || 0, speed = o.speed || 9, flip = o.flip || 1, tongue = o.tongue !== false, lookUp = o.lookUp || 0;
   const coat = C(P.coat || '#A14F26'), coatD = darken(coat, 0.25), muzzle = P.muzzle === 'same' ? darken(coat, 0.08) : mix(coat, [0.1, 0.06, 0.05], 0.75);
+  const sz = { s: 0.68, m: 0.86, l: 1, xl: 1.2 }[P.size] || 1; s *= sz;
   X.save(); X.translate(x, y); X.scale(s * flip, s);
   const w = t * speed, wag = 0.35 * Math.sin(t * 11);
   X.beginPath(); X.moveTo(-100, -160); X.bezierCurveTo(-130, -170, -145, -200, -150 + 30 * Math.sin(wag), -235 + 10 * Math.cos(wag * 2));
@@ -1053,6 +1084,23 @@ function weightRack(x, y) {
   for (let i = 0; i < 4; i++) dumbbell(x + 70 + (i % 2) * 140, y - 175 - Math.floor(i / 2) * 0);
 }
 
+function sunBurst(x, y, t) {
+  const g = X.createRadialGradient(x, y, 20, x, y, 520); g.addColorStop(0, css([1, 0.92, 0.65], 0.75)); g.addColorStop(1, css([1, 0.85, 0.55], 0));
+  circ(x, y, 520); X.fillStyle = g; X.fill();
+  for (let i = 0; i < 14; i++) { const a = i / 14 * 2 * PI + t * 0.15, r0 = 180, r1 = 430 + 40 * Math.sin(t * 2 + i); X.beginPath(); X.moveTo(x + r0 * Math.cos(a - 0.05), y + r0 * Math.sin(a - 0.05)); X.lineTo(x + r1 * Math.cos(a), y + r1 * Math.sin(a)); X.lineTo(x + r0 * Math.cos(a + 0.05), y + r0 * Math.sin(a + 0.05)); X.closePath(); fill([1, 0.95, 0.75], 0.45); }
+}
+function speedLines(x, y, t) { for (let i = 0; i < 4; i++) { const k = (t * 3 + i * 0.25) % 1, len = 120 + 60 * (i % 2); line([[x - k * 60, y + i * 70], [x - k * 60 - len, y + i * 70]], 9, [1, 1, 1], 0.75 * (1 - k)); } }
+function seated(x, y, s, L, t, b) {
+  // a mat, the body from the hips up, legs crossed in front, hands resting on the knees, eyes closed
+  rr(x - 300 * s, y - 14 * s, 600 * s, 34 * s, 16 * s); fill([0.35, 0.62, 0.6]);
+  X.save(); X.beginPath(); X.rect(x - 400 * s, 0, 800 * s, y - 70 * s); X.clip();
+  person(x, y + 190 * s, s, L, t, { armL: [0.55 + 0.05 * b, 1.25], armR: [0.55 + 0.05 * b, 1.25], bob: 4 * b, eyesClosed: true });
+  X.restore();
+  const pc = L.outfit === 'dress' ? C(L.top) : C(L.pants);
+  [-1, 1].forEach(sd => { X.save(); X.translate(x, y - 60 * s); X.rotate(sd * 0.1); rr(-170 * s, -34 * s, 340 * s, 68 * s, 34 * s); fill(sd < 0 ? darken(pc, 0.08) : pc); X.restore(); });
+  [-1, 1].forEach(sd => { ell(x + sd * 175 * s, y - 50 * s, 30 * s, 16 * s); fill([0.13, 0.11, 0.1]); });
+}
+
 // ---------------------------------------------------------------- scenes
 const walkX = (p, x0, x1, k0 = 0, k1 = 0.75) => { const q = clamp((p - k0) / (k1 - k0)); return [x0 + (x1 - x0) * ease(q), q > 0 && q < 1]; };
 const ME = cfg => cfg.me || DEFAULT_ME;
@@ -1065,12 +1113,12 @@ const SCENES = {
   title: { label: 'Opening sunrise', fn(c, t, p) { outdoor(c, t, 'sunrise', 1080 - 140 * ease(p)); const q = clamp((p - 0.3) / 0.7), x = -480 + 1500 * q, m = q > 0 && q < 1; person(x, 1660, 1, ME(c), t, { walk: m ? 1 : 0, armL: [0.12, 0.05], armR: [0.3, 0.2] }); pet(c, x + 250, 1710, 0.9, t, { walk: m ? 1 : 0 }); } },
   end: { label: 'Closing sunset walk', fn(c, t, p) { outdoor(c, t, 'sunset', 960 + 60 * p); const n = 1 + (hasPartner(c) ? 1 : 0) + kidsOf(c).length; const x0 = n > 1 ? 200 : 420; const x = x0 + (1100 + n * 150) * ease(clamp((p - 0.25) / 0.75)), m = p > 0.25; const right = familyRow(c, x, 1690, t, { walk: m ? 1 : 0, s: n > 3 ? 0.85 : 1 }); pet(c, right + 70, 1730, 0.85, t, { walk: m ? 1 : 0 }); } },
 
-  walk: { label: 'Walking outside with my pet', fn(c, t, p) { outdoor(c, t, 'day'); const x = 80 + 560 * p; person(x, 1660, 1, ME(c), t, { walk: 1, armL: [0.12, 0.05], armR: [0.3, 0.2] }); pet(c, x + 250 + 60 * Math.sin(t * 1.5), 1720, 0.85, t, { walk: 1, speed: 12 }); } },
+  walk: { label: 'Walking with my dog', fn(c, t, p) { outdoor(c, t, 'day'); const x = 80 + 520 * p, dx = x + 270 + 40 * Math.sin(t * 1.5); const h = person(x, 1660, 1, ME(c), t, { walk: 1, armL: [0.12, 0.05], armR: [0.55, 0.35] }); const P0 = petsOf(c)[0]; if (P0 && P0.type === 'dog') { const k = 0.85 * ({ s: 0.68, m: 0.86, l: 1, xl: 1.2 }[P0.size] || 1), cx = dx + 95 * k, cy = 1720 - 175 * k; X.beginPath(); X.moveTo(h.R[0], h.R[1]); X.quadraticCurveTo((h.R[0] + cx) / 2, Math.max(h.R[1], cy) + 70, cx, cy); X.lineWidth = 5; X.strokeStyle = css([0.85, 0.3, 0.25]); X.stroke(); } pet(c, dx, 1720, 0.85, t, { walk: 1, speed: 12 }); } },
   start: { label: 'Stepping out at sunrise', fn(c, t, p) { outdoor(c, t, 'sunrise', 940); const [x, m] = walkX(p, -120, 420, 0, 0.6); person(x, 1660, 1.05, ME(c), t, { walk: m ? 1 : 0 }); pet(c, x + 250, 1700, 0.9, t, { walk: m ? 1 : 0 }); } },
   sunrise: { label: 'Standing tall at sunrise', fn(c, t) { outdoor(c, t, 'sunrise', 920); person(400, 1680, 1.1, ME(c), t, { armL: [0.6, 0.6], armR: [0.6, 0.6], bob: 4 * Math.sin(t * 2) }); pet(c, 700, 1740, 0.9, t, { flip: -1, lookUp: 0.6 }); } },
-  celebrate: { label: 'Arms up, feeling great', fn(c, t) { outdoor(c, t, 'day'); person(400, 1680, 1.05, ME(c), t, { armL: [2.6, 2.7], armR: [2.6, 2.7], bob: Math.abs(Math.sin(t * 3)) * 60 }); pet(c, 520 + 260 * Math.sin(t * 0.9), 1760, 0.85, t, { walk: 1, speed: 14, flip: Math.cos(t * 0.9) > 0 ? 1 : -1 }); } },
+  celebrate: { label: 'Arms up, feeling great', fn(c, t) { outdoor(c, t, 'sunrise', 1000); sunBurst(400, 1250, t); person(400, 1680, 1.05, ME(c), t, { armL: [2.6, 2.7], armR: [2.6, 2.7], bob: Math.abs(Math.sin(t * 3)) * 60 }); pet(c, 520 + 260 * Math.sin(t * 0.9), 1760, 0.85, t, { walk: 1, speed: 14, flip: Math.cos(t * 0.9) > 0 ? 1 : -1 }); } },
   strong: { label: 'Strong pose', fn(c, t) { outdoor(c, t, 'day'); const f = ease(clamp((t - 0.5) / 0.6)); person(420, 1690, 1.12, ME(c), t, { armL: [1.6 * f + 0.15, 0.1 + 2.9 * f], armR: [1.6 * f + 0.15, 0.1 + 2.9 * f] }); pet(c, 720, 1750, 0.9, t, { flip: -1, lookUp: 0.6 }); } },
-  jog: { label: 'Running', fn(c, t, p) { outdoor(c, t, 'day'); const x = -150 + 1100 * p; person(x, 1660, 1, ME(c), t, { walk: 1.3, speed: 12, armL: [-0.5 * Math.sin(t * 12), 1.3], armR: [0.5 * Math.sin(t * 12), 1.3], bob: 8 * Math.abs(Math.sin(t * 12)) }); pet(c, x + 260, 1700, 0.85, t, { walk: 1.3, speed: 15 }); } },
+  jog: { label: 'Running', fn(c, t, p) { outdoor(c, t, 'day'); const x = -150 + 1100 * p; speedLines(x - 150, 1330, t); person(x, 1660, 1, ME(c), t, { walk: 1.3, speed: 12, armL: [-0.5 * Math.sin(t * 12), 1.3], armR: [0.5 * Math.sin(t * 12), 1.3], bob: 8 * Math.abs(Math.sin(t * 12)) }); pet(c, x + 260, 1700, 0.85, t, { walk: 1.3, speed: 15 }); } },
   unwind: { label: 'Sunset stroll to wind down', fn(c, t, p) { outdoor(c, t, 'sunset'); const x = 120 + 520 * p; person(x, 1660, 1, ME(c), t, { walk: 1, armL: [0.12, 0.05], armR: [0.12, 0.05] }); pet(c, x + 230 + 30 * Math.sin(t), 1700, 0.85, t, { walk: 1 }); } },
   steady: { label: 'Calm, looking ahead', fn(c, t) { outdoor(c, t, 'sunrise', 900); person(520, 1700, 1.05, ME(c), t, { flip: -1 }); pet(c, 260, 1740, 0.9, t); } },
   selflove: { label: 'Hand on heart', fn(c, t) { outdoor(c, t, 'sunrise', 930); const k = ease(clamp((t - 0.5) / 0.6)); person(440, 1680, 1.08, ME(c), t, { armR: [0.15 + 0.05 * k, 0.1 - 2.52 * k], bob: 3 * Math.sin(t * 2) }); hearts(440, 1040, t); pet(c, 730, 1740, 0.9, t, { flip: -1, lookUp: 0.7 }); } },
@@ -1087,7 +1135,7 @@ const SCENES = {
   familydinner: { label: 'Family dinner', fn(c, t) { room(c, t, { wall: [0.42, 0.34, 0.36], floor: [0.42, 0.32, 0.28], lights: true }); person(200, 1680, 1, ME(c), t, { armR: [0.6, 1.4] }); if (hasPartner(c)) person(880, 1680, 0.95, PT(c), t, { flip: -1, armR: [0.6, 1.4] }); const kids = kidsOf(c); kids.slice(0, 3).forEach((k, i) => drawKid(k, 420 + i * 130, 1560, t + i, { armL: [0.6, 1.5], armR: [0.6, 1.5] })); const bb = babiesOf(c); if (bb.length) baby(420 + Math.min(kids.length, 3) * 130, 1420, 0.8, bb[0], t); table(110, 970, 1450); [300, 540, 780].forEach(bx => bowl(bx, 1440, t)); hearts(540, 1000, t, 2); pet(c, 80, 1840, 0.65, t, { lookUp: 0.8 }); } },
   paint: { label: 'Painting or making art', fn(c, t) { room(c, t, { wall: [0.94, 0.92, 0.88], window: 'day' }); easel(720, 1700, t); const s = 0.25 * Math.sin(t * 4); const h = person(380, 1670, 1, ME(c), t, { armR: [1.35 + s, 1.05 - s] }); line([[h.R[0], h.R[1]], [h.R[0] + 60, h.R[1] - 50]], 8, [0.55, 0.4, 0.28]); circ(h.R[0] + 64, h.R[1] - 54, 9); fill(CORAL); pet(c, 140, 1790, 0.7, t, { tongue: false }); } },
   songs_outdoor: { label: 'Playing music outside at dusk', fn(c, t) { outdoor(c, t, 'dusk'); const s = 0.2 * Math.sin(t * 9); person(440, 1700, 1.05, ME(c), t, { armL: [0.9, 1.9], armR: [0.35 + s, 1 + s] }); guitar(430, 1320, -0.55); line([[512, 1265], [472, 1325]], 38, ME(c).outfit === 'dress' ? ME(c).skin : ME(c).top); pet(c, 760, 1760, 0.85, t, { flip: -1, tongue: false }); notes(600, 1050, t, 3, [1, 1, 1]); } },
-  calm: { label: 'Breathing, calm mind', fn(c, t) { outdoor(c, t, 'sunrise', 930); calmRings(440, 1200, t); const b = Math.sin(t * 1.2); person(440, 1680, 1.05, ME(c), t, { armL: [0.5 + 0.1 * b, 0.6], armR: [0.5 + 0.1 * b, 0.6], bob: 4 * b }); pet(c, 740, 1750, 0.85, t, { flip: -1, tongue: false }); } },
+  calm: { label: 'Breathing, calm mind', fn(c, t) { outdoor(c, t, 'sunrise', 930); calmRings(440, 1310, t); const b = Math.sin(t * 1.2); seated(440, 1740, 1.05, ME(c), t, b); pet(c, 790, 1760, 0.8, t, { flip: -1, tongue: false }); } },
 
   wake: { label: 'Waking up fresh', fn(c, t) { room(c, t, { wall: [0.95, 0.9, 0.84], window: 'sunrise' }); const u = ease(clamp((t - 0.6) / 0.8)) * (0.85 + 0.15 * Math.sin(t * 2)); person(380, 1660, 1, ME(c), t, { armL: [0.15 + 2.7 * u, 0.1 + 2.8 * u], armR: [0.15 + 2.7 * u, 0.1 + 2.8 * u], bob: 6 * u }); pet(c, 760, 1760, 0.85, t, { flip: -1 }); } },
   idea: { label: 'Lightbulb moment, planning', fn(c, t) { room(c, t, { window: 'day' }); person(330, 1650, 1, ME(c), t, { armL: [0.4, 1.2], armR: [0.3, 1.5] }); bulb(330, 940 - 10 * Math.sin(t * 2), t); desk(130, 620); notebook(380, 1340, t); pet(c, 760, 1720, 0.85, t, { flip: -1 }); } },
@@ -1499,7 +1547,7 @@ function errCopy(e) {
 }
 
 // ------------------------------------------------ steps
-const STEP_NAMES = ['What you\'re building', 'Your world', 'Your people', 'Your lines', 'Song and save'];
+const STEP_NAMES = ['What you\'re building', 'Your world', 'Your people', 'Your scenes', 'Song and save'];
 function renderSteps() {
   const nav = $('#steps'); nav.innerHTML = '';
   STEP_NAMES.forEach((n, i) => nav.append(el('button', { 'aria-current': i === S.step ? 'step' : false, class: i < S.step ? 'done' : '', onclick: () => go(i) }, el('span', { class: 'n' }, String(i + 1)), n)));
@@ -1621,12 +1669,14 @@ function renderWorlds() {
 // ------------------------------------------------ colour picker from photos
 let pickCb = null, pickIdx = 0;
 const pc = $('#pickCanvas'), pctx = pc.getContext('2d', { willReadFrequently: true });
-async function openPicker(cb, label) {
+let pickList = [];
+async function openPicker(cb, label, list) {
+  if (list) { if (list !== pickList) pickIdx = 0; pickList = list; }
   pickCb = cb; $('#pickTitle').textContent = 'Tap the ' + label.toLowerCase(); $('#picker').hidden = false;
   const th = $('#pickThumbs'); th.innerHTML = '';
-  photos.forEach((p, i) => th.append(el('img', { src: p.url, alt: 'Photo ' + (i + 1), class: i === pickIdx ? 'on' : '', onclick: () => { pickIdx = i; openPicker(cb, label); } })));
-  pickIdx = Math.min(pickIdx, photos.length - 1);
-  const im = await loadImg(photos[pickIdx].url), k = Math.min(800 / im.naturalWidth, 800 / im.naturalHeight);
+  if (pickList.length > 1) pickList.forEach((p, i) => th.append(el('img', { src: p.url, alt: 'Photo ' + (i + 1), class: i === pickIdx ? 'on' : '', onclick: () => { pickIdx = i; openPicker(cb, label); } })));
+  pickIdx = Math.min(pickIdx, pickList.length - 1);
+  const im = await loadImg(pickList[pickIdx].url), k = Math.min(800 / im.naturalWidth, 800 / im.naturalHeight);
   pc.width = Math.round(im.naturalWidth * k); pc.height = Math.round(im.naturalHeight * k);
   pctx.drawImage(im, 0, 0, pc.width, pc.height);
   $('#pickStatus').textContent = 'Tap on hair, skin, clothes or fur in your photo.';
@@ -1683,9 +1733,22 @@ const PET_FIELDS = [
   ['name', 'Name', 'text', 'e.g. Max'],
   ['coat', 'Coat colour', 'color', COAT],
   ['muzzle', 'Face', 'seg', [['dark', 'Darker face'], ['same', 'Same colour']]],
+  ['size', 'Size', 'seg', [['s', 'Small'], ['m', 'Medium'], ['l', 'Large'], ['xl', 'Extra large']], P => P.type === 'dog'],
   ['ears', 'Ears', 'seg', [['floppy', 'Floppy'], ['up', 'Pointy']], P => P.type === 'dog'],
 ];
-function fieldUI(obj, fields, box, prefix, onChange) {
+const personPhotos = {};
+const photosFor = key => [personPhotos[key], ...photos].filter(Boolean);
+function photoSlot(key, label) {
+  const inp = el('input', { type: 'file', accept: 'image/*', hidden: true });
+  const has = personPhotos[key];
+  inp.onchange = () => { const f = inp.files[0]; if (!f || !f.type.startsWith('image/')) return; if (has) URL.revokeObjectURL(has.url); personPhotos[key] = { file: f, url: URL.createObjectURL(f) }; renderPeople(); };
+  return el('div', { class: 'photoslot' },
+    has ? el('img', { src: has.url, alt: '' }) : null,
+    el('button', { class: 'btn ghost small', onclick: () => inp.click() }, has ? 'Change photo' : label),
+    el('span', { class: 'meta' }, has ? 'Now tap "Pick from photo" next to hair, skin, clothes or fur to copy the colours.' : 'Optional. Tap the photo to copy real hair, skin and clothes colours. It stays on your device.'),
+    inp);
+}
+function fieldUI(obj, fields, box, prefix, onChange, pkey) {
   box.innerHTML = '';
   fields.forEach(([k, label, type, opts, show, onPick]) => {
     if (show && !show(obj)) return;
@@ -1696,7 +1759,7 @@ function fieldUI(obj, fields, box, prefix, onChange) {
       pick.oninput = () => { obj[k] = pick.value; save(); };
       pick.onchange = () => { obj[k] = pick.value; onChange(); };
       ctl = el('div', { class: 'sw' }, opts.map(c => el('button', { style: `background:${c}`, 'aria-label': c, 'aria-pressed': String(obj[k]).toLowerCase() === c.toLowerCase() ? 'true' : 'false', onclick: () => { obj[k] = c; onChange(); } })), pick,
-        photos.length ? el('button', { class: 'frompic', onclick: () => openPicker(hex => { obj[k] = hex; onChange(); }, label) }, 'Pick from photo') : null);
+        photosFor(pkey).length ? el('button', { class: 'frompic', onclick: () => openPicker(hex => { obj[k] = hex; onChange(); }, label, photosFor(pkey)) }, 'Pick from photo') : null);
     } else {
       ctl = el('input', { type: 'text', id: prefix + k, value: obj[k] || '', maxlength: 24, placeholder: opts || '', autocomplete: 'off' });
       ctl.oninput = () => { obj[k] = ctl.value; namesChanged(); save(); };
@@ -1713,18 +1776,18 @@ function namesChanged() { const h = $('#buildTitle'); if (h) h.textContent = fil
 function renderPeople() {
   if (!S.cfg.me.sex) S.cfg.me.sex = S.cfg.me.body === 'f' ? 'f' : 'm';
   if (!S.cfg.partner.sex) S.cfg.partner.sex = S.cfg.partner.body === 'm' ? 'm' : 'f';
-  fieldUI(S.cfg.me, ME_FIELDS, $('#meFields'), 'me-', peopleChanged);
+  fieldUI(S.cfg.me, ME_FIELDS, $('#meFields'), 'me-', peopleChanged, 'me'); 
   $('#partnerOn').checked = !!S.cfg.partner.on;
   const pf = $('#partnerFields'); pf.innerHTML = '';
   if (S.cfg.partner.on) {
     const st = el('div', {}); fieldUI(S.cfg.partner, [['status', 'Status', 'seg', [['have', 'Together now'], ['hoping', 'Hoping to meet']]], PARTNER_NAME, PARTNER_SEX], st, 'pts-', peopleChanged);
-    const lk = el('div', { class: 'panel', style: 'gap:12px' }); fieldUI(S.cfg.partner, LOOK_FIELDS, lk, 'pt-', peopleChanged);
+    const lk = el('div', { class: 'panel', style: 'gap:12px' }); fieldUI(S.cfg.partner, LOOK_FIELDS, lk, 'pt-', peopleChanged, 'partner');
     pf.append(st, lk);
   } else pf.append(el('p', { class: 'lede' }, 'Tick Include to add a partner you have now, or one you hope to meet. Leave it off and love scenes show you on your own.'));
   const kb = $('#kidsBox'); kb.innerHTML = '';
   if (!S.cfg.kids.length) kb.append(el('p', { class: 'lede' }, 'None yet. Add kids you have now, or the ones you hope for one day.'));
   S.cfg.kids.forEach((k, i) => {
-    const body = el('div', { class: 'panel', style: 'gap:10px' }); fieldUI(k, KID_FIELDS, body, `k${i}-`, peopleChanged);
+    const body = el('div', { class: 'panel', style: 'gap:10px' }); fieldUI(k, KID_FIELDS, body, `k${i}-`, peopleChanged, 'kid' + i);
     kb.append(el('div', { class: 'pcard' }, el('div', { class: 'subhead' }, el('h4', {}, (k.name || '').trim() || `Child ${i + 1}`), el('button', { class: 'ib', 'aria-label': 'Remove child', onclick: () => { S.cfg.kids.splice(i, 1); peopleChanged(); } }, '×')), body));
   });
   $('#addKid').disabled = S.cfg.kids.length >= 4;
@@ -1732,7 +1795,7 @@ function renderPeople() {
   if (!S.cfg.pets.length) pb.append(el('p', { class: 'lede' }, 'None yet. Add a pet you have, or one you would love to have.'));
   S.cfg.pets.forEach((p, i) => {
     if (!p.status) p.status = 'have';
-    const body = el('div', { class: 'panel', style: 'gap:10px' }); fieldUI(p, PET_FIELDS, body, `p${i}-`, peopleChanged);
+    const body = el('div', { class: 'panel', style: 'gap:10px' }); fieldUI(p, PET_FIELDS, body, `p${i}-`, peopleChanged, 'pet' + i);
     pb.append(el('div', { class: 'pcard' }, el('div', { class: 'subhead' }, el('h4', {}, p.name || `Pet ${i + 1}`), el('button', { class: 'ib', 'aria-label': 'Remove pet', onclick: () => { S.cfg.pets.splice(i, 1); peopleChanged(); } }, '×')), body));
   });
   $('#addPet').disabled = S.cfg.pets.length >= 3;
@@ -1742,36 +1805,134 @@ $('#addKid').onclick = () => { S.cfg.kids.push({ ...LSN.DEFAULT_KID, sex: 'x', s
 $('#addPet').onclick = () => { S.cfg.pets.push({ type: 'dog', name: '', coat: rand(COAT), muzzle: 'dark', ears: 'floppy' }); peopleChanged(); };
 
 // ------------------------------------------------ step 4: lines
-const sceneSelect = (val, onchange) => { const s = el('select', { 'aria-label': 'Scene' }, LSN.PICKABLE.map(k => el('option', { value: k, selected: k === val }, LSN.SCENES[k].label))); s.onchange = () => onchange(s.value); return s; };
-function lineRow(kind, item, onRemove) {
-  const inp = el('textarea', { rows: 2, maxlength: 110, 'aria-label': kind === 'glimpse' ? 'Glimpse line' : 'Action line' }); inp.value = item.text;
-  inp.oninput = () => { item.text = inp.value; markEdited(); preview(kind, item); };
-  inp.onfocus = () => preview(kind, item);
-  const ctl = el('div', { class: 'ctl' }, sceneSelect(item.scene, v => { item.scene = v; markEdited(); preview(kind, item); }), el('button', { class: 'ib', title: 'Preview this line', 'aria-label': 'Preview this line', onclick: () => preview(kind, item) }, '▶'));
-  if (onRemove) ctl.append(el('button', { class: 'ib', title: 'Remove', 'aria-label': 'Remove line', onclick: onRemove }, '×'));
-  return el('div', { class: 'line ' + (kind === 'glimpse' ? 'glimpse' : '') }, el('span', { class: 'kind' }, kind === 'glimpse' ? 'Glimpse of where it leads' : 'Action'), inp, ctl);
+// Words typed into a scene pick a matching picture, until someone chooses one by hand
+const SCENE_WORDS = [
+  [/\b(baby|newborn|pregnan\w*|nursery)\b/, 'holdbaby'], [/\b(pram|stroller)\b/, 'pram'],
+  [/\b(bedtime|story|stories|tuck)\b/, 'bedtime'], [/\b(school run|school drop|drop.?off)\b/, 'schoolrun'],
+  [/\b(kids?|children|son|daughter|play(ing)? with)\b/, 'parkday'], [/\b(family dinner|dinner together|eat together)\b/, 'familydinner'],
+  [/\b(date|date night|romance|romantic)\b/, 'date'], [/\b(cuddle|hug|close|intimate|appreciate|listen to (him|her|them))\b/, 'cuddle'],
+  [/\b(dance|dancing|party|gig|night out)\b/, 'party'], [/\b(soda|sober|alcohol|drink(s|ing)?|beer|wine|booze|kombucha|mocktail)\b/, 'soda'],
+  [/\b(gym|weights?|lift(ing)?|strength|squats?|deadlifts?|pump)\b/, 'gym'], [/\b(run|running|jog|jogging|marathon|parkrun)\b/, 'jog'],
+  [/\b(swim|surf|ocean|beach)\b/, 'celebrate'], [/\b(yoga|stretch\w*|pilates|meditat\w*|breathe|breath\w*|calm|quiet|mindful\w*|present)\b/, 'calm'],
+  [/\b(walk|walking|stroll|hike|hiking|bush|outside|outdoors|nature)\b/, 'walk'],
+  [/\b(move|moving|exercise|workout|work out|train|training|fit|fitness|sport|active)\b/, 'gym'],
+  [/\b(sleep|bed early|wake|waking|alarm|early)\b/, 'wake'],
+  [/\b(clean|cleaning|tidy|declutter|organis\w*|organiz\w*|chores?)\b/, 'clean'],
+  [/\b(cook\w*|meal|recipe)\b/, 'cook'], [/\b(groceries|shopping list|fridge|meal prep|prep)\b/, 'fridge'],
+  [/\b(eat|eating|food|veg\w*|healthy|salad|breakfast|lunch|nutrition|water)\b/, 'eat'],
+  [/\b(save|saving|savings|invest\w*|super)\b/, 'jar'], [/\b(money|budget\w*|debt|bills?|spend\w*|numbers|finance\w*)\b/, 'money'],
+  [/\b(launch\w*|ship|finish\w*|publish\w*|release)\b/, 'ship'], [/\b(hard part|hardest|first thing)\b/, 'hardfirst'],
+  [/\b(work|business|laptop|focus\w*|career|job|project|clients?|study|studying)\b/, 'cafe'],
+  [/\b(read|reading|book|learn\w*|course)\b/, 'read'], [/\b(write|writing|journal\w*|plan|planning|ideas?|goals?)\b/, 'idea'],
+  [/\b(paint\w*|draw\w*|art|create|creative|craft)\b/, 'paint'], [/\b(record\w*|studio)\b/, 'guitar'],
+  [/\b(guitar|music|song|sing\w*|band|piano)\b/, 'songs_outdoor'],
+  [/\b(travel\w*|trip|holiday|adventure|explore)\b/, 'travel'], [/\b(friends?|mates|catch up|social|people)\b/, 'friends'],
+  [/\b(call|phone|talk|chat|reach out)\b/, 'talk'], [/\b(partner|wife|husband|girlfriend|boyfriend|love)\b/, 'couple'],
+  [/\b(proud|grateful|gratitude|kind to myself|myself)\b/, 'selflove'], [/\b(dog|pup|puppy|cat)\b/, 'walk'],
+];
+function guessScene(text) {
+  const t = ' ' + String(text || '').toLowerCase() + ' ';
+  for (const [re, sc] of SCENE_WORDS) if (re.test(t)) {
+    if (sc === 'cook' && /\b(we|together|us|our)\b/.test(t) && hasPartnerNow()) return 'cook_together';
+    if (sc === 'walk' && /\b(we|together|us|our)\b/.test(t) && hasPartnerNow()) return 'couple';
+    return sc;
+  }
+  return null;
 }
+const hasPartnerNow = () => S.cfg.partner && S.cfg.partner.on;
+// small moving pictures on each scene card
+let liveThumbs = [], thumbClock = 0;
+const thumbObs = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { const t = liveThumbs.find(x => x.cv === e.target); if (t) t.vis = e.isIntersecting; })) : null;
+function thumbCanvas(item) {
+  const cv = el('canvas', { width: 168, height: 299, 'aria-hidden': 'true' });
+  const t = { cv, ctx: cv.getContext('2d'), item, vis: !thumbObs, off: Math.random() * 3 };
+  zoomThumb(t.ctx, 168, 299);
+  liveThumbs.push(t); if (thumbObs) thumbObs.observe(cv);
+  drawThumb(t, 1.6);
+  return cv;
+}
+const zoomThumb = (ctx, w, h) => { const k = h / 1400; ctx.setTransform(k, 0, 0, k, -140 * k, -520 * k); };
+const SCENE_HOME = { walk: 'park', jog: 'park', calm: 'mountains', celebrate: 'beach', couple: 'city', friends: 'park', campfire: 'mountains', travel: 'city' };
+function drawThumb(t, tt) { const it = t.item; LSN.drawScene(t.ctx, it.world && it.world !== S.cfg.world ? { ...S.cfg, world: it.world } : S.cfg, it.scene, tt % 5.5, (tt % 5.5) / 5.5); }
+function tickThumbs(now) {
+  if (S.step !== 3 || recording || now - thumbClock < 110) return;
+  thumbClock = now; const tt = now / 1000;
+  liveThumbs.forEach(t => { if (t.vis && t.cv.isConnected) drawThumb(t, tt + t.off); });
+}
+function sceneCard(kind, item, onRemove) {
+  const lead = kind === 'glimpse';
+  const picName = el('span', { class: 'picname' }, LSN.SCENES[item.scene] ? LSN.SCENES[item.scene].label : '');
+  const thumb = el('button', { class: 'thumb', 'aria-label': 'Play this scene in the preview', onclick: () => preview(kind, item) }, thumbCanvas(item));
+  const inp = el('textarea', { rows: 2, maxlength: 110, 'aria-label': lead ? 'Where it leads' : 'Scene words', placeholder: lead ? 'e.g. Fit, strong, full of energy' : 'e.g. I move my body before work' });
+  inp.value = item.text;
+  const refresh = () => { picName.textContent = LSN.SCENES[item.scene] ? LSN.SCENES[item.scene].label : ''; const t = liveThumbs.find(x => x.item === item); if (t) drawThumb(t, 1.6); };
+  inp.oninput = () => {
+    item.text = inp.value;
+    if (!item.pick && !lead) { const g = guessScene(item.text); if (g && g !== item.scene && LSN.SCENES[g]) { item.scene = g; refresh(); } }
+    markEdited(); preview(kind, item);
+  };
+  inp.onfocus = () => preview(kind, item);
+  const fit = () => { inp.style.height = 'auto'; inp.style.height = inp.scrollHeight + 2 + 'px'; };
+  inp.addEventListener('input', fit); requestAnimationFrame(fit);
+  const acts = el('div', { class: 'acts' },
+    el('button', { class: 'linkbtn', title: picName.textContent, onclick: () => openScenePick(item, () => { item.pick = true; refresh(); markEdited(); preview(kind, item); }) }, 'Change picture'));
+  if (onRemove) acts.append(el('button', { class: 'linkbtn quiet', style: 'margin-left:auto', onclick: onRemove }, 'Remove'));
+  return el('div', { class: 'scene' + (lead ? ' lead' : '') }, thumb, el('div', { class: 'body' }, el('span', { class: 'kind' }, lead ? 'Where it leads' : 'Scene'), inp, acts));
+}
+// picture chooser: every scene drawn small, with the person's own character
+// one of each kind of moment, grouped so it's quick to scan (look-alikes left out; they still play if already chosen)
+const SCENE_GROUPS = [
+  ['Body', ['walk', 'jog', 'gym', 'calm', 'celebrate', 'wake']],
+  ['Food and drink', ['cook', 'eat', 'fridge', 'soda']],
+  ['Love and family', ['cuddle', 'date', 'couple', 'cook_together', 'family', 'familydinner', 'parkday', 'schoolrun', 'bedtime', 'pram', 'holdbaby']],
+  ['Friends and fun', ['friends', 'campfire', 'party']],
+  ['Work and money', ['cafe', 'ship', 'idea', 'money', 'jar', 'talk']],
+  ['Making and learning', ['read', 'paint', 'songs_outdoor', 'guitar', 'travel']],
+  ['Home', ['clean', 'excited']],
+];
+let scenePickDone = null, scenePickItem = null;
+function openScenePick(item, done) {
+  scenePickItem = item; scenePickDone = done;
+  const box = $('#sceneGrid'); box.innerHTML = '';
+  const cfg = item.world && item.world !== S.cfg.world ? { ...S.cfg, world: item.world } : S.cfg;
+  SCENE_GROUPS.forEach(([name, keys]) => {
+    const grid = el('div', { class: 'scenegrid' });
+    keys.filter(k => LSN.SCENES[k]).forEach(k => {
+      const cv = el('canvas', { width: 135, height: 240, 'aria-hidden': 'true' }), x = cv.getContext('2d'); zoomThumb(x, 135, 240);
+      LSN.drawScene(x, SCENE_HOME[k] ? { ...cfg, world: SCENE_HOME[k] } : cfg, k, 2.2, 0.5);
+      grid.append(el('button', { 'aria-pressed': k === item.scene ? 'true' : 'false', onclick: () => { item.scene = k; closeScenePick(true); } }, cv, el('span', {}, LSN.SCENES[k].label)));
+    });
+    box.append(el('h4', { class: 'scenegroup' }, name), grid);
+  });
+  $('#scenePick').hidden = false; $('#scenePickClose').focus();
+}
+function closeScenePick(chose) { $('#scenePick').hidden = true; const d = scenePickDone; scenePickDone = scenePickItem = null; if (chose && d) d(); }
+$('#scenePickClose').onclick = () => closeScenePick(false);
+$('#scenePick').onclick = e => { if (e.target.id === 'scenePick') closeScenePick(false); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#scenePick').hidden) closeScenePick(false); });
 function markEdited() { S.isExample = false; S.linesTouched = true; $('#exampleBanner').hidden = true; save(); updateMeta(); }
 function renderLines() {
-  $('#exampleBanner').hidden = !S.isExample;
+  $('#exampleBanner').hidden = true;
   $('#opening').value = S.cfg.opening; $('#closing').value = S.cfg.closing;
-  const box = $('#sections'); box.innerHTML = '';
+  const box = $('#sections'); box.innerHTML = ''; liveThumbs = [];
+  if (!S.cfg.sections.length) box.append(el('div', { class: 'banner' }, 'Tick what you\u2019re building on step 1 and your scenes appear here. Or add your own theme below.'));
   S.cfg.sections.forEach((sec, si) => {
     const title = el('input', { type: 'text', class: 'sectitle', value: sec.title || '', 'aria-label': 'Theme name', maxlength: 40 });
     title.oninput = () => { sec.title = title.value; markEdited(); };
-    const tools = el('div', { class: 'row' });
-    if (sec.theme && TH(sec.theme)) tools.append(el('button', { class: 'btn ghost small', title: 'New wording for this theme', onclick: () => { S.cfg.sections[si] = buildSection(TH(sec.theme), S.fills[sec.theme] || {}, S.cfg); markEdited(); renderLines(); } }, 'Shuffle wording'));
-    const card = el('div', { class: 'sec' }, el('div', { class: 'titlerow' }, title, el('button', { class: 'ib', 'aria-label': 'Remove theme', title: 'Remove theme', onclick: () => { S.cfg.sections.splice(si, 1); markEdited(); renderLines(); } }, '×')));
-    sec.actions.forEach((a, ai) => card.append(lineRow('action', a, () => { sec.actions.splice(ai, 1); markEdited(); renderLines(); })));
-    if (sec.actions.length < 4) tools.prepend(el('button', { class: 'btn ghost small', onclick: () => { sec.actions.push({ text: '', scene: 'checklist' }); markEdited(); renderLines(); } }, 'Add an action'));
-    card.append(tools, lineRow('glimpse', sec.glimpse));
+    const tools = el('div', { class: 'titlerow' }, title);
+    if (sec.theme && TH(sec.theme)) tools.append(el('button', { class: 'linkbtn quiet', title: 'Suggest different words for this theme', onclick: () => { S.cfg.sections[si] = buildSection(TH(sec.theme), S.fills[sec.theme] || {}, S.cfg); markEdited(); renderLines(); } }, 'New words'));
+    tools.append(el('button', { class: 'ib', 'aria-label': 'Remove theme', title: 'Remove theme', onclick: () => { S.cfg.sections.splice(si, 1); markEdited(); renderLines(); } }, '\u00d7'));
+    const card = el('div', { class: 'sec' }, tools);
+    sec.actions.forEach((a, ai) => card.append(sceneCard('action', a, sec.actions.length > 1 ? () => { sec.actions.splice(ai, 1); markEdited(); renderLines(); } : null)));
+    if (sec.actions.length < 4) card.append(el('button', { class: 'addscene', onclick: () => { sec.actions.push({ text: '', scene: 'walk' }); markEdited(); renderLines(); } }, '+ Add a scene'));
+    card.append(sceneCard('glimpse', sec.glimpse));
     box.append(card);
   });
   updateMeta();
 }
 $('#opening').oninput = e => { S.cfg.opening = e.target.value; markEdited(); preview('glimpse', { text: S.cfg.opening, scene: 'title' }); };
 $('#closing').oninput = e => { S.cfg.closing = e.target.value; markEdited(); preview('glimpse', { text: S.cfg.closing, scene: 'end' }); };
-$('#addSection').onclick = () => { S.cfg.sections.push({ title: 'My own theme', actions: [{ text: '', scene: 'checklist' }], glimpse: { text: '', scene: 'sunrise' } }); markEdited(); renderLines(); };
+$('#addSection').onclick = () => { S.cfg.sections.push({ title: 'My own theme', actions: [{ text: '', scene: 'walk' }], glimpse: { text: '', scene: 'celebrate' } }); markEdited(); renderLines(); };
 const fmt = s => { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
 function updateMeta() {
   const n = S.cfg.sections.reduce((s, x) => s + x.actions.filter(a => a.text.trim()).length + (x.glimpse.text.trim() ? 1 : 0), 0);
@@ -1788,9 +1949,9 @@ function chosenThemes() {
 $('#build').onclick = () => {
   let { ids, added } = chosenThemes(); const st = $('#writeStatus'); st.className = 'status';
   if (!ids.length) { ids = EXAMPLE; st.textContent = 'You haven’t ticked anything on the first step, so these are general lines. Tick what matters to you for lines that fit.'; }
-  else st.textContent = `Built ${ids.length} themes.${added.length ? ' Added ' + added.join(' and ') + ' from your people.' : ''} Shuffle any theme for new wording, or edit lines directly.`;
+  else st.textContent = `Back to your picks.${added.length ? ' Added ' + added.join(' and ') + ' from your people.' : ''}`;
   S.cfg.sections = ids.map(id => buildSection(TH(id), S.fills[id] || {}, S.cfg));
-  S.isExample = false; save(); renderLines();
+  S.isExample = false; S.linesTouched = false; save(); renderLines();
 };
 $('#writeAI').onclick = async () => {
   const st = $('#writeStatus'), btn = $('#writeAI');
@@ -1836,7 +1997,7 @@ function setPreviewForStep() {
   if (S.step === 0) { mode = { type: 'scene', scene: 'title', text: S.cfg.opening }; $('#stageNote').textContent = 'Your film opens like this'; }
   else if (S.step === 1) { mode = { type: 'scene', scene: 'walk' }; $('#stageNote').textContent = 'Your world'; }
   else if (S.step === 2) { mode = { type: 'scene', scene: 'together' }; $('#stageNote').textContent = 'Your people'; }
-  else if (S.step === 3) { mode = { type: 'line', kind: 'glimpse', item: { text: S.cfg.opening, scene: 'title' } }; $('#stageNote').textContent = 'Tap ▶ on a line to preview it'; }
+  else if (S.step === 3) { mode = { type: 'line', kind: 'glimpse', item: { text: S.cfg.opening, scene: 'title' } }; $('#stageNote').textContent = 'Tap a picture to preview that scene'; }
   else { mode = { type: 'movie' }; $('#stageNote').textContent = song ? 'Press play to watch with your song' : 'Press play to watch'; }
   t0 = performance.now();
 }
@@ -1940,6 +2101,7 @@ function frame(now) {
     }
   }
   if (!recording) heroFrame(Math.min(0.1, (now - lastFrame) / 1000));
+  tickThumbs(now);
   lastFrame = now; requestAnimationFrame(frame);
 }
 
