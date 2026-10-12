@@ -345,6 +345,8 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
         <div class="card">
           <div class="subhead"><h3>Save your video</h3></div>
           <p class="lede">The film plays through once while it records, so it takes as long as the song. Keep this screen open and awake until it finishes.</p>
+          <label class="switch"><input type="checkbox" id="recSilent"> Save without music</label>
+          <p class="meta">Posting it to Instagram or TikTok? Save it without music, then add any song you love from the app's own music library when you post.</p>
           <div class="row"><button class="btn coral" id="recBtn">Make my video file</button><button class="btn ghost small" id="recStop" hidden>Stop</button></div>
           <div class="bar" id="recBar" hidden><i></i></div>
           <p class="status" id="recStatus"></p>
@@ -2492,9 +2494,11 @@ $('#recBtn').onclick = async () => {
   stopMovie(); recording = true; $('#recBtn').disabled = true; $('#recStop').hidden = false; $('#recBar').hidden = false; $('#result').hidden = true;
   try { wake = await navigator.wakeLock?.request('screen'); } catch (e) { wake = null; }
   await document.fonts.ready;
-  const tl = movieTL(), mime = pickMime(), stream = stage.captureStream(30);
+  // without music the film keeps its natural pace, since there's no song for it to fit
+  const silent = $('#recSilent').checked, withSong = !!song && !silent;
+  const tl = silent ? LSN.timeline(filmCfg()) : movieTL(), mime = pickMime(), stream = stage.captureStream(30);
   let dest = null;
-  if (song) { const ac = ensureAudioGraph(); if (ac) { dest = ac.createMediaStreamDestination(); gainNode.connect(dest); stream.addTrack(dest.stream.getAudioTracks()[0]); } }
+  if (withSong) { const ac = ensureAudioGraph(); if (ac) { dest = ac.createMediaStreamDestination(); gainNode.connect(dest); stream.addTrack(dest.stream.getAudioTracks()[0]); } }
   const chunks = [];
   try { recorder = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: 6000000 } : { videoBitsPerSecond: 6000000 }); }
   catch (e) { recording = false; $('#recBtn').disabled = false; $('#recStop').hidden = true; st.className = 'status err'; st.textContent = "This browser couldn't start recording. Try Chrome or Safari."; return; }
@@ -2503,18 +2507,18 @@ $('#recBtn').onclick = async () => {
   const done = new Promise(r => recorder.onstop = r);
   recorder.start(1000);
   const start = performance.now();
-  if (song) { setGain(S.song.offset > 0 ? 0 : 1); audio.loop = !!tl.loop; audio.currentTime = S.song.offset; try { await audio.play(); } catch (e) {} }
+  if (withSong) { setGain(S.song.offset > 0 ? 0 : 1); audio.loop = !!tl.loop; audio.currentTime = S.song.offset; try { await audio.play(); } catch (e) {} }
   let stopped = false, early = false;
   const finish = () => { if (stopped) return; stopped = true; audio.pause(); if (recorder.state !== 'inactive') recorder.stop(); };
   $('#recStop').onclick = () => { early = true; finish(); };
   const loop = () => {
     if (stopped) return;
-    const T = song && !tl.loop ? Math.max(0, audio.currentTime - S.song.offset) : (performance.now() - start) / 1000;
-    if (song) setGain(songGain(T, tl.total));
+    const T = withSong && !tl.loop ? Math.max(0, audio.currentTime - S.song.offset) : (performance.now() - start) / 1000;
+    if (withSong) setGain(songGain(T, tl.total));
     LSN.render(sx, S.cfg, tl, T);
     $('#recBar i').style.width = (100 * T / tl.total).toFixed(1) + '%';
     st.textContent = `Recording ${fmt(T)} of ${fmt(tl.total)}. Keep this screen open.`;
-    if (T >= tl.total - 0.05 || (song && !tl.loop && audio.ended)) { finish(); return; }
+    if (T >= tl.total - 0.05 || (withSong && !tl.loop && audio.ended)) { finish(); return; }
     requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);
@@ -2524,7 +2528,7 @@ $('#recBtn').onclick = async () => {
   recording = false; $('#recBtn').disabled = false; $('#recStop').hidden = true;
   resultBlob = new Blob(chunks, { type: recorder.mimeType || mime || 'video/webm' });
   $('#resultVideo').src = URL.createObjectURL(resultBlob); $('#result').hidden = false;
-  st.textContent = (early ? 'Stopped early. ' : 'Done. ') + `${(resultBlob.size / 1048576).toFixed(1)} MB, ${resultExt.toUpperCase()} video.`;
+  st.textContent = (early ? 'Stopped early. ' : 'Done. ') + `${(resultBlob.size / 1048576).toFixed(1)} MB, ${resultExt.toUpperCase()} video.` + (silent ? ' No music in this one, so add your song when you post it.' : '');
   $('#saveStatus').textContent = ''; $('#saveBtn').hidden = false;
   movieT = 0; setPreviewForStep();
 };
