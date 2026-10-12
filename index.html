@@ -248,7 +248,7 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
   <div class="grid">
     <main id="panels">
       <section class="panel" data-step="0">
-        <header><h2>What matters to you this year</h2><p class="lede">Tick what you want to work on. A couple of quick questions turn each one into lines about you, in action.</p></header>
+        <header><h2>What you're building</h2><p class="lede">This year or ten years from now. Tick what you want in your life, and a couple of quick questions turn each one into the steps you take today.</p></header>
         <div class="card"><div class="tiles" id="tiles"></div></div>
         <div class="card" id="fillsCard"><div class="subhead"><h3>A few details</h3></div><div class="fills" id="fills"></div></div>
         <div class="card"><label class="q" for="notes">Anything else? <span class="hint">Optional. Places, names, the feeling you're after.</span><textarea id="notes" rows="2" placeholder="e.g. living by the beach, a new chapter, more time outdoors"></textarea></label></div>
@@ -281,7 +281,7 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
       </section>
 
       <section class="panel" data-step="3" hidden>
-        <header><h2>Your lines</h2><p class="lede">Mostly you in action, doing the daily steps. Each theme ends with a short glimpse of where it leads, so it feels like a path, not a finish line.</p></header>
+        <header><h2>Your lines</h2><p class="lede">Actions are what you do now, every day. Each theme ends with a glimpse of where it's heading, however long it takes, so it feels like a path, not a finish line.</p></header>
         <div class="card">
           <div class="row"><button class="btn coral" id="build">Build my lines</button><button class="btn ghost" id="writeAI" hidden>Write them with Claude</button></div>
           <p class="status" id="writeStatus"></p>
@@ -1495,7 +1495,7 @@ function errCopy(e) {
 }
 
 // ------------------------------------------------ steps
-const STEP_NAMES = ['What matters', 'Your world', 'Your people', 'Your lines', 'Song and save'];
+const STEP_NAMES = ['What you\'re building', 'Your world', 'Your people', 'Your lines', 'Song and save'];
 function renderSteps() {
   const nav = $('#steps'); nav.innerHTML = '';
   STEP_NAMES.forEach((n, i) => nav.append(el('button', { 'aria-current': i === S.step ? 'step' : false, class: i < S.step ? 'done' : '', onclick: () => go(i) }, el('span', { class: 'n' }, String(i + 1)), n)));
