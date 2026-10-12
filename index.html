@@ -202,6 +202,8 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
 .heroeg{font-size:.95rem;color:var(--muted);max-width:56ch;margin:0;padding-left:14px;border-left:3px solid color-mix(in srgb,var(--gold) 70%,transparent)}
 .heroeg span{display:block;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--sea);margin-bottom:2px}
 .toplink{text-decoration:none}
+.mobonly{display:none}
+@media (max-width:860px){.deskonly{display:none!important}.mobonly{display:inline}p.mobonly{display:block}.herocopy{gap:12px}.hero{padding-block:4px 28px;margin-bottom:26px}.herocopy .btn{margin-top:4px}}
 @media (max-width:520px){.toplink{display:none}}
 .buildhead{display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
 .buildhead h2{font-size:1.7rem;font-weight:700}
@@ -235,14 +237,15 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
     <div class="herocopy">
       <span class="pill">Life starts now</span>
       <h2 id="heroTitle">A minute of you, doing the things</h2>
-      <p class="herolede">Make a short animated film of you doing the everyday things that build the life you want. Watch it each morning and train your mind to see you as the person who does them.</p>
-      <p class="heroeg"><span>In this example</span> A sunrise walk on the beach, the gym, a bush run, dinner cooked together, focused work at a city cafe, a fresh clean home, quiet minutes by the lake, dancing with a soda water in hand, a cuddle at the end of the day. Each run of actions ends with a glimpse of where it leads.</p>
+      <p class="herolede mobonly">A one-minute animated film of you doing the everyday things that build the life you want. Watch it each morning.</p>
+      <p class="herolede deskonly">Make a short animated film of you doing the everyday things that build the life you want. Watch it each morning and train your mind to see you as the person who does them.</p>
+      <p class="heroeg deskonly"><span>In this example</span> A sunrise walk on the beach, the gym, a bush run, dinner cooked together, focused work at a city cafe, a fresh clean home, quiet minutes by the lake, dancing with a soda water in hand, a cuddle at the end of the day. Each run of actions ends with a glimpse of where it leads.</p>
       <button class="btn coral" id="startBuild">Make your own film</button>
     </div>
   </section>
 
   <div id="builder" class="builder">
-  <header class="buildhead"><span class="pill">Build your own</span><h2 id="buildTitle">Your film, starring you</h2><p class="lede">Pick what matters, set the scene, add your people. The preview updates as you go.</p></header>
+  <header class="buildhead"><span class="pill">Build your own</span><h2 id="buildTitle">Your film, starring you</h2><p class="lede"><span class="mobonly">Each morning it trains your mind to see you as someone who does these things. </span>Pick what matters, set the scene, add your people. The preview updates as you go.</p></header>
   <nav class="steps" id="steps" aria-label="Steps"></nav>
 
   <div class="grid">
