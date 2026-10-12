@@ -2224,11 +2224,18 @@ const DEMO_ME = { body: 'm', hair: 'short', hairCol: '#2E2622', grey: false, ski
 const DEMO_CFG = { world: 'beach', tint: null, me: DEMO_ME, pets: [{ type: 'dog', name: 'Pawsha', coat: '#A14F26', muzzle: 'dark', ears: 'floppy' }], kids: [{ ...LSN.DEFAULT_KID, name: 'Mia', sex: 'f', hair: 'long', hairCol: '#2E2622', skin: '#E3B08E', outfit: 'dress', top: '#F2C46F' }], partner: { ...LSN.DEFAULT_PARTNER, on: true, status: 'have', glasses: true, name: 'Olivia' }, friend2: { body: 'f', hair: 'curly', hairCol: '#2A211C', skin: '#8A5434', facial: 'none', outfit: 'tee', top: '#5FA88F', inner: '#5FA88F', pants: '#30406E', chair: true }, opening: '', closing: '', sections: DEMO_SECTIONS };
 const heroTL = LSN.timeline(DEMO_CFG);
 const filmCfg = () => S.cfg;
+let refitTimer = null;
+function refitTrack(base) {
+  if (!song || !S.song.track || !song.beat || composing || playing || recording) return;
+  if (Math.abs(song.duration - base.total) <= 3) return;
+  clearTimeout(refitTimer); refitTimer = setTimeout(() => { if (!playing && !composing && S.song.track) pickTrack(S.song.track, false, true); }, 1500);
+}
 function movieTL() {
   const o = S.song, key = JSON.stringify([S.cfg.sections, S.cfg.opening, S.cfg.closing, o, song && song.duration, song && !!song.beat]);
   if (key === tlKey && tlCache) return tlCache;
   const fc = filmCfg();
   const base = LSN.timeline(fc);
+  refitTrack(base);
   let tl = base;
   if (song && song.duration) {
     const remain = Math.max(10, song.duration - o.offset);
@@ -2325,6 +2332,7 @@ async function playMovie() {
   playing = true; $('#playBtn').textContent = 'Pause'; if (S.step === 3) renderTracks();
   // no music chosen yet: start the default track now, inside the tap, and let it join when it's ready
   ensureAudioGraph();
+  if (song && S.song.track && song.beat && Math.abs(song.duration - LSN.timeline(filmCfg()).total) > 3) { audio.pause(); URL.revokeObjectURL(song.url); song = null; movieT = 0; }
   if (!song) { unlockAudio(); if (!composing) { pickTrack(S.song.track || 'sunrise'); $('#stageNote').textContent = 'Adding music. It joins in a moment.'; } }
   if (song) { ensureAudioGraph(); audio.currentTime = S.song.offset + movieT; try { await audio.play(); } catch (e) { stopMovie(); } }
 }
@@ -2371,7 +2379,7 @@ function heroFrame(dt) {
 }
 $('#scrub').oninput = e => { if (recording) return; mode = { type: 'movie' }; movieT = movieTL().total * e.target.value / 1000; if (song) audio.currentTime = S.song.offset + movieT; };
 $('#songBtn').onclick = () => $('#songInput').click();
-function useSong(f, name, beat, andPlay) {
+function useSong(f, name, beat, andPlay, quiet) {
   // music arriving while the film plays silent joins in rather than stopping it
   const join = playing && !song;
   if (!join) stopMovie();
@@ -2384,7 +2392,7 @@ function useSong(f, name, beat, andPlay) {
     $('#songStatus').textContent = `${name} \u00b7 ${fmt(audio.duration)}`;
     if (beat) song.beat = beat;
     if (join && playing) { ensureAudioGraph(); audio.currentTime = Math.min(movieT, audio.duration - 1); audio.play().catch(() => {}); $('#stageNote').textContent = 'Now playing: ' + name; if (fullOpen) $('#fullNote').textContent = 'Music: ' + name; }
-    else { movieT = 0; setPreviewForStep(); if (andPlay && !recording) { playMovie(); $('#stageNote').textContent = 'Now playing: ' + name; } }
+    else { movieT = 0; if (!quiet) setPreviewForStep(); if (andPlay && !recording) { playMovie(); $('#stageNote').textContent = 'Now playing: ' + name; } }
     renderSongOpts();
     if (beat) { /* beat known from the composer */ }
     else analyseBeat(f).then(b => { if (song && song.url === url) { song.beat = b && b.bpm > 50 && b.bpm < 200 ? b : null; renderSongOpts(); } }).catch(() => { if (song) { song.beat = null; renderSongOpts(); } });
@@ -2411,7 +2419,7 @@ function tapTrack(id) {
   if (S.song.track === id && song && !composing) { if (playing) stopMovie(); else playMovie(); renderTracks(); return; }
   unlockAudio(); pickTrack(id, true);
 }
-async function pickTrack(id, andPlay) {
+async function pickTrack(id, andPlay, quiet) {
   S.song.track = id; composing = id; save(); renderTracks();
   $('#songStatus').textContent = 'Composing your track...';
   try {
@@ -2419,7 +2427,7 @@ async function pickTrack(id, andPlay) {
     const tr = await MUSIC.make(id, len);
     composing = null;
     if (S.song.track !== id) return;
-    useSong(tr.blob, tr.name + ' (free track)', { bpm: tr.bpm, period: tr.period, barPhase: 0 }, andPlay);
+    useSong(tr.blob, tr.name + ' (free track)', { bpm: tr.bpm, period: tr.period, barPhase: 0 }, andPlay, quiet);
     renderTracks();
   } catch (e) { composing = null; renderTracks(); const m = "Couldn't make the track on this device. Try adding an MP3 instead."; $('#songStatus').textContent = m; const fn = $('#fullNote'); if (fn && !$('#fullview').hidden) fn.textContent = m + ' The film still plays silent.'; }
 }
