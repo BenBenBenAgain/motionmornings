@@ -265,7 +265,7 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
       <span class="pill">Life in motion</span>
       <h2 id="heroTitle"><span class="hl">See it every morning.</span> <span class="hl">Live it every day.</span></h2>
       <p class="herolede">A short animated film of you doing the everyday things that build the life you've always wanted.</p>
-      <p class="heroeg deskonly"><span>In this example</span> A sunrise walk on the beach, the gym, a bush run, dinner cooked together, focused work at a city cafe, a fresh clean home, quiet minutes by the lake, dancing with a soda water in hand, a cuddle at the end of the day. Each run of actions ends with a glimpse of where it leads.</p>
+      <p class="heroeg deskonly"><span>In this example</span> A morning dog walk, the gym, dinner cooked together, the school run, a hug at Mum's door, focused work at a city cafe, quiet minutes in the mountains, guitar at dusk, dancing with a soda water in hand, and date night. Each run of actions ends with a glimpse of where it leads.</p>
       <button class="btn coral" id="startBuild">Make your own film</button>
     </div>
   </section>
@@ -926,6 +926,8 @@ function hearts(x, y, t, n = 3) {
   }
 }
 function laptop(x, y, screen) {
+  // seen from behind when the person sits facing us: the lid with a small logo, no screen
+  if (screen === 'back') { rr(x - 150, y - 210, 300, 195, 14); fill([0.74, 0.76, 0.8]); rr(x - 150, y - 210, 300, 195, 14); X.lineWidth = 4; X.strokeStyle = css([0.6, 0.62, 0.66]); X.stroke(); circ(x, y - 112, 16); fill([0.9, 0.91, 0.93]); rect(x - 160, y - 18, 320, 18, [0.6, 0.62, 0.66]); return; }
   rr(x - 150, y - 210, 300, 195, 12); fill([0.25, 0.27, 0.3]);
   rr(x - 136, y - 198, 272, 170, 6); fill([0.95, 0.97, 1]);
   X.beginPath(); X.moveTo(x - 175, y - 15); X.lineTo(x + 175, y - 15); X.lineTo(x + 190, y); X.lineTo(x - 190, y); X.closePath(); fill([0.6, 0.62, 0.66]);
@@ -1128,6 +1130,7 @@ function seated(x, y, s, L, t, b) {
 // ---------------------------------------------------------------- scenes
 const walkX = (p, x0, x1, k0 = 0, k1 = 0.75) => { const q = clamp((p - k0) / (k1 - k0)); return [x0 + (x1 - x0) * ease(q), q > 0 && q < 1]; };
 const ME = cfg => cfg.me || DEFAULT_ME;
+const F2 = cfg => cfg.friend2 || FRIEND2;
 const PT = cfg => cfg.partner || DEFAULT_PARTNER;
 const firstKid = cfg => kidsOf(cfg)[0] || DEFAULT_KID;
 // ---- sport and people props
@@ -1159,7 +1162,7 @@ function tennis(c, t) {
   const meS = dir === 0 ? sw(1 - q * 3) : sw((q - 0.7) * 3), frS = dir === 1 ? sw(1 - q * 3) : sw((q - 0.7) * 3);
   const h = person(250, 1700, 1, ME(c), t, { walk: 0.25, speed: 8, armR: [0.45 + 0.8 * meS, 1.0 + 0.9 * meS], armL: [0.6, 0.9] });
   racket(h.R[0], h.R[1], 0.3 + 1.1 * meS);
-  const fr = hasPartner(c) ? PT(c) : FRIEND2;
+  const fr = hasPartner(c) ? PT(c) : F2(c);
   const h2 = person(840, 1690, 0.95, fr, t, { flip: -1, walk: 0.25, speed: 8, armR: [0.45 + 0.8 * frS, 1.0 + 0.9 * frS], armL: [0.6, 0.9] });
   racket(h2.R[0], h2.R[1], -0.3 - 1.1 * frS);
   rect(532, 1440, 16, 330, [0.25, 0.25, 0.28]); rr(470, 1470, 140, 230, 6); X.save(); X.clip(); X.lineWidth = 2; X.strokeStyle = css([1, 1, 1], 0.55); X.beginPath(); for (let i = 0; i < 12; i++) { X.moveTo(470 + i * 14, 1470); X.lineTo(470 + i * 14, 1700); } for (let j = 0; j < 17; j++) { X.moveTo(470, 1470 + j * 14); X.lineTo(610, 1470 + j * 14); } X.stroke(); X.restore(); rect(466, 1462, 148, 14, [1, 1, 1]);
@@ -1214,7 +1217,7 @@ function swim(c, t, p) {
   line([[970, 1080], [970, 1300]], 10, [0.8, 0.82, 0.85]); line([[1040, 1080], [1040, 1300]], 10, [0.8, 0.82, 0.85]); [1150, 1220].forEach(y => line([[970, y], [1040, y]], 8, [0.8, 0.82, 0.85]));
   pet(c, 820, 1240, 0.5, t, { flip: -1, tongue: false });
 }
-const VISITOR = { body: 'f', hair: 'bun', hairCol: '#B9B4AD', skin: '#EDC3A6', facial: 'none', outfit: 'jacket', top: '#8E6C9E', inner: '#F2EDE4', pants: '#4D4D59' };
+const VISITOR = { glasses: true, body: 'f', hair: 'bun', hairCol: '#B9B4AD', skin: '#EDC3A6', facial: 'none', outfit: 'jacket', top: '#8E6C9E', inner: '#F2EDE4', pants: '#4D4D59' };
 function hug(c, t) {
   sky(t, 'day', null, 400);
   rect(0, 380, W, 1200, [0.93, 0.89, 0.82]); for (let y = 440; y < 1560; y += 56) line([[0, y], [W, y]], 3, [0.82, 0.77, 0.7]);
@@ -1243,7 +1246,7 @@ function bbq(c, t) {
   for (let x = 0; x < W; x += 54) { X.beginPath(); X.moveTo(x + 2, 1340); X.lineTo(x + 2, 1110); X.lineTo(x + 26, 1085); X.lineTo(x + 50, 1110); X.lineTo(x + 50, 1340); X.closePath(); fill(mix(wood, [0, 0, 0], (x / 54) % 2 ? 0.06 : 0)); }
   rect(0, 1150, W, 14, mix(wood, [0, 0, 0], 0.2)); rect(0, 1280, W, 14, mix(wood, [0, 0, 0], 0.2));
   stringLights(900, 70, t);
-  person(150, 1660, 0.92, FRIEND2, t, { armR: [0.5, 1.5] }); glass(205, 1290, t);
+  const hf = person(150, 1660, 0.92, F2(c), t, { armR: [0.5, 1.5] }); glass(hf.R[0] + 4, hf.R[1] + 16, t);
   const h = person(380, 1690, 1, ME(c), t, { armR: [0.95 + 0.1 * Math.sin(t * 4), 1.45] });
   rr(500, 1430, 260, 26, 8); fill([0.25, 0.25, 0.28]); rr(510, 1456, 240, 130, 16); fill([0.2, 0.2, 0.22]);
   line([[530, 1586], [520, 1760]], 12, [0.3, 0.3, 0.32]); line([[730, 1586], [740, 1760]], 12, [0.3, 0.3, 0.32]);
@@ -1270,8 +1273,8 @@ const SCENES = {
   unwind: { label: 'Sunset stroll to wind down', fn(c, t, p) { outdoor(c, t, 'sunset'); const x = 120 + 520 * p; person(x, 1660, 1, ME(c), t, { walk: 1, armL: [0.12, 0.05], armR: [0.12, 0.05] }); pet(c, x + 230 + 30 * Math.sin(t), 1700, 0.85, t, { walk: 1 }); } },
   steady: { label: 'Calm, looking ahead', fn(c, t) { outdoor(c, t, 'sunrise', 900); person(520, 1700, 1.05, ME(c), t, { flip: -1 }); pet(c, 260, 1740, 0.9, t); } },
   selflove: { label: 'Hand on heart', fn(c, t) { outdoor(c, t, 'sunrise', 930); const k = ease(clamp((t - 0.5) / 0.6)); person(440, 1680, 1.08, ME(c), t, { armR: [0.15 + 0.05 * k, 0.1 - 2.52 * k], bob: 3 * Math.sin(t * 2) }); hearts(440, 1040, t); pet(c, 730, 1740, 0.9, t, { flip: -1, lookUp: 0.7 }); } },
-  friends: { label: 'Out with friends', fn(c, t) { outdoor(c, t, 'day'); const wv = 0.4 * Math.sin(t * 6); person(250, 1680, 1, ME(c), t, { armR: [2.5, 2.9 + wv] }); person(640, 1660, 0.95, FRIEND2, t, { flip: -1, armR: [2.4, 2.9 - wv] }); person(880, 1650, 0.97, FRIEND1, t, { flip: -1 }); pet(c, 430, 1760, 0.8, t); } },
-  campfire: { label: 'Evening with my people', fn(c, t) { outdoor(c, t, 'dusk'); campfire(540, 1740, t); person(200, 1700, 0.95, ME(c), t, { armR: [0.6, 1.2] }); person(420, 1640, 0.85, FRIEND1, t); person(680, 1640, 0.85, FRIEND2, t, { flip: -1 }); if (hasPartner(c)) person(900, 1700, 0.93, PT(c), t, { flip: -1 }); pet(c, 70, 1840, 0.7, t); nightTint(0.15); } },
+  friends: { label: 'Out with friends', fn(c, t) { outdoor(c, t, 'day'); const wv = 0.4 * Math.sin(t * 6); person(250, 1680, 1, ME(c), t, { armR: [2.5, 2.9 + wv] }); person(640, 1660, 0.95, F2(c), t, { flip: -1, armR: [2.4, 2.9 - wv] }); person(880, 1650, 0.97, FRIEND1, t, { flip: -1 }); pet(c, 430, 1760, 0.8, t); } },
+  campfire: { label: 'Evening with my people', fn(c, t) { outdoor(c, t, 'dusk'); campfire(540, 1740, t); person(200, 1700, 0.95, ME(c), t, { armR: [0.6, 1.2] }); person(420, 1640, 0.85, FRIEND1, t); person(680, 1640, 0.85, F2(c), t, { flip: -1 }); if (hasPartner(c)) person(900, 1700, 0.93, PT(c), t, { flip: -1 }); pet(c, 70, 1840, 0.7, t); nightTint(0.15); } },
   couple: { label: 'Walking together', fn(c, t, p) { outdoor(c, t, 'sunset'); const x = 160 + 380 * p; person(x, 1680, 1, ME(c), t, { walk: 1, armL: [0.12, 0.05], armR: [0.5, 0.3] }); if (hasPartner(c)) person(x + 160, 1680, 0.94, PT(c), t, { walk: 1, armL: [0.5, 0.3], armR: [0.12, 0.05] }); pet(c, x + 380, 1720, 0.85, t, { walk: 1 }); hearts(x + 80, 1050, t); } },
   together: { label: 'Side by side at sunset', fn(c, t) { outdoor(c, t, 'sunset'); const n = 1 + (hasPartner(c) ? 1 : 0) + kidsOf(c).length; const s = n > 4 ? 0.85 : 1; const right = familyRow(c, n > 2 ? 170 : 330, 1690, t, { s }); pet(c, Math.min(right + 90, 900), 1745, 0.85 * s, t, { flip: -1 }); } },
   family: { label: 'The whole family together', fn(c, t) { outdoor(c, t, 'sunset', 980); const n = 1 + (hasPartner(c) ? 1 : 0) + kidsOf(c).length; const s = n > 4 ? 0.85 : 1; const right = familyRow(c, n > 2 ? 170 : 330, 1700, t, { s }); hearts(540, 1000, t); pet(c, Math.min(right + 90, 900), 1750, 0.85 * s, t, { flip: -1 }); } },
@@ -1297,8 +1300,8 @@ const SCENES = {
   progress: { label: 'Watching my progress grow', fn(c, t) { room(c, t, { wall: [0.9, 0.92, 0.9] }); rr(470, 720, 560, 520, 26); fill([1, 1, 1], 0.95); barchart(510, 1190, 480, 400, t, 5, [0.35, 0.68, 0.5]); person(260, 1660, 1, ME(c), t, { armR: [1.9, 1.7] }); pet(c, 760, 1780, 0.75, t, { flip: -1 }); } },
   money: { label: 'Checking my numbers', fn(c, t) { room(c, t, { wall: [0.93, 0.91, 0.86], window: 'day' }); desk(150, 700); person(420, 1650, 1, ME(c), t, { armL: [0.4, 1.3], armR: [0.4, 1.3] }); notebook(430, 1360, t); rr(540, 1350, 120, 90, 10); fill([0.3, 0.32, 0.35]); for (let i = 0; i < 6; i++) rect(555 + (i % 3) * 32, 1365 + Math.floor(i / 3) * 32, 24, 24, [0.85, 0.85, 0.85]); pet(c, 860, 1780, 0.75, t, { flip: -1 }); } },
   jar: { label: 'Saving a little every pay', fn(c, t) { room(c, t, { wall: [0.94, 0.9, 0.82] }); desk(450, 1000); const drops = [0.8, 1.8, 2.8, 3.6]; const coins = 3 + drops.filter(d => t > d + 0.6).length; jar(720, 1440, coins); drops.forEach(d => coinDrop(720, 1440 - coins * 16, (t - d) / 0.6)); person(280, 1660, 1, ME(c), t, { armR: [1.4, 1.5] }); pet(c, 120, 1780, 0.7, t); } },
-  laptop: { label: 'Focused work on my laptop', fn(c, t, p) { room(c, t, { wall: [0.88, 0.9, 0.93], window: 'sunrise' }); person(380, 1650, 1, ME(c), t, typing(t)); desk(120, 720); laptop(400, 1440, (x, y, w, h) => barchart(x + 20, y + h - 15, w - 40, h - 40, t, 6, [0.4, 0.62, 0.85])); rr(600, 1370, 50, 70, 8); fill([0.95, 0.95, 0.92]); clockRing(870, 640, p); pet(c, 860, 1780, 0.75, t, { flip: -1 }); } },
-  hardfirst: { label: 'Doing the hard task first', fn(c, t) { room(c, t, { wall: [0.92, 0.9, 0.86] }); checklist(520, 700, 460, 3, t, 1.2, 99); person(300, 1650, 1, ME(c), t, typing(t)); desk(60, 620); laptop(320, 1440); pet(c, 800, 1780, 0.75, t, { flip: -1 }); } },
+  laptop: { label: 'Focused work on my laptop', fn(c, t, p) { room(c, t, { wall: [0.88, 0.9, 0.93], window: 'sunrise' }); person(380, 1650, 1, ME(c), t, typing(t)); desk(120, 720); laptop(400, 1440, 'back'); rr(600, 1370, 50, 70, 8); fill([0.95, 0.95, 0.92]); clockRing(870, 640, p); pet(c, 860, 1780, 0.75, t, { flip: -1 }); } },
+  hardfirst: { label: 'Doing the hard task first', fn(c, t) { room(c, t, { wall: [0.92, 0.9, 0.86] }); checklist(520, 700, 460, 3, t, 1.2, 99); person(300, 1650, 1, ME(c), t, typing(t)); desk(60, 620); laptop(320, 1440, 'back'); pet(c, 800, 1780, 0.75, t, { flip: -1 }); } },
   ship: { label: 'Finishing and launching', fn(c, t) { room(c, t, { wall: [0.9, 0.92, 0.95] }); const u = ease(clamp((t - 1.8) / 0.4)); desk(520, 1040); laptop(780, 1440, (x, y, w, h) => tick(x + w / 2, y + h / 2, 50, clamp((t - 1) / 0.6))); person(300, 1660, 1, ME(c), t, { armL: [0.2 + 2.5 * u, 0.2 + 2.6 * u], armR: [0.2 + 2.5 * u, 0.2 + 2.6 * u], bob: 20 * u * Math.abs(Math.sin(t * 6)) }); confetti(t, 1.8); pet(c, 140, 1790, 0.7, t, { lookUp: 0.6 }); } },
   talk: { label: 'Talking with someone', fn(c, t) { room(c, t, { wall: [0.95, 0.88, 0.8], floor: [0.6, 0.46, 0.36] }); person(300, 1660, 1, ME(c), t, { armR: [0.5 + 0.2 * Math.sin(t * 3), 1] }); person(780, 1660, 0.98, FRIEND1, t, { flip: -1, armR: [0.4, 1 + 0.2 * Math.sin(t * 2.5)] }); const ph = Math.floor(t / 1.2) % 2, a = Math.sin(((t % 1.2) / 1.2) * PI); ph ? bubble(640, 820, 280, 140, a, [0.88, 0.95, 0.9], 1) : bubble(120, 820, 280, 140, a); } },
   excited: { label: 'Heading out, excited for the day', fn(c, t, p) { room(c, t, { wall: [0.95, 0.9, 0.84], window: 'sunrise' }); const [x, m] = walkX(p, 200, 520, 0.2, 0.8); person(x, 1660, 1, ME(c), t, { walk: m ? 1 : 0 }); pet(c, x + 240, 1740, 0.85, t, { walk: m ? 1 : 0 }); } },
@@ -1306,10 +1309,10 @@ const SCENES = {
   guitar: { label: 'Recording music', fn(c, t) { room(c, t, { wall: [0.55, 0.74, 0.85], floor: [0.72, 0.62, 0.52], pattern: true }); micStand(760, 1680); const s = 0.2 * Math.sin(t * 9); person(420, 1680, 1, ME(c), t, { armL: [0.9, 1.9], armR: [0.35 + s, 1 + s] }); guitar(410, 1300, -0.55); line([[490, 1250], [450, 1310]], 36, ME(c).outfit === 'dress' ? ME(c).skin : ME(c).top); notes(700, 1000, t); pet(c, 160, 1790, 0.7, t, { tongue: false }); } },
   songcard: { label: 'Finishing a song', fn(c, t) { room(c, t, { wall: [0.55, 0.74, 0.85], floor: [0.72, 0.62, 0.52], pattern: true }); songCard(560, 760, t); const u = ease(clamp((t - 2.2) / 0.4)); person(300, 1680, 1, ME(c), t, { armR: [0.15 + 2 * u, 0.4 + 2.4 * u] }); guitar(760, 1640, -1.35); notes(650, 1100, t, 3, [1, 1, 1]); pet(c, 120, 1800, 0.65, t); } },
   travel: { label: 'Planning a trip', fn(c, t) { room(c, t, { wall: [0.95, 0.9, 0.82], window: 'day', inWindow: () => plane(-200 + 1500 * ((t * 0.18) % 1), 820 + 20 * Math.sin(t), 0.6) }); mapCard(120, 700, t); jar(900, 1440, 6); person(360, 1660, 1, ME(c), t, { armR: [0.3, 0.3] }); suitcase(600, 1700); pet(c, 850, 1800, 0.7, t, { flip: -1 }); } },
-  party: { label: 'Dancing at a party', fn(c, t) { room(c, t, { wall: [0.2, 0.18, 0.3], floor: [0.26, 0.22, 0.3], lights: true }); discoBall(540, 330, t); const dn = (ph, sp = 6) => ({ armL: [2.3 + 0.4 * Math.sin(t * sp + ph), 2.6 + 0.3 * Math.sin(t * sp + ph)], armR: [1.1 + 0.6 * Math.sin(t * sp + ph + 1.5), 1.6], bob: 22 * Math.abs(Math.sin(t * sp / 2 + ph)) }); person(900, 1620, 0.85, FRIEND1, t, { flip: -1, ...dn(1.2) }); person(120, 1630, 0.85, FRIEND2, t, dn(2.4)); if (hasPartner(c)) person(680, 1690, 0.95, PT(c), t, { flip: -1, ...dn(0.6) }); const h = person(360, 1700, 1.02, ME(c), t, { armR: [2.3 + 0.4 * Math.sin(t * 6), 2.6], armL: [0.75, 1.95], bob: 22 * Math.abs(Math.sin(t * 3)) }); glass(h.L[0] - 4, h.L[1] + 16, t); confetti(t % 3, 0); } },
+  party: { label: 'Dancing at a party', fn(c, t) { room(c, t, { wall: [0.2, 0.18, 0.3], floor: [0.26, 0.22, 0.3], lights: true }); discoBall(540, 330, t); const dn = (ph, sp = 6) => ({ armL: [2.3 + 0.4 * Math.sin(t * sp + ph), 2.6 + 0.3 * Math.sin(t * sp + ph)], armR: [1.1 + 0.6 * Math.sin(t * sp + ph + 1.5), 1.6], bob: 22 * Math.abs(Math.sin(t * sp / 2 + ph)) }); person(900, 1620, 0.85, FRIEND1, t, { flip: -1, ...dn(1.2) }); person(120, 1630, 0.85, F2(c), t, dn(2.4)); if (hasPartner(c)) person(680, 1690, 0.95, PT(c), t, { flip: -1, ...dn(0.6) }); const h = person(360, 1700, 1.02, ME(c), t, { armR: [2.3 + 0.4 * Math.sin(t * 6), 2.6], armL: [0.75, 1.95], bob: 22 * Math.abs(Math.sin(t * 3)) }); glass(h.L[0] - 4, h.L[1] + 16, t); confetti(t % 3, 0); } },
   clean: { label: 'Cleaning the house', fn(c, t) { room(c, t, { wall: [0.88, 0.94, 0.95], floor: [0.82, 0.72, 0.58], window: 'day' }); plant(150, 1460); sofa(560, 1000, 1460, [0.45, 0.62, 0.68]); const sw = Math.sin(t * 3); const h = person(380, 1680, 1, ME(c), t, { armL: [0.55 + 0.1 * sw, 1.35], armR: [0.75 + 0.15 * sw, 1.25] }); const mx = 520 + 80 * sw; line([[h.L[0] - 20, h.L[1] - 50], [mx, 1840]], 10, [0.6, 0.45, 0.3]); rr(mx - 70, 1830, 140, 28, 10); fill([0.35, 0.7, 0.85]); rr(820, 1720, 110, 120, 14); fill([0.95, 0.75, 0.3]); sparkles(t, [[300, 1600, 30], [560, 1820, 34], [700, 1500, 26], [900, 1350, 30], [220, 1420, 24]]); pet(c, 940, 1860, 0.6, t, { flip: -1 }); } },
   cuddle: { label: 'Cuddling up together', fn(c, t) { room(c, t, { wall: [0.5, 0.42, 0.48], floor: [0.42, 0.32, 0.3], window: 'dusk' }); lamp(170, 1460, t); sofa(220, 960, 1500, [0.78, 0.55, 0.45]); const sw = 6 * Math.sin(t * 1.2); if (hasPartner(c)) person(600 + sw, 1690, 0.95, PT(c), t, { flip: -1, armL: [1.25, 1.75], armR: [0.4, 0.5] }); person(480 + sw, 1690, 1.02, ME(c), t, { armR: [0.95, 2.2], armL: [0.3, 0.4] }); hearts(540, 1000, t); pet(c, 860, 1850, 0.65, t, { flip: -1, tongue: false }); } },
-  cafe: { label: 'Focused work at a cafe', fn(c, t) { outdoor(c, t, 'day'); rect(0, 1180, W, 40, [0.95, 0.55, 0.42]); for (let i = 0; i < 9; i++) rect(i * 130, 1220, 65, 40, [1, 1, 1], 0.9); person(420, 1660, 1, ME(c), t, typing(t)); table(200, 760, 1440); laptop(470, 1440, (x, y, w, h) => { for (let i = 0; i < 4; i++) rr(x + 24, y + 26 + i * 34, (w - 80) * (0.5 + 0.5 * ((i * 37 + Math.floor(t * 2)) % 7) / 7), 14, 7); fill([0.55, 0.65, 0.85]); }); rr(650, 1370, 54, 70, 10); fill([1, 1, 1]); steam(660, 1370, t, 2, 22); pet(c, 900, 1760, 0.75, t, { flip: -1 }); } },
+  cafe: { label: 'Focused work at a cafe', fn(c, t) { outdoor(c, t, 'day'); rect(0, 1180, W, 40, [0.95, 0.55, 0.42]); for (let i = 0; i < 9; i++) rect(i * 130, 1220, 65, 40, [1, 1, 1], 0.9); person(420, 1660, 1, ME(c), t, typing(t)); table(200, 760, 1440); laptop(470, 1440, 'back'); rr(650, 1370, 54, 70, 10); fill([1, 1, 1]); steam(660, 1370, t, 2, 22); pet(c, 900, 1760, 0.75, t, { flip: -1 }); } },
   cook_together: { label: 'Cooking together, record playing', fn(c, t) { room(c, t, { wall: [0.97, 0.88, 0.76], floor: [0.62, 0.5, 0.4], window: 'sunset' }); counter(250, 1100, 1440, [0.5, 0.38, 0.3]); stove(560, 1420, t); recordPlayer(900, 1440, t); const s = 0.25 * Math.sin(t * 5); person(200, 1660, 1, ME(c), t, { armR: [0.6 + s, 1.5 + s] }); if (hasPartner(c)) person(360, 1700, 0.94, PT(c), t, { armR: [0.3, 0.6] }); pet(c, 100, 1820, 0.7, t, { lookUp: 0.8 }); hearts(300, 1000, t, 2); } },
   footy: { label: 'Kicking the footy', fn(c, t) { kickabout(c, t, false); } },
   soccer: { label: 'Kicking a soccer ball', fn(c, t) { kickabout(c, t, true); } },
@@ -2195,28 +2198,30 @@ S.song = Object.assign({ offset: 0, fit: 'song', snap: true }, S.song || {});
 let tlKey = '', tlCache = null;
 // The example film in the hero: a fixed couple-and-dog character, a range of life scenes.
 const DEMO_SECTIONS = [
-  // each pair of actions is followed by a short glimpse of where it leads
+  // each group of actions is followed by a short glimpse of where it leads
   { title: 'Body', actions: [
-    { text: 'I train at the gym and feel strong', scene: 'gym' },
-    { text: 'I run the bush track and feel alive', scene: 'jog', world: 'park' }
-  ], glimpse: { text: 'Fit, strong, full of energy', scene: 'strong', world: 'beach', d: 4 } },
-  { title: 'Home', actions: [
-    { text: 'We cook dinner together with a record on', scene: 'cook_together' },
-    { text: 'I keep our home fresh and easy to live in', scene: 'clean' }
-  ], glimpse: { text: 'A home we love coming back to', scene: 'familydinner', d: 4 } },
+    { text: 'I walk {pet} before breakfast', scene: 'walk', world: 'park' },
+    { text: 'I lift a little heavier each week', scene: 'gym' }
+  ], glimpse: { text: 'Fit, strong and full of energy', scene: 'strong', world: 'mountains', d: 4 } },
+  { title: 'Family', actions: [
+    { text: 'We cook together with a record on', scene: 'cook_together' },
+    { text: 'I walk Mia to school', scene: 'schoolrun' },
+    { text: 'I visit Mum and stay for dinner', scene: 'hug' }
+  ], glimpse: { text: 'A full table and a lot of laughs', scene: 'bbq', d: 4 } },
   { title: 'Work', actions: [
-    { text: 'I do focused work that matters to me', scene: 'cafe', world: 'city' }
-  ], glimpse: { text: 'My work, finished and out in the world', scene: 'ship', d: 4 } },
+    { text: 'I do two focused hours on my business', scene: 'cafe' }
+  ], glimpse: { text: 'My work, really taking off', scene: 'ship', d: 4 } },
   { title: 'Mind', actions: [
-    { text: 'I take five quiet minutes to breathe', scene: 'calm', world: 'mountains' },
+    { text: 'I breathe slowly for five minutes', scene: 'calm' },
+    { text: 'I play guitar at dusk, just for me', scene: 'songs_outdoor' },
     { text: 'I dance all night with a soda water in hand', scene: 'party' }
-  ], glimpse: { text: 'Clear head, bright mornings', scene: 'wake', d: 4 } },
+  ], glimpse: { text: 'Clear head, big mornings', scene: 'wake', d: 4 } },
   { title: 'Love', actions: [
-    { text: 'I make time to just be close', scene: 'cuddle' }
+    { text: 'Friday is date night with Olivia, phones away', scene: 'date' }
   ], glimpse: { text: 'Closer every year', scene: 'couple', world: 'city', d: 4 } }
 ];
 const DEMO_ME = { body: 'm', hair: 'short', hairCol: '#2E2622', grey: false, skin: '#E3B08E', facial: 'stubble', facialCol: '#2E2622', outfit: 'tee', top: '#4F7FB0', inner: '#EFE8DC', pants: '#30406E' };
-const DEMO_CFG = { world: 'beach', tint: null, me: DEMO_ME, pets: [{ type: 'dog', name: '', coat: '#A14F26', muzzle: 'dark', ears: 'floppy' }], kids: [], partner: { ...LSN.DEFAULT_PARTNER, on: true, status: 'have' }, opening: '', closing: '', sections: DEMO_SECTIONS };
+const DEMO_CFG = { world: 'beach', tint: null, me: DEMO_ME, pets: [{ type: 'dog', name: 'Pawsha', coat: '#A14F26', muzzle: 'dark', ears: 'floppy' }], kids: [{ ...LSN.DEFAULT_KID, name: 'Mia', sex: 'f', hair: 'long', hairCol: '#2E2622', skin: '#E3B08E', outfit: 'dress', top: '#F2C46F' }], partner: { ...LSN.DEFAULT_PARTNER, on: true, status: 'have', glasses: true, name: 'Olivia' }, friend2: { body: 'f', hair: 'curly', hairCol: '#2A211C', skin: '#8A5434', facial: 'none', outfit: 'tee', top: '#5FA88F', inner: '#5FA88F', pants: '#30406E', chair: true }, opening: '', closing: '', sections: DEMO_SECTIONS };
 const heroTL = LSN.timeline(DEMO_CFG);
 const filmCfg = () => S.cfg;
 function movieTL() {
@@ -2535,7 +2540,7 @@ document.fonts.load('italic 400 40px Poppins').catch(() => {}); document.fonts.l
 $('#notes').value = S.notes || '';
 renderThemes(); renderThumbs(); renderSteps(); $('#buildTitle').textContent = filmTitle();
 requestAnimationFrame(frame);
-window.__lsn = { S, go, tl: () => movieTL(), song: () => song };
+window.__lsn = { S, go, tl: () => movieTL(), song: () => song, demo: DEMO_CFG };
 })();
 
 </script>
