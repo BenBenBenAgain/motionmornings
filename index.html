@@ -2237,7 +2237,10 @@ function movieTL() {
   const base = LSN.timeline(fc);
   refitTrack(base);
   let tl = base;
-  if (song && song.duration) {
+  // someone's own song that's shorter than the film repeats, so the scenes keep their normal pace
+  const short = song && song.duration && !S.song.track && (song.duration - o.offset) < base.total - 1;
+  if (short) tl = Object.assign({}, base, { loop: true });
+  else if (song && song.duration) {
     const remain = Math.max(10, song.duration - o.offset);
     tl = LSN.timeline(fc, o.fit === 'song' ? remain : Math.min(base.total, remain));
     if (o.snap && song.beat) tl = snapTL(tl, song.beat, o.offset);
@@ -2289,7 +2292,7 @@ function frame(now) {
   if (!recording) {
     if (mode.type === 'movie' || playing) {
       const tl = movieTL();
-      if (playing) { movieT = song ? audio.currentTime - S.song.offset : movieT + (now - lastFrame) / 1000; if (song) setGain(songGain(movieT, tl.total)); if (movieT >= tl.total - 0.05) { stopMovie(); movieT = 0; } }
+      if (playing) { movieT = song && !tl.loop ? audio.currentTime - S.song.offset : movieT + (now - lastFrame) / 1000; if (song) setGain(songGain(movieT, tl.total)); if (movieT >= tl.total - 0.05) { stopMovie(); movieT = 0; } }
       LSN.render(fullOpen ? fx : sx, filmCfg(), tl, !playing && movieT === 0 ? 2 : movieT);
       if (fullOpen) { $('#fullProg').style.width = (100 * movieT / tl.total).toFixed(2) + '%'; $('#fullTime').textContent = fmt(movieT) + ' / ' + fmt(tl.total); $('#fullPlay').textContent = playing ? 'Pause' : 'Play'; }
       $('#scrub').value = Math.round(1000 * movieT / tl.total); $('#timeLbl').textContent = fmt(movieT) + ' / ' + fmt(tl.total);
@@ -2334,7 +2337,7 @@ async function playMovie() {
   ensureAudioGraph();
   if (song && S.song.track && song.beat && Math.abs(song.duration - LSN.timeline(filmCfg()).total) > 3) { audio.pause(); URL.revokeObjectURL(song.url); song = null; movieT = 0; }
   if (!song) { unlockAudio(); if (!composing) { pickTrack(S.song.track || 'sunrise'); $('#stageNote').textContent = 'Adding music. It joins in a moment.'; } }
-  if (song) { ensureAudioGraph(); audio.currentTime = S.song.offset + movieT; try { await audio.play(); } catch (e) { stopMovie(); } }
+  if (song) { ensureAudioGraph(); const tl = movieTL(); audio.loop = !!tl.loop; audio.currentTime = tl.loop ? (S.song.offset + movieT) % song.duration : S.song.offset + movieT; try { await audio.play(); } catch (e) { stopMovie(); } }
 }
 function stopMovie() { if (!playing) return; playing = false; audio.pause(); setGain(1); $('#playBtn').textContent = 'Play my film'; if (S.step === 3) renderTracks(); }
 $('#playBtn').onclick = () => { if (!recording) playing ? stopMovie() : playMovie(); };
@@ -2377,14 +2380,14 @@ function heroFrame(dt) {
   LSN.render(hx, DEMO_CFG, tl, Math.min(heroT, tl.total - 0.01));
   $('#heroBar').style.width = (100 * Math.min(1, heroT / tl.total)).toFixed(2) + '%';
 }
-$('#scrub').oninput = e => { if (recording) return; mode = { type: 'movie' }; movieT = movieTL().total * e.target.value / 1000; if (song) audio.currentTime = S.song.offset + movieT; };
+$('#scrub').oninput = e => { if (recording) return; mode = { type: 'movie' }; const tl = movieTL(); movieT = tl.total * e.target.value / 1000; if (song) audio.currentTime = tl.loop ? (S.song.offset + movieT) % song.duration : S.song.offset + movieT; };
 $('#songBtn').onclick = () => $('#songInput').click();
 function useSong(f, name, beat, andPlay, quiet) {
   // music arriving while the film plays silent joins in rather than stopping it
   const join = playing && !song;
   if (!join) stopMovie();
   if (song) URL.revokeObjectURL(song.url);
-  const url = URL.createObjectURL(f); audio.src = url; song = { url, name, duration: 0 };
+  const url = URL.createObjectURL(f); audio.loop = false; audio.src = url; song = { url, name, duration: 0 };
   $('#songStatus').textContent = 'Loading...';
   audio.onloadedmetadata = () => {
     song.duration = audio.duration; S.song.offset = 0;
@@ -2466,6 +2469,7 @@ full.addEventListener('keydown', e => { if (e.key === 'Escape') closeFull(); });
 function renderSongOpts() {
   $('#songOpts').hidden = !song || !song.duration;
   if (!song || !song.duration) return;
+  if (!S.song.track) { const nat = LSN.timeline(filmCfg()).total; $('#songStatus').textContent = `${song.name} \u00b7 ${fmt(song.duration)}` + (song.duration - S.song.offset < nat - 1 ? `. Your film is ${fmt(nat)}, so the song repeats.` : ''); }
   const r = $('#songStart'); r.max = Math.max(0, Math.min(90, Math.floor(song.duration - 30))); r.value = S.song.offset; $('#songStartLbl').textContent = fmt(S.song.offset);
   $$('#fitSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.fit === S.song.fit ? 'true' : 'false'));
   $('#beatSnap').checked = !!S.song.snap;
@@ -2499,18 +2503,18 @@ $('#recBtn').onclick = async () => {
   const done = new Promise(r => recorder.onstop = r);
   recorder.start(1000);
   const start = performance.now();
-  if (song) { setGain(S.song.offset > 0 ? 0 : 1); audio.currentTime = S.song.offset; try { await audio.play(); } catch (e) {} }
+  if (song) { setGain(S.song.offset > 0 ? 0 : 1); audio.loop = !!tl.loop; audio.currentTime = S.song.offset; try { await audio.play(); } catch (e) {} }
   let stopped = false, early = false;
   const finish = () => { if (stopped) return; stopped = true; audio.pause(); if (recorder.state !== 'inactive') recorder.stop(); };
   $('#recStop').onclick = () => { early = true; finish(); };
   const loop = () => {
     if (stopped) return;
-    const T = song ? Math.max(0, audio.currentTime - S.song.offset) : (performance.now() - start) / 1000;
+    const T = song && !tl.loop ? Math.max(0, audio.currentTime - S.song.offset) : (performance.now() - start) / 1000;
     if (song) setGain(songGain(T, tl.total));
     LSN.render(sx, S.cfg, tl, T);
     $('#recBar i').style.width = (100 * T / tl.total).toFixed(1) + '%';
     st.textContent = `Recording ${fmt(T)} of ${fmt(tl.total)}. Keep this screen open.`;
-    if (T >= tl.total - 0.05 || (song && audio.ended)) { finish(); return; }
+    if (T >= tl.total - 0.05 || (song && !tl.loop && audio.ended)) { finish(); return; }
     requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);
