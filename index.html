@@ -222,6 +222,7 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
 .herobar{width:100%;max-width:320px;height:4px;border-radius:99px;background:var(--sunk);overflow:hidden}
 .herobar i{display:block;height:100%;width:0;background:var(--coral)}
 .herosong{margin:0;font-size:.95rem;font-style:italic;color:var(--muted);text-align:center;max-width:32ch}
+.herocredit{margin:-4px 0 0;font-size:.78rem;letter-spacing:.04em;color:var(--muted);opacity:.8;text-align:center}
 .herocopy{display:flex;flex-direction:column;gap:14px;align-items:flex-start}
 .herocopy h2{font-size:clamp(1.9rem,4.4vw,3rem);font-weight:700;letter-spacing:-.015em;max-width:none}
 .herocopy h2 .hl{display:block;white-space:nowrap}
@@ -262,6 +263,7 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
       <div class="herobar"><i id="heroBar"></i></div>
       <div class="row" style="justify-content:center"><button class="btn ghost small" id="heroPlay">Pause</button><button class="btn small" id="heroSound">Sound on</button></div>
       <p class="herosong">Now imagine it with your favourite song.</p>
+      <p class="herocredit">Music: Howqua</p>
     </div>
     <div class="herocopy">
       <span class="pill">Life in motion</span>
@@ -2360,11 +2362,11 @@ let heroSound = false, heroTrack = null, heroTLm = heroTL;
 const soundBtn = $('#heroSound');
 const soundLabel = () => { soundBtn.textContent = heroSound ? 'Sound off' : (heroTrack ? 'Sound on' : 'Sound on'); };
 const heroReady = (async () => {
-  await new Promise(r => setTimeout(r, 400));
-  const tr = await MUSIC.make('sunrise', heroTL.total);
-  heroTrack = tr; heroAudio.src = URL.createObjectURL(tr.blob);
-  const raw = LSN.timeline(DEMO_CFG, tr.duration);
-  heroTLm = snapTL(raw, { period: tr.period, barPhase: 0 }, 0);
+  // the example film plays Howqua's "Time" from the top, cut to the film's length with a fade at the end
+  heroAudio.src = 'demo-music.mp3';
+  await new Promise((ok, bad) => { if (heroAudio.readyState >= 1) return ok(); heroAudio.addEventListener('loadedmetadata', ok, { once: true }); heroAudio.addEventListener('error', bad, { once: true }); });
+  heroTrack = { duration: heroAudio.duration };
+  heroTLm = LSN.timeline(DEMO_CFG, heroAudio.duration);
   heroT = Math.min(heroT * heroTLm.total / heroTL.total, heroTLm.total - 0.1);
 })().catch(() => { soundBtn.hidden = true; });
 heroAudio.onended = () => { heroT = 0; if (heroSound && heroPlaying) { heroAudio.currentTime = 0; heroAudio.play().catch(() => {}); } };
