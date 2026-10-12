@@ -197,7 +197,12 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
 .herobar{width:100%;max-width:320px;height:4px;border-radius:99px;background:var(--sunk);overflow:hidden}
 .herobar i{display:block;height:100%;width:0;background:var(--coral)}
 .herocopy{display:flex;flex-direction:column;gap:14px;align-items:flex-start}
-.herocopy h2{font-size:clamp(1.7rem,4vw,2.5rem);font-weight:700;letter-spacing:-.01em}
+.herocopy h2{font-size:clamp(1.9rem,4.4vw,3rem);font-weight:700;letter-spacing:-.015em;max-width:16ch}
+.herolede{font-size:clamp(1.05rem,1.6vw,1.25rem);line-height:1.55;color:var(--ink);opacity:.86;max-width:46ch;margin:0}
+.heroeg{font-size:.95rem;color:var(--muted);max-width:56ch;margin:0;padding-left:14px;border-left:3px solid color-mix(in srgb,var(--gold) 70%,transparent)}
+.heroeg span{display:block;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--sea);margin-bottom:2px}
+.toplink{text-decoration:none}
+@media (max-width:520px){.toplink{display:none}}
 .buildhead{display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
 .buildhead h2{font-size:1.7rem;font-weight:700}
 .builder{scroll-margin-top:8px}
@@ -219,7 +224,7 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
 <div class="wrap">
   <div class="top">
     <div class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><path d="M16.5 51 Q21.5 41.5 30 52 Q38.5 41.5 43.5 51" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M37.5 35 Q41.5 27.2 47 35.5 Q52.5 27.2 56.5 35" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M40 78 A28 28 0 0 1 96 78 Z" fill="var(--coral)"/><line x1="14" y1="78" x2="106" y2="78" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><line x1="54" y1="90" x2="84" y2="90" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/><line x1="61" y1="101" x2="77" y2="101" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/></svg><h1>Motion Mornings</h1></div>
-    <p class="tag"><strong>Life starts now.</strong> Make a short animated film of you doing the everyday things that build the life you want. Watch it each morning and train your mind to see you as the person who does them.</p>
+    <a class="btn ghost small toplink" href="#builder">Make your film</a>
   </div>
   <section class="hero" aria-labelledby="heroTitle">
     <div class="herofilm">
@@ -228,9 +233,10 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
       <div class="row" style="justify-content:center"><button class="btn ghost small" id="heroPlay">Pause</button><button class="btn small" id="heroSound">Sound on</button></div>
     </div>
     <div class="herocopy">
-      <span class="pill">An example film</span>
+      <span class="pill">Life starts now</span>
       <h2 id="heroTitle">A minute of you, doing the things</h2>
-      <p class="lede">A sunrise walk on the beach. The gym, a bush run, dinner cooked together. Focused work at a city cafe, a fresh clean home, five quiet minutes by the lake, dancing with a soda water in hand, a cuddle at the end of the day. Each run of small actions ends with a quick glimpse of where it leads: fit and strong, a home you love, work out in the world, a clear head, closer every year.</p>
+      <p class="herolede">Make a short animated film of you doing the everyday things that build the life you want. Watch it each morning and train your mind to see you as the person who does them.</p>
+      <p class="heroeg"><span>In this example</span> A sunrise walk on the beach, the gym, a bush run, dinner cooked together, focused work at a city cafe, a fresh clean home, quiet minutes by the lake, dancing with a soda water in hand, a cuddle at the end of the day. Each run of actions ends with a glimpse of where it leads.</p>
       <button class="btn coral" id="startBuild">Make your own film</button>
     </div>
   </section>
@@ -263,6 +269,7 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
 
       <section class="panel" data-step="2" hidden>
         <header><h2>Who's in your life</h2><p class="lede">The people and pets you have now, and the ones you're hoping for. Simple and cartoony, recognisably yours.</p></header>
+        <div class="banner"><strong>Picture the life you're building.</strong> No partner, kids or dog yet but you'd love them one day? Add them anyway. Seeing them in your film each morning is part of the point.</div>
         <div class="card"><div class="subhead"><h3>You</h3></div><p class="meta">Your name titles the film, like "Ben's Motion Mornings". The lines stay in your own voice: "I go for a run", never your name.</p><div id="meFields" class="panel" style="gap:12px"></div></div>
         <div class="card">
           <div class="subhead"><h3>A partner</h3><label class="switch"><input type="checkbox" id="partnerOn"> Include</label></div>
@@ -1668,6 +1675,7 @@ const KID_FIELDS = [
 ];
 const PET_FIELDS = [
   ['type', 'Type', 'seg', [['dog', 'Dog'], ['cat', 'Cat']]],
+  ['status', 'In my life', 'seg', [['have', 'Now'], ['hoping', 'One day']]],
   ['name', 'Name', 'text', 'e.g. Max'],
   ['coat', 'Coat colour', 'color', COAT],
   ['muzzle', 'Face', 'seg', [['dark', 'Darker face'], ['same', 'Same colour']]],
@@ -1708,17 +1716,18 @@ function renderPeople() {
     const st = el('div', {}); fieldUI(S.cfg.partner, [['status', 'Status', 'seg', [['have', 'Together now'], ['hoping', 'Hoping to meet']]], PARTNER_NAME, PARTNER_SEX], st, 'pts-', peopleChanged);
     const lk = el('div', { class: 'panel', style: 'gap:12px' }); fieldUI(S.cfg.partner, LOOK_FIELDS, lk, 'pt-', peopleChanged);
     pf.append(st, lk);
-  } else pf.append(el('p', { class: 'lede' }, 'Off. Love scenes show you on your own.'));
+  } else pf.append(el('p', { class: 'lede' }, 'Tick Include to add a partner you have now, or one you hope to meet. Leave it off and love scenes show you on your own.'));
   const kb = $('#kidsBox'); kb.innerHTML = '';
-  if (!S.cfg.kids.length) kb.append(el('p', { class: 'lede' }, 'None added. Add kids you have now or hope to have.'));
+  if (!S.cfg.kids.length) kb.append(el('p', { class: 'lede' }, 'None yet. Add kids you have now, or the ones you hope for one day.'));
   S.cfg.kids.forEach((k, i) => {
     const body = el('div', { class: 'panel', style: 'gap:10px' }); fieldUI(k, KID_FIELDS, body, `k${i}-`, peopleChanged);
     kb.append(el('div', { class: 'pcard' }, el('div', { class: 'subhead' }, el('h4', {}, (k.name || '').trim() || `Child ${i + 1}`), el('button', { class: 'ib', 'aria-label': 'Remove child', onclick: () => { S.cfg.kids.splice(i, 1); peopleChanged(); } }, '×')), body));
   });
   $('#addKid').disabled = S.cfg.kids.length >= 4;
   const pb = $('#petsBox'); pb.innerHTML = '';
-  if (!S.cfg.pets.length) pb.append(el('p', { class: 'lede' }, 'No pets.'));
+  if (!S.cfg.pets.length) pb.append(el('p', { class: 'lede' }, 'None yet. Add a pet you have, or one you would love to have.'));
   S.cfg.pets.forEach((p, i) => {
+    if (!p.status) p.status = 'have';
     const body = el('div', { class: 'panel', style: 'gap:10px' }); fieldUI(p, PET_FIELDS, body, `p${i}-`, peopleChanged);
     pb.append(el('div', { class: 'pcard' }, el('div', { class: 'subhead' }, el('h4', {}, p.name || `Pet ${i + 1}`), el('button', { class: 'ib', 'aria-label': 'Remove pet', onclick: () => { S.cfg.pets.splice(i, 1); peopleChanged(); } }, '×')), body));
   });
