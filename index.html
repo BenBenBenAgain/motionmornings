@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Motion Mornings: see yourself doing the things that change your path</title>
+<title>Motion Mornings: see it every morning, live it every day</title>
 <meta name="description" content="Make a short animated film of you doing the everyday things that build the life you want. Watch it each morning and train your mind to see you as the person who does them.">
 <meta name="theme-color" content="#FBF3E6">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -197,7 +197,9 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
 .herobar{width:100%;max-width:320px;height:4px;border-radius:99px;background:var(--sunk);overflow:hidden}
 .herobar i{display:block;height:100%;width:0;background:var(--coral)}
 .herocopy{display:flex;flex-direction:column;gap:14px;align-items:flex-start}
-.herocopy h2{font-size:clamp(1.9rem,4.4vw,3rem);font-weight:700;letter-spacing:-.015em;max-width:14ch}
+.herocopy h2{font-size:clamp(1.9rem,4.4vw,3rem);font-weight:700;letter-spacing:-.015em;max-width:none}
+.herocopy h2 .hl{display:block;white-space:nowrap}
+@media (max-width:420px){.herocopy h2{font-size:clamp(1.55rem,7.6vw,2rem);max-width:none}}
 .herolede{font-size:clamp(1.05rem,1.6vw,1.25rem);line-height:1.55;color:var(--ink);opacity:.86;max-width:46ch;margin:0}
 .heroeg{font-size:.95rem;color:var(--muted);max-width:56ch;margin:0;padding-left:14px;border-left:3px solid color-mix(in srgb,var(--gold) 70%,transparent)}
 .heroeg span{display:block;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--sea);margin-bottom:2px}
@@ -235,9 +237,9 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
       <div class="row" style="justify-content:center"><button class="btn ghost small" id="heroPlay">Pause</button><button class="btn small" id="heroSound">Sound on</button></div>
     </div>
     <div class="herocopy">
-      <span class="pill">Life starts now</span>
-      <h2 id="heroTitle">See yourself doing the things.</h2>
-      <p class="herolede">A short animated film of you doing the everyday things that change your path. Watch it every morning.</p>
+      <span class="pill">Life in motion</span>
+      <h2 id="heroTitle"><span class="hl">See it every morning.</span> <span class="hl">Live it every day.</span></h2>
+      <p class="herolede">A short animated film of you doing the everyday things that build the life you've always wanted.</p>
       <p class="heroeg deskonly"><span>In this example</span> A sunrise walk on the beach, the gym, a bush run, dinner cooked together, focused work at a city cafe, a fresh clean home, quiet minutes by the lake, dancing with a soda water in hand, a cuddle at the end of the day. Each run of actions ends with a glimpse of where it leads.</p>
       <button class="btn coral" id="startBuild">Make your own film</button>
     </div>
