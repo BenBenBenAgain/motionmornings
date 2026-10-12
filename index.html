@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Motion Mornings: a short film of you, doing the things</title>
+<title>Motion Mornings: see yourself doing the things that change your path</title>
 <meta name="description" content="Make a short animated film of you doing the everyday things that build the life you want. Watch it each morning and train your mind to see you as the person who does them.">
 <meta name="theme-color" content="#FBF3E6">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -197,7 +197,7 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
 .herobar{width:100%;max-width:320px;height:4px;border-radius:99px;background:var(--sunk);overflow:hidden}
 .herobar i{display:block;height:100%;width:0;background:var(--coral)}
 .herocopy{display:flex;flex-direction:column;gap:14px;align-items:flex-start}
-.herocopy h2{font-size:clamp(1.9rem,4.4vw,3rem);font-weight:700;letter-spacing:-.015em;max-width:16ch}
+.herocopy h2{font-size:clamp(1.9rem,4.4vw,3rem);font-weight:700;letter-spacing:-.015em;max-width:20ch}
 .herolede{font-size:clamp(1.05rem,1.6vw,1.25rem);line-height:1.55;color:var(--ink);opacity:.86;max-width:46ch;margin:0}
 .heroeg{font-size:.95rem;color:var(--muted);max-width:56ch;margin:0;padding-left:14px;border-left:3px solid color-mix(in srgb,var(--gold) 70%,transparent)}
 .heroeg span{display:block;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--sea);margin-bottom:2px}
@@ -236,16 +236,15 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
     </div>
     <div class="herocopy">
       <span class="pill">Life starts now</span>
-      <h2 id="heroTitle">A short film of you, doing the things</h2>
-      <p class="herolede mobonly">A short animated film of you doing the everyday things that build the life you want. Watch it each morning.</p>
-      <p class="herolede deskonly">Make a short animated film of you doing the everyday things that build the life you want. Watch it each morning and train your mind to see you as the person who does them.</p>
+      <h2 id="heroTitle">See yourself doing the everyday things that change your path.</h2>
+      <p class="herolede">A short animated film starring you. Watch it each morning and build the life you want.</p>
       <p class="heroeg deskonly"><span>In this example</span> A sunrise walk on the beach, the gym, a bush run, dinner cooked together, focused work at a city cafe, a fresh clean home, quiet minutes by the lake, dancing with a soda water in hand, a cuddle at the end of the day. Each run of actions ends with a glimpse of where it leads.</p>
       <button class="btn coral" id="startBuild">Make your own film</button>
     </div>
   </section>
 
   <div id="builder" class="builder">
-  <header class="buildhead"><span class="pill">Build your own</span><h2 id="buildTitle">Your film, starring you</h2><p class="lede"><span class="mobonly">Each morning it trains your mind to see you as someone who does these things. </span>Pick what matters, set the scene, add your people. The preview updates as you go.</p></header>
+  <header class="buildhead"><span class="pill">Build your own</span><h2 id="buildTitle">Make your film</h2><p class="lede"><span class="mobonly">Each morning it trains your mind to see you as someone who does these things. </span>Pick what matters, set the scene, add your people. The preview updates as you go.</p></header>
   <nav class="steps" id="steps" aria-label="Steps"></nav>
 
   <div class="grid">
@@ -1707,7 +1706,7 @@ function fieldUI(obj, fields, box, prefix, onChange) {
 function peopleChanged() { liveLines(); save(); renderPeople(); setPreviewForStep(); }
 // "Ben's Motion Mornings": the film is titled with the person's name, the lines stay in their own voice
 const possessive = n => n + (/s$/i.test(n) ? '’' : '’s');
-function filmTitle() { const n = (S.cfg.me.name || '').trim(); return n ? possessive(n) + ' Motion Mornings' : 'Your film, starring you'; }
+function filmTitle() { const n = (S.cfg.me.name || '').trim(); return n ? possessive(n) + ' Motion Mornings' : 'Make your film'; }
 function namesChanged() { const h = $('#buildTitle'); if (h) h.textContent = filmTitle(); liveLines(); }
 function renderPeople() {
   if (!S.cfg.me.sex) S.cfg.me.sex = S.cfg.me.body === 'f' ? 'f' : 'm';
