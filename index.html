@@ -271,7 +271,7 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
   </section>
 
   <div id="builder" class="builder">
-  <header class="buildhead"><span class="pill">Build your own</span><h2 id="buildTitle">Make your film</h2><p class="lede"><span class="mobonly">Each morning it trains your mind to see you as someone who does these things. </span>Pick what matters, set the scene, add your people. The preview updates as you go.</p></header>
+  <header class="buildhead"><span class="pill">Build your own</span><h2 id="buildTitle">Make your film</h2><p class="lede"><span class="mobonly">Each morning it trains your mind to see you as someone who does these things. </span>Pick what matters, add your people, check your scenes. The preview updates as you go.</p></header>
   <nav class="steps" id="steps" aria-label="Steps"></nav>
 
   <div class="grid">
@@ -281,10 +281,10 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
         <div class="card"><div class="tiles" id="tiles"></div></div>
         <div class="card" id="fillsCard"><div class="subhead"><h3>A few details</h3></div><div class="fills" id="fills"></div></div>
         <div class="card"><label class="q" for="notes">Anything else? <span class="hint">Optional. Places, names, the feeling you're after.</span><textarea id="notes" rows="2" placeholder="e.g. living by the beach, a new chapter, more time outdoors"></textarea></label></div>
-        <div class="navrow"><span></span><button class="btn coral" data-next>Next: your world</button></div>
+        <div class="navrow"><span></span><button class="btn coral" data-next>Next: your people</button></div>
       </section>
 
-      <section class="panel" data-step="1" hidden>
+      <section class="panel" data-step="off" hidden>
         <header><h2>Your world</h2><p class="lede">Where does your film happen? Pick the places that feel like your life.</p></header>
         <div class="card" hidden>
           <div class="drop" id="drop" tabindex="0" role="button" aria-label="Add photos">Drop photos here or tap to choose (up to 8)</div>
@@ -296,7 +296,7 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
         <div class="navrow"><button class="btn ghost" data-prev>Back</button><button class="btn coral" data-next>Next: your people</button></div>
       </section>
 
-      <section class="panel" data-step="2" hidden>
+      <section class="panel" data-step="1" hidden>
         <header><h2>Who's in your life</h2><p class="lede">The people and pets you have now, and the ones you're hoping for. Simple and cartoony, recognisably yours.</p></header>
         <div class="banner"><strong>Picture the life you're building.</strong> No partner, kids or dog yet but you'd love them one day? Add them anyway. Seeing them in your film each morning is part of the point.</div>
         <div class="card"><div class="subhead"><h3>You</h3></div><p class="meta">Your name titles the film, like "Ben's Motion Mornings". The lines stay in your own voice: "I go for a run", never your name.</p><div id="meFields" class="panel" style="gap:12px"></div></div>
@@ -309,18 +309,18 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
         <div class="navrow"><button class="btn ghost" data-prev>Back</button><button class="btn coral" data-next>Next: your scenes</button></div>
       </section>
 
-      <section class="panel" data-step="3" hidden>
+      <section class="panel" data-step="2" hidden>
         <header><h2>Your scenes</h2><p class="lede">These are the scenes in your film, built from what you picked. Keep them, tweak the words, or change the picture. Each theme ends with where it leads, however long that takes.</p></header>
         <div class="row" style="gap:8px"><button class="btn ghost small" id="build">Start again from my picks</button><button class="btn ghost small" id="writeAI" hidden>Write them with Claude</button><span class="status" id="writeStatus"></span></div>
         <div class="banner" id="exampleBanner" hidden></div>
-        <div class="card"><label class="q">Opening words <span class="hint">Shown over the sunrise as your film starts.</span><input type="text" id="opening" maxlength="60"></label></div>
+        <div class="card"><label class="q">Opening words <span class="hint">Shown over the sunrise as your film starts. Leave it blank to use the words shown.</span><input type="text" id="opening" maxlength="60"></label></div>
         <div id="sections" class="panel" style="gap:14px"></div>
         <div class="row between"><button class="btn ghost small" id="addSection">Add your own theme</button><span class="meta" id="lineMeta"></span></div>
-        <div class="card"><label class="q">Closing words <span class="hint">The last thing you see before you go and do it.</span><input type="text" id="closing" maxlength="70"></label></div>
+        <div class="card"><label class="q">Closing words <span class="hint">The last thing you see before you go and do it. Leave it blank to use the words shown.</span><input type="text" id="closing" maxlength="70"></label></div>
         <div class="navrow"><button class="btn ghost" data-prev>Back</button><button class="btn coral" data-next>Next: song and save</button></div>
       </section>
 
-      <section class="panel" data-step="4" hidden>
+      <section class="panel" data-step="3" hidden>
         <header><h2>Your music, then save it</h2><p class="lede">Pick one of our free tracks, or add a song of your own. Your film stretches to fit the music, and scenes change on the beat.</p></header>
         <div class="card">
           <div class="subhead"><h3>Free tracks</h3><button class="btn ghost small" data-mute aria-pressed="false">Mute</button></div>
@@ -632,9 +632,17 @@ const FRIEND2 = { body: 'f', hair: 'long', hairCol: '#D9B373', skin: '#F2D3BC', 
 
 function person(x, y, s, L, t, o = {}) {
   const walk = o.walk || 0, speed = o.speed || 7, armL = o.armL || [0.15, 0.1], armR = o.armR || [0.15, 0.1];
-  const smile = o.smile !== false, bob = o.bob || 0, flip = o.flip || 1;
+  const smile = o.smile !== false, flip = o.flip || 1;
+  // a wheelchair: the body sits lower, the legs bend at the seat, and the wheels turn when moving
+  const chair = !!L.chair, D = chair ? 92 : 0, bob = chair ? Math.min(o.bob || 0, 10) : (o.bob || 0);
   const hands = {};
   X.save(); X.translate(x, y - bob); X.scale(s * flip, s);
+  if (chair) {
+    const fr = [0.24, 0.26, 0.3];
+    rr(-98, -440, 196, 290, 20); fill(fr);
+    line([[-92, -436], [-122, -452]], 12, fr); line([[92, -436], [122, -452]], 12, fr);
+    X.translate(0, D);
+  }
   const w = t * speed, hc = C(L.hairCol), skin = C(L.skin), skinD = darken(skin, 0.15);
   const dress = L.outfit === 'dress';
   const hs = o.head || 1; const headOn = () => { X.save(); if (hs !== 1) { X.translate(0, -470); X.scale(hs, hs); X.translate(0, 470); } };
@@ -649,7 +657,21 @@ function person(x, y, s, L, t, o = {}) {
   }
   X.restore();
   // legs
-  if (dress) {
+  if (chair) {
+    const lc = dress ? skin : C(L.pants), wd = dress ? 26 : 48;
+    rr(-110, -262, 220, 36, 12); fill([0.24, 0.26, 0.3]);
+    [-1, 1].forEach(sd => { line([[sd * 28, -250], [sd * 34, -200]], wd + 6, lc); line([[sd * 34, -200], [sd * 36, -122]], wd, lc); ell(sd * 40, -114, 30, 15); fill([0.13, 0.11, 0.10]); });
+    rr(-82, -104, 164, 14, 6); fill([0.4, 0.42, 0.46]);
+    [-1, 1].forEach(sd => { circ(sd * 64, -104, 14); fill([0.15, 0.15, 0.17]); });
+    const spin = walk ? t * speed * 0.9 : 0;
+    [-1, 1].forEach(sd => {
+      const cx = sd * 130, cy = -212;
+      ell(cx, cy, 42, 120); X.lineWidth = 18; X.strokeStyle = css([0.15, 0.15, 0.17]); X.stroke();
+      ell(cx, cy, 30, 104); X.lineWidth = 5; X.strokeStyle = css([0.72, 0.74, 0.78]); X.stroke();
+      for (let i = 0; i < 4; i++) { const a = spin + i * PI / 4; line([[cx - 30 * Math.cos(a), cy - 104 * Math.sin(a)], [cx + 30 * Math.cos(a), cy + 104 * Math.sin(a)]], 3, [0.72, 0.74, 0.78]); }
+      circ(cx, cy, 9); fill([0.5, 0.52, 0.55]);
+    });
+  } else if (dress) {
     [[-1, 0], [1, PI]].forEach(([side, ph]) => {
       const a = walk * 0.34 * Math.sin(w + ph), hx = side * 22, hy = -170, fx = hx + 165 * Math.sin(a), fy = hy + 165 * Math.cos(a);
       line([[hx, hy], [fx, fy]], 26, skin); ell(fx + 6, fy, 26, 12); fill([0.55, 0.3, 0.25]);
@@ -674,7 +696,7 @@ function person(x, y, s, L, t, o = {}) {
     line([[sx, sy], [ex, ey]], wd, upper); line([[ex, ey], [hx, hy]], wd * (L.outfit === 'tee' ? 0.8 : 1), fore);
     if (L.outfit === 'tee') { circ(ex, ey, wd / 2); fill(upper); }
     circ(hx, hy, 20); fill(skin);
-    hands[side < 0 ? 'L' : 'R'] = [x + flip * s * hx, y - bob + s * hy];
+    hands[side < 0 ? 'L' : 'R'] = [x + flip * s * hx, y - bob + s * (hy + D)];
   });
   // head
   rect(-18, -472, 36, 32, skinD);
@@ -707,6 +729,7 @@ function person(x, y, s, L, t, o = {}) {
   // face
   const brow = L.hair === 'bald' ? darken(skin, 0.5) : (L.body === 'f' ? mix(hc, [0.3, 0.2, 0.15], 0.4) : hc);
   [-1, 1].forEach(side => { if (o.eyesClosed) { X.beginPath(); X.arc(side * 18, -508, 8, 0.15 * PI, 0.85 * PI); X.lineWidth = 4; X.strokeStyle = css([0.15, 0.15, 0.18]); X.stroke(); } else { circ(side * 18, -505, 5.5); fill([0.15, 0.15, 0.18]); } line([[side * 9, -523], [side * 30, -526]], 5, brow); });
+  if (L.glasses) { const gc = [0.16, 0.16, 0.2]; [-1, 1].forEach(sd => { circ(sd * 19, -506, 17); X.lineWidth = 4.5; X.strokeStyle = css(gc); X.stroke(); line([[sd * 36, -508], [sd * 49, -514]], 4, gc); }); line([[-3, -508], [3, -508]], 4, gc); }
   line([[0, -500], [-4, -482], [3, -480]], 3, skinD);
   const hasM = L.facial === 'moustache' || L.facial === 'beard';
   if (smile) { X.beginPath(); X.arc(0, hasM ? -470 : -478, 13, 0.15 * PI, 0.85 * PI); X.lineWidth = 4; X.strokeStyle = css([0.55, 0.25, 0.22]); X.stroke(); }
@@ -1091,6 +1114,7 @@ function sunBurst(x, y, t) {
 }
 function speedLines(x, y, t) { for (let i = 0; i < 4; i++) { const k = (t * 3 + i * 0.25) % 1, len = 120 + 60 * (i % 2); line([[x - k * 60, y + i * 70], [x - k * 60 - len, y + i * 70]], 9, [1, 1, 1], 0.75 * (1 - k)); } }
 function seated(x, y, s, L, t, b) {
+  if (L.chair) { person(x, y, s, L, t, { armL: [0.35 + 0.04 * b, 0.9], armR: [0.35 + 0.04 * b, 0.9], eyesClosed: true }); return; }
   // a mat, the body from the hips up, legs crossed in front, hands resting on the knees, eyes closed
   rr(x - 300 * s, y - 14 * s, 600 * s, 34 * s, 16 * s); fill([0.35, 0.62, 0.6]);
   X.save(); X.beginPath(); X.rect(x - 400 * s, 0, 800 * s, y - 70 * s); X.clip();
@@ -1106,6 +1130,130 @@ const walkX = (p, x0, x1, k0 = 0, k1 = 0.75) => { const q = clamp((p - k0) / (k1
 const ME = cfg => cfg.me || DEFAULT_ME;
 const PT = cfg => cfg.partner || DEFAULT_PARTNER;
 const firstKid = cfg => kidsOf(cfg)[0] || DEFAULT_KID;
+// ---- sport and people props
+function footyBall(x, y, a, soccer) {
+  if (soccer) { circ(x, y, 32); fill([1, 1, 1]); X.lineWidth = 3; X.strokeStyle = css([0.2, 0.2, 0.22]); X.stroke(); [[0, 0], [-17, -17], [18, -15], [-15, 18], [17, 17]].forEach(([dx, dy], i) => { const r = i ? 7 : 10, c = Math.cos(a), s = Math.sin(a); circ(x + dx * c - dy * s, y + dx * s + dy * c, r); fill([0.18, 0.18, 0.2]); }); return; }
+  X.save(); X.translate(x, y); X.rotate(a); ell(0, 0, 44, 27); fill([0.62, 0.24, 0.14]); line([[-14, -10], [14, -10]], 4, [1, 1, 1]); for (let i = -2; i <= 2; i++) line([[i * 6, -15], [i * 6, -5]], 3, [1, 1, 1]); X.restore();
+}
+function kickabout(c, t, soccer) {
+  outdoor(c, t, 'day');
+  if (soccer) { const gx = 700, gy = 1430; line([[gx, gy], [gx, gy - 230], [gx + 330, gy - 230], [gx + 330, gy]], 12, [1, 1, 1]); X.lineWidth = 2; X.strokeStyle = css([1, 1, 1], 0.5); X.beginPath(); for (let i = 1; i < 11; i++) { X.moveTo(gx + i * 30, gy - 230); X.lineTo(gx + i * 30, gy); } for (let j = 1; j < 8; j++) { X.moveTo(gx, gy - j * 29); X.lineTo(gx + 330, gy - j * 29); } X.stroke(); }
+  else [[640, 300], [730, 470], [850, 470], [940, 300]].forEach(([px, h]) => line([[px, 1430], [px, 1430 - h]], 12, [1, 1, 1]));
+  const kid = kidsOf(c).length, T = 1.7, q = (t / T) % 1, dir = Math.floor(t / T) % 2;
+  const ax = 330, bx = 780, u = dir ? 1 - q : q, x = ax + (bx - ax) * u, y = 1380 - 380 * Math.sin(q * PI);
+  const meKick = dir === 0 ? clamp(1 - q * 4) : clamp((q - 0.75) * 4);
+  person(250, 1680, 1, ME(c), t, { walk: 0.5 * meKick, speed: 9, armL: [0.9 + 0.5 * meKick, 0.7], armR: [0.5, 0.4], bob: 10 * meKick });
+  const mk = dir === 1 ? clamp(1 - q * 4) : clamp((q - 0.75) * 4);
+  if (kid) drawKid(firstKid(c), 860, 1690, t + 0.5, { flip: -1, walk: 0.5 * mk, speed: 10, armL: [1.2, 1.0], armR: [1.2, 1.0] });
+  else person(860, 1670, 0.97, FRIEND1, t, { flip: -1, walk: 0.5 * mk, speed: 9, armL: [1.0 + 0.4 * mk, 0.8], armR: [1.0 + 0.4 * mk, 0.8], bob: 10 * mk });
+  footyBall(x, y, t * 7, soccer);
+  pet(c, 300 + 400 * u, 1800, 0.75, t, { walk: 1.2, speed: 14, flip: dir ? -1 : 1 });
+}
+function racket(x, y, a) { X.save(); X.translate(x, y); X.rotate(a); line([[0, 0], [0, -70]], 12, [0.2, 0.2, 0.25]); ell(0, -120, 36, 50); fill([1, 1, 1], 0.2); X.lineWidth = 9; X.strokeStyle = css(CORAL); X.stroke(); X.restore(); }
+function tennis(c, t) {
+  outdoor(c, t, 'day');
+  rect(0, 1330, W, 590, [0.33, 0.53, 0.62]); rect(0, 1330, W, 14, [1, 1, 1]); rect(0, 1890, W, 12, [1, 1, 1], 0.9);
+  line([[60, 1600], [W - 60, 1600]], 6, [1, 1, 1], 0.8);
+  const T = 1.4, q = (t / T) % 1, dir = Math.floor(t / T) % 2, u = dir ? 1 - q : q;
+  const sw = k => Math.sin(clamp(k) * PI);
+  const meS = dir === 0 ? sw(1 - q * 3) : sw((q - 0.7) * 3), frS = dir === 1 ? sw(1 - q * 3) : sw((q - 0.7) * 3);
+  const h = person(250, 1700, 1, ME(c), t, { walk: 0.25, speed: 8, armR: [0.45 + 0.8 * meS, 1.0 + 0.9 * meS], armL: [0.6, 0.9] });
+  racket(h.R[0], h.R[1], 0.3 + 1.1 * meS);
+  const fr = hasPartner(c) ? PT(c) : FRIEND2;
+  const h2 = person(840, 1690, 0.95, fr, t, { flip: -1, walk: 0.25, speed: 8, armR: [0.45 + 0.8 * frS, 1.0 + 0.9 * frS], armL: [0.6, 0.9] });
+  racket(h2.R[0], h2.R[1], -0.3 - 1.1 * frS);
+  rect(532, 1440, 16, 330, [0.25, 0.25, 0.28]); rr(470, 1470, 140, 230, 6); X.save(); X.clip(); X.lineWidth = 2; X.strokeStyle = css([1, 1, 1], 0.55); X.beginPath(); for (let i = 0; i < 12; i++) { X.moveTo(470 + i * 14, 1470); X.lineTo(470 + i * 14, 1700); } for (let j = 0; j < 17; j++) { X.moveTo(470, 1470 + j * 14); X.lineTo(610, 1470 + j * 14); } X.stroke(); X.restore(); rect(466, 1462, 148, 14, [1, 1, 1]);
+  const bxp = 380 + 330 * u * 1.0, by = 1300 - 300 * Math.sin(q * PI); circ(bxp, by, 17); fill([0.85, 0.95, 0.35]);
+  pet(c, 120, 1860, 0.6, t, { lookUp: 0.6 });
+}
+function surfboard(x, y, a, len = 270) { X.save(); X.translate(x, y); X.rotate(a); ell(0, 0, len, 34); fill([0.98, 0.88, 0.55]); line([[-len + 30, 0], [len - 30, 0]], 6, CORAL); X.restore(); }
+function surf(c, t, p) {
+  outdoor(c, t, 'day');
+  const sx = 760 + 60 * Math.sin(t * 0.8), sy = 1205;
+  X.beginPath(); X.moveTo(sx - 220, sy + 20); X.bezierCurveTo(sx - 100, sy - 70, sx + 60, sy - 90, sx + 120, sy - 30); X.bezierCurveTo(sx + 90, sy - 50, sx + 40, sy - 30, sx + 30, sy + 20); X.closePath(); fill([0.3, 0.58, 0.72]);
+  line([[sx - 200, sy + 14], [sx - 90, sy - 50], [sx + 40, sy - 70], [sx + 115, sy - 32]], 10, [1, 1, 1], 0.85);
+  surfboard(sx, sy + 8, -0.1, 70);
+  person(sx, sy + 4, 0.2, FRIEND1, t, { armL: [1.5, 1.6], armR: [1.4, 1.5], bob: 3 * Math.sin(t * 3) });
+  const x = 110 + 440 * p;
+  const h = person(x, 1680, 1, ME(c), t, { walk: 1, armL: [0.12, 0.05], armR: [0.35, 0.2] });
+  surfboard(x + 30, 1360, -0.08); circ(h.R[0], h.R[1] - 10, 20); fill(ME(c).skin);
+  pet(c, x + 330, 1740, 0.85, t, { walk: 1 });
+}
+function cycle(c, t, p) {
+  outdoor(c, t, 'day');
+  if (ME(c).chair) { const x = -100 + 1000 * p; speedLines(x - 200, 1400, t); person(x, 1690, 1, ME(c), t, { walk: 1, speed: 10, armL: [0.3, 0.5], armR: [0.3, 0.5] }); pet(c, x - 380, 1730, 0.8, t, { walk: 1.3, speed: 15 }); return; }
+  const bx = -60 + 900 * p, gy = 1790, r = 112;
+  speedLines(bx - 330, 1450, t);
+  const wheel = wx => { circ(wx, gy - r, r); X.lineWidth = 14; X.strokeStyle = css([0.18, 0.18, 0.2]); X.stroke(); for (let i = 0; i < 6; i++) { const a = -t * 7 + i * PI / 3; line([[wx, gy - r], [wx + r * Math.cos(a), gy - r + r * Math.sin(a)]], 3, [0.7, 0.7, 0.72]); } circ(wx, gy - r, 10); fill([0.5, 0.5, 0.52]); };
+  wheel(bx - 200); wheel(bx + 200);
+  const pc = [bx - 10, gy - 95], seat = [bx - 80, gy - 360], head = [bx + 140, gy - 330];
+  line([[bx - 200, gy - r], pc, seat, [bx - 200, gy - r]], 14, CORAL); line([pc, [bx + 130, gy - 300], seat], 14, CORAL); line([[bx + 130, gy - 300], [bx + 200, gy - r]], 14, CORAL);
+  rr(seat[0] - 50, seat[1] - 22, 100, 24, 10); fill([0.18, 0.18, 0.2]);
+  const ca = t * 7; line([[pc[0] - 50 * Math.cos(ca), pc[1] - 50 * Math.sin(ca)], [pc[0] + 50 * Math.cos(ca), pc[1] + 50 * Math.sin(ca)]], 9, [0.3, 0.3, 0.32]);
+  const h = person(bx - 70, gy - 70, 0.9, ME(c), t, { walk: 0.7, speed: 7, armL: [-0.9, -1.2], armR: [1.25, 1.35] });
+  line([[bx + 130, gy - 300], head, h.R], 10, [0.25, 0.25, 0.28]);
+  pet(c, bx - 470, 1760, 0.75, t, { walk: 1.3, speed: 15 });
+}
+function swim(c, t, p) {
+  sky(t, 'day', null, 1080);
+  for (let i = 0; i < 12; i++) { circ(i * 100 + 30, 1010, 80); fill(gt([0.32, 0.55, 0.32], 'day')); }
+  rect(0, 1040, W, 60, gt([0.32, 0.55, 0.32], 'day'));
+  rect(0, 1100, W, 170, [0.94, 0.91, 0.85]); for (let x = 0; x < W; x += 90) line([[x, 1100], [x, 1270]], 2, [0.85, 0.8, 0.72]);
+  rect(0, 1270, W, 560, lin(0, 1270, 0, 1830, [[0, [0.42, 0.78, 0.9]], [1, [0.25, 0.6, 0.8]]]));
+  rect(0, 1262, W, 16, [0.98, 0.98, 0.96]);
+  for (let i = 0; i < 9; i++) { const y = 1320 + i * 58, k = (t * 30 + i * 47) % 160; line([[k - 160 + (i % 2) * 70, y], [k - 60 + (i % 2) * 70, y]], 5, [1, 1, 1], 0.35); line([[k + 260, y], [k + 380, y]], 5, [1, 1, 1], 0.35); line([[k + 640, y + 20], [k + 760, y + 20]], 5, [1, 1, 1], 0.35); }
+  [1430, 1650].forEach(y => { for (let x = 10; x < W; x += 36) { circ(x, y, 11); fill(Math.floor(x / 36) % 4 < 2 ? [0.93, 0.4, 0.35] : [1, 1, 1]); } });
+  rect(0, 1830, W, 90, [0.94, 0.91, 0.85]);
+  const sx = 80 + 760 * p, sy = 1545, L = ME(c);
+  ell(sx - 70, sy + 22, 150, 34); fill([0.15, 0.35, 0.5], 0.35);
+  for (let i = 0; i < 4; i++) { const k = (t * 3 + i * 0.25) % 1; circ(sx - 210 - 30 * k + 12 * i, sy + 4 - 26 * Math.sin(k * PI), 10 * (1 - k) + 3); fill([1, 1, 1], 0.8 * (1 - k)); }
+  [0, PI].forEach(ph => { const a = t * 5 + ph, up = Math.sin(a); if (up < -0.2) return; const shx = sx - 20, ex = shx - 120 * Math.cos(a), ey = sy - 10 - 120 * Math.max(0, up); line([[shx, sy], [ex, ey]], 30, L.skin); circ(ex, ey, 18); fill(L.skin); });
+  circ(sx + 40, sy - 18, 46); fill(L.skin); X.beginPath(); X.arc(sx + 40, sy - 26, 48, PI * 1.02, PI * 1.98); X.closePath(); fill(L.top);
+  rr(sx + 52, sy - 34, 40, 18, 8); fill([0.2, 0.25, 0.35]); circ(sx + 75, sy - 25, 7); fill([0.6, 0.85, 0.95]);
+  line([[sx - 30, sy + 26], [sx + 120, sy + 26]], 8, [1, 1, 1], 0.7);
+  line([[970, 1080], [970, 1300]], 10, [0.8, 0.82, 0.85]); line([[1040, 1080], [1040, 1300]], 10, [0.8, 0.82, 0.85]); [1150, 1220].forEach(y => line([[970, y], [1040, y]], 8, [0.8, 0.82, 0.85]));
+  pet(c, 820, 1240, 0.5, t, { flip: -1, tongue: false });
+}
+const VISITOR = { body: 'f', hair: 'bun', hairCol: '#B9B4AD', skin: '#EDC3A6', facial: 'none', outfit: 'jacket', top: '#8E6C9E', inner: '#F2EDE4', pants: '#4D4D59' };
+function hug(c, t) {
+  sky(t, 'day', null, 400);
+  rect(0, 380, W, 1200, [0.93, 0.89, 0.82]); for (let y = 440; y < 1560; y += 56) line([[0, y], [W, y]], 3, [0.82, 0.77, 0.7]);
+  X.beginPath(); X.moveTo(-20, 420); X.lineTo(W / 2, 240); X.lineTo(W + 20, 420); X.closePath(); fill([0.55, 0.36, 0.3]);
+  rect(110, 800, 330, 770, [0.98, 0.85, 0.6]); const g = X.createRadialGradient(275, 1100, 20, 275, 1100, 380); g.addColorStop(0, css([1, 0.92, 0.7], 0.9)); g.addColorStop(1, css([1, 0.8, 0.5], 0)); rect(110, 800, 330, 770, g);
+  X.beginPath(); X.moveTo(110, 800); X.lineTo(20, 760); X.lineTo(20, 1620); X.lineTo(110, 1570); X.closePath(); fill([0.3, 0.45, 0.55]); circ(45, 1200, 10); fill(GOLD);
+  X.lineWidth = 16; X.strokeStyle = css([1, 1, 1]); X.strokeRect(110, 800, 330, 770);
+  rect(720, 820, 260, 280, [0.75, 0.86, 0.95]); X.lineWidth = 14; X.strokeRect(720, 820, 260, 280); line([[850, 820], [850, 1100]], 10, [1, 1, 1]);
+  rect(0, 1570, W, 350, [0.68, 0.52, 0.4]); for (let y = 1620; y < H; y += 70) line([[0, y], [W, y]], 4, [0.58, 0.43, 0.33]);
+  rr(180, 1585, 200, 40, 8); fill([0.55, 0.62, 0.45]);
+  rr(900, 1460, 110, 120, 14); fill([0.85, 0.5, 0.35]); [[935, 1440, 40], [975, 1420, 46], [955, 1390, 40]].forEach(([x, y, r]) => { circ(x, y, r); fill([0.4, 0.62, 0.38]); });
+  const sw = 4 * Math.sin(t * 1.4);
+  const sq = 0.06 * Math.sin(t * 2.4);
+  person(495 + sw, 1700, 0.94, VISITOR, t, { armR: [1.5 + sq, 0.25], armL: [0.25, 0.15], bob: 3 * Math.sin(t * 2.4) });
+  person(590 - sw, 1700, 1.02, ME(c), t, { flip: -1, armR: [1.55 - sq, 0.3], armL: [0.25, 0.15], bob: 3 * Math.sin(t * 2.4 + 1) });
+  hearts(540, 1040, t);
+  pet(c, 820, 1790, 0.8, t, { flip: -1, lookUp: 0.6, walk: 0.3, speed: 12 });
+}
+function stringLights(y0, sag, t) {
+  X.beginPath(); X.moveTo(-20, y0); X.quadraticCurveTo(W / 2, y0 + sag * 2, W + 20, y0); X.lineWidth = 3; X.strokeStyle = css([0.2, 0.2, 0.2]); X.stroke();
+  for (let i = 0; i < 11; i++) { const u = (i + 0.5) / 11, x = -20 + u * (W + 40), y = y0 + 4 * sag * u * (1 - u) + 10, a = 0.6 + 0.4 * Math.sin(t * 3 + i * 1.7); const g = X.createRadialGradient(x, y, 2, x, y, 36); g.addColorStop(0, css([1, 0.85, 0.5], 0.6 * a)); g.addColorStop(1, css([1, 0.85, 0.5], 0)); circ(x, y, 36); X.fillStyle = g; X.fill(); circ(x, y, 8); fill([1, 0.88, 0.6], a); }
+}
+function bbq(c, t) {
+  outdoor(c, t, 'sunset');
+  const wood = gt([0.62, 0.45, 0.32], 'sunset');
+  for (let x = 0; x < W; x += 54) { X.beginPath(); X.moveTo(x + 2, 1340); X.lineTo(x + 2, 1110); X.lineTo(x + 26, 1085); X.lineTo(x + 50, 1110); X.lineTo(x + 50, 1340); X.closePath(); fill(mix(wood, [0, 0, 0], (x / 54) % 2 ? 0.06 : 0)); }
+  rect(0, 1150, W, 14, mix(wood, [0, 0, 0], 0.2)); rect(0, 1280, W, 14, mix(wood, [0, 0, 0], 0.2));
+  stringLights(900, 70, t);
+  person(150, 1660, 0.92, FRIEND2, t, { armR: [0.5, 1.5] }); glass(205, 1290, t);
+  const h = person(380, 1690, 1, ME(c), t, { armR: [0.95 + 0.1 * Math.sin(t * 4), 1.45] });
+  rr(500, 1430, 260, 26, 8); fill([0.25, 0.25, 0.28]); rr(510, 1456, 240, 130, 16); fill([0.2, 0.2, 0.22]);
+  line([[530, 1586], [520, 1760]], 12, [0.3, 0.3, 0.32]); line([[730, 1586], [740, 1760]], 12, [0.3, 0.3, 0.32]);
+  for (let i = 0; i < 4; i++) { rr(540 + i * 52, 1408 - 4 * Math.abs(Math.sin(t * 3 + i)), 40, 18, 9); fill([0.6, 0.3, 0.2]); }
+  steam(560, 1420, t, 3, 60);
+  line([[h.R[0], h.R[1]], [h.R[0] + 90, h.R[1] + 30]], 6, [0.6, 0.6, 0.62]);
+  if (hasPartner(c)) person(870, 1680, 0.94, PT(c), t, { flip: -1, armR: [0.5, 1.5] }); else person(870, 1670, 0.96, FRIEND1, t, { flip: -1, armR: [0.5, 1.5] });
+  kidsOf(c).slice(0, 2).forEach((k, i) => drawKid(k, 980 - i * 70, 1730, t + i, { flip: -1, walk: 0.3 }));
+  pet(c, 640, 1840, 0.75, t, { lookUp: 0.9 });
+}
 const firstBaby = cfg => babiesOf(cfg)[0] || { age: 'baby', hairCol: '#6B4A33', skin: ME(cfg).skin, top: '#F7D9C4' };
 const typing = t => ({ armL: [0.45, 1.45 + 0.1 * Math.sin(t * 14)], armR: [0.45, 1.45 + 0.1 * Math.sin(t * 14 + 1)] });
 
@@ -1163,6 +1311,14 @@ const SCENES = {
   cuddle: { label: 'Cuddling up together', fn(c, t) { room(c, t, { wall: [0.5, 0.42, 0.48], floor: [0.42, 0.32, 0.3], window: 'dusk' }); lamp(170, 1460, t); sofa(220, 960, 1500, [0.78, 0.55, 0.45]); const sw = 6 * Math.sin(t * 1.2); if (hasPartner(c)) person(600 + sw, 1690, 0.95, PT(c), t, { flip: -1, armL: [1.25, 1.75], armR: [0.4, 0.5] }); person(480 + sw, 1690, 1.02, ME(c), t, { armR: [0.95, 2.2], armL: [0.3, 0.4] }); hearts(540, 1000, t); pet(c, 860, 1850, 0.65, t, { flip: -1, tongue: false }); } },
   cafe: { label: 'Focused work at a cafe', fn(c, t) { outdoor(c, t, 'day'); rect(0, 1180, W, 40, [0.95, 0.55, 0.42]); for (let i = 0; i < 9; i++) rect(i * 130, 1220, 65, 40, [1, 1, 1], 0.9); person(420, 1660, 1, ME(c), t, typing(t)); table(200, 760, 1440); laptop(470, 1440, (x, y, w, h) => { for (let i = 0; i < 4; i++) rr(x + 24, y + 26 + i * 34, (w - 80) * (0.5 + 0.5 * ((i * 37 + Math.floor(t * 2)) % 7) / 7), 14, 7); fill([0.55, 0.65, 0.85]); }); rr(650, 1370, 54, 70, 10); fill([1, 1, 1]); steam(660, 1370, t, 2, 22); pet(c, 900, 1760, 0.75, t, { flip: -1 }); } },
   cook_together: { label: 'Cooking together, record playing', fn(c, t) { room(c, t, { wall: [0.97, 0.88, 0.76], floor: [0.62, 0.5, 0.4], window: 'sunset' }); counter(250, 1100, 1440, [0.5, 0.38, 0.3]); stove(560, 1420, t); recordPlayer(900, 1440, t); const s = 0.25 * Math.sin(t * 5); person(200, 1660, 1, ME(c), t, { armR: [0.6 + s, 1.5 + s] }); if (hasPartner(c)) person(360, 1700, 0.94, PT(c), t, { armR: [0.3, 0.6] }); pet(c, 100, 1820, 0.7, t, { lookUp: 0.8 }); hearts(300, 1000, t, 2); } },
+  footy: { label: 'Kicking the footy', fn(c, t) { kickabout(c, t, false); } },
+  soccer: { label: 'Kicking a soccer ball', fn(c, t) { kickabout(c, t, true); } },
+  tennis: { label: 'Playing tennis', fn(c, t) { tennis(c, t); } },
+  surf: { label: 'Heading out for a surf', fn(c, t, p) { surf(c, t, p); } },
+  cycle: { label: 'Going for a ride', fn(c, t, p) { cycle(c, t, p); } },
+  swim: { label: 'Swimming laps', fn(c, t, p) { swim(c, t, p); } },
+  hug: { label: 'A big hug at the door', fn(c, t) { hug(c, t); } },
+  bbq: { label: 'Backyard barbecue', fn(c, t) { bbq(c, t); } },
 };
 const PICKABLE = Object.keys(SCENES).filter(k => k !== 'title' && k !== 'end');
 
@@ -1220,16 +1376,26 @@ function petName(cfg) {
   return ps.every(p => p.type === ps[0].type) ? 'my ' + ps[0].type + 's' : 'my pets';
 }
 function fillText(text, cfg) { return String(text || '').replace(/\{pet\}/g, petName(cfg) || 'my pet'); }
+const FIXED_HOME = { title: 'beach', end: 'beach', calm: 'mountains', campfire: 'mountains', steady: 'mountains', friends: 'park', family: 'park', pram: 'park', parkday: 'park', footy: 'park', soccer: 'park', tennis: 'park', bbq: 'park', schoolrun: 'city', cafe: 'city', surf: 'beach', together: 'beach', songs_outdoor: 'beach' };
+const ROAM_SCENES = new Set(['walk', 'jog', 'start', 'sunrise', 'strong', 'selflove', 'unwind', 'couple', 'cycle', 'celebrate']);
+const ROAM_SHOW = { walk: 'park', jog: 'beach', couple: 'city', cycle: 'city', celebrate: 'beach', unwind: 'beach', strong: 'park' };
+// the setting a scene's picture shows in the chooser
+const homeWorld = k => FIXED_HOME[k] || ROAM_SHOW[k] || 'beach';
+function openingText(cfg) { const nm = cfg.me && (cfg.me.name || '').trim(); return (cfg.opening || '').trim() || 'Good morning' + (nm ? ', ' + nm : ''); }
+function closingText(cfg) { return (cfg.closing || '').trim() || 'Now go live it.'; }
 function timeline(cfg, targetDur) {
-  const items = [{ kind: 'g', text: cfg.opening || 'My life starts now', scene: 'title', d: 6, size: 100 }];
+  const items = [{ kind: 'g', text: openingText(cfg), scene: 'title', d: 6, size: 100 }];
   (cfg.sections || []).forEach(sec => {
     (sec.actions || []).forEach(a => { if (a.text && a.text.trim()) items.push({ kind: 'a', text: a.text, scene: a.scene, world: a.world, d: 5 }); });
     if (sec.glimpse && sec.glimpse.text && sec.glimpse.text.trim()) items.push({ kind: 'g', text: sec.glimpse.text, scene: sec.glimpse.scene, world: sec.glimpse.world, d: sec.glimpse.d || 5.5 });
   });
-  // more than one place picked: outdoor scenes move between them through the film
-  const ws = (cfg.worlds || []).filter(w => WORLDS[w]);
-  if (ws.length > 1) items.forEach((it, k) => { if (!it.world) it.world = ws[k % ws.length]; });
-  items.push({ kind: 'g', text: cfg.closing || "My life starts now. Let's go.", scene: 'end', d: 8, last: true });
+  // every scene has a natural setting; walks, runs and rides move between places so the film keeps changing
+  const ROAMS = ['park', 'beach', 'city', 'mountains'], used = { park: 0, beach: 0, city: 0, mountains: 0 }; let prev = null;
+  items.forEach((it, k) => {
+    if (!it.world) it.world = FIXED_HOME[it.scene] || (ROAM_SCENES.has(it.scene) ? ROAMS.filter(w => w !== prev).sort((a, b) => used[a] - used[b] || ((ROAMS.indexOf(a) + k) % 4) - ((ROAMS.indexOf(b) + k) % 4))[0] : null);
+    if (it.world && (FIXED_HOME[it.scene] || ROAM_SCENES.has(it.scene))) { used[it.world]++; prev = it.world; }
+  });
+  items.push({ kind: 'g', text: closingText(cfg), scene: 'end', d: 8, last: true });
   const raw = items.reduce((s, i) => s + i.d, 0), k = targetDur ? targetDur / raw : 1;
   let s = 0; items.forEach(i => { i.d *= k; i.start = s; s += i.d; });
   return { items, total: s };
@@ -1265,7 +1431,7 @@ function render(ctx, cfg, tl, T) {
 }
 function drawScene(ctx, cfg, key, t, p = 0.5) { X = ctx; X.save(); X.fillStyle = css(CREAM); X.fillRect(0, 0, W, H); (SCENES[key] || SCENES.sunrise).fn(cfg, t, p); X.restore(); }
 
-return { W, H, SCENES, DEFAULT_KID, petsOf, PICKABLE, WORLDS: Object.keys(WORLDS), DEFAULT_ME, DEFAULT_PARTNER, timeline, render, drawScene, fillText, petName };
+return { W, H, SCENES, homeWorld, openingText, closingText, DEFAULT_KID, petsOf, PICKABLE, WORLDS: Object.keys(WORLDS), DEFAULT_ME, DEFAULT_PARTNER, timeline, render, drawScene, fillText, petName };
 })();
 </script>
 <script>
@@ -1417,62 +1583,74 @@ const rand = a => a[Math.floor(Math.random() * a.length)];
 // ------------------------------------------------ themes
 // {key|fallback} is filled from the theme's answers. Scenes starting with @ are picked from answers.
 const THEMES = [
-  { id: 'start', title: 'A fresh start', hint: 'A new chapter, a reset', qs: [],
-    a: [["I understand how I work now, and I work with it", 'idea'], ["I'm building better days, one small win at a time", 'checklist'], ['I wake up clear-headed and ready to go', 'wake'], ['I start each morning with one small win', 'checklist'], ['I plan my day and keep it simple', 'idea']],
-    g: [['Calm, clear and proud of myself', 'sunrise'], ['My new chapter, well underway', 'start']] },
-  { id: 'drink', title: 'Better drinks', hint: 'Soda water, clear mornings', qs: [['swap', 'What do you love to reach for?', 'soda water, kombucha, tea']],
-    a: [['I choose a cold {swap|soda water} and enjoy it', 'soda'], ['I wind down and celebrate in ways that feel good', 'unwind'], ['I wake up clear-headed and ready for the day', 'wake'], ['I dance all night with a {swap|soda water} in hand', 'party']],
-    g: [['Sharp. Rested. Proud of myself.', 'sunrise'], ['Clear head, full of energy', 'celebrate']] },
+  { id: 'move', title: 'Moving my body', hint: 'Training you enjoy', qs: [['activity', 'What kind of movement?', 'gym, running, yoga'], ['freq', 'How often?', '3 times a week']],
+    a: [['I show up for {activity|training} {freq|most mornings}', '@move'], ['I lace up and go, even for ten minutes', 'jog'], ['I lift a little heavier each week', 'gym'], ['I walk {pet} before breakfast', 'walk']],
+    g: [['Fit, strong and full of energy', 'strong'], ['Stronger every month', 'celebrate']] },
   { id: 'food', title: 'Eating well', hint: 'Good food, more energy', qs: [['meal', 'A healthy meal you love?', 'salmon and greens']],
-    a: [['I keep good food in the house, so the easy choice is the healthy one', 'fridge'], ['I cook {meal|real meals} and enjoy making it', 'cook'], ['I eat to feel good, and I notice the difference', 'eat'], ['I plan my meals for the week', 'idea']],
-    g: [['More energy. Feeling great.', 'celebrate'], ['Light, strong and full of energy', 'strong']] },
-  { id: 'move', title: 'Moving my body', hint: 'Training you enjoy', qs: [['activity', 'What kind of movement?', 'gym, running, yoga, surfing'], ['freq', 'How often?', '3 times a week']],
-    a: [['I make time for {activity|exercise} {freq|most days}, even when I don’t feel like it', '@move'], ['I find workouts I actually enjoy, and I mix them up', 'jog'], ['I show up, even for a short session, and that counts', 'gym'], ['I track my progress and watch myself get stronger', 'progress']],
-    g: [['Fit. Strong. A big smile.', 'strong'], ['Stronger every month', 'celebrate']] },
-  { id: 'money', title: 'Money', hint: 'Steady, saving, growing', qs: [['saving', 'What are you saving for?', 'a house deposit, a holiday']],
-    a: [['I check my money every week and know my numbers', 'money'], ['I put something aside every pay for {saving|my future}', 'jar'], ['I spend on what matters most to me', 'money'], ['I build skills that can earn me more', 'laptop']],
-    g: [['Steady and calm, with real upside ahead', 'steady'], ['Money working for me', 'progress']] },
-  { id: 'work', title: 'Work I care about', hint: 'A job, business or project', qs: [['work', 'What are you building or working toward?', 'my own business, a promotion']],
-    a: [['I spend focused hours on {work|work that matters to me}', 'cafe'], ['I show up and do the hard part first', 'hardfirst'], ['I finish what I start, and I ship it', 'ship'], ['I talk to people and learn from them', 'talk']],
-    g: [['Excited to get up for work that’s growing', 'excited'], ['{work|My work}, gaining real traction', 'progress']] },
+    a: [['I cook {meal|a real dinner} at home', 'cook'], ['I fill the fridge with good food on Sunday', 'fridge'], ['I sit down and enjoy every meal', 'eat'], ['I prep my lunches for the week', 'cook']],
+    g: [['More energy every afternoon', 'celebrate'], ['Light, strong, full of energy', 'strong']] },
+  { id: 'money', title: 'Money', hint: 'Saving, steady, growing', qs: [['saving', 'What are you saving for?', 'a house deposit, a holiday']],
+    a: [['I check my numbers every Sunday', 'money'], ['Every payday, some goes to {saving|savings}', 'jar'], ['I learn a skill that pays', 'laptop']],
+    g: [['{saving|The savings goal}, done', 'progress'], ['Calm about money, with room to spare', 'steady']] },
+  { id: 'people', title: 'People I love', hint: 'Friends and family', qs: [['who', 'Who do you want more time with?', 'my parents, old friends']],
+    a: [['I visit {who|family} and stay for dinner', 'hug'], ['I call {who|the people I love} every week', 'talk'], ['I host the barbecue this time', 'bbq'], ['I say yes when friends make plans', 'friends']],
+    g: [['Surrounded by people I love', 'campfire'], ['A full table and a lot of laughs', 'bbq']] },
+  { id: 'sport', title: 'Sport', hint: 'Playing the game', qs: [['sport', 'What sport?', 'footy, tennis, surfing']],
+    a: [['I get out for {sport|sport} every week', '@sport'], ['I train between sessions to stay sharp', 'jog'], ['I stretch and recover after every session', 'calm']],
+    g: [['Fitter, faster, loving it', '@sport'], ['Better every season', '@sport']] },
+  { id: 'calm', title: 'A calm mind', hint: 'Rest, sleep, peace', qs: [],
+    a: [['I breathe slowly for five minutes', 'calm'], ['I’m in bed early and up rested', 'wake'], ['I walk without my phone and look around', 'walk'], ['I stretch on the mat each morning', 'calm']],
+    g: [['Calm, clear and present', 'sunrise'], ['Rested and easy in myself', 'steady']] },
+  { id: 'screen', title: 'Less screen time', hint: 'Phone down, life up', qs: [],
+    a: [['I read a book instead of scrolling', 'read'], ['My phone stays in the drawer at dinner', 'familydinner'], ['I head outside when I want to scroll', 'walk'], ['I wake up and look at the sky first', 'wake']],
+    g: [['More time, and I’m present for it', 'sunrise'], ['Here for the good stuff', 'together']] },
+  { id: 'drink', title: 'Better drinks', hint: 'Soda water, clear mornings', qs: [['swap', 'What do you love to reach for?', 'soda water, kombucha, tea']],
+    a: [['I order a {swap|soda water} and enjoy it', 'soda'], ['I dance all night with a {swap|soda water} in hand', 'party'], ['I wake up on Sunday clear and ready', 'wake'], ['I swap the after-work drink for a walk', 'unwind']],
+    g: [['Sharp, rested and proud of myself', 'sunrise'], ['Clear head, big mornings', 'celebrate']] },
+  { id: 'brave', title: 'Confidence', hint: 'Saying yes, speaking up', qs: [['yes', 'Something you’d love to say yes to?', 'a dance class, speaking up at work']],
+    a: [['I say yes to {yes|the thing that scares me}', 'excited'], ['I speak up in the meeting', 'talk'], ['I walk in and say hello first', 'friends'], ['I stand tall and take up space', 'strong']],
+    g: [['Proud of who I’m becoming', 'selflove'], ['Brave, and it feels good', 'celebrate']] },
   { id: 'love', title: 'Finding love', hint: 'Open to the right person', qs: [],
-    a: [['I put myself out there', 'friends'], ['I\u2019m open to meeting the right {pw|person}', 'friends'], ['I love myself, and I have a lot to offer', 'selflove'], ['I deserve love, and I have so much love to give', 'date'], ['I’m kind and present with the people I meet', 'talk']],
+    a: [['I say yes to the invite and go', 'friends'], ['I ask them out for a coffee', 'date'], ['I dress up and head out', 'excited'], ['I’m kind and curious with new people', 'talk']],
     g: [['Falling for each other. Easy and real.', 'couple']] },
   { id: 'partner', title: 'My relationship', hint: 'Closer with my partner', qs: [['pname', 'Partner’s name?', 'Sam']],
-    a: [['I make time for {pname|my partner}, just the two of us', 'date'], ['I listen properly and say what I appreciate', 'cuddle'], ['I show up for {pname|us} every day', 'cook_together'], ['We plan our future together', 'couple']],
+    a: [['Friday is date night with {pname|my partner}', 'date'], ['We cook together with a record on', 'cook_together'], ['I tell {pname|my partner} what I love about them', 'cuddle'], ['We walk and plan our future', 'couple']],
     g: [['Closer every year', 'together']] },
   { id: 'family', title: 'Being a present parent', hint: 'Time with my kids', qs: [['kids', 'Kids’ names?', 'Mia and Jack']],
-    a: [['I’m present with {kids|my kids}, phone away', 'parkday'], ['I read to {kids|my kids} at bedtime', 'bedtime'], ['I do the school run with a smile', 'schoolrun'], ['We eat dinner together most nights', 'familydinner']],
+    a: [['Phone away, I play with {kids|my kids}', 'parkday'], ['I read to {kids|my kids} every night', 'bedtime'], ['I walk {kids|the kids} to school', 'schoolrun'], ['We eat dinner together at the table', 'familydinner']],
     g: [['A home full of laughter', 'family']] },
   { id: 'grow', title: 'Growing our family', hint: 'Getting ready for kids', qs: [],
-    a: [['I create a calm, loving home', 'cook_together'], ['I get my health ready for the family I’m building', 'jog'], ['I get our money ready for a family', 'money'], ['I make room in my life for little ones', 'excited']],
+    a: [['We cook healthy meals together', 'cook_together'], ['I get fit for the family I’m building', 'jog'], ['I save for our family every payday', 'jar'], ['We talk about the parents we’ll be', 'couple']],
     g: [['Our family, growing', 'pram'], ['A little one in my arms', 'holdbaby']] },
-  { id: 'people', title: 'Friends and family', hint: 'My people, my values', qs: [['who', 'Who do you want more time with?', 'my parents, old friends']],
-    a: [['I make time for {who|the people who share my values}', 'campfire'], ['I reach out first and keep in touch', 'talk'], ['I say yes to plans with people I love', 'friends']],
-    g: [['Surrounded by people I love', 'campfire']] },
+  { id: 'work', title: 'Work I care about', hint: 'A job, business or project', qs: [['work', 'What are you building or working toward?', 'my own business, a promotion']],
+    a: [['I do two focused hours on {work|my work}', 'cafe'], ['I do the hard part first', 'hardfirst'], ['I finish it and send it out', 'ship'], ['I ask for advice and really listen', 'talk']],
+    g: [['{work|My work}, really taking off', 'progress'], ['Excited to start the day', 'excited']] },
+  { id: 'start', title: 'A fresh start', hint: 'A new chapter, a reset', qs: [],
+    a: [['I’m up with the sun and ready to go', 'wake'], ['I tick off one small win before nine', 'checklist'], ['I write down three things for tomorrow', 'idea'], ['I step out the door with a plan', 'start']],
+    g: [['My new chapter, well underway', 'start'], ['Calm, clear and proud of myself', 'sunrise']] },
   { id: 'create', title: 'Making things', hint: 'Music, art, writing', qs: [['craft', 'What do you create?', 'music, painting, writing']],
-    a: [['I make {craft|something creative} most days, even when it’s rough', '@craft'], ['I finish what I start and enjoy the done feeling', '@craftdone'], ['I share my {craft|work} with people', '@craftshare']],
+    a: [['I make {craft|something} most days, rough is fine', '@craft'], ['I finish it and call it done', '@craftdone'], ['I share my {craft|work} with friends', '@craftshare']],
     g: [['{craft|Work} I’m proud of', '@craftshare']] },
-  { id: 'learn', title: 'Learning and growing', hint: 'A skill, a language', qs: [['learn', 'What are you learning?', 'Spanish, coding, guitar']],
-    a: [['I practise {learn|something new} a little every day', 'read'], ['I read and learn something every day', 'read'], ['I ask questions and keep growing', 'idea']],
-    g: [['Growing into who I want to be', 'sunrise']] },
-  { id: 'calm', title: 'A calm mind', hint: 'Rest, sleep, peace', qs: [],
-    a: [['I stop, breathe and come back to now', 'calm'], ['I protect my sleep and wind down early', 'unwind'], ['I put my phone down and notice what’s around me', 'walk']],
-    g: [['Calm, clear and present', 'sunrise']] },
+  { id: 'learn', title: 'Learning something new', hint: 'A skill, a language', qs: [['learn', 'What are you learning?', 'Spanish, coding, guitar']],
+    a: [['I practise {learn|something new} with my morning coffee', '@learn'], ['I do a lesson on my lunch break', 'laptop'], ['I try it out loud, mistakes and all', 'talk']],
+    g: [['{learn|It}, finally clicking', 'celebrate']] },
   { id: 'travel', title: 'Adventure', hint: 'A trip to plan for', qs: [['place', 'Where to?', 'Vietnam']],
-    a: [['I’m saving and planning for {place|my next adventure}', 'travel'], ['I put a little aside for {place|the trip} every pay', 'jar']],
+    a: [['I save for {place|my next trip} every payday', 'jar'], ['I map out {place|the trip}, step by step', 'travel'], ['I book the weekend away', 'travel']],
     g: [['{place|Adventure}, here I come', 'start']] },
   { id: 'home', title: 'Home', hint: 'A place I love', qs: [['home', 'Your dream home or place?', 'a house by the beach']],
-    a: [['I walk {pet} and take in where I live', 'walk'], ['I keep my home fresh and a place I love coming back to', 'clean'], ['I’m working toward {home|a home I love}', 'money']],
+    a: [['I walk {pet} and take in where I live', 'walk'], ['I clear one drawer every Sunday', 'clean'], ['I save for {home|the home I want}', 'money']],
     g: [['Home, just how I want it', 'cook_together']] },
 ];
 const TH = id => THEMES.find(t => t.id === id);
-const MOVE_SCENE = v => /run|jog/.test(v) ? 'jog' : /yoga|stretch|pilates|medit/.test(v) ? 'calm' : /walk|hike/.test(v) ? 'walk' : /gym|weight|lift|strength/.test(v) ? 'gym' : 'gym';
+const MOVE_SCENE = v => /surf|swim|cycl|bike|ride|tennis|footy|soccer|padel/.test(v) ? SPORT_SCENE(v) : /run|jog/.test(v) ? 'jog' : /yoga|stretch|pilates|medit/.test(v) ? 'calm' : /walk|hike/.test(v) ? 'walk' : /gym|weight|lift|strength/.test(v) ? 'gym' : 'gym';
+const SPORT_SCENE = v => /soccer|futsal/.test(v) ? 'soccer' : /tennis|padel|squash|badminton|pickle/.test(v) ? 'tennis' : /surf|bodyboard/.test(v) ? 'surf' : /swim|triathl/.test(v) ? 'swim' : /cycl|bike|ride|riding|mtb/.test(v) ? 'cycle' : /run|athlet/.test(v) ? 'jog' : 'footy';
 const isMusic = v => /music|song|guitar|sing|band|piano|beat/.test(v);
 function sceneFor(sc, fills) {
   if (!sc.startsWith('@')) return sc;
   const craft = (fills.craft || '').toLowerCase(), act = (fills.activity || '').toLowerCase();
   if (sc === '@move') return MOVE_SCENE(act);
+  if (sc === '@sport') return SPORT_SCENE((fills.sport || '').toLowerCase());
+  if (sc === '@learn') return isMusic((fills.learn || '').toLowerCase()) ? 'guitar' : 'read';
   if (sc === '@craft') return isMusic(craft) ? 'guitar' : /paint|draw|art|sketch/.test(craft) ? 'paint' : 'laptop';
   if (sc === '@craftdone') return isMusic(craft) ? 'songcard' : /paint|draw|art/.test(craft) ? 'paint' : 'ship';
   if (sc === '@craftshare') return isMusic(craft) ? 'songs_outdoor' : 'friends';
@@ -1485,7 +1663,7 @@ function fillT(tpl, fills, cfg) {
   const auto = { pname: cfg.partner && cfg.partner.on && cfg.partner.status !== 'hoping' ? (cfg.partner.name || '').trim() : '', kids: kidNames.length ? joinN(kidNames) : '' };
   let out = tpl.replace(/\{(\w+)\|([^}]*)\}/g, (m, k, fb) => { const v = (fills[k] || '').trim() || auto[k] || ''; return v || fb; });
   out = out.replace(/\{pet\}/g, LSN.petName(cfg) || 'outside');
-  if (/I walk outside/.test(out)) out = out.replace('I walk outside and', 'I get outside and');
+  if (/I walk outside/.test(out)) out = out.replace('I walk outside', 'I get outside');
   out = out.replace(/\s+/g, ' ').trim();
   return out.charAt(0).toUpperCase() + out.slice(1);
 }
@@ -1502,7 +1680,7 @@ function buildSection(th, fills, cfg) {
   const own = {}; Object.entries(fills || {}).forEach(([k, v]) => { if (String(v || '').trim()) own[k] = v; });
   fills = Object.assign(autoFills(cfg), own);
   const n = Math.min(th.a.length, th.a.length >= 4 ? 3 : th.a.length);
-  const idx = [...th.a.keys()].sort(() => Math.random() - 0.5).slice(0, n).sort((a, b) => a - b);
+  const idx = [0, ...[...th.a.keys()].slice(1).sort(() => Math.random() - 0.5).slice(0, n - 1)].sort((a, b) => a - b);
   const g = rand(th.g);
   return { theme: th.id, title: th.title, actions: idx.map(i => ({ text: fillT(th.a[i][0], fills, cfg), scene: sceneFor(th.a[i][1], fills) })), glimpse: { text: fillT(g[0], fills, cfg), scene: sceneFor(g[1], fills) } };
 }
@@ -1516,12 +1694,19 @@ const WORLD_LABELS = { beach: 'Beach', park: 'Green and leafy', city: 'City', mo
 const DEFAULT_ME = { body: 'm', hair: 'short', hairCol: '#6B4A33', grey: false, skin: '#E8BA99', facial: 'stubble', facialCol: '#6B4A33', outfit: 'tee', top: '#4F7FB0', inner: '#EFE8DC', pants: '#30406E' };
 const EXAMPLE = ['move', 'food', 'people', 'calm', 'create'];
 const fresh = () => {
-  const cfg = { world: 'beach', tint: null, me: { ...DEFAULT_ME }, pets: [{ type: 'dog', name: '', coat: '#A14F26', muzzle: 'dark', ears: 'floppy' }], kids: [], partner: { on: false, status: 'have', ...LSN.DEFAULT_PARTNER, on: false }, opening: 'My life starts now', closing: "My life starts now. Let's go.", sections: [] };
-  return { v: 2, step: 0, themes: [], fills: {}, notes: '', isExample: false, linesTouched: false, cfg };
+  const cfg = { world: 'beach', tint: null, me: { ...DEFAULT_ME }, pets: [{ type: 'dog', name: '', coat: '#A14F26', muzzle: 'dark', ears: 'floppy' }], kids: [], partner: { on: false, status: 'have', ...LSN.DEFAULT_PARTNER, on: false }, opening: '', closing: '', sections: [] };
+  return { v: 2, stepsV: 4, step: 0, themes: [], fills: {}, notes: '', isExample: false, linesTouched: false, cfg };
 };
 let S = fresh();
-try { const raw = localStorage.getItem('lsn-draft-v2'); if (raw) { const d = JSON.parse(raw); if (d && d.v === 2 && d.cfg && d.cfg.me) S = Object.assign(fresh(), d); } } catch (e) {}
-if (S.isExample) { S.isExample = false; S.linesTouched = false; liveLines(); }
+try { const raw = localStorage.getItem('lsn-draft-v2'); if (raw) { const d = JSON.parse(raw); if (d && d.v === 2 && d.cfg && d.cfg.me) {
+  // older drafts: the Your world step is gone, and the old default words give way to the new ones
+  if (!d.stepsV) { d.step = [0, 1, 1, 2, 3][d.step] || 0; d.stepsV = 4; }
+  if (d.cfg.opening === 'My life starts now') d.cfg.opening = '';
+  if (d.cfg.closing === "My life starts now. Let's go.") d.cfg.closing = '';
+  S = Object.assign(fresh(), d);
+} } } catch (e) {}
+if (S.isExample) { S.isExample = false; S.linesTouched = false; }
+liveLines();
 let saveTimer;
 const save = () => { clearTimeout(saveTimer); saveTimer = setTimeout(() => { try { localStorage.setItem('lsn-draft-v2', JSON.stringify(S)); } catch (e) {} }, 400); };
 const photos = [];
@@ -1547,18 +1732,17 @@ function errCopy(e) {
 }
 
 // ------------------------------------------------ steps
-const STEP_NAMES = ['What you\'re building', 'Your world', 'Your people', 'Your scenes', 'Song and save'];
+const STEP_NAMES = ['What you\'re building', 'Your people', 'Your scenes', 'Song and save'];
 function renderSteps() {
   const nav = $('#steps'); nav.innerHTML = '';
   STEP_NAMES.forEach((n, i) => nav.append(el('button', { 'aria-current': i === S.step ? 'step' : false, class: i < S.step ? 'done' : '', onclick: () => go(i) }, el('span', { class: 'n' }, String(i + 1)), n)));
   $$('.panel[data-step]').forEach(p => p.hidden = +p.dataset.step !== S.step);
-  if (S.step === 1) renderWorlds();
-  if (S.step === 2) renderPeople();
-  if (S.step === 3) renderLines();
-  if (S.step === 4) renderSongOpts();
+  if (S.step === 1) renderPeople();
+  if (S.step === 2) renderLines();
+  if (S.step === 3) renderSongOpts();
   setPreviewForStep();
 }
-function go(i) { S.step = Math.max(0, Math.min(4, i)); save(); renderSteps(); const b = $('#builder'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+function go(i) { S.step = Math.max(0, Math.min(3, i)); save(); renderSteps(); const b = $('#builder'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 $$('[data-next]').forEach(b => b.onclick = () => go(S.step + 1));
 $$('[data-prev]').forEach(b => b.onclick = () => go(S.step - 1));
 
@@ -1591,7 +1775,7 @@ function liveLines() {
   const ids = THEMES.map(t => t.id).filter(id => S.themes.includes(id));
   const keep = {}; (S.cfg.sections || []).forEach(s => { if (s.theme) keep[s.theme] = s; });
   const names = [S.cfg.partner.on && S.cfg.partner.name, (S.cfg.kids || []).map(k => k.name)];
-  const key = id => JSON.stringify([S.fills[id] || {}, names]);
+  const key = id => JSON.stringify(['w2', S.fills[id] || {}, names]);
   S.cfg.sections = ids.map(id => keep[id] && key(id) === keep[id]._fills ? keep[id] : Object.assign(buildSection(TH(id), S.fills[id] || {}, S.cfg), { _fills: key(id) }));
   S.isExample = false;
 }
@@ -1699,6 +1883,8 @@ const LOOK_FIELDS = [
   ['hairCol', 'Hair colour', 'color', HAIR],
   ['grey', 'Grey streaks', 'seg', [[false, 'No'], [true, 'Yes']], L => L.hair === 'wavy'],
   ['skin', 'Skin tone', 'color', SKIN],
+  ['glasses', 'Glasses', 'seg', [[false, 'No'], [true, 'Yes']]],
+  ['chair', 'Uses a wheelchair', 'seg', [[false, 'No'], [true, 'Yes']]],
   ['facial', 'Facial hair', 'seg', [['none', 'None'], ['stubble', 'Stubble'], ['moustache', 'Moustache'], ['beard', 'Beard']]],
   ['facialCol', 'Facial hair colour', 'color', HAIR, L => L.facial !== 'none'],
   ['outfit', 'Outfit', 'seg', [['jacket', 'Jacket'], ['tee', 'T-shirt'], ['dress', 'Dress']]],
@@ -1723,6 +1909,8 @@ const KID_FIELDS = [
   ['hair', 'Hair', 'seg', [['short', 'Short'], ['long', 'Long'], ['curly', 'Curly'], ['bun', 'Bun'], ['buzz', 'Buzz cut']], K => K.age !== 'baby'],
   ['hairCol', 'Hair colour', 'color', HAIR],
   ['skin', 'Skin tone', 'color', SKIN],
+  ['glasses', 'Glasses', 'seg', [[false, 'No'], [true, 'Yes']], K => K.age !== 'baby'],
+  ['chair', 'Uses a wheelchair', 'seg', [[false, 'No'], [true, 'Yes']], K => K.age !== 'baby'],
   ['outfit', 'Outfit', 'seg', [['tee', 'T-shirt'], ['dress', 'Dress']], K => K.age !== 'baby'],
   ['top', 'Top colour', 'color', CLOTH],
   ['pants', 'Pants colour', 'color', CLOTH, K => K.age !== 'baby' && K.outfit !== 'dress'],
@@ -1753,7 +1941,7 @@ function fieldUI(obj, fields, box, prefix, onChange, pkey) {
   fields.forEach(([k, label, type, opts, show, onPick]) => {
     if (show && !show(obj)) return;
     let ctl;
-    if (type === 'seg') ctl = el('div', { class: 'seg', role: 'group', 'aria-label': label }, opts.map(([v, l]) => el('button', { 'aria-pressed': obj[k] === v ? 'true' : 'false', onclick: () => { obj[k] = v; if (onPick) onPick(obj, v); onChange(); } }, l)));
+    if (type === 'seg') ctl = el('div', { class: 'seg', role: 'group', 'aria-label': label }, opts.map(([v, l]) => el('button', { 'aria-pressed': obj[k] === v || (v === false && obj[k] == null) ? 'true' : 'false', onclick: () => { obj[k] = v; if (onPick) onPick(obj, v); onChange(); } }, l)));
     else if (type === 'color') {
       const pick = el('input', { type: 'color', value: isHex(obj[k]) ? obj[k] : '#888888', 'aria-label': label + ', any colour' });
       pick.oninput = () => { obj[k] = pick.value; save(); };
@@ -1810,10 +1998,13 @@ const SCENE_WORDS = [
   [/\b(baby|newborn|pregnan\w*|nursery)\b/, 'holdbaby'], [/\b(pram|stroller)\b/, 'pram'],
   [/\b(bedtime|story|stories|tuck)\b/, 'bedtime'], [/\b(school run|school drop|drop.?off)\b/, 'schoolrun'],
   [/\b(kids?|children|son|daughter|play(ing)? with)\b/, 'parkday'], [/\b(family dinner|dinner together|eat together)\b/, 'familydinner'],
-  [/\b(date|date night|romance|romantic)\b/, 'date'], [/\b(cuddle|hug|close|intimate|appreciate|listen to (him|her|them))\b/, 'cuddle'],
+  [/\b(date|date night|romance|romantic)\b/, 'date'], [/\b(cuddle|close|intimate|appreciate|listen to (him|her|them))\b/, 'cuddle'],
   [/\b(dance|dancing|party|gig|night out)\b/, 'party'], [/\b(soda|sober|alcohol|drink(s|ing)?|beer|wine|booze|kombucha|mocktail)\b/, 'soda'],
   [/\b(gym|weights?|lift(ing)?|strength|squats?|deadlifts?|pump)\b/, 'gym'], [/\b(run|running|jog|jogging|marathon|parkrun)\b/, 'jog'],
-  [/\b(swim|surf|ocean|beach)\b/, 'celebrate'], [/\b(yoga|stretch\w*|pilates|meditat\w*|breathe|breath\w*|calm|quiet|mindful\w*|present)\b/, 'calm'],
+  [/\b(footy|afl|aussie rules|rugby|kick(ing)? the ball)\b/, 'footy'], [/\b(soccer|futsal)\b/, 'soccer'], [/\b(tennis|padel|squash|badminton|pickleball)\b/, 'tennis'],
+  [/\b(surf\w*|bodyboard\w*)\b/, 'surf'], [/\b(swim\w*|laps|pool)\b/, 'swim'], [/\b(cycl\w*|bike|ride|riding)\b/, 'cycle'],
+  [/\b(barbecue|bbq|barbie|host\w*)\b/, 'bbq'], [/\b(visit\w*|hug|mum|dad|mom|nan|grandma|grandpa|parents)\b/, 'hug'],
+  [/\b(ocean|beach)\b/, 'celebrate'], [/\b(yoga|stretch\w*|pilates|meditat\w*|breathe|breath\w*|calm|quiet|mindful\w*|present)\b/, 'calm'],
   [/\b(walk|walking|stroll|hike|hiking|bush|outside|outdoors|nature)\b/, 'walk'],
   [/\b(move|moving|exercise|workout|work out|train|training|fit|fitness|sport|active)\b/, 'gym'],
   [/\b(sleep|bed early|wake|waking|alarm|early)\b/, 'wake'],
@@ -1852,10 +2043,9 @@ function thumbCanvas(item) {
   return cv;
 }
 const zoomThumb = (ctx, w, h) => { const k = h / 1400; ctx.setTransform(k, 0, 0, k, -140 * k, -520 * k); };
-const SCENE_HOME = { walk: 'park', jog: 'park', calm: 'mountains', celebrate: 'beach', couple: 'city', friends: 'park', campfire: 'mountains', travel: 'city' };
-function drawThumb(t, tt) { const it = t.item; LSN.drawScene(t.ctx, it.world && it.world !== S.cfg.world ? { ...S.cfg, world: it.world } : S.cfg, it.scene, tt % 5.5, (tt % 5.5) / 5.5); }
+function drawThumb(t, tt) { const it = t.item; LSN.drawScene(t.ctx, { ...S.cfg, world: it.world || LSN.homeWorld(it.scene) }, it.scene, tt % 5.5, (tt % 5.5) / 5.5); }
 function tickThumbs(now) {
-  if (S.step !== 3 || recording || now - thumbClock < 110) return;
+  if (S.step !== 2 || recording || now - thumbClock < 110) return;
   thumbClock = now; const tt = now / 1000;
   liveThumbs.forEach(t => { if (t.vis && t.cv.isConnected) drawThumb(t, tt + t.off); });
 }
@@ -1883,9 +2073,10 @@ function sceneCard(kind, item, onRemove) {
 // one of each kind of moment, grouped so it's quick to scan (look-alikes left out; they still play if already chosen)
 const SCENE_GROUPS = [
   ['Body', ['walk', 'jog', 'gym', 'calm', 'celebrate', 'wake']],
+  ['Sport', ['footy', 'soccer', 'tennis', 'surf', 'cycle', 'swim']],
   ['Food and drink', ['cook', 'eat', 'fridge', 'soda']],
   ['Love and family', ['cuddle', 'date', 'couple', 'cook_together', 'family', 'familydinner', 'parkday', 'schoolrun', 'bedtime', 'pram', 'holdbaby']],
-  ['Friends and fun', ['friends', 'campfire', 'party']],
+  ['Friends and fun', ['hug', 'bbq', 'friends', 'campfire', 'party']],
   ['Work and money', ['cafe', 'ship', 'idea', 'money', 'jar', 'talk']],
   ['Making and learning', ['read', 'paint', 'songs_outdoor', 'guitar', 'travel']],
   ['Home', ['clean', 'excited']],
@@ -1899,7 +2090,7 @@ function openScenePick(item, done) {
     const grid = el('div', { class: 'scenegrid' });
     keys.filter(k => LSN.SCENES[k]).forEach(k => {
       const cv = el('canvas', { width: 135, height: 240, 'aria-hidden': 'true' }), x = cv.getContext('2d'); zoomThumb(x, 135, 240);
-      LSN.drawScene(x, SCENE_HOME[k] ? { ...cfg, world: SCENE_HOME[k] } : cfg, k, 2.2, 0.5);
+      LSN.drawScene(x, { ...cfg, world: LSN.homeWorld(k) }, k, 2.2, 0.5);
       grid.append(el('button', { 'aria-pressed': k === item.scene ? 'true' : 'false', onclick: () => { item.scene = k; closeScenePick(true); } }, cv, el('span', {}, LSN.SCENES[k].label)));
     });
     box.append(el('h4', { class: 'scenegroup' }, name), grid);
@@ -1913,7 +2104,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#scene
 function markEdited() { S.isExample = false; S.linesTouched = true; $('#exampleBanner').hidden = true; save(); updateMeta(); }
 function renderLines() {
   $('#exampleBanner').hidden = true;
-  $('#opening').value = S.cfg.opening; $('#closing').value = S.cfg.closing;
+  $('#opening').value = S.cfg.opening || ''; $('#closing').value = S.cfg.closing || ''; $('#opening').placeholder = LSN.openingText({ me: S.cfg.me }); $('#closing').placeholder = LSN.closingText({});
   const box = $('#sections'); box.innerHTML = ''; liveThumbs = [];
   if (!S.cfg.sections.length) box.append(el('div', { class: 'banner' }, 'Tick what you\u2019re building on step 1 and your scenes appear here. Or add your own theme below.'));
   S.cfg.sections.forEach((sec, si) => {
@@ -1930,8 +2121,8 @@ function renderLines() {
   });
   updateMeta();
 }
-$('#opening').oninput = e => { S.cfg.opening = e.target.value; markEdited(); preview('glimpse', { text: S.cfg.opening, scene: 'title' }); };
-$('#closing').oninput = e => { S.cfg.closing = e.target.value; markEdited(); preview('glimpse', { text: S.cfg.closing, scene: 'end' }); };
+$('#opening').oninput = e => { S.cfg.opening = e.target.value; markEdited(); preview('glimpse', { text: LSN.openingText(S.cfg), scene: 'title' }); };
+$('#closing').oninput = e => { S.cfg.closing = e.target.value; markEdited(); preview('glimpse', { text: LSN.closingText(S.cfg), scene: 'end' }); };
 $('#addSection').onclick = () => { S.cfg.sections.push({ title: 'My own theme', actions: [{ text: '', scene: 'walk' }], glimpse: { text: '', scene: 'celebrate' } }); markEdited(); renderLines(); };
 const fmt = s => { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
 function updateMeta() {
@@ -1994,10 +2185,9 @@ const audio = new Audio(); audio.preload = 'auto';
 function preview(kind, item) { if (recording) return; stopMovie(); mode = { type: 'line', kind, item }; t0 = performance.now(); $('#stageNote').textContent = 'Previewing this line'; }
 function setPreviewForStep() {
   if (recording || playing) return;
-  if (S.step === 0) { mode = { type: 'scene', scene: 'title', text: S.cfg.opening }; $('#stageNote').textContent = 'Your film opens like this'; }
-  else if (S.step === 1) { mode = { type: 'scene', scene: 'walk' }; $('#stageNote').textContent = 'Your world'; }
-  else if (S.step === 2) { mode = { type: 'scene', scene: 'together' }; $('#stageNote').textContent = 'Your people'; }
-  else if (S.step === 3) { mode = { type: 'line', kind: 'glimpse', item: { text: S.cfg.opening, scene: 'title' } }; $('#stageNote').textContent = 'Tap a picture to preview that scene'; }
+  if (S.step === 0) { mode = { type: 'scene', scene: 'title', text: LSN.openingText(S.cfg) }; $('#stageNote').textContent = 'Your film opens like this'; }
+  else if (S.step === 1) { mode = { type: 'scene', scene: 'together' }; $('#stageNote').textContent = 'Your people'; }
+  else if (S.step === 2) { mode = { type: 'line', kind: 'glimpse', item: { text: LSN.openingText(S.cfg), scene: 'title' } }; $('#stageNote').textContent = 'Tap a picture to preview that scene'; }
   else { mode = { type: 'movie' }; $('#stageNote').textContent = song ? 'Press play to watch with your song' : 'Press play to watch'; }
   t0 = performance.now();
 }
@@ -2026,7 +2216,7 @@ const DEMO_SECTIONS = [
   ], glimpse: { text: 'Closer every year', scene: 'couple', world: 'city', d: 4 } }
 ];
 const DEMO_ME = { body: 'm', hair: 'short', hairCol: '#2E2622', grey: false, skin: '#E3B08E', facial: 'stubble', facialCol: '#2E2622', outfit: 'tee', top: '#4F7FB0', inner: '#EFE8DC', pants: '#30406E' };
-const DEMO_CFG = { world: 'beach', tint: null, me: DEMO_ME, pets: [{ type: 'dog', name: '', coat: '#A14F26', muzzle: 'dark', ears: 'floppy' }], kids: [], partner: { ...LSN.DEFAULT_PARTNER, on: true, status: 'have' }, opening: 'My life starts now', closing: "My life starts now. Let's go.", sections: DEMO_SECTIONS };
+const DEMO_CFG = { world: 'beach', tint: null, me: DEMO_ME, pets: [{ type: 'dog', name: '', coat: '#A14F26', muzzle: 'dark', ears: 'floppy' }], kids: [], partner: { ...LSN.DEFAULT_PARTNER, on: true, status: 'have' }, opening: '', closing: '', sections: DEMO_SECTIONS };
 const heroTL = LSN.timeline(DEMO_CFG);
 const filmCfg = () => S.cfg;
 function movieTL() {
@@ -2093,11 +2283,11 @@ function frame(now) {
       $('#scrub').value = Math.round(1000 * movieT / tl.total); $('#timeLbl').textContent = fmt(movieT) + ' / ' + fmt(tl.total);
     } else if (mode.type === 'line') {
       const it = mode.item, t = ((now - t0) / 1000) % 5.5;
-      LSN.render(sx, S.cfg, { items: [{ kind: mode.kind === 'glimpse' ? 'g' : 'a', text: it.text || ' ', scene: it.scene, world: it.world, d: 5.5, start: 0, size: it.scene === 'title' ? 100 : 78 }], total: 5.5 }, t);
+      LSN.render(sx, S.cfg, { items: [{ kind: mode.kind === 'glimpse' ? 'g' : 'a', text: it.text || ' ', scene: it.scene, world: it.world || LSN.homeWorld(it.scene), d: 5.5, start: 0, size: it.scene === 'title' ? 100 : 78 }], total: 5.5 }, t);
     } else {
       const t = ((now - t0) / 1000) % 6;
-      if (mode.text) LSN.render(sx, S.cfg, { items: [{ kind: 'g', text: mode.text, scene: mode.scene, d: 6, start: 0, size: 100 }], total: 6 }, t);
-      else LSN.drawScene(sx, S.cfg, mode.scene, t, t / 6);
+      if (mode.text) LSN.render(sx, S.cfg, { items: [{ kind: 'g', text: mode.text, scene: mode.scene, world: LSN.homeWorld(mode.scene), d: 6, start: 0, size: 100 }], total: 6 }, t);
+      else LSN.drawScene(sx, { ...S.cfg, world: LSN.homeWorld(mode.scene) }, mode.scene, t, t / 6);
     }
   }
   if (!recording) heroFrame(Math.min(0.1, (now - lastFrame) / 1000));
@@ -2107,8 +2297,9 @@ function frame(now) {
 
 // ------------------------------------------------ player + song
 let actx = null, srcNode = null, gainNode = null, spkNode = null, muted = false;
+// iPhones on silent mute sound that runs through the page's mixer unless it's marked as media playback
+try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
 function ensureAudioGraph() {
-  if (!song) return null;
   // the speaker gain sits after the recording tap, so muting the preview never mutes a saved video
   if (!actx) { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null; actx = new AC(); srcNode = actx.createMediaElementSource(audio); gainNode = actx.createGain(); spkNode = actx.createGain(); spkNode.gain.value = muted ? 0 : 1; srcNode.connect(gainNode); gainNode.connect(spkNode); spkNode.connect(actx.destination); }
   if (actx.state === 'suspended') actx.resume(); return actx;
@@ -2126,10 +2317,13 @@ function unlockAudio() {
 async function playMovie() {
   if (heroSound) { heroSound = false; heroAudio.pause(); soundLabel(); }
   mode = { type: 'movie' }; if (movieT >= movieTL().total - 0.1) movieT = 0;
-  playing = true; $('#playBtn').textContent = 'Pause'; if (S.step === 4) renderTracks();
+  playing = true; $('#playBtn').textContent = 'Pause'; if (S.step === 3) renderTracks();
+  // no music chosen yet: start the default track now, inside the tap, and let it join when it's ready
+  ensureAudioGraph();
+  if (!song) { unlockAudio(); if (!composing) { pickTrack(S.song.track || 'sunrise'); $('#stageNote').textContent = 'Adding music. It joins in a moment.'; } }
   if (song) { ensureAudioGraph(); audio.currentTime = S.song.offset + movieT; try { await audio.play(); } catch (e) { stopMovie(); } }
 }
-function stopMovie() { if (!playing) return; playing = false; audio.pause(); setGain(1); $('#playBtn').textContent = 'Play my film'; if (S.step === 4) renderTracks(); }
+function stopMovie() { if (!playing) return; playing = false; audio.pause(); setGain(1); $('#playBtn').textContent = 'Play my film'; if (S.step === 3) renderTracks(); }
 $('#playBtn').onclick = () => { if (!recording) playing ? stopMovie() : playMovie(); };
 $$('[data-mute]').forEach(b => b.onclick = () => setMuted(!muted));
 // ------------------------------------------------ hero example film
@@ -2184,7 +2378,7 @@ function useSong(f, name, beat, andPlay) {
     const nat = LSN.timeline(S.cfg).total; S.song.fit = beat ? 'song' : (audio.duration > nat * 1.5 ? 'lines' : 'song');
     $('#songStatus').textContent = `${name} \u00b7 ${fmt(audio.duration)}`;
     if (beat) song.beat = beat;
-    if (join && playing) { ensureAudioGraph(); audio.currentTime = Math.min(movieT, audio.duration - 1); audio.play().catch(() => {}); if (fullOpen) $('#fullNote').textContent = 'Music: ' + name; }
+    if (join && playing) { ensureAudioGraph(); audio.currentTime = Math.min(movieT, audio.duration - 1); audio.play().catch(() => {}); $('#stageNote').textContent = 'Now playing: ' + name; if (fullOpen) $('#fullNote').textContent = 'Music: ' + name; }
     else { movieT = 0; setPreviewForStep(); if (andPlay && !recording) { playMovie(); $('#stageNote').textContent = 'Now playing: ' + name; } }
     renderSongOpts();
     if (beat) { /* beat known from the composer */ }
