@@ -353,6 +353,7 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
           <div id="result" hidden class="panel" style="gap:10px">
             <video class="result" id="resultVideo" controls playsinline></video>
             <div class="row"><button class="btn coral" id="saveBtn">Save to my device</button></div>
+            <p class="meta" id="shareHint" hidden>Send it straight to Instagram, TikTok or your camera roll.</p>
             <p class="status" id="saveStatus"></p>
           </div>
         </div>
@@ -2530,6 +2531,11 @@ $('#recBtn').onclick = async () => {
   $('#resultVideo').src = URL.createObjectURL(resultBlob); $('#result').hidden = false;
   st.textContent = (early ? 'Stopped early. ' : 'Done. ') + `${(resultBlob.size / 1048576).toFixed(1)} MB, ${resultExt.toUpperCase()} video.` + (silent ? ' No music in this one, so add your song when you post it.' : '');
   $('#saveStatus').textContent = ''; $('#saveBtn').hidden = false;
+  // phones open the share sheet, which lists Instagram and TikTok next to Save Video, so say so
+  let canShareFile = false;
+  try { canShareFile = !downloads && !!navigator.canShare && navigator.canShare({ files: [new File([resultBlob], 'film.' + resultExt, { type: resultBlob.type })] }); } catch (e) {}
+  $('#saveBtn').textContent = canShareFile ? 'Save or share' : 'Save to my device';
+  $('#shareHint').hidden = !canShareFile;
   movieT = 0; setPreviewForStep();
 };
 $('#saveBtn').onclick = async () => {
