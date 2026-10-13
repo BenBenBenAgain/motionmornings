@@ -1701,7 +1701,7 @@ const WORLD_LABELS = { beach: 'Beach', park: 'Green and leafy', city: 'City', mo
 const DEFAULT_ME = { body: 'm', hair: 'short', hairCol: '#6B4A33', grey: false, skin: '#E8BA99', facial: 'stubble', facialCol: '#6B4A33', outfit: 'tee', top: '#4F7FB0', inner: '#EFE8DC', pants: '#30406E' };
 const EXAMPLE = ['move', 'food', 'people', 'calm', 'create'];
 const fresh = () => {
-  const cfg = { world: 'beach', tint: null, me: { ...DEFAULT_ME }, pets: [{ type: 'dog', name: '', coat: '#A14F26', muzzle: 'dark', ears: 'floppy' }], kids: [], partner: { on: false, status: 'have', ...LSN.DEFAULT_PARTNER, on: false }, opening: '', closing: '', sections: [] };
+  const cfg = { world: 'beach', tint: null, me: { ...DEFAULT_ME }, pets: [], kids: [], partner: { on: false, status: 'have', ...LSN.DEFAULT_PARTNER, on: false }, opening: '', closing: '', sections: [] };
   return { v: 2, stepsV: 4, step: 0, themes: [], fills: {}, notes: '', isExample: false, linesTouched: false, cfg };
 };
 let S = fresh();
