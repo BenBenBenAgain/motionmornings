@@ -60,6 +60,8 @@ button,input,textarea,select{font:inherit;color:inherit}
 .steps button[aria-current="step"]{color:var(--ink);border-color:var(--coral)}
 .steps button[aria-current="step"] .n{background:var(--coral);color:var(--coral-ink)}
 .steps button.done .n{background:var(--ok);color:#fff}
+.steps button:disabled{opacity:.45;cursor:not-allowed}
+.steperr{margin:0;font-weight:600;padding:10px 14px;border-radius:12px;background:color-mix(in srgb,var(--coral) 14%,transparent)}
 /* phones: all four steps visible, two by two */
 @media (max-width:640px){.steps{display:grid;grid-template-columns:1fr 1fr;overflow:visible}.steps button{min-width:0;font-size:.86rem;line-height:1.2;text-align:left;padding:6px 10px 6px 6px;border-radius:16px}.steps button .n{flex:none}}
 
@@ -288,6 +290,7 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
       <section class="panel" data-step="0">
         <header><h2>What you're building</h2><p class="lede">This year or ten years from now. Tick what you want in your life, and a couple of quick questions turn each one into the steps you take today.</p></header>
         <div class="card mequick" id="meQuick" aria-label="You"></div>
+        <p class="status err steperr" id="step0Err" hidden></p>
         <div class="card"><div class="tiles" id="tiles"></div></div>
         <div class="card" id="fillsCard"><div class="subhead"><h3>A few details</h3></div><div class="fills" id="fills"></div></div>
         <div class="card"><label class="q" for="notes">Anything else? <span class="hint">Optional. Places, names, the feeling you're after.</span><textarea id="notes" rows="2" placeholder="e.g. living by the beach, a new chapter, more time outdoors"></textarea></label></div>
@@ -1712,7 +1715,7 @@ const DEFAULT_ME = { body: 'm', hair: 'short', hairCol: '#6B4A33', grey: false, 
 const EXAMPLE = ['move', 'food', 'people', 'calm', 'create'];
 const fresh = () => {
   const cfg = { world: 'beach', tint: null, me: { ...DEFAULT_ME, sex: null, skin: null, unset: true }, pets: [], kids: [], partner: { on: false, status: 'have', ...LSN.DEFAULT_PARTNER, on: false }, opening: '', closing: '', sections: [] };
-  return { v: 2, stepsV: 4, step: 0, themes: [], fills: {}, notes: '', isExample: false, linesTouched: false, cfg };
+  return { v: 2, stepsV: 4, step: 0, reached: 0, themes: [], fills: {}, notes: '', isExample: false, linesTouched: false, cfg };
 };
 let S = fresh();
 try { const raw = localStorage.getItem('lsn-draft-v2'); if (raw) { const d = JSON.parse(raw); if (d && d.v === 2 && d.cfg && d.cfg.me) {
@@ -1723,6 +1726,8 @@ try { const raw = localStorage.getItem('lsn-draft-v2'); if (raw) { const d = JSO
   S = Object.assign(fresh(), d);
 } } } catch (e) {}
 if (S.isExample) { S.isExample = false; S.linesTouched = false; }
+// the furthest step someone has reached; steps beyond it stay locked so the film is built in order
+if (typeof S.reached !== 'number') S.reached = S.step;
 liveLines();
 let saveTimer;
 const save = () => { clearTimeout(saveTimer); saveTimer = setTimeout(() => { try { localStorage.setItem('lsn-draft-v2', JSON.stringify(S)); } catch (e) {} }, 400); };
@@ -1752,7 +1757,7 @@ function errCopy(e) {
 const STEP_NAMES = ['What you\'re building', 'Your people', 'Your scenes', 'Song and save'];
 function renderSteps() {
   const nav = $('#steps'); nav.innerHTML = '';
-  STEP_NAMES.forEach((n, i) => nav.append(el('button', { 'aria-current': i === S.step ? 'step' : false, class: i < S.step ? 'done' : '', onclick: () => go(i) }, el('span', { class: 'n' }, String(i + 1)), n)));
+  STEP_NAMES.forEach((n, i) => nav.append(el('button', { 'aria-current': i === S.step ? 'step' : false, class: i < S.step ? 'done' : '', disabled: i > S.reached ? '' : null, title: i > S.reached ? 'Finish the steps before this one first' : null, onclick: () => go(i) }, el('span', { class: 'n' }, String(i + 1)), n)));
   $$('.panel[data-step]').forEach(p => p.hidden = +p.dataset.step !== S.step);
   if (S.step === 0) renderMe();
   if (S.step === 1) renderPeople();
@@ -1760,7 +1765,16 @@ function renderSteps() {
   if (S.step === 3) renderSongOpts();
   setPreviewForStep();
 }
-function go(i) { S.step = Math.max(0, Math.min(3, i)); if (S.step > 0) meReady(S.cfg.me); save(); renderSteps(); const b = $('#builder'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+// moving on from step one needs at least one thing ticked, otherwise there's nothing to make a film from
+function canLeave(step) {
+  if (step === 0 && !S.themes.length) { const e = $('#step0Err'); e.textContent = 'Tick at least one thing you want in your life to start your film.'; e.hidden = false; e.scrollIntoView({ behavior: 'smooth', block: 'center' }); return false; }
+  return true;
+}
+function go(i) {
+  i = Math.max(0, Math.min(3, i));
+  if (i > S.reached + 1) return;
+  if (i > S.step) { for (let s = S.step; s < i; s++) if (!canLeave(s)) return; }
+  S.step = i; S.reached = Math.max(S.reached, i); if (S.step > 0) meReady(S.cfg.me); save(); renderSteps(); const b = $('#builder'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 $$('[data-next]').forEach(b => b.onclick = () => go(S.step + 1));
 $$('[data-prev]').forEach(b => b.onclick = () => go(S.step - 1));
 
@@ -1769,7 +1783,7 @@ function renderThemes() {
   const box = $('#tiles'); box.innerHTML = '';
   THEMES.forEach(th => {
     const on = S.themes.includes(th.id);
-    box.append(el('button', { class: 'tile', 'aria-pressed': on ? 'true' : 'false', onclick: () => { S.themes = on ? S.themes.filter(x => x !== th.id) : [...S.themes, th.id]; liveLines(); save(); renderThemes(); if (!on) { const sec = S.cfg.sections.find(s => s.theme === th.id); const a = sec && sec.actions.find(x => x.text && x.text.trim()); if (a) { preview('action', a); $('#stageNote').textContent = 'Added to your film: ' + th.title; } } else { $('#stageNote').textContent = 'Taken out of your film: ' + th.title; } } }, el('b', {}, th.title), el('small', {}, th.hint)));
+    box.append(el('button', { class: 'tile', 'aria-pressed': on ? 'true' : 'false', onclick: () => { S.themes = on ? S.themes.filter(x => x !== th.id) : [...S.themes, th.id]; $('#step0Err').hidden = true; liveLines(); save(); renderThemes(); if (!on) { const sec = S.cfg.sections.find(s => s.theme === th.id); const a = sec && sec.actions.find(x => x.text && x.text.trim()); if (a) { preview('action', a); $('#stageNote').textContent = 'Added to your film: ' + th.title; } } else { $('#stageNote').textContent = 'Taken out of your film: ' + th.title; } } }, el('b', {}, th.title), el('small', {}, th.hint)));
   });
   const fills = $('#fills'); fills.innerHTML = '';
   const withQs = THEMES.filter(t => S.themes.includes(t.id) && t.qs.length);
