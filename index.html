@@ -116,7 +116,9 @@ textarea{min-height:76px}
 .mequick{flex-direction:row;flex-wrap:wrap;gap:10px 18px;align-items:center;padding-block:12px}
 .mequick .field{display:flex;align-items:center;gap:10px;grid-template-columns:none}
 .mequick .field > span{font-size:.9rem;white-space:nowrap}
-.mequick input{max-width:170px}
+.mequick input[type=text]{max-width:170px}
+.mequick .sw input[type=color],.mequick .sw .frompic{display:none}
+.mequick .sw button{width:26px;height:26px}
 .seg{display:flex;flex-wrap:wrap;gap:6px}
 .seg button{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:5px 12px;cursor:pointer;font-size:.9rem}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
@@ -1912,7 +1914,8 @@ function applySex(o, v, kid) {
   else { o.facial = 'none'; o.outfit = 'tee'; if (o.hair === 'bald') o.hair = 'short'; }
 }
 const PARTNER_SEX = ['sex', 'Look', 'seg', [['m', 'Man'], ['f', 'Woman'], ['x', 'Neutral']], null, (o, v) => applySex(o, v, false)];
-const ME_QUICK = [['name', 'Your name', 'text', 'e.g. Ben'], PARTNER_SEX];
+// skin sits up top too: the quickest way for the preview to look like you. Fine-tuning stays in Your people.
+const ME_QUICK = [['name', 'Your name', 'text', 'e.g. Ben'], PARTNER_SEX, ['skin', 'Skin', 'color', SKIN]];
 const ME_FIELDS = LOOK_FIELDS;
 const PARTNER_NAME = ['name', 'Their name', 'text', 'e.g. Sam', P => P.status !== 'hoping'];
 const KID_FIELDS = [
