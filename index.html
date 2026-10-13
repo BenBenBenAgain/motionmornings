@@ -60,6 +60,8 @@ button,input,textarea,select{font:inherit;color:inherit}
 .steps button[aria-current="step"]{color:var(--ink);border-color:var(--coral)}
 .steps button[aria-current="step"] .n{background:var(--coral);color:var(--coral-ink)}
 .steps button.done .n{background:var(--ok);color:#fff}
+/* phones: all four steps visible, two by two */
+@media (max-width:640px){.steps{display:grid;grid-template-columns:1fr 1fr;overflow:visible}.steps button{min-width:0;font-size:.86rem;line-height:1.2;text-align:left;padding:6px 10px 6px 6px;border-radius:16px}.steps button .n{flex:none}}
 
 /* main grid */
 .grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:40px;align-items:start;margin-top:14px}
