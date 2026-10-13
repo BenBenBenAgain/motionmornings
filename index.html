@@ -1142,7 +1142,8 @@ function seated(x, y, s, L, t, b) {
 
 // ---------------------------------------------------------------- scenes
 const walkX = (p, x0, x1, k0 = 0, k1 = 0.75) => { const q = clamp((p - k0) / (k1 - k0)); return [x0 + (x1 - x0) * ease(q), q > 0 && q < 1]; };
-const ME = cfg => cfg.me || DEFAULT_ME;
+// a brand new film has no look or skin picked yet; anything that still draws them gets a sensible stand-in
+const ME = cfg => { const m = cfg.me || DEFAULT_ME; return m.skin ? m : Object.assign({}, m, { skin: DEFAULT_ME.skin }); };
 const F2 = cfg => cfg.friend2 || FRIEND2;
 const PT = cfg => cfg.partner || DEFAULT_PARTNER;
 const firstKid = cfg => kidsOf(cfg)[0] || DEFAULT_KID;
@@ -1274,7 +1275,7 @@ const firstBaby = cfg => babiesOf(cfg)[0] || { age: 'baby', hairCol: '#6B4A33', 
 const typing = t => ({ armL: [0.45, 1.45 + 0.1 * Math.sin(t * 14)], armR: [0.45, 1.45 + 0.1 * Math.sin(t * 14 + 1)] });
 
 const SCENES = {
-  title: { label: 'Opening sunrise', fn(c, t, p) { outdoor(c, t, 'sunrise', 1080 - 140 * ease(p)); const q = clamp((p - 0.3) / 0.7), x = -480 + 1500 * q, m = q > 0 && q < 1; person(x, 1660, 1, ME(c), t, { walk: m ? 1 : 0, armL: [0.12, 0.05], armR: [0.3, 0.2] }); pet(c, x + 250, 1710, 0.9, t, { walk: m ? 1 : 0 }); } },
+  title: { label: 'Opening sunrise', fn(c, t, p) { outdoor(c, t, 'sunrise', 1080 - 140 * ease(p)); const q = clamp((p - 0.3) / 0.7), x = -480 + 1500 * q, m = q > 0 && q < 1; if (!(c.me && c.me.unset)) person(x, 1660, 1, ME(c), t, { walk: m ? 1 : 0, armL: [0.12, 0.05], armR: [0.3, 0.2] }); pet(c, x + 250, 1710, 0.9, t, { walk: m ? 1 : 0 }); } },
   end: { label: 'Closing sunset walk', fn(c, t, p) { outdoor(c, t, 'sunset', 960 + 60 * p); const n = 1 + (hasPartner(c) ? 1 : 0) + kidsOf(c).length; const x0 = n > 1 ? 200 : 420; const x = x0 + (1100 + n * 150) * ease(clamp((p - 0.25) / 0.75)), m = p > 0.25; const right = familyRow(c, x, 1690, t, { walk: m ? 1 : 0, s: n > 3 ? 0.85 : 1 }); pet(c, right + 70, 1730, 0.85, t, { walk: m ? 1 : 0 }); } },
 
   walk: { label: 'Walking with my dog', fn(c, t, p) { outdoor(c, t, 'day'); const x = 80 + 520 * p, dx = x + 270 + 40 * Math.sin(t * 1.5); const h = person(x, 1660, 1, ME(c), t, { walk: 1, armL: [0.12, 0.05], armR: [0.55, 0.35] }); const P0 = petsOf(c)[0]; if (P0 && P0.type === 'dog') { const k = 0.85 * ({ s: 0.68, m: 0.86, l: 1, xl: 1.2 }[P0.size] || 1), cx = dx + 95 * k, cy = 1720 - 175 * k; X.beginPath(); X.moveTo(h.R[0], h.R[1]); X.quadraticCurveTo((h.R[0] + cx) / 2, Math.max(h.R[1], cy) + 70, cx, cy); X.lineWidth = 5; X.strokeStyle = css([0.85, 0.3, 0.25]); X.stroke(); } pet(c, dx, 1720, 0.85, t, { walk: 1, speed: 12 }); } },
@@ -1710,7 +1711,7 @@ const WORLD_LABELS = { beach: 'Beach', park: 'Green and leafy', city: 'City', mo
 const DEFAULT_ME = { body: 'm', hair: 'short', hairCol: '#6B4A33', grey: false, skin: '#E8BA99', facial: 'stubble', facialCol: '#6B4A33', outfit: 'tee', top: '#4F7FB0', inner: '#EFE8DC', pants: '#30406E' };
 const EXAMPLE = ['move', 'food', 'people', 'calm', 'create'];
 const fresh = () => {
-  const cfg = { world: 'beach', tint: null, me: { ...DEFAULT_ME }, pets: [], kids: [], partner: { on: false, status: 'have', ...LSN.DEFAULT_PARTNER, on: false }, opening: '', closing: '', sections: [] };
+  const cfg = { world: 'beach', tint: null, me: { ...DEFAULT_ME, sex: null, skin: null, unset: true }, pets: [], kids: [], partner: { on: false, status: 'have', ...LSN.DEFAULT_PARTNER, on: false }, opening: '', closing: '', sections: [] };
   return { v: 2, stepsV: 4, step: 0, themes: [], fills: {}, notes: '', isExample: false, linesTouched: false, cfg };
 };
 let S = fresh();
@@ -1759,7 +1760,7 @@ function renderSteps() {
   if (S.step === 3) renderSongOpts();
   setPreviewForStep();
 }
-function go(i) { S.step = Math.max(0, Math.min(3, i)); save(); renderSteps(); const b = $('#builder'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+function go(i) { S.step = Math.max(0, Math.min(3, i)); if (S.step > 0) meReady(S.cfg.me); save(); renderSteps(); const b = $('#builder'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 $$('[data-next]').forEach(b => b.onclick = () => go(S.step + 1));
 $$('[data-prev]').forEach(b => b.onclick = () => go(S.step - 1));
 
@@ -1917,7 +1918,9 @@ function applySex(o, v, kid) {
 }
 const PARTNER_SEX = ['sex', 'Look', 'seg', [['m', 'Man'], ['f', 'Woman'], ['x', 'Neutral']], null, (o, v) => applySex(o, v, false)];
 // skin sits up top too: the quickest way for the preview to look like you. Fine-tuning stays in Your people.
-const ME_QUICK = [['name', 'Your name', 'text', 'e.g. Ben'], PARTNER_SEX, ['skin', 'Skin', 'color', SKIN]];
+// picking a look is what brings the character into the preview
+const meReady = o => { if (!o.unset) return; o.unset = false; if (!o.skin) o.skin = DEFAULT_ME.skin; if (!o.sex) { o.sex = 'm'; applySex(o, 'm', false); } };
+const ME_QUICK = [['name', 'Your name', 'text', 'e.g. Ben'], [PARTNER_SEX[0], PARTNER_SEX[1], PARTNER_SEX[2], PARTNER_SEX[3], null, (o, v) => { applySex(o, v, false); meReady(o); }], ['skin', 'Skin', 'color', SKIN]];
 const ME_FIELDS = LOOK_FIELDS;
 const PARTNER_NAME = ['name', 'Their name', 'text', 'e.g. Sam', P => P.status !== 'hoping'];
 const KID_FIELDS = [
@@ -1976,7 +1979,7 @@ function fieldUI(obj, fields, box, prefix, onChange, pkey) {
   });
 }
 function peopleChanged() { liveLines(); save(); renderMe(); renderPeople(); setPreviewForStep(); }
-function renderMe() { if (!S.cfg.me.sex) S.cfg.me.sex = S.cfg.me.body === 'f' ? 'f' : 'm'; fieldUI(S.cfg.me, ME_QUICK, $('#meQuick'), 'me-', peopleChanged, 'me'); }
+function renderMe() { if (!S.cfg.me.sex && !S.cfg.me.unset) S.cfg.me.sex = S.cfg.me.body === 'f' ? 'f' : 'm'; fieldUI(S.cfg.me, ME_QUICK, $('#meQuick'), 'me-', peopleChanged, 'me'); }
 // "Ben's Motion Mornings": the film is titled with the person's name, the lines stay in their own voice
 const possessive = n => n + (/s$/i.test(n) ? '’' : '’s');
 function filmTitle() { const n = (S.cfg.me.name || '').trim(); return n ? possessive(n) + ' Motion Mornings' : 'Make your film'; }
