@@ -268,7 +268,7 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
     <div class="herofilm">
       <div class="phone"><canvas id="heroStage" width="720" height="1280" aria-label="Example film: a sunrise beach walk, the gym, a bush run, cooking together, working at a city cafe, cleaning the house, breathing by a mountain lake, dancing at a party and cuddling up at home"></canvas></div>
       <div class="herobar"><i id="heroBar"></i></div>
-      <div class="row" style="justify-content:center"><button class="btn ghost small" id="heroPlay">Pause</button><button class="btn small" id="heroSound">Sound on</button></div>
+      <div class="row" style="justify-content:center"><button class="btn ghost small" id="heroPlay">Pause</button><button class="btn small" id="heroSound">🔊 Tap for sound</button></div>
       <p class="herosong">Now imagine it with your favourite song.</p>    </div>
     <div class="herocopy">
       <span class="pill">Life in motion</span>
@@ -2373,7 +2373,7 @@ heroBtn.onclick = () => { heroPlaying = !heroPlaying; heroLabel(); if (heroSound
 const heroAudio = new Audio(); heroAudio.preload = 'auto';
 let heroSound = false, heroTrack = null, heroTLm = heroTL;
 const soundBtn = $('#heroSound');
-const soundLabel = () => { soundBtn.textContent = heroSound ? 'Sound off' : (heroTrack ? 'Sound on' : 'Sound on'); };
+const soundLabel = () => { soundBtn.textContent = heroSound ? 'Sound off' : '🔊 Tap for sound'; };
 const heroReady = (async () => {
   // the example film plays Howqua's "Time" from the top, cut to the film's length with a fade at the end
   heroAudio.src = 'demo-music.mp3';
@@ -2390,6 +2390,9 @@ soundBtn.onclick = () => {
   const go = () => { heroAudio.currentTime = Math.min(heroT, Math.max(0, heroTLm.total - 0.2)); heroAudio.play().catch(() => { heroSound = false; soundLabel(); }); };
   if (heroTrack) go(); else { soundBtn.textContent = 'Loading...'; heroReady.then(() => { if (heroSound) { go(); soundLabel(); } }); }
 };
+// tapping the film itself: first tap brings the music in, after that it pauses and plays like a video
+heroCv.style.cursor = 'pointer';
+heroCv.addEventListener('click', () => { if (!heroSound) soundBtn.onclick(); else heroBtn.onclick(); });
 try { new IntersectionObserver(es => { heroVisible = es[0].isIntersecting; if (heroSound) { if (heroVisible && heroPlaying) heroAudio.play().catch(() => {}); else heroAudio.pause(); } }).observe(heroCv); } catch (e) {}
 $('#startBuild').onclick = () => { const b = $('#builder'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 function heroFrame(dt) {
