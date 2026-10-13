@@ -289,8 +289,8 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
     <main id="panels">
       <section class="panel" data-step="0">
         <header><h2>What you're building</h2><p class="lede">This year or ten years from now. Tick what you want in your life, and a couple of quick questions turn each one into the steps you take today.</p></header>
-        <div class="card mequick" id="meQuick" aria-label="You"></div>
         <p class="status err steperr" id="step0Err" hidden></p>
+        <div class="card mequick" id="meQuick" aria-label="You"></div>
         <div class="card"><div class="tiles" id="tiles"></div></div>
         <div class="card" id="fillsCard"><div class="subhead"><h3>A few details</h3></div><div class="fills" id="fills"></div></div>
         <div class="card"><label class="q" for="notes">Anything else? <span class="hint">Optional. Places, names, the feeling you're after.</span><textarea id="notes" rows="2" placeholder="e.g. living by the beach, a new chapter, more time outdoors"></textarea></label></div>
@@ -1767,14 +1767,21 @@ function renderSteps() {
 }
 // moving on from step one needs at least one thing ticked, otherwise there's nothing to make a film from
 function canLeave(step) {
-  if (step === 0 && !S.themes.length) { const e = $('#step0Err'); e.textContent = 'Tick at least one thing you want in your life to start your film.'; e.hidden = false; e.scrollIntoView({ behavior: 'smooth', block: 'center' }); return false; }
+  if (step === 0) {
+    const me = S.cfg.me, need = [me.unset && 'look', !me.skin && 'skin tone'].filter(Boolean), needGoal = !S.themes.length;
+    if (need.length || needGoal) {
+      const e = $('#step0Err'), pick = 'Pick your ' + need.join(' and ');
+      e.textContent = need.length && needGoal ? pick + ', and tick at least one thing you want in your life.' : need.length ? pick + ' so your film starts with you.' : 'Tick at least one thing you want in your life to start your film.';
+      e.hidden = false; e.scrollIntoView({ behavior: 'smooth', block: 'center' }); return false;
+    }
+  }
   return true;
 }
 function go(i) {
   i = Math.max(0, Math.min(3, i));
   if (i > S.reached + 1) return;
   if (i > S.step) { for (let s = S.step; s < i; s++) if (!canLeave(s)) return; }
-  S.step = i; S.reached = Math.max(S.reached, i); if (S.step > 0) meReady(S.cfg.me); save(); renderSteps(); const b = $('#builder'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  S.step = i; S.reached = Math.max(S.reached, i); if (S.step > 0) meFull(S.cfg.me); save(); renderSteps(); const b = $('#builder'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 $$('[data-next]').forEach(b => b.onclick = () => go(S.step + 1));
 $$('[data-prev]').forEach(b => b.onclick = () => go(S.step - 1));
 
@@ -1783,7 +1790,7 @@ function renderThemes() {
   const box = $('#tiles'); box.innerHTML = '';
   THEMES.forEach(th => {
     const on = S.themes.includes(th.id);
-    box.append(el('button', { class: 'tile', 'aria-pressed': on ? 'true' : 'false', onclick: () => { S.themes = on ? S.themes.filter(x => x !== th.id) : [...S.themes, th.id]; $('#step0Err').hidden = true; liveLines(); save(); renderThemes(); if (!on) { const sec = S.cfg.sections.find(s => s.theme === th.id); const a = sec && sec.actions.find(x => x.text && x.text.trim()); if (a) { preview('action', a); $('#stageNote').textContent = 'Added to your film: ' + th.title; } } else { $('#stageNote').textContent = 'Taken out of your film: ' + th.title; } } }, el('b', {}, th.title), el('small', {}, th.hint)));
+    box.append(el('button', { class: 'tile', 'aria-pressed': on ? 'true' : 'false', onclick: () => { S.themes = on ? S.themes.filter(x => x !== th.id) : [...S.themes, th.id]; step0Ok(); liveLines(); save(); renderThemes(); if (!on) { const sec = S.cfg.sections.find(s => s.theme === th.id); const a = sec && sec.actions.find(x => x.text && x.text.trim()); if (a) { preview('action', a); $('#stageNote').textContent = 'Added to your film: ' + th.title; } } else { $('#stageNote').textContent = 'Taken out of your film: ' + th.title; } } }, el('b', {}, th.title), el('small', {}, th.hint)));
   });
   const fills = $('#fills'); fills.innerHTML = '';
   const withQs = THEMES.filter(t => S.themes.includes(t.id) && t.qs.length);
@@ -1933,7 +1940,8 @@ function applySex(o, v, kid) {
 const PARTNER_SEX = ['sex', 'Look', 'seg', [['m', 'Man'], ['f', 'Woman'], ['x', 'Neutral']], null, (o, v) => applySex(o, v, false)];
 // skin sits up top too: the quickest way for the preview to look like you. Fine-tuning stays in Your people.
 // picking a look is what brings the character into the preview
-const meReady = o => { if (!o.unset) return; o.unset = false; if (!o.skin) o.skin = DEFAULT_ME.skin; if (!o.sex) { o.sex = 'm'; applySex(o, 'm', false); } };
+const meReady = o => { if (!o.unset) return; o.unset = false; if (!o.sex) { o.sex = 'm'; applySex(o, 'm', false); } };
+const meFull = o => { meReady(o); if (!o.skin) o.skin = DEFAULT_ME.skin; };
 const ME_QUICK = [['name', 'Your name', 'text', 'e.g. Ben'], [PARTNER_SEX[0], PARTNER_SEX[1], PARTNER_SEX[2], PARTNER_SEX[3], null, (o, v) => { applySex(o, v, false); meReady(o); }], ['skin', 'Skin', 'color', SKIN]];
 const ME_FIELDS = LOOK_FIELDS;
 const PARTNER_NAME = ['name', 'Their name', 'text', 'e.g. Sam', P => P.status !== 'hoping'];
@@ -1993,7 +2001,8 @@ function fieldUI(obj, fields, box, prefix, onChange, pkey) {
   });
 }
 function peopleChanged() { liveLines(); save(); renderMe(); renderPeople(); setPreviewForStep(); }
-function renderMe() { if (!S.cfg.me.sex && !S.cfg.me.unset) S.cfg.me.sex = S.cfg.me.body === 'f' ? 'f' : 'm'; fieldUI(S.cfg.me, ME_QUICK, $('#meQuick'), 'me-', peopleChanged, 'me'); }
+function step0Ok() { const e = $('#step0Err'); if (e && !e.hidden && !S.cfg.me.unset && S.cfg.me.skin && S.themes.length) e.hidden = true; }
+function renderMe() { step0Ok(); if (!S.cfg.me.sex && !S.cfg.me.unset) S.cfg.me.sex = S.cfg.me.body === 'f' ? 'f' : 'm'; fieldUI(S.cfg.me, ME_QUICK, $('#meQuick'), 'me-', peopleChanged, 'me'); }
 // "Ben's Motion Mornings": the film is titled with the person's name, the lines stay in their own voice
 const possessive = n => n + (/s$/i.test(n) ? '’' : '’s');
 function filmTitle() { const n = (S.cfg.me.name || '').trim(); return n ? possessive(n) + ' Motion Mornings' : 'Make your film'; }
