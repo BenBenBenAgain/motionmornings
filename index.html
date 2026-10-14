@@ -61,6 +61,9 @@ button,input,textarea,select{font:inherit;color:inherit}
 .steps button[aria-current="step"] .n{background:var(--coral);color:var(--coral-ink)}
 .steps button.done .n{background:var(--ok);color:#fff}
 .steps button:disabled{opacity:.45;cursor:not-allowed}
+.tile.full{opacity:.5}
+.goalmeta{margin:0;font-weight:600}
+.goalmeta.bump{color:var(--coral)}
 .steperr{margin:0;font-weight:600;padding:10px 14px;border-radius:12px;background:color-mix(in srgb,var(--coral) 14%,transparent)}
 /* phones: all four steps visible, two by two */
 @media (max-width:640px){.steps{display:grid;grid-template-columns:1fr 1fr;overflow:visible}.steps button{min-width:0;font-size:.86rem;line-height:1.2;text-align:left;padding:6px 10px 6px 6px;border-radius:16px}.steps button .n{flex:none}}
@@ -291,7 +294,7 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
         <header><h2>What you're building</h2><p class="lede">This year or ten years from now. Tick what you want in your life, and a couple of quick questions turn each one into the steps you take today.</p></header>
         <p class="status err steperr" id="step0Err" hidden></p>
         <div class="card mequick" id="meQuick" aria-label="You"></div>
-        <div class="card"><div class="tiles" id="tiles"></div></div>
+        <div class="card"><p class="meta goalmeta" id="goalMeta"></p><div class="tiles" id="tiles"></div></div>
         <div class="card" id="fillsCard"><div class="subhead"><h3>A few details</h3></div><div class="fills" id="fills"></div></div>
         <div class="card"><label class="q" for="notes">Anything else? <span class="hint">Optional. Places, names, the feeling you're after.</span><textarea id="notes" rows="2" placeholder="e.g. living by the beach, a new chapter, more time outdoors"></textarea></label></div>
         <div class="navrow"><span></span><button class="btn coral" data-next>Next: your people</button></div>
@@ -334,7 +337,7 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
       </section>
 
       <section class="panel" data-step="3" hidden>
-        <header><h2>Your music, then save it</h2><p class="lede">Pick one of our free tracks, or add a song of your own. Your film stretches to fit the music, and scenes change on the beat.</p></header>
+        <header><h2>Pick your song</h2><p class="lede">Three ways to add music: one of our <b>free tracks</b> below, an <b>MP3 of your own</b>, or <b>save it without music</b> and add any song inside Instagram or TikTok.</p></header>
         <div class="card">
           <div class="subhead"><h3>Free tracks</h3><button class="btn ghost small" data-mute aria-pressed="false">Mute</button></div>
           <p class="meta">Original cinematic music, made right here for the length of your film. Free to use anywhere, including when you share it.</p>
@@ -647,6 +650,8 @@ const FRIEND1 = { body: 'm', hair: 'short', hairCol: '#261F1A', skin: '#C98E66',
 const FRIEND2 = { body: 'f', hair: 'long', hairCol: '#D9B373', skin: '#F2D3BC', facial: 'none', outfit: 'tee', top: '#F2BF59', inner: '#F2BF59', pants: '#404D73' };
 
 function person(x, y, s, L, t, o = {}) {
+  // someone who hasn't picked a look yet isn't drawn: the scene runs without them
+  const ghost = !!(L && L.unset); if (ghost) { X.save(); X.globalAlpha = 0; }
   const walk = o.walk || 0, speed = o.speed || 7, armL = o.armL || [0.15, 0.1], armR = o.armR || [0.15, 0.1];
   const smile = o.smile !== false, flip = o.flip || 1;
   // a wheelchair: the body sits lower, the legs bend at the seat, and the wheels turn when moving
@@ -755,6 +760,7 @@ function person(x, y, s, L, t, o = {}) {
   } else if (L.facial !== 'stubble') { [-1, 1].forEach(sd => { circ(sd * 28, -480, 9); fill([0.95, 0.55, 0.5], 0.35); }); }
   X.restore();
   X.restore();
+  if (ghost) X.restore();
   return hands;
 }
 
@@ -1404,10 +1410,10 @@ const homeWorld = k => FIXED_HOME[k] || ROAM_SHOW[k] || 'beach';
 function openingText(cfg) { const nm = cfg.me && (cfg.me.name || '').trim(); return (cfg.opening || '').trim() || 'Good morning' + (nm ? ', ' + nm : ''); }
 function closingText(cfg) { return (cfg.closing || '').trim() || 'Now go live it.'; }
 function timeline(cfg, targetDur) {
-  const items = [{ kind: 'g', text: openingText(cfg), scene: 'title', d: 6, size: 100 }];
+  const items = [{ kind: 'g', text: openingText(cfg), scene: 'title', d: 5, size: 100 }];
   (cfg.sections || []).forEach(sec => {
-    (sec.actions || []).forEach(a => { if (a.text && a.text.trim()) items.push({ kind: 'a', text: a.text, scene: a.scene, world: a.world, d: 5 }); });
-    if (sec.glimpse && sec.glimpse.text && sec.glimpse.text.trim()) items.push({ kind: 'g', text: sec.glimpse.text, scene: sec.glimpse.scene, world: sec.glimpse.world, d: sec.glimpse.d || 5.5 });
+    (sec.actions || []).forEach(a => { if (a.text && a.text.trim()) items.push({ kind: 'a', text: a.text, scene: a.scene, world: a.world, d: 4 }); });
+    if (sec.glimpse && sec.glimpse.text && sec.glimpse.text.trim()) items.push({ kind: 'g', text: sec.glimpse.text, scene: sec.glimpse.scene, world: sec.glimpse.world, d: sec.glimpse.d || 4 });
   });
   // every scene has a natural setting; walks, runs and rides move between places so the film keeps changing
   const ROAMS = ['park', 'beach', 'city', 'mountains'], used = { park: 0, beach: 0, city: 0, mountains: 0 }; let prev = null;
@@ -1415,7 +1421,7 @@ function timeline(cfg, targetDur) {
     if (!it.world) it.world = FIXED_HOME[it.scene] || (ROAM_SCENES.has(it.scene) ? ROAMS.filter(w => w !== prev).sort((a, b) => used[a] - used[b] || ((ROAMS.indexOf(a) + k) % 4) - ((ROAMS.indexOf(b) + k) % 4))[0] : null);
     if (it.world && (FIXED_HOME[it.scene] || ROAM_SCENES.has(it.scene))) { used[it.world]++; prev = it.world; }
   });
-  items.push({ kind: 'g', text: closingText(cfg), scene: 'end', d: 8, last: true });
+  items.push({ kind: 'g', text: closingText(cfg), scene: 'end', d: 7, last: true });
   const raw = items.reduce((s, i) => s + i.d, 0), k = targetDur ? targetDur / raw : 1;
   let s = 0; items.forEach(i => { i.d *= k; i.start = s; s += i.d; });
   return { items, total: s };
@@ -1699,7 +1705,8 @@ function autoFills(cfg) {
 function buildSection(th, fills, cfg) {
   const own = {}; Object.entries(fills || {}).forEach(([k, v]) => { if (String(v || '').trim()) own[k] = v; });
   fills = Object.assign(autoFills(cfg), own);
-  const n = Math.min(th.a.length, th.a.length >= 4 ? 3 : th.a.length);
+  // two actions per goal keeps a four-goal film around a minute
+  const n = Math.min(th.a.length, 2);
   const idx = [0, ...[...th.a.keys()].slice(1).sort(() => Math.random() - 0.5).slice(0, n - 1)].sort((a, b) => a - b);
   const g = rand(th.g);
   return { theme: th.id, title: th.title, actions: idx.map(i => ({ text: fillT(th.a[i][0], fills, cfg), scene: sceneFor(th.a[i][1], fills) })), glimpse: { text: fillT(g[0], fills, cfg), scene: sceneFor(g[1], fills) } };
@@ -1762,7 +1769,8 @@ function renderSteps() {
   if (S.step === 0) renderMe();
   if (S.step === 1) renderPeople();
   if (S.step === 2) renderLines();
-  if (S.step === 3) renderSongOpts();
+  // nobody should reach the last step with a silent film by accident, so a free track goes on to start
+  if (S.step === 3) { if (!song && !S.song.track && !composing) pickTrack('sunrise', false); renderSongOpts(); }
   setPreviewForStep();
 }
 // moving on from step one needs at least one thing ticked, otherwise there's nothing to make a film from
@@ -1786,11 +1794,21 @@ $$('[data-next]').forEach(b => b.onclick = () => go(S.step + 1));
 $$('[data-prev]').forEach(b => b.onclick = () => go(S.step - 1));
 
 // ------------------------------------------------ step 1: themes
+// up to four goals: a focused film of about a minute beats one that covers everything
+const MAX_GOALS = 4;
+function goalNote(bump) {
+  const n = S.themes.length, m = $('#goalMeta'); if (!m) return;
+  const len = LSN.timeline(S.cfg).total;
+  m.textContent = n ? `${n} of ${MAX_GOALS} picked \u00b7 your film is about ${fmt(len)}` : `Pick up to ${MAX_GOALS}. Your film will be about a minute.`;
+  m.classList.toggle('bump', !!bump && n >= MAX_GOALS);
+  if (bump && n >= MAX_GOALS) m.textContent = `That's ${MAX_GOALS}, the most for one film. Untick one to swap it.`;
+}
 function renderThemes() {
-  const box = $('#tiles'); box.innerHTML = '';
+  const box = $('#tiles'); box.innerHTML = ''; goalNote();
   THEMES.forEach(th => {
     const on = S.themes.includes(th.id);
-    box.append(el('button', { class: 'tile', 'aria-pressed': on ? 'true' : 'false', onclick: () => { S.themes = on ? S.themes.filter(x => x !== th.id) : [...S.themes, th.id]; step0Ok(); liveLines(); save(); renderThemes(); if (!on) { const sec = S.cfg.sections.find(s => s.theme === th.id); const a = sec && sec.actions.find(x => x.text && x.text.trim()); if (a) { preview('action', a); $('#stageNote').textContent = 'Added to your film: ' + th.title; } } else { $('#stageNote').textContent = 'Taken out of your film: ' + th.title; } } }, el('b', {}, th.title), el('small', {}, th.hint)));
+    const full = !on && S.themes.length >= MAX_GOALS;
+    box.append(el('button', { class: 'tile' + (full ? ' full' : ''), 'aria-pressed': on ? 'true' : 'false', onclick: () => { if (full) { goalNote(true); return; } S.themes = on ? S.themes.filter(x => x !== th.id) : [...S.themes, th.id]; step0Ok(); liveLines(); save(); renderThemes(); if (!on) { const sec = S.cfg.sections.find(s => s.theme === th.id); const a = sec && sec.actions.find(x => x.text && x.text.trim()); if (a) { preview('action', a); $('#stageNote').textContent = 'Added to your film: ' + th.title; } } else { $('#stageNote').textContent = 'Taken out of your film: ' + th.title; } } }, el('b', {}, th.title), el('small', {}, th.hint)));
   });
   const fills = $('#fills'); fills.innerHTML = '';
   const withQs = THEMES.filter(t => S.themes.includes(t.id) && t.qs.length);
@@ -1814,7 +1832,7 @@ function liveLines() {
   const ids = THEMES.map(t => t.id).filter(id => S.themes.includes(id));
   const keep = {}; (S.cfg.sections || []).forEach(s => { if (s.theme) keep[s.theme] = s; });
   const names = [S.cfg.partner.on && S.cfg.partner.name, (S.cfg.kids || []).map(k => k.name)];
-  const key = id => JSON.stringify(['w2', S.fills[id] || {}, names]);
+  const key = id => JSON.stringify(['w3', S.fills[id] || {}, names]);
   S.cfg.sections = ids.map(id => keep[id] && key(id) === keep[id]._fills ? keep[id] : Object.assign(buildSection(TH(id), S.fills[id] || {}, S.cfg), { _fills: key(id) }));
   S.isExample = false;
 }
@@ -2437,7 +2455,7 @@ function useSong(f, name, beat, andPlay, quiet) {
   $('#songStatus').textContent = 'Loading...';
   audio.onloadedmetadata = () => {
     song.duration = audio.duration; S.song.offset = 0;
-    const nat = LSN.timeline(S.cfg).total; S.song.fit = beat ? 'song' : (audio.duration > nat * 1.5 ? 'lines' : 'song');
+    const nat = LSN.timeline(S.cfg).total; S.song.fit = beat ? 'song' : 'lines';
     $('#songStatus').textContent = `${name} \u00b7 ${fmt(audio.duration)}`;
     if (beat) song.beat = beat;
     if (join && playing) { ensureAudioGraph(); audio.currentTime = Math.min(movieT, audio.duration - 1); audio.play().catch(() => {}); $('#stageNote').textContent = 'Now playing: ' + name; if (fullOpen) $('#fullNote').textContent = 'Music: ' + name; }
