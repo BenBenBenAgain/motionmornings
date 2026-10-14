@@ -1359,8 +1359,8 @@ function hug(c, t) {
   rr(900, 1460, 110, 120, 14); fill([0.85, 0.5, 0.35]); [[935, 1440, 40], [975, 1420, 46], [955, 1390, 40]].forEach(([x, y, r]) => { circ(x, y, r); fill([0.4, 0.62, 0.38]); });
   const sw = 4 * Math.sin(t * 1.4);
   const sq = 0.06 * Math.sin(t * 2.4);
-  person(490 + sw, 1700, 0.94, VISITOR, t, { armR: [0.6, 0.3], armL: [0.2, 0.15], bob: 3 * Math.sin(t * 2.4) });
   person(610 - sw, 1700, 1.02, ME(c), t, { armL: [1.42 + 0.5 * sq, 0.1], armR: [0.2, 0.15], bob: 3 * Math.sin(t * 2.4 + 1) });
+  person(490 + sw, 1700, 0.94, VISITOR, t, { armR: [0.45, 0.9], armL: [0.2, 0.15], bob: 3 * Math.sin(t * 2.4) });
   hearts(540, 1040, t);
   pet(c, 820, 1790, 0.8, t, { flip: -1, lookUp: 0.6, walk: 0.3, speed: 12 });
 }
@@ -2384,7 +2384,7 @@ const DEMO_SECTIONS = [
   ], glimpse: { text: 'Clear head, big mornings', scene: 'wake', d: 4 } },
   { title: 'Family', actions: [
     { text: 'I visit Mum more often', scene: 'hug' },
-    { text: 'Olivia and I cook dinner with a record on', scene: 'cook_together' }
+    { text: 'Olivia and I cook dinner with a vinyl on', scene: 'cook_together' }
   ], glimpse: { text: 'I\u2019m building my own family', scene: 'newfamily', d: 4 } }
 ];
 const DEMO_ME = { body: 'm', hair: 'short', hairCol: '#2E2622', grey: false, skin: '#E3B08E', facial: 'stubble', facialCol: '#2E2622', outfit: 'tee', top: '#4F7FB0', inner: '#EFE8DC', pants: '#30406E' };
