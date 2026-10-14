@@ -1520,8 +1520,8 @@ const ROAM_SHOW = { walk: 'park', jog: 'beach', couple: 'city', cycle: 'city', c
 // the setting a scene's picture shows in the chooser
 const homeWorld = k => FIXED_HOME[k] || ROAM_SHOW[k] || 'beach';
 // opening and closing are in the viewer's own voice, like every line in between
-function openingText(cfg) { return (cfg.opening || '').trim() || 'This is my morning.'; }
-function closingText(cfg) { return (cfg.closing || '').trim() || 'Now I go and live it.'; }
+function openingText(cfg) { return (cfg.opening || '').trim() || 'This is me.'; }
+function closingText(cfg) { return (cfg.closing || '').trim() || 'I\u2019m off to live it.'; }
 function timeline(cfg, targetDur) {
   const items = [{ kind: 'g', text: openingText(cfg), scene: 'title', d: cfg.openD || 5, size: 100 }];
   (cfg.sections || []).forEach(sec => {
