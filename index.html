@@ -2413,7 +2413,7 @@ const soundBtn = $('#heroSound');
 const soundLabel = () => { soundBtn.textContent = heroSound ? 'Sound off' : '🔊 Tap for sound'; };
 const heroReady = (async () => {
   // the example film plays Howqua's "Time" from the top, cut to the film's length with a fade at the end
-  heroAudio.src = 'demo-music.mp3';
+  heroAudio.src = 'demo-music.mp3?v=60';
   await new Promise((ok, bad) => { if (heroAudio.readyState >= 1) return ok(); heroAudio.addEventListener('loadedmetadata', ok, { once: true }); heroAudio.addEventListener('error', bad, { once: true }); });
   heroTrack = { duration: heroAudio.duration };
   heroTLm = LSN.timeline(DEMO_CFG, heroAudio.duration);
