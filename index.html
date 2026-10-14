@@ -271,7 +271,7 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
   </div>
   <section class="hero" aria-labelledby="heroTitle">
     <div class="herofilm">
-      <div class="phone"><canvas id="heroStage" width="720" height="1280" aria-label="Example film: the gym, a dog walk, waking with the sun, breathing, focused work, saving, cooking together and the school run"></canvas></div>
+      <div class="phone"><canvas id="heroStage" width="720" height="1280" aria-label="Example film: focused work, saving, a dog walk, the gym, breathing, dancing, cooking together and the school run"></canvas></div>
       <div class="herobar"><i id="heroBar"></i></div>
       <div class="row" style="justify-content:center"><button class="btn ghost small" id="heroPlay">Pause</button><button class="btn small" id="heroSound">🔊 Tap for sound</button></div>
       <p class="herosong">Now imagine it with your favourite song.</p>    </div>
@@ -279,7 +279,7 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
       <span class="pill">Life in motion</span>
       <h2 id="heroTitle"><span class="hl">See it every morning.</span> <span class="hl">Live it every day.</span></h2>
       <p class="herolede">A short animated film of you doing the everyday things that build the life you've always wanted.</p>
-      <p class="heroeg deskonly"><span>In this example</span> The gym, a morning dog walk, up with the sun, five quiet minutes of breathing, focused work at a cafe, saving a little every pay, dinner cooked together and the school run. Each pair of actions ends with a glimpse of where it leads.</p>
+      <p class="heroeg deskonly"><span>In this example</span> Focused work at a cafe, saving a little every pay, a morning dog walk, the gym, five quiet minutes of breathing, dancing with a soda water in hand, dinner cooked together and the school run. Each pair of actions ends with a glimpse of where it leads.</p>
       <button class="btn coral" id="startBuild">Make your own film</button>
     </div>
   </section>
@@ -2270,28 +2270,27 @@ S.song = Object.assign({ offset: 0, fit: 'song', snap: true }, S.song || {});
 let tlKey = '', tlCache = null;
 // The example film in the hero: a fixed couple-and-dog character, a range of life scenes.
 const DEMO_SECTIONS = [
-  // timed to Howqua's "Time": the opening holds through the intro and "We are born and we cry",
-  // the dog walk lands on "But in between we walk", waking on "we open our eyes",
-  // breathing on "when do we open our minds" and the clock on "using the time we have"
-  { title: 'Body', actions: [
-    { text: 'I lift a little heavier each week', scene: 'gym', d: 5 },
-    { text: 'I walk {pet} before breakfast', scene: 'walk', world: 'park' }
-  ], glimpse: { text: 'Fit, strong and full of energy', scene: 'strong', world: 'mountains', d: 5 } },
-  { title: 'Mind', actions: [
-    { text: 'I\u2019m up with the sun', scene: 'wake', d: 3 },
-    { text: 'I breathe slowly for five minutes', scene: 'calm' }
-  ], glimpse: { text: 'Making every hour count', scene: 'clockplan', d: 4 } },
+  // set to Howqua's "Time" (from 0:03 of the song): the dog walk lands on "we walk the paths of our lives",
+  // breathing on "using the time we have" and dancing on "the best way we possibly can"
   { title: 'Work', actions: [
-    { text: 'I do two focused hours on my business', scene: 'cafe', d: 5 },
+    { text: 'I do two focused hours on my business', scene: 'cafe' },
     { text: 'I put a little away every pay', scene: 'jar' }
   ], glimpse: { text: 'My work, really taking off', scene: 'ship', d: 4 } },
+  { title: 'Body', actions: [
+    { text: 'I walk {pet} before breakfast', scene: 'walk', world: 'park' },
+    { text: 'I lift a little heavier each week', scene: 'gym' }
+  ], glimpse: { text: 'Fit, strong and full of energy', scene: 'strong', world: 'mountains', d: 4 } },
+  { title: 'Mind', actions: [
+    { text: 'I breathe slowly for five minutes', scene: 'calm' },
+    { text: 'I dance all night with a soda water in hand', scene: 'party' }
+  ], glimpse: { text: 'Clear head, big mornings', scene: 'wake', d: 4 } },
   { title: 'Family', actions: [
     { text: 'We cook together with a record on', scene: 'cook_together' },
     { text: 'I walk Mia to school', scene: 'schoolrun' }
   ], glimpse: { text: 'Our family, growing', scene: 'holdbaby', d: 4 } }
 ];
 const DEMO_ME = { body: 'm', hair: 'short', hairCol: '#2E2622', grey: false, skin: '#E3B08E', facial: 'stubble', facialCol: '#2E2622', outfit: 'tee', top: '#4F7FB0', inner: '#EFE8DC', pants: '#30406E' };
-const DEMO_CFG = { world: 'beach', tint: null, me: DEMO_ME, pets: [{ type: 'dog', name: 'Pawsha', coat: '#A14F26', muzzle: 'dark', ears: 'floppy' }], kids: [{ ...LSN.DEFAULT_KID, name: 'Mia', sex: 'f', hair: 'long', hairCol: '#2E2622', skin: '#E3B08E', outfit: 'dress', top: '#F2C46F' }], partner: { ...LSN.DEFAULT_PARTNER, on: true, status: 'have', glasses: true, name: 'Olivia' }, friend2: { body: 'f', hair: 'curly', hairCol: '#2A211C', skin: '#8A5434', facial: 'none', outfit: 'tee', top: '#5FA88F', inner: '#5FA88F', pants: '#30406E', chair: true }, opening: '', closing: '', openD: 10, sections: DEMO_SECTIONS };
+const DEMO_CFG = { world: 'beach', tint: null, me: DEMO_ME, pets: [{ type: 'dog', name: 'Pawsha', coat: '#A14F26', muzzle: 'dark', ears: 'floppy' }], kids: [{ ...LSN.DEFAULT_KID, name: 'Mia', sex: 'f', hair: 'long', hairCol: '#2E2622', skin: '#E3B08E', outfit: 'dress', top: '#F2C46F' }], partner: { ...LSN.DEFAULT_PARTNER, on: true, status: 'have', glasses: true, name: 'Olivia' }, friend2: { body: 'f', hair: 'curly', hairCol: '#2A211C', skin: '#8A5434', facial: 'none', outfit: 'tee', top: '#5FA88F', inner: '#5FA88F', pants: '#30406E', chair: true }, opening: '', closing: '', sections: DEMO_SECTIONS };
 const heroTL = LSN.timeline(DEMO_CFG);
 const filmCfg = () => S.cfg;
 let refitTimer = null;
@@ -2426,7 +2425,7 @@ const soundBtn = $('#heroSound');
 const soundLabel = () => { soundBtn.textContent = heroSound ? 'Sound off' : '🔊 Tap for sound'; };
 const heroReady = (async () => {
   // the example film plays Howqua's "Time" from the top, cut to the film's length with a fade at the end
-  heroAudio.src = 'demo-music.mp3?v=67';
+  heroAudio.src = 'demo-music.mp3?v=60b';
   await new Promise((ok, bad) => { if (heroAudio.readyState >= 1) return ok(); heroAudio.addEventListener('loadedmetadata', ok, { once: true }); heroAudio.addEventListener('error', bad, { once: true }); });
   heroTrack = { duration: heroAudio.duration };
   heroTLm = LSN.timeline(DEMO_CFG, heroAudio.duration);
