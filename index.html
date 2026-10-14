@@ -833,7 +833,7 @@ const DEFAULT_KID = { age: 'kid', status: 'have', hair: 'short', hairCol: '#6B4A
 const kidsOf = cfg => (cfg.kids || []).filter(k => k.age !== 'baby');
 const babiesOf = cfg => (cfg.kids || []).filter(k => k.age === 'baby');
 const kidLook = k => Object.assign({ body: 'f', facial: 'none', inner: '#FFFFFF', grey: false }, DEFAULT_KID, k);
-const kidScale = k => k.age === 'teen' ? 0.8 : 0.6, kidHead = k => k.age === 'teen' ? 1.1 : 1.35;
+const kidScale = k => k.age === 'teen' ? 0.8 : k.age === 'little' ? 0.46 : 0.6, kidHead = k => k.age === 'teen' ? 1.1 : k.age === 'little' ? 1.45 : 1.35;
 function drawKid(k, x, y, t, o = {}) { return person(x, y, kidScale(k) * (o.s || 1), kidLook(k), t, Object.assign({ head: kidHead(k) }, o)); }
 function baby(x, y, s, k, t) {
   const L = kidLook(k || {});
@@ -1325,8 +1325,8 @@ function hug(c, t) {
   rr(900, 1460, 110, 120, 14); fill([0.85, 0.5, 0.35]); [[935, 1440, 40], [975, 1420, 46], [955, 1390, 40]].forEach(([x, y, r]) => { circ(x, y, r); fill([0.4, 0.62, 0.38]); });
   const sw = 4 * Math.sin(t * 1.4);
   const sq = 0.06 * Math.sin(t * 2.4);
-  person(495 + sw, 1700, 0.94, VISITOR, t, { armR: [1.5 + sq, 0.25], armL: [0.25, 0.15], bob: 3 * Math.sin(t * 2.4) });
   person(590 - sw, 1700, 1.02, ME(c), t, { flip: -1, armR: [1.55 - sq, 0.3], armL: [0.25, 0.15], bob: 3 * Math.sin(t * 2.4 + 1) });
+  person(495 + sw, 1700, 0.94, VISITOR, t, { armR: [1.1 + sq, 0.35], armL: [0.25, 0.15], bob: 3 * Math.sin(t * 2.4) });
   hearts(540, 1040, t);
   pet(c, 820, 1790, 0.8, t, { flip: -1, lookUp: 0.6, walk: 0.3, speed: 12 });
 }
@@ -2353,7 +2353,7 @@ const DEMO_SECTIONS = [
   ], glimpse: { text: 'I\u2019m building my own family', scene: 'newfamily', d: 4 } }
 ];
 const DEMO_ME = { body: 'm', hair: 'short', hairCol: '#2E2622', grey: false, skin: '#E3B08E', facial: 'stubble', facialCol: '#2E2622', outfit: 'tee', top: '#4F7FB0', inner: '#EFE8DC', pants: '#30406E' };
-const DEMO_CFG = { world: 'beach', tint: null, me: DEMO_ME, pets: [{ type: 'dog', name: 'Pawsha', coat: '#A14F26', muzzle: 'dark', ears: 'floppy' }], kids: [], partner: { ...LSN.DEFAULT_PARTNER, on: true, status: 'have', glasses: true, name: 'Olivia' }, friend2: { body: 'f', hair: 'curly', hairCol: '#2A211C', skin: '#8A5434', facial: 'none', outfit: 'tee', top: '#5FA88F', inner: '#5FA88F', pants: '#30406E', chair: true }, opening: '', closing: '', sections: DEMO_SECTIONS };
+const DEMO_CFG = { world: 'beach', tint: null, me: DEMO_ME, pets: [{ type: 'dog', name: 'Pawsha', coat: '#A14F26', muzzle: 'dark', ears: 'floppy' }], kids: [{ ...LSN.DEFAULT_KID, age: 'little', sex: 'f', hair: 'bun', hairCol: '#2E2622', skin: '#E3B08E', outfit: 'dress', top: '#F2C46F' }], partner: { ...LSN.DEFAULT_PARTNER, on: true, status: 'have', glasses: true, name: 'Olivia' }, friend2: { body: 'f', hair: 'curly', hairCol: '#2A211C', skin: '#8A5434', facial: 'none', outfit: 'tee', top: '#5FA88F', inner: '#5FA88F', pants: '#30406E', chair: true }, opening: '', closing: '', sections: DEMO_SECTIONS };
 const heroTL = LSN.timeline(DEMO_CFG);
 const filmCfg = () => S.cfg;
 let refitTimer = null;
