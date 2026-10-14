@@ -279,7 +279,7 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
       <span class="pill">Life in motion</span>
       <h2 id="heroTitle"><span class="hl">See it every morning.</span> <span class="hl">Live it every day.</span></h2>
       <p class="herolede">A short animated film of you doing the everyday things that build the life you've always wanted.</p>
-      <p class="heroeg deskonly"><span>In this example</span> A job you enjoy, building your savings, a morning dog walk, the gym, five quiet minutes of breathing, dancing with a soda water in hand, dinner cooked together and the school run. Each pair of actions ends with a glimpse of where it leads.</p>
+      <p class="heroeg deskonly"><span>In this example</span> A job you enjoy, saving towards financial freedom, a morning dog walk, the gym, five quiet minutes of breathing, dancing with a soda water in hand, dinner cooked together and the school run. Each pair of actions ends with a glimpse of where it leads.</p>
       <button class="btn coral" id="startBuild">Make your own film</button>
     </div>
   </section>
@@ -1071,6 +1071,35 @@ function campfire(x, y, t) {
     X.bezierCurveTo(x + 10 * s, y - 120 * s * f, x + 60 * s, y - 80 * s * f, x + 50 * s, y - 10); X.closePath(); fill(c);
   });
 }
+// a thought bubble that pops in at time k, with a little trail of dots down towards the head
+function thought(x, y, r, hx, hy, t, k, draw) {
+  const s = ease((t - k) / 0.5); if (s <= 0) return;
+  const bob = 6 * Math.sin(t * 1.8 + k * 3);
+  [[0.25, 14], [0.5, 22]].forEach(([u, rad], i) => { if (t - k > 0.12 * i) { circ(hx + (x - hx) * u, hy + (y + r * 0.6 - hy) * u + bob * u, rad * s); fill([1, 1, 1], 0.92); } });
+  X.save(); X.translate(x, y + bob); X.scale(s, s);
+  X.shadowColor = 'rgba(40,30,25,0.18)'; X.shadowBlur = 18;
+  [[-0.55, 0.2, 0.62], [0.55, 0.2, 0.62], [0, -0.3, 0.72], [-0.3, 0.45, 0.6], [0.3, 0.45, 0.6], [0, 0.1, 0.85]].forEach(([dx, dy, rr2]) => { circ(dx * r, dy * r, rr2 * r); fill([1, 1, 1], 0.96); });
+  X.shadowBlur = 0;
+  X.beginPath(); X.arc(0, 0.08 * r, 0.78 * r, 0, 2 * PI); X.clip(); draw(r);
+  X.restore();
+}
+function houseIcon(r) {
+  rect(-r, 0.28 * r, 2 * r, r, [0.62, 0.8, 0.5]);
+  rect(-0.42 * r, -0.12 * r, 0.84 * r, 0.52 * r, [0.97, 0.88, 0.7]);
+  X.beginPath(); X.moveTo(-0.55 * r, -0.1 * r); X.lineTo(0, -0.55 * r); X.lineTo(0.55 * r, -0.1 * r); X.closePath(); fill([0.86, 0.42, 0.33]);
+  rect(-0.1 * r, 0.12 * r, 0.2 * r, 0.28 * r, [0.45, 0.3, 0.22]);
+  rect(0.18 * r, 0.0, 0.16 * r, 0.14 * r, [0.6, 0.78, 0.92]); rect(-0.34 * r, 0.0, 0.16 * r, 0.14 * r, [0.6, 0.78, 0.92]);
+  circ(0.55 * r, -0.5 * r, 0.12 * r); fill([1, 0.85, 0.4]);
+}
+function holidayIcon(r, t) {
+  rect(-r, -r, 2 * r, 2 * r, [0.62, 0.84, 0.96]);
+  circ(0.42 * r, -0.4 * r, 0.16 * r); fill([1, 0.86, 0.4]);
+  rect(-r, 0.05 * r, 2 * r, 0.3 * r, [0.27, 0.6, 0.78]);
+  rect(-r, 0.33 * r, 2 * r, r, [0.96, 0.85, 0.6]);
+  X.beginPath(); X.moveTo(-0.38 * r, 0.42 * r); X.quadraticCurveTo(-0.3 * r, 0, -0.12 * r, -0.36 * r); X.lineWidth = 0.08 * r; X.strokeStyle = css([0.55, 0.38, 0.22]); X.stroke();
+  const sw = 0.06 * Math.sin(t * 1.5);
+  [-2.6, -1.9, -1.1, -0.4].forEach(a => { X.save(); X.translate(-0.12 * r, -0.36 * r); X.rotate(a + sw); X.beginPath(); X.ellipse(0.24 * r, 0, 0.26 * r, 0.07 * r, 0, 0, 2 * PI); fill([0.3, 0.62, 0.36]); X.restore(); });
+}
 function wallClock(x, y, r, t) {
   circ(x, y + 6, r + 10); fill([0.2, 0.16, 0.14], 0.18);
   circ(x, y, r + 10); fill([0.3, 0.24, 0.2]);
@@ -1322,6 +1351,7 @@ const SCENES = {
   calm: { label: 'Breathing, calm mind', fn(c, t) { outdoor(c, t, 'sunrise', 930); calmRings(440, 1310, t); const b = Math.sin(t * 1.2); seated(440, 1740, 1.05, ME(c), t, b); pet(c, 790, 1760, 0.8, t, { flip: -1, tongue: false }); } },
 
   wake: { label: 'Waking up fresh', fn(c, t) { room(c, t, { wall: [0.95, 0.9, 0.84], window: 'sunrise' }); const u = ease(clamp((t - 0.6) / 0.8)) * (0.85 + 0.15 * Math.sin(t * 2)); person(380, 1660, 1, ME(c), t, { armL: [0.15 + 2.7 * u, 0.1 + 2.8 * u], armR: [0.15 + 2.7 * u, 0.1 + 2.8 * u], bob: 6 * u }); pet(c, 760, 1760, 0.85, t, { flip: -1 }); } },
+  freedom: { label: 'Dreaming of a home and a holiday', fn(c, t) { outdoor(c, t, 'day'); person(540, 1700, 1.05, ME(c), t, { armL: [0.12, 0.05], armR: [0.12, 0.05] }); thought(300, 780, 150, 500, 1080, t, 0.3, r => houseIcon(r)); thought(790, 760, 150, 590, 1080, t, 1.0, r => holidayIcon(r, t)); pet(c, 820, 1760, 0.85, t, { flip: -1, lookUp: 0.5 }); } },
   clockplan: { label: 'Planning, clock on the wall', fn(c, t) { room(c, t, { window: 'day' }); wallClock(500, 640, 80, t); person(330, 1650, 1, ME(c), t, { armL: [0.4, 1.2], armR: [0.3, 1.5] }); bulb(330, 940 - 10 * Math.sin(t * 2), t); desk(130, 620); notebook(380, 1340, t); pet(c, 760, 1720, 0.85, t, { flip: -1 }); } },
   idea: { label: 'Lightbulb moment, planning', fn(c, t) { room(c, t, { window: 'day' }); person(330, 1650, 1, ME(c), t, { armL: [0.4, 1.2], armR: [0.3, 1.5] }); bulb(330, 940 - 10 * Math.sin(t * 2), t); desk(130, 620); notebook(380, 1340, t); pet(c, 760, 1720, 0.85, t, { flip: -1 }); } },
   checklist: { label: 'Ticking off small wins', fn(c, t) { room(c, t, { wall: [0.92, 0.9, 0.86] }); const u = ease(clamp((t - 2.6) / 0.5)); person(280, 1660, 1, ME(c), t, { armR: [0.4 + 2.2 * u, 0.4 + 2 * u] }); checklist(530, 760, 460, 3, t, 0.8, 0.6); pet(c, 700, 1760, 0.8, t, { flip: -1 }); } },
@@ -2273,8 +2303,8 @@ const DEMO_SECTIONS = [
   // set to Howqua's "Time" (from 0:03 of the song): the dog walk lands on "we walk the paths of our lives",
   // breathing on "using the time we have" and dancing on "the best way we possibly can"
   { title: 'Work', actions: [
-    { text: 'I work a job I enjoy', scene: 'excited' },
-    { text: 'I focus on building my savings', scene: 'jar' }
+    { text: 'I work a job I enjoy', scene: 'laptop' },
+    { text: 'I save towards financial freedom', scene: 'freedom', world: 'city' }
   ], glimpse: { text: 'My work, really taking off', scene: 'ship', d: 4 } },
   { title: 'Body', actions: [
     { text: 'I walk {pet} before breakfast', scene: 'walk', world: 'park' },
