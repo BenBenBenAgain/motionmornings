@@ -1970,6 +1970,32 @@ function renderThemes() {
   });
 }
 $('#notes').oninput = e => { S.notes = e.target.value; save(); };
+// A one minute film should never show the same picture twice. Scenes that look alike share a group.
+const LOOKALIKE = { footy: 'kick', soccer: 'kick', strong: 'pose', champion: 'pose', celebrate: 'pose', cook: 'kitchen', cook_together: 'kitchen', calm: 'calm', wake: 'bedroom', sunrise: 'sunrise', start: 'sunrise', idea: 'plan', clockplan: 'plan', laptop: 'desk', hardfirst: 'desk', cafe: 'desk' };
+const lookOf = sc => LOOKALIKE[sc] || sc;
+const GLIMPSE_SPARE = ['celebrate', 'champion', 'sunrise', 'steady', 'excited', 'unwind', 'selflove', 'together', 'progress'];
+function varyScenes(sections) {
+  const used = new Set();
+  sections.forEach(sec => {
+    const th = sec.theme && TH(sec.theme), fills = Object.assign(autoFills(S.cfg), S.fills[sec.theme] || {});
+    // start from the goal's own picks each time, so removing a goal brings its neighbours' scenes back
+    (sec.actions || []).forEach(a => { if (a._o) { a.text = a._o.text; a.scene = a._o.scene; } else a._o = { text: a.text, scene: a.scene }; });
+    if (sec.glimpse) { const g0 = sec.glimpse; if (g0._o) { g0.scene = g0._o.scene; g0.world = g0._o.world; } else g0._o = { scene: g0.scene, world: g0.world }; }
+    (sec.actions || []).forEach(a => {
+      if (used.has(lookOf(a.scene)) && th) {
+        // swap for another of this goal's lines whose picture hasn't been used yet
+        const alt = th.a.map(x => ({ text: fillT(x[0], fills, S.cfg), scene: sceneFor(x[1], fills) })).find(x => !used.has(lookOf(x.scene)) && !sec.actions.some(y => y.text === x.text));
+        if (alt) { a.text = alt.text; a.scene = alt.scene; }
+      }
+      used.add(lookOf(a.scene));
+    });
+    const g = sec.glimpse;
+    if (g) {
+      if (used.has(lookOf(g.scene))) { const spare = GLIMPSE_SPARE.find(sc => !used.has(lookOf(sc))); if (spare) { g.scene = spare; g.world = null; } }
+      used.add(lookOf(g.scene));
+    }
+  });
+}
 // Until someone edits their lines by hand, the film follows what they tick, so the preview always shows their choices.
 function liveLines() {
   if (S.linesTouched) return;
@@ -1978,6 +2004,7 @@ function liveLines() {
   const names = [S.cfg.partner.on && S.cfg.partner.name, (S.cfg.kids || []).map(k => k.name)];
   const key = id => JSON.stringify(['w3', S.fills[id] || {}, names]);
   S.cfg.sections = ids.map(id => keep[id] && key(id) === keep[id]._fills ? keep[id] : Object.assign(buildSection(TH(id), S.fills[id] || {}, S.cfg), { _fills: key(id) }));
+  varyScenes(S.cfg.sections);
   S.isExample = false;
 }
 
@@ -2107,9 +2134,9 @@ const PARTNER_SEX = ['sex', 'Look', 'seg', [['m', 'Man'], ['f', 'Woman'], ['x', 
 // picking a look is what brings the character into the preview
 // starting looks for each choice, deliberately unlike the man in the demo film so it feels like yours from the first tap
 const STARTER = {
-  m: { hair: 'short', hairCol: '#A0703F', facial: 'beard', facialCol: '#8A5A30', outfit: 'jacket', top: '#5A8C73', inner: '#EFE8DC', pants: '#17171C' },
-  f: { hair: 'bun', hairCol: '#383130', facial: 'none', outfit: 'jacket', top: '#F2C46F', inner: '#EFE8DC', pants: '#30406E' },
-  x: { hair: 'buzz', hairCol: '#1F1A18', facial: 'none', outfit: 'tee', top: '#8E4B5C', pants: '#17171C' }
+  m: { hair: 'short', hairCol: '#A0703F', facial: 'beard', facialCol: '#8A5A30', outfit: 'jacket', top: '#B5452B', inner: '#EFE8DC', pants: '#30406E' },
+  f: { hair: 'bun', hairCol: '#383130', facial: 'none', outfit: 'jacket', top: '#2F8F8A', inner: '#EFE8DC', pants: '#30406E' },
+  x: { hair: 'buzz', hairCol: '#1F1A18', facial: 'none', outfit: 'tee', top: '#2F5D8A', pants: '#17171C' }
 };
 const pickLook = (o, v) => { applySex(o, v, false); Object.assign(o, STARTER[v] || {}); };
 const meReady = o => { if (!o.unset) return; o.unset = false; if (!o.sex) { o.sex = 'm'; pickLook(o, 'm'); } };
