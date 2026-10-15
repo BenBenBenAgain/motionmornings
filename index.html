@@ -2073,9 +2073,16 @@ function applySex(o, v, kid) {
 const PARTNER_SEX = ['sex', 'Look', 'seg', [['m', 'Man'], ['f', 'Woman'], ['x', 'Neutral']], null, (o, v) => applySex(o, v, false)];
 // skin sits up top too: the quickest way for the preview to look like you. Fine-tuning stays in Your people.
 // picking a look is what brings the character into the preview
-const meReady = o => { if (!o.unset) return; o.unset = false; if (!o.sex) { o.sex = 'm'; applySex(o, 'm', false); } };
+// starting looks for each choice, deliberately unlike the man in the demo film so it feels like yours from the first tap
+const STARTER = {
+  m: { hair: 'short', hairCol: '#A0703F', facial: 'beard', facialCol: '#8A5A30', outfit: 'jacket', top: '#5A8C73', inner: '#EFE8DC', pants: '#17171C' },
+  f: { hair: 'bun', hairCol: '#383130', facial: 'none', outfit: 'jacket', top: '#F2C46F', inner: '#EFE8DC', pants: '#30406E' },
+  x: { hair: 'buzz', hairCol: '#1F1A18', facial: 'none', outfit: 'tee', top: '#8E4B5C', pants: '#17171C' }
+};
+const pickLook = (o, v) => { applySex(o, v, false); Object.assign(o, STARTER[v] || {}); };
+const meReady = o => { if (!o.unset) return; o.unset = false; if (!o.sex) { o.sex = 'm'; pickLook(o, 'm'); } };
 const meFull = o => { meReady(o); if (!o.skin) o.skin = DEFAULT_ME.skin; };
-const ME_QUICK = [['name', 'Your name', 'text', 'e.g. Ben'], [PARTNER_SEX[0], PARTNER_SEX[1], PARTNER_SEX[2], PARTNER_SEX[3], null, (o, v) => { applySex(o, v, false); meReady(o); }], ['skin', 'Skin', 'color', SKIN]];
+const ME_QUICK = [['name', 'Your name', 'text', 'e.g. Ben'], [PARTNER_SEX[0], PARTNER_SEX[1], PARTNER_SEX[2], PARTNER_SEX[3], null, (o, v) => { pickLook(o, v); meReady(o); }], ['skin', 'Skin', 'color', SKIN]];
 const ME_FIELDS = LOOK_FIELDS;
 const PARTNER_NAME = ['name', 'Their name', 'text', 'e.g. Sam', P => P.status !== 'hoping'];
 const KID_FIELDS = [
