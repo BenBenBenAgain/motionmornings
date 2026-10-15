@@ -1971,10 +1971,10 @@ function renderThemes() {
 }
 $('#notes').oninput = e => { S.notes = e.target.value; save(); };
 // A one minute film should never show the same picture twice. Scenes that look alike share a group.
-const LOOKALIKE = { footy: 'kick', soccer: 'kick', strong: 'pose', champion: 'pose', celebrate: 'pose', cook: 'kitchen', cook_together: 'kitchen', calm: 'calm', wake: 'bedroom', sunrise: 'sunrise', start: 'sunrise', idea: 'plan', clockplan: 'plan', laptop: 'desk', hardfirst: 'desk', cafe: 'desk' };
-const lookOf = sc => LOOKALIKE[sc] || sc;
-const GLIMPSE_SPARE = ['celebrate', 'champion', 'sunrise', 'steady', 'excited', 'unwind', 'selflove', 'together', 'progress'];
-function varyScenes(sections) {
+function lookOf(sc) { return ({ footy: 'kick', soccer: 'kick', strong: 'pose', champion: 'pose', celebrate: 'pose', cook: 'kitchen', cook_together: 'kitchen', calm: 'calm', wake: 'bedroom', sunrise: 'sunrise', start: 'sunrise', idea: 'plan', clockplan: 'plan', laptop: 'desk', hardfirst: 'desk', cafe: 'desk' })[sc] || sc; }
+function varyScenes(sections) { try { varyScenesInner(sections); } catch (e) { console.error(e); } }
+function varyScenesInner(sections) {
+  const GLIMPSE_SPARE = ['celebrate', 'champion', 'sunrise', 'steady', 'excited', 'unwind', 'selflove', 'together', 'progress'];
   const used = new Set();
   sections.forEach(sec => {
     const th = sec.theme && TH(sec.theme), fills = Object.assign(autoFills(S.cfg), S.fills[sec.theme] || {});
