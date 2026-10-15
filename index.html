@@ -124,6 +124,7 @@ textarea{min-height:76px}
 .mequick .field{display:flex;align-items:center;gap:10px;grid-template-columns:none}
 .mequick .field > span{font-size:.9rem;white-space:nowrap}
 .mequick input[type=text]{max-width:170px}
+.menote{flex:1 1 100%;margin:0;font-size:.85rem}
 .mequick .sw input[type=color],.mequick .sw .frompic{display:none}
 .mequick .sw button{width:26px;height:26px}
 .seg{display:flex;flex-wrap:wrap;gap:6px}
@@ -2147,7 +2148,7 @@ function fieldUI(obj, fields, box, prefix, onChange, pkey) {
 }
 function peopleChanged() { liveLines(); save(); renderMe(); renderPeople(); setPreviewForStep(); }
 function step0Ok() { const e = $('#step0Err'); if (e && !e.hidden && !S.cfg.me.unset && S.cfg.me.skin && S.themes.length) e.hidden = true; }
-function renderMe() { step0Ok(); if (!S.cfg.me.sex && !S.cfg.me.unset) S.cfg.me.sex = S.cfg.me.body === 'f' ? 'f' : 'm'; fieldUI(S.cfg.me, ME_QUICK, $('#meQuick'), 'me-', peopleChanged, 'me'); }
+function renderMe() { step0Ok(); if (!S.cfg.me.sex && !S.cfg.me.unset) S.cfg.me.sex = S.cfg.me.body === 'f' ? 'f' : 'm'; fieldUI(S.cfg.me, ME_QUICK, $('#meQuick'), 'me-', peopleChanged, 'me'); $('#meQuick').append(el('p', { class: 'meta menote' }, 'Refine your look in step 2.')); }
 // "Ben's Motion Mornings": the film is titled with the person's name, the lines stay in their own voice
 const possessive = n => n + (/s$/i.test(n) ? '’' : '’s');
 function filmTitle() { const n = (S.cfg.me.name || '').trim(); return n ? possessive(n) + ' Motion Mornings' : 'Make your film'; }
