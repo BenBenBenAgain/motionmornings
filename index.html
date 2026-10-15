@@ -232,8 +232,13 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
 /* hero: the example film */
 .hero{display:grid;grid-template-columns:320px minmax(0,1fr);gap:48px;align-items:center;padding-block:18px 56px;border-bottom:1px solid var(--line);margin-bottom:36px}
 .herofilm{display:flex;flex-direction:column;align-items:center;gap:10px}
-.herobar{width:100%;max-width:320px;height:4px;border-radius:99px;background:var(--sunk);overflow:hidden}
-.herobar i{display:block;height:100%;width:0;background:var(--coral)}
+.herobar{width:100%;max-width:320px;height:28px;cursor:pointer;touch-action:none;position:relative;display:flex;align-items:center}
+.herobar::before{content:'';position:absolute;left:0;right:0;top:50%;height:6px;margin-top:-3px;border-radius:99px;background:var(--sunk)}
+.herobar i{display:block;position:relative;height:6px;width:0;border-radius:99px;background:var(--coral)}
+.herobar i::after{content:'';position:absolute;right:-8px;top:50%;width:16px;height:16px;margin-top:-8px;border-radius:50%;background:var(--coral);box-shadow:0 1px 4px rgba(0,0,0,.25)}
+input[type=range]{height:30px;touch-action:none}
+#timeLbl{min-width:6.2em;text-align:right}
+@media (max-width:860px){.player .row{flex-wrap:wrap;row-gap:2px}.player #scrub{order:3;flex:1 1 100%}}
 .demotag{align-self:center;margin-bottom:2px;color:var(--coral)}
 .herosong{margin:0;font-size:.95rem;font-style:italic;color:var(--muted);text-align:center;max-width:32ch}
 .herocopy{display:flex;flex-direction:column;gap:14px;align-items:flex-start}
@@ -274,7 +279,7 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
     <div class="herofilm">
       <span class="pill demotag">Demo film</span>
       <div class="phone"><canvas id="heroStage" width="720" height="1280" aria-label="Example film: heading to work, saving, a dog walk, the gym, breathing, dancing, visiting Mum and cooking together"></canvas></div>
-      <div class="herobar"><i id="heroBar"></i></div>
+      <div class="herobar" id="heroSeek" role="slider" aria-label="Position in demo film" tabindex="0"><i id="heroBar"></i></div>
       <div class="row" style="justify-content:center"><button class="btn ghost small" id="heroPlay">Pause</button><button class="btn small" id="heroSound">🔊 Tap for sound</button></div>
       <p class="herosong">Now imagine it’s you, your life, your favourite song.</p>    </div>
     <div class="herocopy">
@@ -2371,7 +2376,7 @@ const audio = new Audio(); audio.preload = 'auto';
 function preview(kind, item) { if (recording) return; stopMovie(); mode = { type: 'line', kind, item }; t0 = performance.now(); $('#stageNote').textContent = 'Previewing this line'; }
 function setPreviewForStep() {
   if (recording || playing) return;
-  if (S.step === 0) { mode = { type: 'scene', scene: 'title', text: LSN.openingText(S.cfg) }; $('#stageNote').textContent = 'Your film opens like this'; }
+  if (S.step === 0) { mode = { type: 'scene', scene: 'title', text: LSN.openingText(S.cfg) }; $('#stageNote').textContent = 'Your film opens like this'; if (!S.cfg.me.unset) { t0 = performance.now() - 2600; return; } }
   else if (S.step === 1) { mode = { type: 'scene', scene: 'together' }; $('#stageNote').textContent = 'Your people'; }
   else if (S.step === 2) { mode = { type: 'line', kind: 'glimpse', item: { text: LSN.openingText(S.cfg), scene: 'title' } }; $('#stageNote').textContent = 'Tap a picture to preview that scene'; }
   else { mode = { type: 'movie' }; $('#stageNote').textContent = song ? 'Press play to watch with your song' : 'Press play to watch'; }
@@ -2475,7 +2480,7 @@ function frame(now) {
       if (playing) { movieT = song && !tl.loop ? audio.currentTime - S.song.offset : movieT + (now - lastFrame) / 1000; if (song) setGain(songGain(movieT, tl.total)); if (movieT >= tl.total - 0.05) { stopMovie(); movieT = 0; } }
       LSN.render(fullOpen ? fx : sx, filmCfg(), tl, !playing && movieT === 0 ? 2 : movieT);
       if (fullOpen) { $('#fullProg').style.width = (100 * movieT / tl.total).toFixed(2) + '%'; $('#fullTime').textContent = fmt(movieT) + ' / ' + fmt(tl.total); $('#fullPlay').textContent = playing ? 'Pause' : 'Play'; }
-      $('#scrub').value = Math.round(1000 * movieT / tl.total); $('#timeLbl').textContent = fmt(movieT) + ' / ' + fmt(tl.total);
+      if (!scrubbing) $('#scrub').value = Math.round(1000 * movieT / tl.total); $('#timeLbl').textContent = fmt(movieT) + ' / ' + fmt(tl.total);
     } else if (mode.type === 'line') {
       const it = mode.item, t = ((now - t0) / 1000) % 5.5;
       LSN.render(sx, S.cfg, { items: [{ kind: mode.kind === 'glimpse' ? 'g' : 'a', text: it.text || ' ', scene: it.scene, world: it.world || LSN.homeWorld(it.scene), d: 5.5, start: 0, size: it.scene === 'title' ? 100 : 78 }], total: 5.5 }, t);
@@ -2555,14 +2560,27 @@ heroCv.style.cursor = 'pointer';
 heroCv.addEventListener('click', () => { if (!heroSound) soundBtn.onclick(); else heroBtn.onclick(); });
 try { new IntersectionObserver(es => { heroVisible = es[0].isIntersecting; if (heroSound) { if (heroVisible && heroPlaying) heroAudio.play().catch(() => {}); else heroAudio.pause(); } }).observe(heroCv); } catch (e) {}
 $('#startBuild').onclick = () => { const b = $('#builder'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+// drag along the demo's bar to jump anywhere in the film
+let heroDrag = false;
+function heroSeek(e) {
+  const r = $('#heroSeek').getBoundingClientRect(), f = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+  heroT = f * heroTLm.total * 0.999; if (heroSound) { try { heroAudio.currentTime = heroT; } catch (er) {} }
+}
+$('#heroSeek').addEventListener('pointerdown', e => { heroDrag = true; $('#heroSeek').setPointerCapture(e.pointerId); heroSeek(e); });
+$('#heroSeek').addEventListener('pointermove', e => { if (heroDrag) heroSeek(e); });
+['pointerup', 'pointercancel'].forEach(ev => $('#heroSeek').addEventListener(ev, () => { heroDrag = false; }));
 function heroFrame(dt) {
   if (!heroVisible) return;
   const tl = heroTLm;
-  if (heroSound && !heroAudio.paused) heroT = heroAudio.currentTime;
+  if (heroDrag) {}
+  else if (heroSound && !heroAudio.paused) heroT = heroAudio.currentTime;
   else if (heroPlaying) { heroT += dt; if (heroT >= tl.total) heroT = 0; }
   LSN.render(hx, DEMO_CFG, tl, Math.min(heroT, tl.total - 0.01));
   $('#heroBar').style.width = (100 * Math.min(1, heroT / tl.total)).toFixed(2) + '%';
 }
+let scrubbing = false;
+['pointerdown', 'touchstart'].forEach(ev => $('#scrub').addEventListener(ev, () => { scrubbing = true; }, { passive: true }));
+['pointerup', 'pointercancel', 'touchend', 'change'].forEach(ev => $('#scrub').addEventListener(ev, () => { scrubbing = false; }));
 $('#scrub').oninput = e => { if (recording) return; mode = { type: 'movie' }; const tl = movieTL(); movieT = tl.total * e.target.value / 1000; if (song) audio.currentTime = tl.loop ? (S.song.offset + movieT) % song.duration : S.song.offset + movieT; };
 $('#songBtn').onclick = () => $('#songInput').click();
 function useSong(f, name, beat, andPlay, quiet) {
