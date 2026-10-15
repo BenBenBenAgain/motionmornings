@@ -158,6 +158,8 @@ textarea{min-height:76px}
 .linkbtn.quiet{color:var(--muted);font-weight:500}
 .addscene{border:2px dashed var(--line);background:transparent;border-radius:12px;padding:12px;font-weight:600;color:var(--muted);cursor:pointer;width:100%}
 .modal .box.wide{max-width:760px}
+#privacy h4{margin:6px 0 -8px;font-size:1rem}#privacy p{margin:0;line-height:1.5}
+.foot a,#privacy a{color:var(--sea)}
 .scenegroup{margin:14px 0 6px;font-family:var(--display);font-size:.95rem}
 .scenegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px}
 .scenegrid button{border:2px solid transparent;background:var(--sunk);border-radius:12px;padding:0 0 6px;cursor:pointer;display:flex;flex-direction:column;gap:4px;overflow:hidden;text-align:left}
@@ -369,6 +371,7 @@ input[type=range]{height:30px;touch-action:none}
         <div class="card">
           <div class="subhead"><h3>Save your video</h3></div>
           <p class="lede">The film plays through once while it records, so it takes as long as the song. Keep this screen open and awake until it finishes.</p>
+          <p class="meta"><b>Your film never leaves your device.</b></p>
           <label class="switch"><input type="checkbox" id="recSilent"> Save without music</label>
           <p class="meta">Posting it to Instagram or TikTok? Save it without music, then add any song you love from the app's own music library when you post.</p>
           <div class="row"><button class="btn coral" id="recBtn">Make my video file</button><button class="btn ghost small" id="recStop" hidden>Stop</button></div>
@@ -399,6 +402,7 @@ input[type=range]{height:30px;touch-action:none}
   <footer class="foot">
     <p>Your photos, music and film are made and kept on your device. Nothing is uploaded.</p>
     <p>Watch your film once a day, ideally first thing in the morning. Feel each scene as something you're doing today.</p>
+    <p><a href="#privacy" id="privacyLink">Privacy</a> · <a href="mailto:hello@motionmornings.com">hello@motionmornings.com</a></p>
   </footer>
 </div>
 
@@ -407,6 +411,16 @@ input[type=range]{height:30px;touch-action:none}
   <div class="fullbar"><i id="fullProg"></i></div>
   <div class="fullctl"><button class="btn coral" id="fullPlay">Play</button><span class="time" id="fullTime">0:00</span><button class="btn ghost" data-mute aria-pressed="false">Mute</button><button class="btn ghost" id="fullClose">Close</button></div>
   <p class="fullnote" id="fullNote" aria-live="polite"></p>
+</div>
+
+<div class="modal" id="privacy" hidden role="dialog" aria-modal="true" aria-labelledby="privacyTitle">
+  <div class="box">
+    <div class="subhead"><h3 id="privacyTitle">Privacy</h3><button class="btn ghost small" id="privacyClose">Close</button></div>
+    <h4>Your film stays with you.</h4>
+    <p>Everything you put into Motion Mornings stays on your own phone or computer: your name, your photos, your goals, the songs you add and the videos you save. None of it is uploaded to us or anyone else, and we can't see it.</p>
+    <h4>Questions?</h4>
+    <p>Email <a href="mailto:hello@motionmornings.com">hello@motionmornings.com</a>.</p>
+  </div>
 </div>
 
 <div class="modal" id="scenePick" hidden role="dialog" aria-modal="true" aria-labelledby="scenePickTitle">
@@ -2304,6 +2318,14 @@ function openScenePick(item, done) {
 }
 function closeScenePick(chose) { $('#scenePick').hidden = true; const d = scenePickDone; scenePickDone = scenePickItem = null; if (chose && d) d(); }
 $('#scenePickClose').onclick = () => closeScenePick(false);
+// privacy note: the footer link, or anyone landing on #privacy
+const openPrivacy = () => { $('#privacy').hidden = false; $('#privacyClose').focus(); };
+const closePrivacy = () => { $('#privacy').hidden = true; if (location.hash === '#privacy') history.replaceState(null, '', location.pathname); };
+$('#privacyLink').onclick = e => { e.preventDefault(); openPrivacy(); };
+$('#privacyClose').onclick = closePrivacy;
+$('#privacy').onclick = e => { if (e.target.id === 'privacy') closePrivacy(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#privacy').hidden) closePrivacy(); });
+if (location.hash === '#privacy') openPrivacy();
 $('#scenePick').onclick = e => { if (e.target.id === 'scenePick') closeScenePick(false); };
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#scenePick').hidden) closeScenePick(false); });
 function markEdited() { S.isExample = false; S.linesTouched = true; $('#exampleBanner').hidden = true; save(); updateMeta(); }
