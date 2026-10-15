@@ -657,9 +657,13 @@ const DEFAULT_PARTNER = { body: 'f', hair: 'long', hairCol: '#805438', grey: fal
 const FRIEND1 = { body: 'm', hair: 'short', hairCol: '#261F1A', skin: '#C98E66', facial: 'none', outfit: 'jacket', top: '#5A8C73', inner: '#F2F2E6', pants: '#4D4D59' };
 const FRIEND2 = { body: 'f', hair: 'long', hairCol: '#D9B373', skin: '#F2D3BC', facial: 'none', outfit: 'tee', top: '#F2BF59', inner: '#F2BF59', pants: '#404D73' };
 
+const AGE_GREY = { '50s': 0.4, '60s': 0.75 }, AGE_LINES = { '40s': 1, '50s': 2, '60s': 2 };
 function person(x, y, s, L, t, o = {}) {
   // someone who hasn't picked a look yet isn't drawn: the scene runs without them
   const ghost = !!(L && L.unset); if (ghost) { X.save(); X.globalAlpha = 0; }
+  // height scales the whole person; build widens the body and limbs but not the head
+  s *= ({ short: 0.92, tall: 1.08 }[L.height] || 1);
+  const bw = ({ slim: 0.86, big: 1.26 }[L.build] || 1), ageK = AGE_GREY[L.agegrp] || 0;
   const walk = o.walk || 0, speed = o.speed || 7, armL = o.armL || [0.15, 0.1], armR = o.armR || [0.15, 0.1];
   const smile = o.smile !== false, flip = o.flip || 1;
   // a wheelchair: the body sits lower, the legs bend at the seat, and the wheels turn when moving
@@ -672,7 +676,7 @@ function person(x, y, s, L, t, o = {}) {
     line([[-92, -436], [-122, -452]], 12, fr); line([[92, -436], [122, -452]], 12, fr);
     X.translate(0, D);
   }
-  const w = t * speed, hc = C(L.hairCol), skin = C(L.skin), skinD = darken(skin, 0.15);
+  const w = t * speed, hc = mix(C(L.hairCol), [0.8, 0.79, 0.77], ageK), skin = C(L.skin), skinD = darken(skin, 0.15);
   const dress = L.outfit === 'dress';
   const hs = o.head || 1; const headOn = () => { X.save(); if (hs !== 1) { X.translate(0, -470); X.scale(hs, hs); X.translate(0, 470); } };
   headOn();
@@ -685,6 +689,7 @@ function person(x, y, s, L, t, o = {}) {
     for (let i = 0; i <= 12; i++) { const a = PI * (0.92 + 1.16 * i / 12); circ(Math.cos(a) * 60, -505 + Math.sin(a) * 66, 30); fill(hc); }
   }
   X.restore();
+  X.save(); X.scale(bw, 1);
   // legs
   if (chair) {
     const lc = dress ? skin : C(L.pants), wd = dress ? 26 : 48;
@@ -725,13 +730,14 @@ function person(x, y, s, L, t, o = {}) {
     line([[sx, sy], [ex, ey]], wd, upper); line([[ex, ey], [hx, hy]], wd * (L.outfit === 'tee' ? 0.8 : 1), fore);
     if (L.outfit === 'tee') { circ(ex, ey, wd / 2); fill(upper); }
     circ(hx, hy, 20); fill(skin);
-    hands[side < 0 ? 'L' : 'R'] = [x + flip * s * hx, y - bob + s * (hy + D)];
+    hands[side < 0 ? 'L' : 'R'] = [x + flip * s * bw * hx, y - bob + s * (hy + D)];
   });
+  X.restore();
   // head
   rect(-18, -472, 36, 32, skinD);
   headOn();
   ell(0, -502, 50, 58); fill(skin);
-  const fc = C(L.facialCol || L.hairCol);
+  const fc = mix(C(L.facialCol || L.hairCol), [0.8, 0.79, 0.77], ageK);
   if (L.facial === 'stubble' || L.facial === 'moustache') { X.save(); ell(0, -502, 50, 58); X.clip(); ell(0, -462, 56, 34); fill(fc, 0.42); X.restore(); }
   if (L.facial === 'beard') {
     X.beginPath(); X.moveTo(-50, -505); X.bezierCurveTo(-52, -440, -30, -410, 0, -408); X.bezierCurveTo(30, -410, 52, -440, 50, -505);
@@ -759,6 +765,9 @@ function person(x, y, s, L, t, o = {}) {
   const brow = L.hair === 'bald' ? darken(skin, 0.5) : (L.body === 'f' ? mix(hc, [0.3, 0.2, 0.15], 0.4) : hc);
   [-1, 1].forEach(side => { if (o.eyesClosed) { X.beginPath(); X.arc(side * 18, -508, 8, 0.15 * PI, 0.85 * PI); X.lineWidth = 4; X.strokeStyle = css([0.15, 0.15, 0.18]); X.stroke(); } else { circ(side * 18, -505, 5.5); fill([0.15, 0.15, 0.18]); } line([[side * 9, -523], [side * 30, -526]], 5, brow); });
   if (L.glasses) { const gc = [0.16, 0.16, 0.2]; [-1, 1].forEach(sd => { circ(sd * 19, -506, 17); X.lineWidth = 4.5; X.strokeStyle = css(gc); X.stroke(); line([[sd * 36, -508], [sd * 49, -514]], 4, gc); }); line([[-3, -508], [3, -508]], 4, gc); }
+  // a few gentle lines with age: round the eyes from the 40s, across the forehead from the 50s
+  const ag = AGE_LINES[L.agegrp] || 0;
+  if (ag) { X.globalAlpha = 0.55; [-1, 1].forEach(sd => { line([[sd * 34, -512], [sd * 41, -516]], 2.5, skinD); line([[sd * 34, -503], [sd * 41, -501]], 2.5, skinD); }); if (ag > 1) { line([[-22, -541], [22, -541]], 2.5, skinD); line([[-16, -532], [16, -532]], 2.5, skinD); } X.globalAlpha = 1; }
   line([[0, -500], [-4, -482], [3, -480]], 3, skinD);
   const hasM = L.facial === 'moustache' || L.facial === 'beard';
   if (smile) { X.beginPath(); X.arc(0, hasM ? -470 : -478, 13, 0.15 * PI, 0.85 * PI); X.lineWidth = 4; X.strokeStyle = css([0.55, 0.25, 0.22]); X.stroke(); }
@@ -2057,6 +2066,9 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#picke
 
 // ------------------------------------------------ step 3: people
 const LOOK_FIELDS = [
+  ['agegrp', 'Age', 'seg', [['20s', '20s'], ['30s', '30s'], ['40s', '40s'], ['50s', '50s'], ['60s', '60s+']]],
+  ['height', 'Height', 'seg', [['short', 'Shorter'], ['avg', 'Average'], ['tall', 'Taller']]],
+  ['build', 'Build', 'seg', [['slim', 'Slim'], ['avg', 'Average'], ['big', 'Bigger']]],
   ['hair', 'Hair', 'seg', [['short', 'Short'], ['wavy', 'Long wavy'], ['long', 'Long straight'], ['curly', 'Curly'], ['bun', 'Bun'], ['buzz', 'Buzz cut'], ['bald', 'Bald']]],
   ['hairCol', 'Hair colour', 'color', HAIR],
   ['grey', 'Grey streaks', 'seg', [[false, 'No'], [true, 'Yes']], L => L.hair === 'wavy'],
@@ -2154,6 +2166,7 @@ const possessive = n => n + (/s$/i.test(n) ? '’' : '’s');
 function filmTitle() { const n = (S.cfg.me.name || '').trim(); return n ? possessive(n) + ' Motion Mornings' : 'Make your film'; }
 function namesChanged() { const h = $('#buildTitle'); if (h) h.textContent = filmTitle(); liveLines(); }
 function renderPeople() {
+  [S.cfg.me, S.cfg.partner].forEach(o => { if (!o.agegrp) o.agegrp = '30s'; if (!o.height) o.height = 'avg'; if (!o.build) o.build = 'avg'; });
   if (!S.cfg.me.sex) S.cfg.me.sex = S.cfg.me.body === 'f' ? 'f' : 'm';
   if (!S.cfg.partner.sex) S.cfg.partner.sex = S.cfg.partner.body === 'm' ? 'm' : 'f';
   fieldUI(S.cfg.me, ME_FIELDS, $('#meFields'), 'me-', peopleChanged, 'me'); 
