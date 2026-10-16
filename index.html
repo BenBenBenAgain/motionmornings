@@ -631,12 +631,51 @@ function windowView(world, tod, x, y, w, h, t) {
   else { rect(x, y + h * 0.75, w, h * 0.25, lin(0, y + h * 0.75, 0, y + h, [[0, [0.3, 0.55, 0.7]], [1, [0.4, 0.62, 0.72]]])); }
 }
 
+// Indoor scenes get one of several rooms, so a film never shows the same beige wall over and over.
+// Scenes with their own mood (a dark party, date night) keep their colours.
+const ROOM_STYLES = [
+  { wall: [0.78, 0.84, 0.76], floor: [0.76, 0.62, 0.46], frame: [1, 1, 1], decor: 'frames' },
+  { wall: [0.94, 0.78, 0.68], floor: [0.48, 0.34, 0.26], frame: [0.15, 0.15, 0.17], decor: 'shelf' },
+  { wall: [0.40, 0.58, 0.60], floor: [0.82, 0.72, 0.58], frame: [1, 1, 1], decor: 'roundart' },
+  { wall: [0.96, 0.94, 0.90], floor: [0.62, 0.62, 0.64], frame: [0.55, 0.40, 0.28], decor: 'frames', panel: [0.55, 0.63, 0.73] },
+  { wall: [0.97, 0.88, 0.62], floor: [0.60, 0.45, 0.34], frame: [1, 1, 1], decor: 'none', curtains: [0.35, 0.55, 0.62] },
+  { wall: [0.90, 0.77, 0.79], floor: [0.78, 0.68, 0.58], frame: [1, 1, 1], decor: 'plant' },
+  { wall: [0.27, 0.32, 0.44], floor: [0.70, 0.55, 0.40], frame: [0.95, 0.93, 0.88], decor: 'polaroids', glow: true },
+  { wall: [0.81, 0.80, 0.89], floor: [0.66, 0.52, 0.42], frame: [1, 1, 1], decor: 'mirror', rug: [0.86, 0.52, 0.42] }
+];
+let ROOMSEL = null;
+const roomHash = s => { let n = 7; for (const ch of String(s)) n = (n * 31 + ch.charCodeAt(0)) % 9973; return n % ROOM_STYLES.length; };
+function roomDecor(kind, t) {
+  if (kind === 'frames') {
+    [[86, 500, 140, 180], [256, 548, 110, 132]].forEach(([x, y, w, hh], i) => { rr(x - 8, y - 8, w + 16, hh + 16, 4); fill([0.22, 0.2, 0.2]); rect(x, y, w, hh, [0.98, 0.96, 0.92]); rect(x + 14, y + 14, w - 28, hh - 28, i ? [0.95, 0.75, 0.55] : [0.62, 0.78, 0.9]); X.beginPath(); X.moveTo(x + 14, y + hh - 14); X.lineTo(x + w * 0.45, y + hh * 0.45); X.lineTo(x + w - 14, y + hh - 14); X.closePath(); fill(i ? [0.85, 0.5, 0.4] : [0.4, 0.6, 0.45]); });
+  } else if (kind === 'shelf') {
+    rect(70, 660, 310, 16, [0.48, 0.34, 0.24]);
+    [[95, 22, [0.3, 0.45, 0.6]], [120, 18, [0.85, 0.6, 0.35]], [141, 24, [0.6, 0.35, 0.35]]].forEach(([x, w, c], i) => rect(x, 660 - 90 + i * 8, w, 90 - i * 8, c));
+    [[230, [0.88, 0.5, 0.38]], [320, [0.95, 0.92, 0.85]]].forEach(([x, c]) => { rr(x - 28, 600, 56, 60, 10); fill(c); [[-16, 590, 22], [10, 578, 26], [24, 596, 18]].forEach(([dx, y, r]) => { circ(x + dx, y, r); fill([0.35, 0.6, 0.38]); }); });
+  } else if (kind === 'roundart') {
+    circ(220, 590, 110); fill([0.95, 0.9, 0.82]); circ(220, 590, 92); fill([0.98, 0.78, 0.5]); circ(220, 620, 44); fill([0.95, 0.5, 0.38]); rect(128, 625, 184, 56, [0.25, 0.45, 0.5]); circ(220, 590, 110); X.lineWidth = 10; X.strokeStyle = css([0.25, 0.22, 0.2]); X.stroke();
+  } else if (kind === 'plant') {
+    line([[230, 0], [230, 520]], 3, [0.35, 0.3, 0.28]); rr(194, 512, 72, 62, 12); fill([0.95, 0.92, 0.86]);
+    for (let i = 0; i < 9; i++) { const sw = 6 * Math.sin(t * 1.3 + i); const sd = i % 2 ? 1 : -1; X.save(); X.translate(230 + sd * (20 + i * 3) + sw, 560 + i * 24); X.rotate(sd * 0.6); X.beginPath(); X.ellipse(0, 0, 22, 9, 0, 0, 2 * PI); fill([0.32 + 0.03 * (i % 3), 0.58, 0.36]); X.restore(); }
+  } else if (kind === 'polaroids') {
+    X.beginPath(); X.moveTo(60, 520); X.quadraticCurveTo(220, 570, 390, 520); X.lineWidth = 3; X.strokeStyle = css([0.85, 0.8, 0.7]); X.stroke();
+    [[110, 540, -0.08, [0.62, 0.78, 0.9]], [210, 556, 0.06, [0.95, 0.75, 0.55]], [310, 544, -0.05, [0.6, 0.8, 0.6]]].forEach(([x, y, r, c]) => { X.save(); X.translate(x, y); X.rotate(r); rect(-42, 0, 84, 96, [0.98, 0.97, 0.94]); rect(-34, 8, 68, 64, c); X.restore(); });
+    const g = X.createRadialGradient(200, 600, 20, 200, 600, 520); g.addColorStop(0, css([1, 0.85, 0.55], 0.28)); g.addColorStop(1, css([1, 0.85, 0.55], 0)); X.fillStyle = g; X.fillRect(0, 0, W, 1460);
+  } else if (kind === 'mirror') {
+    ell(220, 600, 96, 130); fill([0.62, 0.45, 0.3]); ell(220, 600, 80, 114); fill([0.82, 0.9, 0.95]); X.beginPath(); X.moveTo(180, 520); X.lineTo(210, 500); X.lineTo(170, 640); X.closePath(); fill([1, 1, 1], 0.5);
+  }
+}
 function room(cfg, t, o = {}) {
   const tint = cfg.tint ? C(cfg.tint) : null;
   let wall = o.wall || [0.93, 0.89, 0.83];
+  // a light, everyday room takes this scene's style; a mood room (dark party, date night) keeps its own
+  const st = ROOMSEL != null && (wall[0] + wall[1] + wall[2]) / 3 > 0.7 ? ROOM_STYLES[ROOMSEL] : null;
+  if (st) wall = st.wall;
   if (tint) wall = mix(wall, tint, 0.22);
-  const floor = o.floor || [0.72, 0.60, 0.48];
+  const floor = st ? st.floor : (o.floor || [0.72, 0.60, 0.48]);
   rect(0, 0, W, 1460, wall);
+  if (st && st.panel) { rect(0, 1080, W, 380, st.panel); rect(0, 1068, W, 16, mix(st.panel, [1, 1, 1], 0.4)); }
+  if (st && st.decor) roomDecor(st.decor, t);
   if (o.pattern) {
     X.lineWidth = 2; X.strokeStyle = css([1, 1, 1], 0.35); X.beginPath();
     for (let yy = 0; yy < 1460; yy += 90) for (let xx = 0; xx < W + 90; xx += 104) {
@@ -649,8 +688,10 @@ function room(cfg, t, o = {}) {
   if (o.window) {
     const wx = 640, wy = 720, ww = 340, wh = 380;
     X.save(); X.beginPath(); X.rect(wx, wy, ww, wh); X.clip(); windowView(cfg.world, o.window, wx, wy, ww, wh, t); if (o.inWindow) o.inWindow(); X.restore();
-    X.lineWidth = 16; X.strokeStyle = css([1, 1, 1]); X.strokeRect(wx, wy, ww, wh);
-    line([[wx + ww / 2, wy], [wx + ww / 2, wy + wh]], 10, [1, 1, 1]); line([[wx, wy + wh / 2], [wx + ww, wy + wh / 2]], 10, [1, 1, 1]);
+    const fr = st ? st.frame : [1, 1, 1];
+    X.lineWidth = 16; X.strokeStyle = css(fr); X.strokeRect(wx, wy, ww, wh);
+    line([[wx + ww / 2, wy], [wx + ww / 2, wy + wh]], 10, fr); line([[wx, wy + wh / 2], [wx + ww, wy + wh / 2]], 10, fr);
+    if (st && st.curtains) { [[wx - 70, -1], [wx + ww - 10, 1]].forEach(([cx, sd]) => { rect(cx, wy - 50, 80, wh + 110, st.curtains); for (let k = 1; k < 4; k++) line([[cx + k * 20, wy - 50], [cx + k * 20, wy + wh + 60]], 3, mix(st.curtains, [0, 0, 0], 0.18)); }); rect(wx - 90, wy - 64, ww + 180, 14, [0.4, 0.3, 0.24]); }
   }
   if (o.lights) {
     X.beginPath(); X.moveTo(-20, 760); X.bezierCurveTo(300, 880, 700, 880, W + 20, 760); X.lineWidth = 3; X.strokeStyle = css([0.2, 0.2, 0.2]); X.stroke();
@@ -662,6 +703,7 @@ function room(cfg, t, o = {}) {
   }
   rect(0, 1460, W, 460, lin(0, 1460, 0, H, [[0, floor], [1, mix(floor, [0, 0, 0], 0.15)]]));
   rect(0, 1450, W, 18, mix(wall, [1, 1, 1], 0.5));
+  if (st && st.rug) { ell(540, 1720, 420, 90); fill(st.rug); ell(540, 1720, 380, 70); X.lineWidth = 4; X.strokeStyle = css(mix(st.rug, [1, 1, 1], 0.4)); X.stroke(); }
 }
 function nightTint(a = 0.25) { rect(0, 0, W, H, [0.15, 0.1, 0.3], a); }
 
@@ -1545,8 +1587,8 @@ function petName(cfg) {
   return ps.every(p => p.type === ps[0].type) ? 'my ' + ps[0].type + 's' : 'my pets';
 }
 function fillText(text, cfg) { return String(text || '').replace(/\{pet\}/g, petName(cfg) || 'my pet'); }
-const FIXED_HOME = { title: 'beach', end: 'beach', calm: 'mountains', campfire: 'mountains', steady: 'mountains', friends: 'park', family: 'park', pram: 'park', parkday: 'park', footy: 'park', soccer: 'park', tennis: 'park', bbq: 'park', schoolrun: 'city', cafe: 'city', surf: 'beach', together: 'beach', songs_outdoor: 'beach' };
-const ROAM_SCENES = new Set(['walk', 'jog', 'start', 'sunrise', 'strong', 'selflove', 'unwind', 'couple', 'cycle', 'celebrate']);
+const FIXED_HOME = { title: 'beach', end: 'beach', calm: 'mountains', campfire: 'mountains', friends: 'park', family: 'park', pram: 'park', parkday: 'park', footy: 'park', soccer: 'park', tennis: 'park', bbq: 'park', schoolrun: 'city', cafe: 'city', surf: 'beach', together: 'beach', songs_outdoor: 'beach' };
+const ROAM_SCENES = new Set(['walk', 'jog', 'start', 'sunrise', 'strong', 'selflove', 'unwind', 'couple', 'cycle', 'celebrate', 'steady']);
 const ROAM_SHOW = { walk: 'park', jog: 'beach', couple: 'city', cycle: 'city', celebrate: 'beach', unwind: 'beach', strong: 'park' };
 // the setting a scene's picture shows in the chooser
 const homeWorld = k => FIXED_HOME[k] || ROAM_SHOW[k] || 'beach';
@@ -1566,6 +1608,9 @@ function timeline(cfg, targetDur) {
     if (it.world && (FIXED_HOME[it.scene] || ROAM_SCENES.has(it.scene))) { used[it.world]++; prev = it.world; }
   });
   items.push({ kind: 'g', text: closingText(cfg), scene: 'end', d: 7, last: true });
+  const roomUse = ROOM_STYLES.map(() => 0); let prevRoom = -1;
+  const indoor = sc => { const s = SCENES[sc]; return !!s && /\broom\(/.test(s.fn.toString()); };
+  items.forEach(it => { if (!indoor(it.scene)) return; const h0 = roomHash(it.scene); let best = -1; for (let j = 0; j < ROOM_STYLES.length; j++) { const r = (h0 + j) % ROOM_STYLES.length; if (r === prevRoom) continue; if (best < 0 || roomUse[r] < roomUse[best]) best = r; } it.room = best; roomUse[best]++; prevRoom = best; });
   const raw = items.reduce((s, i) => s + i.d, 0), k = targetDur ? targetDur / raw : 1;
   let s = 0; items.forEach(i => { i.d *= k; i.start = s; s += i.d; });
   return { items, total: s };
@@ -1577,7 +1622,9 @@ function render(ctx, cfg, tl, T) {
   const it = tl.items[i], t = T - it.start, p = t / it.d, d = it.d;
   X.save(); X.fillStyle = css(CREAM); X.fillRect(0, 0, W, H);
   const sc = it.world && it.world !== cfg.world ? Object.assign({}, cfg, { world: it.world }) : cfg;
+  ROOMSEL = it.room != null ? it.room : roomHash(it.scene);
   try { (SCENES[it.scene] || SCENES.sunrise).fn(sc, t, p); } catch (e) { console.error(e); }
+  ROOMSEL = null;
   X.restore();
   X.save();
   const txt = fillText(it.text, cfg);
@@ -1599,7 +1646,7 @@ function render(ctx, cfg, tl, T) {
   if (a > 0) rect(0, 0, W, H, it.last && t > d / 2 ? [0.05, 0.04, 0.06] : CREAM, a);
   X.restore();
 }
-function drawScene(ctx, cfg, key, t, p = 0.5) { X = ctx; X.save(); X.fillStyle = css(CREAM); X.fillRect(0, 0, W, H); (SCENES[key] || SCENES.sunrise).fn(cfg, t, p); X.restore(); }
+function drawScene(ctx, cfg, key, t, p = 0.5, roomIx) { X = ctx; X.save(); X.fillStyle = css(CREAM); X.fillRect(0, 0, W, H); ROOMSEL = roomIx != null ? roomIx : roomHash(key); try { (SCENES[key] || SCENES.sunrise).fn(cfg, t, p); } finally { ROOMSEL = null; } X.restore(); }
 
 return { W, H, SCENES, homeWorld, openingText, closingText, DEFAULT_KID, petsOf, PICKABLE, WORLDS: Object.keys(WORLDS), DEFAULT_ME, DEFAULT_PARTNER, timeline, render, drawScene, fillText, petName };
 })();
