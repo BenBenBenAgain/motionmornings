@@ -1532,7 +1532,7 @@ const SCENES = {
   clockplan: { label: 'Planning, clock on the wall', fn(c, t) { room(c, t, { window: 'day' }); wallClock(500, 640, 80, t); person(330, 1650, 1, ME(c), t, { armL: [0.4, 1.2], armR: [0.3, 1.5] }); bulb(330, 940 - 10 * Math.sin(t * 2), t); desk(130, 620); notebook(380, 1340, t); pet(c, 760, 1720, 0.85, t, { flip: -1 }); } },
   idea: { label: 'Lightbulb moment, planning', fn(c, t) { room(c, t, { window: 'day' }); person(330, 1650, 1, ME(c), t, { armL: [0.4, 1.2], armR: [0.3, 1.5] }); bulb(330, 940 - 10 * Math.sin(t * 2), t); desk(130, 620); notebook(380, 1340, t); pet(c, 760, 1720, 0.85, t, { flip: -1 }); } },
   checklist: { label: 'Ticking off small wins', fn(c, t) { room(c, t, { wall: [0.92, 0.9, 0.86] }); const u = ease(clamp((t - 2.6) / 0.5)); person(280, 1660, 1, ME(c), t, { armR: [0.4 + 2.2 * u, 0.4 + 2 * u] }); checklist(530, 760, 460, 3, t, 0.8, 0.6); pet(c, 700, 1760, 0.8, t, { flip: -1 }); } },
-  read: { label: 'Reading and learning', fn(c, t) { room(c, t, { wall: [0.93, 0.9, 0.85], window: 'day' }); const h = person(420, 1660, 1, ME(c), t, { armL: [0.5, 1.7], armR: [0.5, 1.7] }); book((h.L[0] + h.R[0]) / 2, h.R[1] + 10, t); pet(c, 780, 1760, 0.8, t, { flip: -1, tongue: false }); } },
+  read: { label: 'Reading and learning', fn(c, t) { room(c, t, { wall: [0.93, 0.9, 0.85], window: 'day' }); const h = person(420, 1660, 1, ME(c), t, { armL: [0.3, 0.25], armR: [0.3, 0.25] }); book((h.L[0] + h.R[0]) / 2, h.R[1] + 10, t); const sk = C(ME(c).skin); [h.L, h.R].forEach(([hx, hy], i) => { circ(hx + (i ? -6 : 6), hy - 12, 21); fill(sk); circ(hx + (i ? -16 : 16), hy - 34, 9); fill(sk); }); pet(c, 780, 1760, 0.8, t, { flip: -1, tongue: false }); } },
   soda: { label: 'Choosing a soda water', fn(c, t) { room(c, t, { wall: [0.33, 0.3, 0.42], floor: [0.4, 0.3, 0.26], lights: true }); const l = ease(clamp((t - 1.2) / 0.8)); const h = person(420, 1680, 1.05, ME(c), t, { armR: [0.35 + 0.6 * l, 1.4 + 0.9 * l] }); glass(h.R[0] + 5, h.R[1] + 20, t); counter(640, 1100, 1470, [0.45, 0.33, 0.27]); pet(c, 160, 1760, 0.8, t); } },
   fridge: { label: 'Stocking up on good food', fn(c, t) { room(c, t, { wall: [0.92, 0.94, 0.9] }); fridge(60, 1640, ease(clamp((t - 0.4) / 0.8))); const r = ease(clamp((t - 1.4) / 0.7)); person(560, 1660, 1, ME(c), t, { armL: [0.3 + 0.9 * r, 0.5 + 0.8 * r] }); counter(700, 1100); fruitBowl(900, 1440); pet(c, 760, 1780, 0.75, t, { flip: -1, lookUp: 0.5 }); } },
   cook: { label: 'Cooking a real meal', fn(c, t) { room(c, t, { wall: [0.94, 0.9, 0.84], window: 'day' }); counter(380, 1100); stove(640, 1420, t); const s = 0.25 * Math.sin(t * 5); person(260, 1660, 1, ME(c), t, { armR: [0.6 + s, 1.5 + s] }); pet(c, 120, 1780, 0.75, t, { lookUp: 0.7 }); } },
@@ -1541,7 +1541,7 @@ const SCENES = {
   progress: { label: 'Watching my progress grow', fn(c, t) { room(c, t, { wall: [0.9, 0.92, 0.9] }); rr(470, 720, 560, 520, 26); fill([1, 1, 1], 0.95); barchart(510, 1190, 480, 400, t, 5, [0.35, 0.68, 0.5]); person(260, 1660, 1, ME(c), t, { armR: [1.9, 1.7] }); pet(c, 760, 1780, 0.75, t, { flip: -1 }); } },
   money: { label: 'Checking my numbers', fn(c, t) { room(c, t, { wall: [0.93, 0.91, 0.86], window: 'day' }); desk(150, 700); person(420, 1650, 1, ME(c), t, { armL: [0.4, 1.3], armR: [0.4, 1.3] }); notebook(300, 1360, t); rr(540, 1350, 120, 90, 10); fill([0.3, 0.32, 0.35]); for (let i = 0; i < 6; i++) rect(555 + (i % 3) * 32, 1365 + Math.floor(i / 3) * 32, 24, 24, [0.85, 0.85, 0.85]); pet(c, 860, 1780, 0.75, t, { flip: -1 }); } },
   jar: { label: 'Saving a little every pay', fn(c, t) { room(c, t, { wall: [0.94, 0.9, 0.82] }); desk(450, 1000); const drops = [0.8, 1.8, 2.8, 3.6]; const coins = 3 + drops.filter(d => t > d + 0.6).length; jar(720, 1440, coins); drops.forEach(d => coinDrop(720, 1440 - coins * 16, (t - d) / 0.6)); person(280, 1660, 1, ME(c), t, { armR: [1.4, 1.5] }); pet(c, 120, 1780, 0.7, t); } },
-  laptop: { label: 'Focused work on my laptop', fn(c, t, p) { room(c, t, { wall: [0.88, 0.9, 0.93], window: 'sunrise' }); person(380, 1650, 1, ME(c), t, typing(t)); desk(120, 720); laptop(400, 1440, 'back'); rr(600, 1370, 50, 70, 8); fill([0.95, 0.95, 0.92]); clockRing(870, 640, p); pet(c, 860, 1780, 0.75, t, { flip: -1 }); } },
+  laptop: { label: 'Focused work on my laptop', fn(c, t, p) { room(c, t, { wall: [0.88, 0.9, 0.93], window: 'sunrise' }); person(380, 1650, 1, ME(c), t, typing(t)); desk(120, 720); laptop(400, 1440, 'back'); rr(600, 1370, 50, 70, 8); fill([0.95, 0.95, 0.92]); clockRing(500, 600, p); pet(c, 860, 1780, 0.75, t, { flip: -1 }); } },
   hardfirst: { label: 'Doing the hard task first', fn(c, t) { room(c, t, { wall: [0.92, 0.9, 0.86] }); checklist(520, 700, 460, 3, t, 1.2, 99); person(300, 1650, 1, ME(c), t, typing(t)); desk(60, 620); laptop(320, 1440, 'back'); pet(c, 800, 1780, 0.75, t, { flip: -1 }); } },
   ship: { label: 'Finishing and launching', fn(c, t) { room(c, t, { wall: [0.9, 0.92, 0.95] }); const u = ease(clamp((t - 1.8) / 0.4)); desk(520, 1040); laptop(780, 1440, (x, y, w, h) => tick(x + w / 2, y + h / 2, 50, clamp((t - 1) / 0.6))); person(300, 1660, 1, ME(c), t, { armL: [0.2 + 2.5 * u, 0.2 + 2.6 * u], armR: [0.2 + 2.5 * u, 0.2 + 2.6 * u], bob: 20 * u * Math.abs(Math.sin(t * 6)) }); confetti(t, 1.8); pet(c, 140, 1790, 0.7, t, { lookUp: 0.6 }); } },
   talk: { label: 'Talking with someone', fn(c, t) { room(c, t, { wall: [0.95, 0.88, 0.8], floor: [0.6, 0.46, 0.36] }); person(300, 1660, 1, ME(c), t, { armR: [0.5 + 0.2 * Math.sin(t * 3), 1] }); person(780, 1660, 0.98, FRIEND1, t, { flip: -1, armR: [0.4, 1 + 0.2 * Math.sin(t * 2.5)] }); const ph = Math.floor(t / 1.2) % 2, a = Math.sin(((t % 1.2) / 1.2) * PI); ph ? bubble(640, 820, 280, 140, a, [0.88, 0.95, 0.9], 1) : bubble(120, 820, 280, 140, a); } },
@@ -2421,7 +2421,7 @@ function thumbCanvas(item) {
 const zoomThumb = (ctx, w, h) => { const k = h / 1400; ctx.setTransform(k, 0, 0, k, -140 * k, -520 * k); };
 function drawThumb(t, tt) { const it = t.item; LSN.drawScene(t.ctx, { ...S.cfg, world: it.world || LSN.homeWorld(it.scene) }, it.scene, tt % 5.5, (tt % 5.5) / 5.5); }
 function tickThumbs(now) {
-  if (S.step !== 2 || recording || now - thumbClock < 110) return;
+  if (S.step !== 2 || recording || now - thumbClock < 110 || !$('#scenePick').hidden) return;
   thumbClock = now; const tt = now / 1000;
   liveThumbs.forEach(t => { if (t.vis && t.cv.isConnected) drawThumb(t, tt + t.off); });
 }
@@ -2462,15 +2462,21 @@ function openScenePick(item, done) {
   scenePickItem = item; scenePickDone = done;
   const box = $('#sceneGrid'); box.innerHTML = '';
   const cfg = item.world && item.world !== S.cfg.world ? { ...S.cfg, world: item.world } : S.cfg;
-  SCENE_GROUPS.forEach(([name, keys]) => {
-    const grid = el('div', { class: 'scenegrid' });
-    keys.filter(k => LSN.SCENES[k]).forEach(k => {
-      const cv = el('canvas', { width: 135, height: 240, 'aria-hidden': 'true' }), x = cv.getContext('2d'); zoomThumb(x, 135, 240);
-      LSN.drawScene(x, { ...cfg, world: LSN.homeWorld(k) }, k, 2.2, 0.5);
-      grid.append(el('button', { 'aria-pressed': k === item.scene ? 'true' : 'false', onclick: () => { item.scene = k; closeScenePick(true); } }, cv, el('span', {}, LSN.SCENES[k].label)));
-    });
-    box.append(el('h4', { class: 'scenegroup' }, name), grid);
-  });
+  const grid = keys => { const g = el('div', { class: 'scenegrid' }); keys.filter(k => LSN.SCENES[k]).forEach(k => {
+    const cv = el('canvas', { width: 135, height: 240, 'aria-hidden': 'true' }), x = cv.getContext('2d'); zoomThumb(x, 135, 240);
+    LSN.drawScene(x, { ...cfg, world: LSN.homeWorld(k) }, k, 2.2, 0.5);
+    g.append(el('button', { 'aria-pressed': k === item.scene ? 'true' : 'false', onclick: () => { item.scene = k; closeScenePick(true); } }, cv, el('span', {}, LSN.SCENES[k].label)));
+  }); return g; };
+  const showAll = () => SCENE_GROUPS.forEach(([name, keys]) => box.append(el('h4', { class: 'scenegroup' }, name), grid(keys)));
+  // scenes that belong to this line's goal come first
+  const sec = (S.cfg.sections || []).find(s => s.glimpse === item || (s.actions || []).includes(item)), th = sec && sec.theme && TH(sec.theme);
+  if (th) {
+    const fills = Object.assign(autoFills(S.cfg), S.fills[th.id] || {});
+    const keys = [...new Set([item.scene, ...th.a.map(a => sceneFor(a[1], fills)), ...th.g.map(g => sceneFor(g[1], fills))])];
+    box.append(el('h4', { class: 'scenegroup' }, 'Suggested for ' + th.title), grid(keys));
+    const more = el('button', { class: 'btn ghost small', style: 'align-self:flex-start;margin-top:4px', onclick: () => { more.remove(); showAll(); } }, 'Show all scenes');
+    box.append(more);
+  } else showAll();
   $('#scenePick').hidden = false; $('#scenePickClose').focus();
 }
 function closeScenePick(chose) { $('#scenePick').hidden = true; const d = scenePickDone; scenePickDone = scenePickItem = null; if (chose && d) d(); }
