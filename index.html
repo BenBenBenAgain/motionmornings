@@ -618,7 +618,39 @@ function mountains(t, tod, sunY) {
   for (let i = 0; i < 14; i++) { ell(r() * W, 1420 + r() * 480, 26, 14); fill(gt([0.6, 0.58, 0.55], tod)); }
 }
 
-const WORLDS = { beach, park, city, mountains };
+// countryside: patchwork hills, a red barn and silo, round hay bales, a fence and a dirt road
+function country(t, tod, sunY) {
+  sky(t, tod, sunY, 1090);
+  const bot = SKIES[tod][1];
+  X.beginPath(); X.moveTo(0, 1090); X.bezierCurveTo(260, 1010, 520, 1070, 760, 1030); X.bezierCurveTo(900, 1005, 1000, 1030, W, 1020); X.lineTo(W, 1200); X.lineTo(0, 1200); X.closePath(); fill(gt(mix([0.6, 0.72, 0.48], bot, 0.35), tod));
+  [[0, 1140, 380, [0.86, 0.74, 0.42]], [380, 1120, 360, [0.52, 0.7, 0.4]], [740, 1130, 340, [0.78, 0.68, 0.4]]].forEach(([x, y, w, c]) => { X.beginPath(); X.moveTo(x - 20, y + 40); X.quadraticCurveTo(x + w / 2, y - 30, x + w + 20, y + 30); X.lineTo(x + w + 20, 1260); X.lineTo(x - 20, 1260); X.closePath(); fill(gt(c, tod)); for (let k = 1; k < 5; k++) { X.beginPath(); X.moveTo(x, y + 30 + k * 26); X.quadraticCurveTo(x + w / 2, y + k * 26, x + w, y + 25 + k * 26); X.lineWidth = 3; X.strokeStyle = css(gt(mix(c, [0, 0, 0], 0.1), tod)); X.stroke(); } });
+  const bx = 780, by = 1100; rect(bx, by - 90, 130, 90, gt([0.72, 0.24, 0.2], tod)); X.beginPath(); X.moveTo(bx - 12, by - 90); X.lineTo(bx + 65, by - 150); X.lineTo(bx + 142, by - 90); X.closePath(); fill(gt([0.45, 0.16, 0.14], tod)); rect(bx + 45, by - 55, 40, 55, gt([0.95, 0.92, 0.85], tod)); line([[bx + 45, by - 55], [bx + 85, by]], 4, gt([0.72, 0.24, 0.2], tod)); line([[bx + 85, by - 55], [bx + 45, by]], 4, gt([0.72, 0.24, 0.2], tod));
+  rect(bx + 150, by - 160, 50, 160, gt([0.8, 0.8, 0.78], tod)); ell(bx + 175, by - 160, 25, 16); fill(gt([0.6, 0.6, 0.62], tod));
+  rect(0, 1250, W, 670, lin(0, 1250, 0, H, [[0, gt([0.6, 0.74, 0.42], tod)], [1, gt([0.46, 0.62, 0.32], tod)]]));
+  X.beginPath(); X.moveTo(560, 1250); X.bezierCurveTo(520, 1400, 760, 1600, 640, H); X.lineTo(980, H); X.bezierCurveTo(1000, 1600, 640, 1400, 600, 1250); X.closePath(); fill(gt([0.82, 0.7, 0.52], tod));
+  [[150, 1330, 1], [300, 1300, 0.7]].forEach(([x, y, s]) => { circ(x, y, 60 * s); fill(gt([0.88, 0.74, 0.42], tod)); circ(x, y, 34 * s); X.lineWidth = 5; X.strokeStyle = css(gt([0.72, 0.58, 0.3], tod)); X.stroke(); });
+  for (let x = 20; x < W; x += 120) line([[x, 1390], [x, 1300]], 10, gt([0.55, 0.4, 0.28], tod));
+  [1320, 1355].forEach(y => line([[0, y], [W, y + 6]], 6, gt([0.6, 0.45, 0.3], tod)));
+}
+// a lake: tree line, still water with the light reflected, a jetty and reeds
+function lake(t, tod, sunY) {
+  sky(t, tod, sunY, 1060);
+  const bot = SKIES[tod][1];
+  for (let x = -40; x < W + 40; x += 70) { const hh = 60 + 40 * Math.abs(Math.sin(x * 0.07)); ell(x, 1065, 50, hh); fill(gt(mix([0.22, 0.42, 0.3], bot, 0.25), tod)); }
+  rect(0, 1060, W, 290, lin(0, 1060, 0, 1350, [[0, gt(mix([0.35, 0.58, 0.68], bot, 0.35), tod)], [1, gt([0.28, 0.5, 0.62], tod)]]));
+  const sn = SKIES[tod][2]; if (sn) { for (let k = 0; k < 6; k++) { const w2 = 120 - k * 14; rect(sunX(tod) - w2 / 2 + 8 * Math.sin(t * 2 + k), 1090 + k * 34, w2, 6, sn, 0.5); } }
+  for (let k = 0; k < 9; k++) { const x = (k * 137 + t * 20) % W, y = 1100 + (k * 53) % 220; line([[x, y], [x + 60, y]], 3, [1, 1, 1], 0.35); }
+  rect(0, 1340, W, 580, lin(0, 1340, 0, H, [[0, gt([0.52, 0.68, 0.4], tod)], [1, gt([0.42, 0.58, 0.32], tod)]]));
+  X.beginPath(); X.moveTo(0, 1350); X.bezierCurveTo(300, 1330, 700, 1370, W, 1340); X.lineTo(W, 1380); X.lineTo(0, 1380); X.closePath(); fill(gt([0.62, 0.55, 0.42], tod));
+  // a long timber pier running out over the water, posts underneath
+  const jc = gt([0.66, 0.5, 0.34], tod), je = gt([0.42, 0.3, 0.2], tod);
+  [[905, 1160], [975, 1160], [860, 1260], [1010, 1260]].forEach(([x, y]) => line([[x, y], [x, y + 46]], 9, je));
+  X.beginPath(); X.moveTo(830, 1400); X.lineTo(1040, 1400); X.lineTo(980, 1150); X.lineTo(900, 1150); X.closePath(); fill(jc);
+  for (let k = 1; k < 10; k++) { const u = k / 10, y = 1150 + u * 250; line([[900 - 70 * u, y], [980 + 60 * u, y]], 3, je, 0.6); }
+  line([[900, 1150], [830, 1400]], 5, je); line([[980, 1150], [1040, 1400]], 5, je);
+  for (let k = 0; k < 14; k++) { const x = 20 + k * 22, sw = 8 * Math.sin(t * 1.5 + k); line([[x, 1400], [x + sw, 1280 - (k % 3) * 25]], 5, gt([0.36, 0.52, 0.3], tod)); if (k % 3 === 0) { ell(x + sw, 1290 - (k % 3) * 25, 7, 20); fill(gt([0.5, 0.35, 0.22], tod)); } }
+}
+const WORLDS = { beach, park, city, mountains, country, lake };
 function outdoor(cfg, t, tod, sunY) { (WORLDS[cfg.world] || beach)(t, tod, sunY); }
 
 function windowView(world, tod, x, y, w, h, t) {
@@ -628,17 +660,19 @@ function windowView(world, tod, x, y, w, h, t) {
   if (world === 'park') { X.beginPath(); X.moveTo(x, y + h * 0.75); X.bezierCurveTo(x + w * 0.3, y + h * 0.6, x + w * 0.7, y + h * 0.8, x + w, y + h * 0.66); X.lineTo(x + w, y + h); X.lineTo(x, y + h); X.closePath(); fill([0.5, 0.7, 0.42]); }
   else if (world === 'city') { const r = rng(5); let xx = x; while (xx < x + w) { const bw = 40 + r() * 40, bh = h * (0.25 + r() * 0.4); rect(xx, y + h - bh, bw - 5, bh, [0.45, 0.5, 0.62]); xx += bw; } }
   else if (world === 'mountains') { X.beginPath(); X.moveTo(x, y + h * 0.8); X.lineTo(x + w * 0.3, y + h * 0.45); X.lineTo(x + w * 0.55, y + h * 0.72); X.lineTo(x + w * 0.8, y + h * 0.5); X.lineTo(x + w, y + h * 0.7); X.lineTo(x + w, y + h); X.lineTo(x, y + h); X.closePath(); fill([0.45, 0.55, 0.7]); }
+  else if (world === 'country') { [[0.86, 0.74, 0.42], [0.52, 0.7, 0.4], [0.78, 0.68, 0.4]].forEach((c, i) => { X.beginPath(); X.moveTo(x, y + h * (0.66 + i * 0.1)); X.quadraticCurveTo(x + w / 2, y + h * (0.56 + i * 0.1), x + w, y + h * (0.68 + i * 0.1)); X.lineTo(x + w, y + h); X.lineTo(x, y + h); X.closePath(); fill(c); }); rect(x + w * 0.62, y + h * 0.58, w * 0.14, h * 0.1, [0.72, 0.24, 0.2]); }
+  else if (world === 'lake') { for (let k = 0; k < 6; k++) { ell(x + k * w / 5, y + h * 0.62, w / 8, h * 0.08); fill([0.25, 0.44, 0.32]); } rect(x, y + h * 0.64, w, h * 0.36, [0.32, 0.55, 0.66]); line([[x + w * 0.2, y + h * 0.78], [x + w * 0.5, y + h * 0.78]], 3, [1, 1, 1], 0.4); }
   else { rect(x, y + h * 0.75, w, h * 0.25, lin(0, y + h * 0.75, 0, y + h, [[0, [0.3, 0.55, 0.7]], [1, [0.4, 0.62, 0.72]]])); }
 }
 
 // Indoor scenes get one of several rooms, so a film never shows the same beige wall over and over.
 // Scenes with their own mood (a dark party, date night) keep their colours.
 const ROOM_STYLES = [
-  { wall: [0.78, 0.84, 0.76], floor: [0.76, 0.62, 0.46], frame: [1, 1, 1], decor: 'frames', win: 'square', view: 'park' },
+  { wall: [0.78, 0.84, 0.76], floor: [0.76, 0.62, 0.46], frame: [1, 1, 1], decor: 'frames', win: 'square', view: 'lake' },
   { wall: [0.94, 0.78, 0.68], floor: [0.48, 0.34, 0.26], frame: [0.15, 0.15, 0.17], decor: 'shelf', win: 'arch', view: 'city' },
   { wall: [0.40, 0.58, 0.60], floor: [0.82, 0.72, 0.58], frame: [1, 1, 1], decor: 'roundart', win: 'round', lamp: true, view: 'mountains' },
   { wall: [0.96, 0.94, 0.90], floor: [0.62, 0.62, 0.64], frame: [0.55, 0.40, 0.28], decor: 'frames', panel: [0.55, 0.63, 0.73], win: 'double', view: 'beach' },
-  { wall: [0.97, 0.88, 0.62], floor: [0.60, 0.45, 0.34], frame: [1, 1, 1], decor: 'none', curtains: [0.35, 0.55, 0.62], win: 'square', view: 'park' },
+  { wall: [0.97, 0.88, 0.62], floor: [0.60, 0.45, 0.34], frame: [1, 1, 1], decor: 'none', curtains: [0.35, 0.55, 0.62], win: 'square', view: 'country' },
   { wall: [0.90, 0.77, 0.79], floor: [0.78, 0.68, 0.58], frame: [1, 1, 1], decor: 'plant', win: 'door', door: [0.36, 0.5, 0.58], view: 'city' },
   { wall: [0.27, 0.32, 0.44], floor: [0.70, 0.55, 0.40], frame: [0.95, 0.93, 0.88], decor: 'polaroids', glow: true, win: 'tall', lamp: true, view: 'city' },
   { wall: [0.81, 0.80, 0.89], floor: [0.66, 0.52, 0.42], frame: [1, 1, 1], decor: 'mirror', rug: [0.86, 0.52, 0.42], win: 'door', door: [0.95, 0.93, 0.88], view: 'mountains' }
@@ -1639,11 +1673,11 @@ function timeline(cfg, targetDur) {
     if (sec.glimpse && sec.glimpse.text && sec.glimpse.text.trim()) items.push({ kind: 'g', text: sec.glimpse.text, scene: sec.glimpse.scene, world: sec.glimpse.world, d: sec.glimpse.d || 4, src: sec.glimpse });
   });
   // every scene has a natural setting; walks, runs and rides move between places so the film keeps changing
-  const ROAMS = ['park', 'beach', 'city', 'mountains'], used = { park: 0, beach: 1, city: 0, mountains: 0 }; let prev = null;
+  const ROAMS = ['park', 'country', 'beach', 'city', 'lake', 'mountains'], used = { park: 0, country: 0, beach: 1, city: 0, lake: 0, mountains: 0 }; let prev = null;
   // scenes tied to a place claim it first; scenes that can be anywhere then go where the film hasn't been yet
   items.forEach(it => { if (!it.world && FIXED_HOME[it.scene]) it.world = FIXED_HOME[it.scene]; if (it.world && ROAMS.includes(it.world)) used[it.world]++; });
   items.forEach((it, k) => {
-    if (!it.world && ROAM_SCENES.has(it.scene)) { const last = (items[k - 1] || {}).world; it.world = ROAMS.filter(w => w !== last).sort((a, b) => used[a] - used[b] || ((ROAMS.indexOf(a) + k) % 4) - ((ROAMS.indexOf(b) + k) % 4))[0]; used[it.world]++; }
+    if (!it.world && ROAM_SCENES.has(it.scene)) { const last = (items[k - 1] || {}).world; it.world = ROAMS.filter(w => w !== last).sort((a, b) => used[a] - used[b] || ((ROAMS.indexOf(a) + k) % ROAMS.length) - ((ROAMS.indexOf(b) + k) % ROAMS.length))[0]; used[it.world]++; }
   });
   items.push({ kind: 'g', text: closingText(cfg), scene: 'end', d: 7, last: true });
   const roomUse = ROOM_STYLES.map(() => 0); let prevRoom = -1;
