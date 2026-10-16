@@ -124,6 +124,7 @@ textarea{min-height:76px}
 .mequick .field{display:flex;align-items:center;gap:10px;grid-template-columns:none}
 .mequick .field > span{font-size:.9rem;white-space:nowrap}
 .mequick input[type=text]{max-width:170px}
+  .filltip{color:var(--coral);font-size:.82rem}
 .menote{flex:1 1 100%;margin:0;font-size:.85rem}
 .mequick .sw input[type=color],.mequick .sw .frompic{display:none}
 .mequick .sw button{width:26px;height:26px}
@@ -1762,7 +1763,7 @@ const THEMES = [
   { id: 'money', title: 'Money', hint: 'Saving, steady, growing', qs: [['saving', 'What are you saving for?', 'a house deposit, a holiday']],
     a: [['I check my numbers every Sunday', 'money'], ['Every payday, some goes to {saving|savings}', 'jar'], ['I learn a skill that pays', 'laptop']],
     g: [['{saving|The savings goal}, done', 'progress'], ['Calm about money, with room to spare', 'steady']] },
-  { id: 'people', title: 'People I love', hint: 'Friends and family', qs: [['who', 'Who do you want more time with?', 'my parents, old friends']],
+  { id: 'people', title: 'People I love', hint: 'Friends and family', qs: [['who', 'Who do you want more time with?', 'Mum, Auntie June, old mates']],
     a: [['I visit {who|family} and stay for dinner', 'hug'], ['I call {who|the people I love} every week', 'talk'], ['I host the barbecue this time', 'bbq'], ['I say yes when friends make plans', 'friends']],
     g: [['Surrounded by people I love', 'campfire'], ['A full table and a lot of laughs', 'bbq']] },
   { id: 'sport', title: 'Sport', hint: 'Playing the game', qs: [['sport', 'What sport?', 'footy, tennis, surfing']],
@@ -1792,7 +1793,7 @@ const THEMES = [
   { id: 'grow', title: 'Growing our family', hint: 'Getting ready for kids', qs: [],
     a: [['We cook healthy meals together', 'cook_together'], ['I get fit for the family I’m building', 'jog'], ['I save for our family every payday', 'jar'], ['We talk about the parents we’ll be', 'couple']],
     g: [['Our family, growing', 'pram'], ['A little one in my arms', 'holdbaby']] },
-  { id: 'work', title: 'Work I care about', hint: 'A job, business or project', qs: [['work', 'What are you building or working toward?', 'my own business, a promotion']],
+  { id: 'work', title: 'Work I care about', hint: 'A job, business or project', qs: [['work', 'What are you building or working toward?', 'my own business, a new app']],
     a: [['I do two focused hours on {work|my work}', 'cafe'], ['I do the hard part first', 'hardfirst'], ['I finish it and send it out', 'ship'], ['I ask for advice and really listen', 'talk']],
     g: [['{work|My work}, really taking off', 'progress'], ['Excited to start the day', 'excited']] },
   { id: 'start', title: 'A fresh start', hint: 'A new chapter, a reset', qs: [],
@@ -1826,12 +1827,49 @@ function sceneFor(sc, fills) {
   if (sc === '@craftshare') return isMusic(craft) ? 'songs_outdoor' : 'friends';
   return 'sunrise';
 }
+// People answer the detail questions in all sorts of ways ("Spend more time with my auntie june").
+// Trim them back to the bit that slots into a line ("my auntie June") so sentences always read right.
+const LEADS = {
+  any: [/^i\s*(?:'d|would|want|wanna|hope|plan|really want)\s+(?:like\s+)?(?:to\s+)?/, /^to\s+/, /^more\s+/],
+  who: [/^(?:spend(?:ing)?\s+)?(?:more\s+)?(?:quality\s+)?time\s+with\s+/, /^spend(?:ing)?\s+(?:more\s+)?/, /^see(?:ing)?\s+(?:more\s+of\s+)?/, /^visit(?:ing)?\s+/, /^with\s+/],
+  work: [/^(?:build(?:ing)?|work(?:ing)?\s+(?:on|toward|towards)|start(?:ing)?|grow(?:ing)?|launch(?:ing)?|creat(?:e|ing)|mak(?:e|ing)|get(?:ting)?)\s+/],
+  saving: [/^sav(?:e|ing)\s+(?:up\s+)?(?:for|towards?)\s+/, /^for\s+/],
+  place: [/^(?:go(?:ing)?|travel(?:l?ing)?|get(?:ting)?|mov(?:e|ing))\s+(?:to\s+)?/, /^to\s+/],
+  learn: [/^learn(?:ing)?\s+(?:to\s+(?:play|speak)\s+)?/, /^(?:play(?:ing)?|speak(?:ing)?)\s+/],
+  meal: [/^(?:eat(?:ing)?|cook(?:ing)?|mak(?:e|ing))\s+/],
+  sport: [/^play(?:ing)?\s+/, /^do(?:ing)?\s+/],
+  swap: [/^(?:drink(?:ing)?|reach(?:ing)?\s+for|have|having)\s+/],
+  yes: [/^say(?:ing)?\s+yes\s+to\s+/, /^(?:try(?:ing)?|do(?:ing)?)\s+/],
+  activity: [/^(?:do(?:ing)?|go(?:ing)?\s+to(?:\s+the)?)\s+/],
+  home: [/^(?:liv(?:e|ing)\s+in|own(?:ing)?|buy(?:ing)?|build(?:ing)?)\s+/]
+};
+const NAME_KEYS = new Set(['who', 'pname', 'kids', 'place']);
+const SMALL = new Set(['my', 'and', 'the', 'old', 'friends', 'family', 'parents', 'mum', 'dad', 'mom', 'mates', 'kids', 'grandparents', 'sister', 'sisters', 'brother', 'brothers', 'auntie', 'aunty', 'aunt', 'uncle', 'nan', 'nanna', 'grandma', 'grandpa', 'pop', 'cousin', 'cousins', 'best', 'friend', 'mate', 'partner', 'husband', 'wife', 'son', 'daughter', 'of', 'a', 'an', 'to', 'in', 'our', 'little', 'big', 'whole', 'crew', 'team', 'neighbours', 'people', 'girls', 'boys', 'bestie', 'gran', 'granny', 'mother', 'father', 'in-laws']);
+function tidyAnswer(k, raw) {
+  let v = String(raw || '').trim().replace(/[.!?,;:]+$/, '').replace(/\s+/g, ' ');
+  if (!v) return '';
+  for (let pass = 0; pass < 3; pass++) {
+    const before = v;
+    [...LEADS.any, ...(LEADS[k] || [])].forEach(re => { v = v.replace(new RegExp(re.source, 'i'), ''); });
+    v = v.replace(/^and\s+(?=[aeiou])/i, 'an ').replace(/^and\s+/i, '');
+    if (v === before) break;
+  }
+  v = v.trim();
+  // "an app where people can…" keeps just "an app"; the detail stays in their head, the caption stays short
+  if (!NAME_KEYS.has(k)) { const cut = v.split(/\s+(?:where|that|which|so that|so|because|to help|for people)\s+/i)[0]; if (cut.split(' ').length >= 2) v = cut; }
+  // "nan and pop" are names; "my nan" is a description
+  const owned = /^(?:my|our|the)\b/i.test(v);
+  const asName = new Set(['mum', 'dad', 'mom', 'nan', 'nanna', 'nana', 'pop', 'poppy', 'grandma', 'grandpa', 'gran', 'granny', 'auntie', 'aunty', 'uncle']);
+  if (NAME_KEYS.has(k)) v = v.split(' ').map(w => { const l = w.toLowerCase(); if (SMALL.has(l) && !(asName.has(l) && !owned)) return l; return w.charAt(0).toUpperCase() + w.slice(1); }).join(' ');
+  else if (/^[A-Z][a-z]/.test(v) && !/^I\b/.test(v)) v = v.charAt(0).toLowerCase() + v.slice(1);
+  return v;
+}
 function fillT(tpl, fills, cfg) {
   // names from "Your people" fill in when the theme's own question is left blank
   const kidNames = (cfg.kids || []).filter(k => k.status !== 'hoping' && (k.name || '').trim()).map(k => k.name.trim());
   const joinN = a => a.length === 1 ? a[0] : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
   const auto = { pname: cfg.partner && cfg.partner.on && cfg.partner.status !== 'hoping' ? (cfg.partner.name || '').trim() : '', kids: kidNames.length ? joinN(kidNames) : '' };
-  let out = tpl.replace(/\{(\w+)\|([^}]*)\}/g, (m, k, fb) => { const v = (fills[k] || '').trim() || auto[k] || ''; return v || fb; });
+  let out = tpl.replace(/\{(\w+)\|([^}]*)\}/g, (m, k, fb) => { const v = tidyAnswer(k, fills[k]) || auto[k] || ''; return v || fb; });
   out = out.replace(/\{pet\}/g, LSN.petName(cfg) || 'outside');
   if (/I walk outside/.test(out)) out = out.replace('I walk outside', 'I get outside');
   out = out.replace(/\s+/g, ' ').trim();
@@ -1963,8 +2001,9 @@ function renderThemes() {
     th.qs.forEach(([k, label, ph]) => {
       const id = `f-${th.id}-${k}`, inp = el('input', { type: 'text', id, placeholder: 'e.g. ' + ph, maxlength: 50 });
       inp.value = S.fills[th.id][k] || '';
-      inp.oninput = () => { S.fills[th.id][k] = inp.value; liveLines(); save(); };
-      card.append(el('label', { for: id }, label, inp));
+      const tip = el('small', { class: 'filltip' }, 'Short works best, just a few words.'); tip.hidden = (inp.value || '').trim().split(/\s+/).length <= 6;
+      inp.oninput = () => { S.fills[th.id][k] = inp.value; tip.hidden = inp.value.trim().split(/\s+/).length <= 6; liveLines(); save(); };
+      card.append(el('label', { for: id }, label, inp, tip));
     });
     fills.append(card);
   });
@@ -2002,7 +2041,7 @@ function liveLines() {
   const ids = THEMES.map(t => t.id).filter(id => S.themes.includes(id));
   const keep = {}; (S.cfg.sections || []).forEach(s => { if (s.theme) keep[s.theme] = s; });
   const names = [S.cfg.partner.on && S.cfg.partner.name, (S.cfg.kids || []).map(k => k.name)];
-  const key = id => JSON.stringify(['w3', S.fills[id] || {}, names]);
+  const key = id => JSON.stringify(['w4', S.fills[id] || {}, names]);
   S.cfg.sections = ids.map(id => keep[id] && key(id) === keep[id]._fills ? keep[id] : Object.assign(buildSection(TH(id), S.fills[id] || {}, S.cfg), { _fills: key(id) }));
   varyScenes(S.cfg.sections);
   S.isExample = false;
