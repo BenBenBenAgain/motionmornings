@@ -125,6 +125,8 @@ textarea{min-height:76px}
 .mequick .field > span{font-size:.9rem;white-space:nowrap}
 .mequick input[type=text]{max-width:170px}
   .filltip{color:var(--coral);font-size:.82rem}
+.newfilm{display:flex;justify-content:flex-end;margin:-2px 0 4px}.newfilm .linkbtn{font-size:.85rem}
+#resetBox h3{margin:0}#resetBox p{margin:0;line-height:1.5}
 .menote{flex:1 1 100%;margin:0;font-size:.85rem}
 .mequick .sw input[type=color],.mequick .sw .frompic{display:none}
 .mequick .sw button{width:26px;height:26px}
@@ -298,6 +300,7 @@ input[type=range]{height:30px;touch-action:none}
   <div id="builder" class="builder">
   <header class="buildhead"><span class="pill">Build your own</span><h2 id="buildTitle">Make your film</h2><p class="lede">Each morning it trains your mind to see you as someone who does these things. Pick what matters, add your people, check your scenes. The preview updates as you go.</p></header>
   <nav class="steps" id="steps" aria-label="Steps"></nav>
+  <div class="newfilm"><button class="linkbtn quiet" id="newFilm" hidden>Clear everything and start a new film</button></div>
 
   <div class="grid">
     <main id="panels">
@@ -411,6 +414,15 @@ input[type=range]{height:30px;touch-action:none}
   <div class="fullbar"><i id="fullProg"></i></div>
   <div class="fullctl"><button class="btn coral" id="fullPlay">Play</button><span class="time" id="fullTime">0:00</span><button class="btn ghost" data-mute aria-pressed="false">Mute</button><button class="btn ghost" id="fullClose">Close</button></div>
   <p class="fullnote" id="fullNote" aria-live="polite"></p>
+</div>
+
+<div class="modal" id="resetBox" hidden role="dialog" aria-modal="true" aria-labelledby="resetTitle">
+  <div class="box">
+    <h3 id="resetTitle">Start a new film?</h3>
+    <p>This clears everything you've set up so far: your goals, your look, your people, your scenes and your song. You'll go back to step 1 with a blank film.</p>
+    <p class="meta">Videos you've already saved to your phone or computer aren't affected.</p>
+    <div class="row" style="gap:10px;flex-wrap:wrap"><button class="btn coral" id="resetYes">Yes, clear it and start again</button><button class="btn ghost" id="resetNo">Keep my film</button></div>
+  </div>
 </div>
 
 <div class="modal" id="privacy" hidden role="dialog" aria-modal="true" aria-labelledby="privacyTitle">
@@ -2050,7 +2062,7 @@ if (S.isExample) { S.isExample = false; S.linesTouched = false; }
 if (typeof S.reached !== 'number') S.reached = S.step;
 liveLines();
 let saveTimer;
-const save = () => { clearTimeout(saveTimer); saveTimer = setTimeout(() => { try { localStorage.setItem('lsn-draft-v2', JSON.stringify(S)); } catch (e) {} }, 400); };
+const save = () => { clearTimeout(saveTimer); try { showNewFilm(); } catch (e) {} saveTimer = setTimeout(() => { if (typeof resetting !== 'undefined' && resetting) return; try { localStorage.setItem('lsn-draft-v2', JSON.stringify(S)); } catch (e) {} }, 400); };
 const photos = [];
 let song = null;
 
@@ -2076,7 +2088,7 @@ function errCopy(e) {
 // ------------------------------------------------ steps
 const STEP_NAMES = ['What you\'re building', 'Your people', 'Your scenes', 'Song and save'];
 function renderSteps() {
-  const nav = $('#steps'); nav.innerHTML = '';
+  const nav = $('#steps'); nav.innerHTML = ''; try { showNewFilm(); } catch (e) {}
   STEP_NAMES.forEach((n, i) => nav.append(el('button', { 'aria-current': i === S.step ? 'step' : false, class: i < S.step ? 'done' : '', disabled: i > S.reached ? '' : null, title: i > S.reached ? 'Finish the steps before this one first' : null, onclick: () => go(i) }, el('span', { class: 'n' }, String(i + 1)), n)));
   $$('.panel[data-step]').forEach(p => p.hidden = +p.dataset.step !== S.step);
   if (S.step === 0) renderMe();
@@ -2521,6 +2533,13 @@ function openScenePick(item, done) {
 }
 function closeScenePick(chose) { $('#scenePick').hidden = true; const d = scenePickDone; scenePickDone = scenePickItem = null; if (chose && d) d(); }
 $('#scenePickClose').onclick = () => closeScenePick(false);
+// start a new film: only offered once there's something to clear, and always confirmed first
+function showNewFilm() { const b = $('#newFilm'); if (b) b.hidden = !(S.themes.length || !S.cfg.me.unset || S.reached > 0); }
+$('#newFilm').onclick = () => { $('#resetBox').hidden = false; $('#resetNo').focus(); };
+$('#resetNo').onclick = () => { $('#resetBox').hidden = true; };
+$('#resetBox').onclick = e => { if (e.target.id === 'resetBox') $('#resetBox').hidden = true; };
+let resetting = false;
+$('#resetYes').onclick = () => { resetting = true; clearTimeout(saveTimer); try { localStorage.removeItem('lsn-draft-v2'); } catch (e) {} history.replaceState(null, '', location.pathname + '#builder'); location.reload(); };
 // privacy note: the footer link, or anyone landing on #privacy
 const openPrivacy = () => { $('#privacy').hidden = false; $('#privacyClose').focus(); };
 const closePrivacy = () => { $('#privacy').hidden = true; if (location.hash === '#privacy') history.replaceState(null, '', location.pathname); };
