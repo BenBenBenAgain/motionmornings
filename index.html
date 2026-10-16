@@ -1624,8 +1624,8 @@ function petName(cfg) {
   return ps.every(p => p.type === ps[0].type) ? 'my ' + ps[0].type + 's' : 'my pets';
 }
 function fillText(text, cfg) { return String(text || '').replace(/\{pet\}/g, petName(cfg) || 'my pet'); }
-const FIXED_HOME = { title: 'beach', end: 'beach', calm: 'mountains', campfire: 'mountains', friends: 'park', family: 'park', pram: 'park', parkday: 'park', footy: 'park', soccer: 'park', tennis: 'park', bbq: 'park', schoolrun: 'city', cafe: 'city', surf: 'beach', together: 'beach', songs_outdoor: 'beach' };
-const ROAM_SCENES = new Set(['walk', 'jog', 'start', 'sunrise', 'strong', 'selflove', 'unwind', 'couple', 'cycle', 'celebrate', 'steady']);
+const FIXED_HOME = { title: 'beach', end: 'beach', calm: 'mountains', campfire: 'mountains', friends: 'park', family: 'park', pram: 'park', parkday: 'park', footy: 'park', soccer: 'park', tennis: 'park', bbq: 'park', schoolrun: 'city', cafe: 'city', surf: 'beach', songs_outdoor: 'beach' };
+const ROAM_SCENES = new Set(['walk', 'jog', 'start', 'sunrise', 'strong', 'selflove', 'unwind', 'couple', 'cycle', 'celebrate', 'steady', 'together']);
 const ROAM_SHOW = { walk: 'park', jog: 'beach', couple: 'city', cycle: 'city', celebrate: 'beach', unwind: 'beach', strong: 'park' };
 // the setting a scene's picture shows in the chooser
 const homeWorld = k => FIXED_HOME[k] || ROAM_SHOW[k] || 'beach';
@@ -1635,19 +1635,21 @@ function closingText(cfg) { return (cfg.closing || '').trim() || 'I\u2019m off t
 function timeline(cfg, targetDur) {
   const items = [{ kind: 'g', text: openingText(cfg), scene: 'title', d: cfg.openD || 5, size: 100 }];
   (cfg.sections || []).forEach(sec => {
-    (sec.actions || []).forEach(a => { if (a.text && a.text.trim()) items.push({ kind: 'a', text: a.text, scene: a.scene, world: a.world, d: a.d || 4 }); });
-    if (sec.glimpse && sec.glimpse.text && sec.glimpse.text.trim()) items.push({ kind: 'g', text: sec.glimpse.text, scene: sec.glimpse.scene, world: sec.glimpse.world, d: sec.glimpse.d || 4 });
+    (sec.actions || []).forEach(a => { if (a.text && a.text.trim()) items.push({ kind: 'a', text: a.text, scene: a.scene, world: a.world, d: a.d || 4, src: a }); });
+    if (sec.glimpse && sec.glimpse.text && sec.glimpse.text.trim()) items.push({ kind: 'g', text: sec.glimpse.text, scene: sec.glimpse.scene, world: sec.glimpse.world, d: sec.glimpse.d || 4, src: sec.glimpse });
   });
   // every scene has a natural setting; walks, runs and rides move between places so the film keeps changing
-  const ROAMS = ['park', 'beach', 'city', 'mountains'], used = { park: 0, beach: 0, city: 0, mountains: 0 }; let prev = null;
+  const ROAMS = ['park', 'beach', 'city', 'mountains'], used = { park: 0, beach: 1, city: 0, mountains: 0 }; let prev = null;
+  // scenes tied to a place claim it first; scenes that can be anywhere then go where the film hasn't been yet
+  items.forEach(it => { if (!it.world && FIXED_HOME[it.scene]) it.world = FIXED_HOME[it.scene]; if (it.world && ROAMS.includes(it.world)) used[it.world]++; });
   items.forEach((it, k) => {
-    if (!it.world) it.world = FIXED_HOME[it.scene] || (ROAM_SCENES.has(it.scene) ? ROAMS.filter(w => w !== prev).sort((a, b) => used[a] - used[b] || ((ROAMS.indexOf(a) + k) % 4) - ((ROAMS.indexOf(b) + k) % 4))[0] : null);
-    if (it.world && (FIXED_HOME[it.scene] || ROAM_SCENES.has(it.scene))) { used[it.world]++; prev = it.world; }
+    if (!it.world && ROAM_SCENES.has(it.scene)) { const last = (items[k - 1] || {}).world; it.world = ROAMS.filter(w => w !== last).sort((a, b) => used[a] - used[b] || ((ROAMS.indexOf(a) + k) % 4) - ((ROAMS.indexOf(b) + k) % 4))[0]; used[it.world]++; }
   });
   items.push({ kind: 'g', text: closingText(cfg), scene: 'end', d: 7, last: true });
   const roomUse = ROOM_STYLES.map(() => 0); let prevRoom = -1;
   const indoor = sc => { const s = SCENES[sc]; return !!s && /\broom\(/.test(s.fn.toString()); };
   items.forEach(it => { if (!indoor(it.scene)) return; const h0 = roomHash(it.scene); let best = -1; for (let j = 0; j < ROOM_STYLES.length; j++) { const r = (h0 + j) % ROOM_STYLES.length; if (r === prevRoom) continue; if (best < 0 || roomUse[r] < roomUse[best]) best = r; } it.room = best; roomUse[best]++; prevRoom = best; });
+  items.forEach(it => { if (it.src) { it.src._world = it.world; it.src._room = it.room; } delete it.src; });
   const raw = items.reduce((s, i) => s + i.d, 0), k = targetDur ? targetDur / raw : 1;
   let s = 0; items.forEach(i => { i.d *= k; i.start = s; s += i.d; });
   return { items, total: s };
@@ -2423,7 +2425,7 @@ function thumbCanvas(item) {
   return cv;
 }
 const zoomThumb = (ctx, w, h) => { const k = h / 1400; ctx.setTransform(k, 0, 0, k, -140 * k, -520 * k); };
-function drawThumb(t, tt) { const it = t.item; LSN.drawScene(t.ctx, { ...S.cfg, world: it.world || LSN.homeWorld(it.scene) }, it.scene, tt % 5.5, (tt % 5.5) / 5.5); }
+function drawThumb(t, tt) { const it = t.item; LSN.drawScene(t.ctx, { ...S.cfg, world: it._world || it.world || LSN.homeWorld(it.scene) }, it.scene, tt % 5.5, (tt % 5.5) / 5.5, it._room); }
 function tickThumbs(now) {
   if (S.step !== 2 || recording || now - thumbClock < 110 || !$('#scenePick').hidden) return;
   thumbClock = now; const tt = now / 1000;
@@ -2497,6 +2499,7 @@ $('#scenePick').onclick = e => { if (e.target.id === 'scenePick') closeScenePick
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#scenePick').hidden) closeScenePick(false); });
 function markEdited() { S.isExample = false; S.linesTouched = true; $('#exampleBanner').hidden = true; save(); updateMeta(); }
 function renderLines() {
+  try { LSN.timeline(S.cfg); } catch (e) {}
   $('#exampleBanner').hidden = true;
   $('#opening').value = S.cfg.opening || ''; $('#closing').value = S.cfg.closing || ''; $('#opening').placeholder = LSN.openingText({ me: S.cfg.me }); $('#closing').placeholder = LSN.closingText({});
   const box = $('#sections'); box.innerHTML = ''; liveThumbs = [];
@@ -2686,7 +2689,7 @@ function frame(now) {
       if (!scrubbing) $('#scrub').value = Math.round(1000 * movieT / tl.total); $('#timeLbl').textContent = fmt(movieT) + ' / ' + fmt(tl.total);
     } else if (mode.type === 'line') {
       const it = mode.item, t = ((now - t0) / 1000) % 5.5;
-      LSN.render(sx, S.cfg, { items: [{ kind: mode.kind === 'glimpse' ? 'g' : 'a', text: it.text || ' ', scene: it.scene, world: it.world || LSN.homeWorld(it.scene), d: 5.5, start: 0, size: it.scene === 'title' ? 100 : 78 }], total: 5.5 }, t);
+      LSN.render(sx, S.cfg, { items: [{ kind: mode.kind === 'glimpse' ? 'g' : 'a', text: it.text || ' ', scene: it.scene, world: it._world || it.world || LSN.homeWorld(it.scene), room: it._room, d: 5.5, start: 0, size: it.scene === 'title' ? 100 : 78 }], total: 5.5 }, t);
     } else {
       const t = ((now - t0) / 1000) % 6;
       if (mode.text) LSN.render(sx, S.cfg, { items: [{ kind: 'g', text: mode.text, scene: mode.scene, world: LSN.homeWorld(mode.scene), d: 6, start: 0, size: 100 }], total: 6 }, t);
