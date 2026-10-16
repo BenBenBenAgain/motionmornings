@@ -307,7 +307,6 @@ input[type=range]{height:30px;touch-action:none}
         <div class="card mequick" id="meQuick" aria-label="You"></div>
         <div class="card"><p class="meta goalmeta" id="goalMeta"></p><div class="tiles" id="tiles"></div></div>
         <div class="card" id="fillsCard"><div class="subhead"><h3>A few details</h3></div><div class="fills" id="fills"></div></div>
-        <div class="card"><label class="q" for="notes">Anything else? <span class="hint">Optional. Places, names, the feeling you're after.</span><textarea id="notes" rows="2" placeholder="e.g. living by the beach, a new chapter, more time outdoors"></textarea></label></div>
         <div class="navrow"><span></span><button class="btn coral" data-next>Next: your people</button></div>
       </section>
 
@@ -2008,7 +2007,7 @@ function renderThemes() {
     fills.append(card);
   });
 }
-$('#notes').oninput = e => { S.notes = e.target.value; save(); };
+
 // A one minute film should never show the same picture twice. Scenes that look alike share a group.
 function lookOf(sc) { return ({ footy: 'kick', soccer: 'kick', strong: 'pose', champion: 'pose', celebrate: 'pose', cook: 'kitchen', cook_together: 'kitchen', calm: 'calm', wake: 'bedroom', sunrise: 'sunrise', start: 'sunrise', idea: 'plan', clockplan: 'plan', laptop: 'desk', hardfirst: 'desk', cafe: 'desk' })[sc] || sc; }
 function varyScenes(sections) { try { varyScenesInner(sections); } catch (e) { console.error(e); } }
@@ -2859,7 +2858,7 @@ $('#saveBtn').onclick = async () => {
 
 // ------------------------------------------------ boot
 document.fonts.load('italic 400 40px Poppins').catch(() => {}); document.fonts.load('700 40px Poppins').catch(() => {});
-$('#notes').value = S.notes || '';
+
 renderThemes(); renderThumbs(); renderSteps(); $('#buildTitle').textContent = filmTitle();
 requestAnimationFrame(frame);
 window.__lsn = { S, go, tl: () => movieTL(), song: () => song, demo: DEMO_CFG };
