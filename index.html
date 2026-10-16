@@ -634,14 +634,14 @@ function windowView(world, tod, x, y, w, h, t) {
 // Indoor scenes get one of several rooms, so a film never shows the same beige wall over and over.
 // Scenes with their own mood (a dark party, date night) keep their colours.
 const ROOM_STYLES = [
-  { wall: [0.78, 0.84, 0.76], floor: [0.76, 0.62, 0.46], frame: [1, 1, 1], decor: 'frames', win: 'square' },
-  { wall: [0.94, 0.78, 0.68], floor: [0.48, 0.34, 0.26], frame: [0.15, 0.15, 0.17], decor: 'shelf', win: 'arch' },
-  { wall: [0.40, 0.58, 0.60], floor: [0.82, 0.72, 0.58], frame: [1, 1, 1], decor: 'roundart', win: 'round', lamp: true },
-  { wall: [0.96, 0.94, 0.90], floor: [0.62, 0.62, 0.64], frame: [0.55, 0.40, 0.28], decor: 'frames', panel: [0.55, 0.63, 0.73], win: 'double' },
-  { wall: [0.97, 0.88, 0.62], floor: [0.60, 0.45, 0.34], frame: [1, 1, 1], decor: 'none', curtains: [0.35, 0.55, 0.62], win: 'square' },
-  { wall: [0.90, 0.77, 0.79], floor: [0.78, 0.68, 0.58], frame: [1, 1, 1], decor: 'plant', win: 'door', door: [0.36, 0.5, 0.58] },
-  { wall: [0.27, 0.32, 0.44], floor: [0.70, 0.55, 0.40], frame: [0.95, 0.93, 0.88], decor: 'polaroids', glow: true, win: 'tall', lamp: true },
-  { wall: [0.81, 0.80, 0.89], floor: [0.66, 0.52, 0.42], frame: [1, 1, 1], decor: 'mirror', rug: [0.86, 0.52, 0.42], win: 'door', door: [0.95, 0.93, 0.88] }
+  { wall: [0.78, 0.84, 0.76], floor: [0.76, 0.62, 0.46], frame: [1, 1, 1], decor: 'frames', win: 'square', view: 'park' },
+  { wall: [0.94, 0.78, 0.68], floor: [0.48, 0.34, 0.26], frame: [0.15, 0.15, 0.17], decor: 'shelf', win: 'arch', view: 'city' },
+  { wall: [0.40, 0.58, 0.60], floor: [0.82, 0.72, 0.58], frame: [1, 1, 1], decor: 'roundart', win: 'round', lamp: true, view: 'mountains' },
+  { wall: [0.96, 0.94, 0.90], floor: [0.62, 0.62, 0.64], frame: [0.55, 0.40, 0.28], decor: 'frames', panel: [0.55, 0.63, 0.73], win: 'double', view: 'beach' },
+  { wall: [0.97, 0.88, 0.62], floor: [0.60, 0.45, 0.34], frame: [1, 1, 1], decor: 'none', curtains: [0.35, 0.55, 0.62], win: 'square', view: 'park' },
+  { wall: [0.90, 0.77, 0.79], floor: [0.78, 0.68, 0.58], frame: [1, 1, 1], decor: 'plant', win: 'door', door: [0.36, 0.5, 0.58], view: 'city' },
+  { wall: [0.27, 0.32, 0.44], floor: [0.70, 0.55, 0.40], frame: [0.95, 0.93, 0.88], decor: 'polaroids', glow: true, win: 'tall', lamp: true, view: 'city' },
+  { wall: [0.81, 0.80, 0.89], floor: [0.66, 0.52, 0.42], frame: [1, 1, 1], decor: 'mirror', rug: [0.86, 0.52, 0.42], win: 'door', door: [0.95, 0.93, 0.88], view: 'mountains' }
 ];
 let ROOMSEL = null;
 const roomHash = s => { let n = 7; for (const ch of String(s)) n = (n * 31 + ch.charCodeAt(0)) % 9973; return n % ROOM_STYLES.length; };
@@ -685,7 +685,9 @@ function room(cfg, t, o = {}) {
     }
     X.stroke();
   }
-  const shape = st && st.win && !(o.inWindow && st.win !== 'square') ? st.win : 'square';
+  let shape = st && st.win && !(o.inWindow && st.win !== 'square') ? st.win : 'square';
+  if (shape === 'door' && o.window) shape = 'square';
+  const viewW = st && st.view ? st.view : cfg.world;
   if (st && shape === 'door') {
     // a door instead of a window: panels, a brass knob, light under it
     const dx = 800, dy = 880, dw = 220, dh = 580;
@@ -698,8 +700,10 @@ function room(cfg, t, o = {}) {
     // each shape is a clip for the view and an outline for the frame
     const panes = shape === 'double' ? [[600, 700, 170, 400], [820, 700, 170, 400]] : shape === 'tall' ? [[780, 560, 190, 560]] : shape === 'round' ? [[640, 710, 340, 340]] : shape === 'arch' ? [[660, 640, 300, 460]] : [[640, 720, 340, 380]];
     const path = (x, y, w, hh) => { X.beginPath(); if (shape === 'round') X.arc(x + w / 2, y + hh / 2, w / 2, 0, 2 * PI); else if (shape === 'arch') { X.moveTo(x, y + hh); X.lineTo(x, y + w / 2); X.arc(x + w / 2, y + w / 2, w / 2, PI, 2 * PI); X.lineTo(x + w, y + hh); X.closePath(); } else X.rect(x, y, w, hh); };
+    // one view behind every pane, so a pair of windows shows one sun across both
+    const bx = Math.min(...panes.map(q => q[0])), by = Math.min(...panes.map(q => q[1])), bx2 = Math.max(...panes.map(q => q[0] + q[2])), by2 = Math.max(...panes.map(q => q[1] + q[3]));
+    X.save(); X.beginPath(); panes.forEach(([wx, wy, ww, wh]) => { if (shape === 'round') { X.moveTo(wx + ww, wy + wh / 2); X.arc(wx + ww / 2, wy + wh / 2, ww / 2, 0, 2 * PI); } else if (shape === 'arch') { X.moveTo(wx, wy + wh); X.lineTo(wx, wy + ww / 2); X.arc(wx + ww / 2, wy + ww / 2, ww / 2, PI, 2 * PI); X.lineTo(wx + ww, wy + wh); X.closePath(); } else X.rect(wx, wy, ww, wh); }); X.clip(); windowView(viewW, o.window, bx, by, bx2 - bx, by2 - by, t); if (o.inWindow) o.inWindow(); X.restore();
     panes.forEach(([wx, wy, ww, wh]) => {
-      X.save(); path(wx, wy, ww, wh); X.clip(); windowView(cfg.world, o.window, wx, wy, ww, wh, t); if (o.inWindow) o.inWindow(); X.restore();
       path(wx, wy, ww, wh); X.lineWidth = 16; X.strokeStyle = css(fr); X.stroke();
       if (shape === 'round') { line([[wx + ww / 2, wy], [wx + ww / 2, wy + wh]], 8, fr); line([[wx, wy + wh / 2], [wx + ww, wy + wh / 2]], 8, fr); }
       else if (shape === 'arch') { line([[wx + ww / 2, wy], [wx + ww / 2, wy + wh]], 10, fr); line([[wx, wy + wh * 0.62], [wx + ww, wy + wh * 0.62]], 10, fr); }
