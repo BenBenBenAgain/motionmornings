@@ -126,7 +126,7 @@ textarea{min-height:76px}
 .mequick input[type=text]{max-width:none;width:min(260px,62vw)}
   .filltip{color:var(--coral);font-size:.82rem}
 .newfilm{display:flex;justify-content:flex-end;margin:-2px 0 4px}.newfilm .linkbtn{font-size:.85rem}
-#lookEd{padding:0}#lookEd .lookbox{max-width:520px;height:100%;max-height:100%;border-radius:0;padding:0;gap:0}@media (min-width:600px){#lookEd{padding:16px}#lookEd .lookbox{height:auto;max-height:92vh;border-radius:16px}}.lookhead{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}.lookhead h3{margin:0;font-family:var(--display)}#lookCanvas{width:100%;height:auto;aspect-ratio:600/560;max-height:42vh;object-fit:contain;border-radius:0;cursor:default;flex:none;background:#F3C9A8}.looktabs{display:flex;gap:6px;padding:10px 12px;overflow-x:auto;border-bottom:1px solid var(--line);flex:none}.looktabs button{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:7px 14px;font-weight:600;white-space:nowrap;cursor:pointer}.looktabs button[aria-selected=true]{background:var(--ink);color:var(--surface);border-color:var(--ink)}.lookfields{padding:14px 16px 24px;overflow:auto;flex:1 1 auto;min-height:0}.lookbtn{align-self:flex-start}
+#lookEd{padding:0}#lookEd .lookbox{max-width:520px;height:100%;max-height:100%;border-radius:0;padding:0;gap:0}@media (min-width:600px){#lookEd{padding:16px}#lookEd .lookbox{height:auto;max-height:92vh;border-radius:16px}}.lookhead{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}.lookhead h3{margin:0;font-family:var(--display)}#lookCanvas{width:100%;height:auto;aspect-ratio:600/560;max-height:42vh;object-fit:contain;border-radius:0;cursor:default;flex:none;background:#D9E0E7}.looktabs{display:flex;gap:6px;padding:10px 12px;overflow-x:auto;border-bottom:1px solid var(--line);flex:none}.looktabs button{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:7px 14px;font-weight:600;white-space:nowrap;cursor:pointer}.looktabs button[aria-selected=true]{background:var(--ink);color:var(--surface);border-color:var(--ink)}.lookfields{padding:14px 16px 24px;overflow:auto;flex:1 1 auto;min-height:0}.lookbtn{align-self:flex-start}
 #resetBox h3{margin:0}#resetBox p{margin:0;line-height:1.5}
 .menote{flex:1 1 100%;margin:0;font-size:.85rem}
 .mequick .sw input[type=color],.mequick .sw .frompic{display:none}
@@ -1837,8 +1837,8 @@ function portrait(ctx, L, t, w, hgt, kind) {
   X = ctx; HATS_OFF = false;
   X.save(); X.clearRect(0, 0, w, hgt);
   const g = X.createRadialGradient(w / 2, hgt * 0.42, 10, w / 2, hgt * 0.5, w * 0.7);
-  g.addColorStop(0, '#FCE3CF'); g.addColorStop(1, '#F3C9A8'); X.fillStyle = g; X.fillRect(0, 0, w, hgt);
-  ell(w / 2, hgt - 34, w * 0.28, 16); fill([0.55, 0.38, 0.3], 0.18);
+  g.addColorStop(0, '#F1F4F7'); g.addColorStop(1, '#D9E0E7'); X.fillStyle = g; X.fillRect(0, 0, w, hgt);
+  ell(w / 2, hgt - 34, w * 0.28, 16); fill([0.25, 0.3, 0.38], 0.16);
   const s = (hgt - 70) / 640, wave = 0.25 * Math.sin(t * 3);
   if (kind === 'pet' && L) {
     // sized so a Great Dane and a chihuahua both fill the frame, the way a pet photo would
