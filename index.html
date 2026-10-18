@@ -951,34 +951,85 @@ function person(x, y, s, L, t, o = {}) {
   return hands;
 }
 
+// dog shapes: a Great Dane, a bulldog and a sausage dog are built from the same parts in different proportions
+const DOG_BUILD = {
+  standard: { leg: 125, rx: 118, ry: 52, lw: 24, hr: 47, neck: 0 },
+  tall: { leg: 178, rx: 124, ry: 46, lw: 20, hr: 45, neck: 34 },
+  stocky: { leg: 72, rx: 106, ry: 64, lw: 32, hr: 56, neck: -10 },
+  long: { leg: 52, rx: 162, ry: 44, lw: 20, hr: 44, neck: -4 },
+  tiny: { leg: 96, rx: 86, ry: 40, lw: 18, hr: 52, neck: -2 }
+};
+function dogGeo(P) {
+  const B = DOG_BUILD[P.build] || DOG_BUILD.standard, k = B.rx / 118, by = -(B.leg + 20);
+  return { B, k, by, hx: 135 * k + (P.build === 'long' ? 10 : 0), hy: by - 80 - B.neck };
+}
+// where a lead clips on, in the dog's own units, so the walk scene can find it for any shape
+function dogCollar(P) { const g = dogGeo(P); return [g.hx - 40, g.hy + 50]; }
 function dog(x, y, s, t, P, o = {}) {
   const walk = o.walk || 0, speed = o.speed || 9, flip = o.flip || 1, tongue = o.tongue !== false, lookUp = o.lookUp || 0;
   const coat = C(P.coat || '#A14F26'), coatD = darken(coat, 0.25), muzzle = P.muzzle === 'same' ? darken(coat, 0.08) : mix(coat, [0.1, 0.06, 0.05], 0.75);
+  const white = [0.97, 0.95, 0.92], markC = P.markCol ? C(P.markCol) : mix(coat, [0.1, 0.07, 0.06], 0.7);
   const sz = { s: 0.68, m: 0.86, l: 1, xl: 1.2 }[P.size] || 1; s *= sz;
+  const { B, k, by, hx, hy } = dogGeo(P), fluffy = P.fur === 'fluffy', curly = P.fur === 'curly';
   X.save(); X.translate(x, y); X.scale(s * flip, s);
   const w = t * speed, wag = 0.35 * Math.sin(t * 11);
-  X.beginPath(); X.moveTo(-100, -160); X.bezierCurveTo(-130, -170, -145, -200, -150 + 30 * Math.sin(wag), -235 + 10 * Math.cos(wag * 2));
-  X.lineWidth = 16; X.lineCap = 'round'; X.strokeStyle = css(coat); X.stroke();
-  [[-80, 0, coatD], [55, PI, coatD], [-55, PI, coat], [82, 0, coat]].forEach(([lx, ph, c]) => {
-    const a = walk * 0.45 * Math.sin(w + ph), fx = lx + 125 * Math.sin(a), fy = -125 + 125 * Math.cos(a);
-    line([[lx, -130], [fx, fy]], 24, c); ell(fx + 6, fy, 16, 9); fill(c);
+  // tail
+  const tx = -B.rx * 0.85, ty = by - 15;
+  if (P.tail === 'stub') { ell(tx - 8, ty - 6, 16, 12); fill(coat); }
+  else if (P.tail === 'curl') { X.beginPath(); X.arc(tx - 6, ty - 34, 22, 0.6 * PI + wag * 0.3, 2.4 * PI + wag * 0.3); X.lineWidth = fluffy || curly ? 20 : 14; X.lineCap = 'round'; X.strokeStyle = css(coat); X.stroke(); }
+  else {
+    X.beginPath(); X.moveTo(tx, ty); X.bezierCurveTo(tx - 30, ty - 10, tx - 45, ty - 40, tx - 50 + 30 * Math.sin(wag), ty - 75 + 10 * Math.cos(wag * 2));
+    X.lineWidth = fluffy ? 26 : curly ? 22 : 16; X.lineCap = 'round'; X.strokeStyle = css(coat); X.stroke();
+    if (P.marking === 'chest' || P.marking === 'socks') { circ(tx - 50 + 30 * Math.sin(wag), ty - 75 + 10 * Math.cos(wag * 2), (fluffy ? 13 : 8)); fill(white); }
+  }
+  // legs
+  [[-80, 0, coatD], [55, PI, coatD], [-55, PI, coat], [82, 0, coat]].forEach(([lx0, ph, c]) => {
+    const lx = lx0 * k, a = walk * 0.45 * Math.sin(w + ph), L = B.leg, top = by + 15, fx = lx + L * Math.sin(a), fy = -L + L * Math.cos(a);
+    const sock = P.marking === 'socks';
+    line([[lx, top], [fx, fy]], B.lw, c);
+    if (sock) line([[lx + (fx - lx) * 0.6, top + (fy - top) * 0.6], [fx, fy]], B.lw, white);
+    if (fluffy) { line([[lx, top + 10], [lx + (fx - lx) * 0.5, top + (fy - top) * 0.5]], B.lw + 10, c); }
+    ell(fx + 6, fy, B.lw * 0.66, 9); fill(sock ? white : c);
   });
-  ell(0, -145, 118, 52); fill(coat); ell(85, -158, 48, 56); fill(coat);
+  // body and chest
+  if (curly) { const n = 16; for (let i = 0; i < n; i++) { const a = (i / n) * 2 * PI; circ(B.rx * 0.92 * Math.cos(a), by + B.ry * 0.9 * Math.sin(a), 17); fill(coat); } }
+  // long coats feather underneath: belly, chest and the backs of the legs
+  if (fluffy) { const n = 9; for (let i = 0; i < n; i++) { const a = PI * (0.12 + 0.76 * i / (n - 1)); circ(B.rx * 0.88 * Math.cos(a), by + B.ry * 0.82 * Math.sin(a) + 6, 15); fill(coat); } }
+  ell(0, by, B.rx, B.ry); fill(coat); if (P.build === 'stocky') { ell(78 * k, by - 4, 66, B.ry * 1.22); fill(coat); } else { ell(85 * k, by - 13, 48 * Math.max(0.9, k * 0.95), B.ry * 1.08); fill(coat); }
+  if (P.marking === 'patches') { X.save(); ell(0, by, B.rx, B.ry); X.clip(); ell(-35 * k, by - 18, 42 * k, 30); fill(markC); ell(30 * k, by + 20, 26 * k, 18); fill(markC); X.restore(); }
+  if (P.marking === 'spots') { X.save(); ell(0, by, B.rx, B.ry); X.clip(); [[-70, -20, 9], [-40, 12, 7], [-10, -28, 8], [20, 6, 10], [50, -24, 7], [-60, 22, 6], [5, 30, 6], [70, 10, 7]].forEach(([sx, sy, r]) => { circ(sx * k, by + sy, r); fill(markC); }); X.restore(); }
+  if (P.marking === 'chest' || P.marking === 'socks') { ell(100 * k, by + 4, 24, B.ry * 0.8); fill(white); }
+  if (curly) for (let i = 0; i < 14; i++) { const a = i * 2.39996, rr2 = 0.75 * Math.sqrt((i + 0.5) / 14); circ(Math.cos(a) * B.rx * rr2, by + Math.sin(a) * B.ry * rr2, 11); fill(mix(coat, [1, 1, 1], 0.12)); }
+  // neck and head
   X.save(); X.translate(0, -18 * lookUp);
-  ell(108, -195, 34, 48); fill(coat);
-  X.beginPath(); X.moveTo(80, -200); X.bezierCurveTo(95, -170, 115, -160, 138, -168); X.lineWidth = 10; X.strokeStyle = css(C(P.collar || '#26262E')); X.stroke();
-  ell(118, -152, 9, 11); fill([0.75, 0.85, 0.6]);
-  X.save(); X.translate(135, -225); X.rotate(-0.35 * lookUp);
-  circ(0, 0, 47); fill(coat);
-  ell(37, 17, 34, 26); fill(muzzle);
-  ell(63, 9, 11, 9); fill([0.05, 0.05, 0.05]);
+  ell(hx - 27, hy + 30 + B.neck / 2, 34 * (B.hr / 47), 48 + B.neck / 2); fill(coat);
+  if (P.marking === 'chest' || P.marking === 'socks') { ell(hx - 18, hy + 62 + B.neck / 2, 16, 26); fill(white); }
+  X.beginPath(); X.moveTo(hx - 55, hy + 25); X.bezierCurveTo(hx - 40, hy + 55, hx - 20, hy + 65, hx + 3, hy + 57); X.lineWidth = 10; X.strokeStyle = css(C(P.collar || '#26262E')); X.stroke();
+  ell(hx - 17, hy + 73, 9, 11); fill([0.75, 0.85, 0.6]);
+  X.save(); X.translate(hx, hy); X.rotate(-0.35 * lookUp);
+  const R = B.hr;
+  if (curly) { const n = 12; for (let i = 0; i < n; i++) { const a = PI * 0.75 + (i / n) * PI * 1.5; circ(R * 0.9 * Math.cos(a), R * 0.9 * Math.sin(a), 14); fill(coat); } }
+  if (P.build === 'stocky') { ell(0, 4, R * 1.12, R * 0.96); fill(coat); } else { circ(0, 0, R); fill(coat); }
+  if (P.marking === 'patches') { ell(4, -10, 18, 16); fill(markC); }
+  const sn = P.snout || 'medium';
+  const mz = sn === 'flat' ? [R * 0.52, 18, 30, 24] : sn === 'long' ? [R * 0.95, 16, 46, 20] : [37, 17, 34, 26];
+  ell(mz[0], mz[1], mz[2], mz[3]); fill(P.marking === 'chest' ? white : muzzle);
+  const nx = sn === 'flat' ? R * 0.55 + 14 : sn === 'long' ? R * 0.95 + 40 : 63;
+  ell(nx, sn === 'flat' ? 6 : 9, 11, 9); fill([0.05, 0.05, 0.05]);
+  if (sn === 'flat') { line([[R * 0.2, 2], [R * 0.45, 10]], 3, darken(coat, 0.4), 0.6); if (P.build === 'stocky') { const jw = P.marking === 'chest' ? white : muzzle; ell(mz[0] - 10, mz[1] + 18, 20, 15); fill(jw); ell(mz[0] + 14, mz[1] + 18, 18, 14); fill(jw); line([[mz[0] - 6, mz[1] + 8], [mz[0] + 22, mz[1] + 8]], 3, darken(coat, 0.45), 0.5); } }
   circ(6, -12, 6.5); fill([0.12, 0.08, 0.06]); circ(8, -14, 2); fill([1, 1, 1]);
-  if (tongue) { ell(42, 46 + 3 * Math.sin(t * 8), 11, 19); fill([0.93, 0.5, 0.55]); }
+  if (tongue) { ell(mz[0] + 5, mz[1] + 29 + 3 * Math.sin(t * 8), 11, 19); fill([0.93, 0.5, 0.55]); }
   X.save(); X.rotate(0.08 * Math.sin(t * 6));
-  X.beginPath();
-  if (P.ears === 'up') { X.moveTo(-28, -30); X.lineTo(-30, -95); X.lineTo(8, -42); X.closePath(); }
-  else { X.moveTo(-22, -34); X.bezierCurveTo(-50, -26, -52, 26, -36, 38); X.bezierCurveTo(-20, 24, -10, -10, -22, -34); }
-  fill(coatD); X.restore();
+  if (curly) { [[-30, -20], [-38, 2], [-36, 24], [-28, 40]].forEach(([ex, ey]) => { circ(ex, ey, 15); fill(coatD); }); }
+  else {
+    X.beginPath();
+    if (P.ears === 'up') { X.moveTo(-28, -30); X.lineTo(-30, -95); X.lineTo(8, -42); X.closePath(); }
+    else if (P.ears === 'big') { X.moveTo(-34, -22); X.lineTo(-58, -108); X.lineTo(6, -46); X.closePath(); }
+    else { const e = fluffy ? 1.25 : 1; X.moveTo(-22, -34); X.bezierCurveTo(-50 * e, -26, -52 * e, 26 * e, -36, 38 * e); X.bezierCurveTo(-20, 24, -10, -10, -22, -34); }
+    fill(coatD);
+    if (P.ears === 'big') { X.beginPath(); X.moveTo(-34, -32); X.lineTo(-50, -92); X.lineTo(-6, -46); X.closePath(); fill([0.93, 0.62, 0.6], 0.6); X.beginPath(); X.moveTo(-6, -40); X.lineTo(4, -112); X.lineTo(30, -36); X.closePath(); fill(coat); X.beginPath(); X.moveTo(-1, -44); X.lineTo(6, -96); X.lineTo(22, -42); X.closePath(); fill([0.93, 0.62, 0.6], 0.6); }
+  }
+  X.restore();
   X.restore(); X.restore(); X.restore();
 }
 
@@ -1600,7 +1651,7 @@ const SCENES = {
   title: { label: 'Opening sunrise', fn(c, t, p) { outdoor(c, t, 'sunrise', 1080 - 140 * ease(p)); const q = clamp((p - 0.3) / 0.7), x = -480 + 1500 * q, m = q > 0 && q < 1; if (!(c.me && c.me.unset)) person(x, 1660, 1, ME(c), t, { walk: m ? 1 : 0, armL: [0.12, 0.05], armR: [0.3, 0.2] }); pet(c, x + 250, 1710, 0.9, t, { walk: m ? 1 : 0 }); } },
   end: { label: 'Closing sunset walk', fn(c, t, p) { outdoor(c, t, 'sunset', 960 + 60 * p); const n = 1 + (hasPartner(c) ? 1 : 0) + kidsOf(c).length; const x0 = n > 1 ? 200 : 420; const x = x0 + (1100 + n * 150) * ease(clamp((p - 0.25) / 0.75)), m = p > 0.25; const right = familyRow(c, x, 1690, t, { walk: m ? 1 : 0, s: n > 3 ? 0.85 : 1 }); pet(c, right + 70, 1730, 0.85, t, { walk: m ? 1 : 0 }); } },
 
-  walk: { label: 'Walking with my dog', fn(c, t, p) { outdoor(c, t, 'day'); const x = 80 + 520 * p, dx = x + 270 + 40 * Math.sin(t * 1.5); const h = person(x, 1660, 1, ME(c), t, { walk: 1, armL: [0.12, 0.05], armR: [0.55, 0.35] }); const P0 = petsOf(c)[0]; if (P0 && P0.type === 'dog') { const k = 0.85 * ({ s: 0.68, m: 0.86, l: 1, xl: 1.2 }[P0.size] || 1), cx = dx + 95 * k, cy = 1720 - 175 * k; X.beginPath(); X.moveTo(h.R[0], h.R[1]); X.quadraticCurveTo((h.R[0] + cx) / 2, Math.max(h.R[1], cy) + 70, cx, cy); X.lineWidth = 5; X.strokeStyle = css([0.85, 0.3, 0.25]); X.stroke(); } pet(c, dx, 1720, 0.85, t, { walk: 1, speed: 12 }); } },
+  walk: { label: 'Walking with my dog', fn(c, t, p) { outdoor(c, t, 'day'); const x = 80 + 520 * p, dx = x + 270 + 40 * Math.sin(t * 1.5); const h = person(x, 1660, 1, ME(c), t, { walk: 1, armL: [0.12, 0.05], armR: [0.55, 0.35] }); const P0 = petsOf(c)[0]; if (P0 && P0.type === 'dog') { const k = 0.85 * ({ s: 0.68, m: 0.86, l: 1, xl: 1.2 }[P0.size] || 1), dc = dogCollar(P0), cx = dx + dc[0] * k, cy = 1720 + dc[1] * k; X.beginPath(); X.moveTo(h.R[0], h.R[1]); X.quadraticCurveTo((h.R[0] + cx) / 2, Math.max(h.R[1], cy) + 70, cx, cy); X.lineWidth = 5; X.strokeStyle = css([0.85, 0.3, 0.25]); X.stroke(); } pet(c, dx, 1720, 0.85, t, { walk: 1, speed: 12 }); } },
   start: { label: 'Stepping out at sunrise', fn(c, t, p) { outdoor(c, t, 'sunrise', 940); const [x, m] = walkX(p, -120, 420, 0, 0.6); person(x, 1660, 1.05, ME(c), t, { walk: m ? 1 : 0 }); pet(c, x + 250, 1700, 0.9, t, { walk: m ? 1 : 0 }); } },
   sunrise: { label: 'Standing tall at sunrise', fn(c, t) { outdoor(c, t, 'sunrise', 920); person(400, 1680, 1.1, ME(c), t, { armL: [0.6, 0.6], armR: [0.6, 0.6], bob: 4 * Math.sin(t * 2) }); pet(c, 700, 1740, 0.9, t, { flip: -1, lookUp: 0.6 }); } },
   celebrate: { label: 'Arms up, feeling great', fn(c, t) { outdoor(c, t, 'sunrise', 1000); sunBurst(400, 1250, t); person(400, 1680, 1.05, ME(c), t, { armL: [2.6, 2.7], armR: [2.6, 2.7], bob: Math.abs(Math.sin(t * 3)) * 60 }); pet(c, 520 + 260 * Math.sin(t * 0.9), 1760, 0.85, t, { walk: 1, speed: 14, flip: Math.cos(t * 0.9) > 0 ? 1 : -1 }); } },
@@ -1782,14 +1833,21 @@ function render(ctx, cfg, tl, T) {
 }
 function drawScene(ctx, cfg, key, t, p = 0.5, roomIx) { X = ctx; X.save(); X.fillStyle = css(CREAM); X.fillRect(0, 0, W, H); ROOMSEL = roomIx != null ? roomIx : roomHash(key); HATS_OFF = false; try { (SCENES[key] || SCENES.sunrise).fn(cfg, t, p); } finally { ROOMSEL = null; } X.restore(); }
 
-function portrait(ctx, L, t, w, hgt) {
+function portrait(ctx, L, t, w, hgt, kind) {
   X = ctx; HATS_OFF = false;
   X.save(); X.clearRect(0, 0, w, hgt);
   const g = X.createRadialGradient(w / 2, hgt * 0.42, 10, w / 2, hgt * 0.5, w * 0.7);
   g.addColorStop(0, '#FCE3CF'); g.addColorStop(1, '#F3C9A8'); X.fillStyle = g; X.fillRect(0, 0, w, hgt);
   ell(w / 2, hgt - 34, w * 0.28, 16); fill([0.55, 0.38, 0.3], 0.18);
   const s = (hgt - 70) / 640, wave = 0.25 * Math.sin(t * 3);
-  if (L && !L.unset) person(w / 2, hgt - 36, s, L, t, { armR: [2.3, 2.6 + wave], armL: [0.18, 0.1], bob: 2 * Math.abs(Math.sin(t * 1.5)) });
+  if (kind === 'pet' && L) {
+    // sized so a Great Dane and a chihuahua both fill the frame, the way a pet photo would
+    const g = L.type === 'dog' ? dogGeo(L) : null, sz = L.type === 'dog' ? ({ s: 0.68, m: 0.86, l: 1, xl: 1.2 }[L.size] || 1) : 1;
+    const tall = L.type === 'dog' ? (-g.hy + g.B.hr + 60) * sz : 330, wide = L.type === 'dog' ? (g.hx + g.B.hr + 70 + g.B.rx * 0.85 + 60) * sz : 360;
+    const ps = Math.min((hgt - 90) / tall, (w - 60) / wide), left = L.type === 'dog' ? (g.B.rx * 0.85 + 60) * sz : 170;
+    const px = (w - wide * ps) / 2 + left * ps;
+    if (L.type === 'dog') dog(px, hgt - 40, ps, t, L, { tongue: true }); else cat(px, hgt - 40, ps, t, L, {});
+  } else if (L && !L.unset) person(w / 2, hgt - 36, s, L, t, { armR: [2.3, 2.6 + wave], armL: [0.18, 0.1], bob: 2 * Math.abs(Math.sin(t * 1.5)) });
   X.restore();
 }
 return { W, H, SCENES, portrait, homeWorld, openingText, closingText, DEFAULT_KID, petsOf, PICKABLE, WORLDS: Object.keys(WORLDS), DEFAULT_ME, DEFAULT_PARTNER, timeline, render, drawScene, fillText, petName };
@@ -2421,14 +2479,42 @@ const KID_FIELDS = [
   ['top', 'Top colour', 'color', CLOTH],
   ['pants', 'Pants colour', 'color', CLOTH, K => K.age !== 'baby' && K.outfit !== 'dress'],
 ];
+// one tap sets a breed's shape, face, coat and colours; everything stays tweakable after
+const BREEDS = {
+  lab: ['Labrador', { build: 'standard', snout: 'medium', fur: 'short', tail: 'long', ears: 'floppy', size: 'l', coat: '#D9A95B', muzzle: 'same', marking: 'none' }],
+  golden: ['Golden retriever', { build: 'standard', snout: 'medium', fur: 'fluffy', tail: 'long', ears: 'floppy', size: 'l', coat: '#D9A04F', muzzle: 'same', marking: 'none' }],
+  cavoodle: ['Cavoodle or spoodle', { build: 'standard', snout: 'medium', fur: 'curly', tail: 'long', ears: 'floppy', size: 's', coat: '#C98E52', muzzle: 'same', marking: 'none' }],
+  kelpie: ['Kelpie', { build: 'standard', snout: 'long', fur: 'short', tail: 'long', ears: 'up', size: 'm', coat: '#2B2220', muzzle: 'dark', marking: 'none' }],
+  collie: ['Border collie', { build: 'standard', snout: 'long', fur: 'fluffy', tail: 'long', ears: 'floppy', size: 'm', coat: '#1E1A18', muzzle: 'same', marking: 'chest' }],
+  staffy: ['Staffy', { build: 'stocky', snout: 'medium', fur: 'short', tail: 'long', ears: 'floppy', size: 'm', coat: '#6E6A6B', muzzle: 'same', marking: 'chest' }],
+  bulldog: ['Bulldog', { build: 'stocky', snout: 'flat', fur: 'short', tail: 'stub', ears: 'floppy', size: 'm', coat: '#F2E8DA', muzzle: 'same', marking: 'patches', markCol: '#C08A55' }],
+  pug: ['Pug', { build: 'stocky', snout: 'flat', fur: 'short', tail: 'curl', ears: 'floppy', size: 's', coat: '#D8B98C', muzzle: 'dark', marking: 'none' }],
+  sausage: ['Sausage dog', { build: 'long', snout: 'long', fur: 'short', tail: 'long', ears: 'floppy', size: 's', coat: '#8A4B2A', muzzle: 'same', marking: 'none' }],
+  greyhound: ['Greyhound', { build: 'tall', snout: 'long', fur: 'short', tail: 'long', ears: 'floppy', size: 'l', coat: '#9B9590', muzzle: 'same', marking: 'none' }],
+  dane: ['Great Dane', { build: 'tall', snout: 'long', fur: 'short', tail: 'long', ears: 'floppy', size: 'xl', coat: '#C9A56E', muzzle: 'dark', marking: 'none' }],
+  chihuahua: ['Chihuahua', { build: 'tiny', snout: 'medium', fur: 'short', tail: 'curl', ears: 'big', size: 's', coat: '#E2C08F', muzzle: 'same', marking: 'none' }],
+  dalmatian: ['Dalmatian', { build: 'standard', snout: 'long', fur: 'short', tail: 'long', ears: 'floppy', size: 'l', coat: '#F2EDE4', muzzle: 'same', marking: 'spots', markCol: '#1E1A18' }],
+  mixed: ['Mixed or other', {}]
+};
+const isDog = P => P.type === 'dog';
 const PET_FIELDS = [
   ['type', 'Type', 'seg', [['dog', 'Dog'], ['cat', 'Cat']]],
   ['status', 'In my life', 'seg', [['have', 'Now'], ['hoping', 'One day']]],
   ['name', 'Name', 'text', 'e.g. Max'],
   ['coat', 'Coat colour', 'color', COAT],
   ['muzzle', 'Face', 'seg', [['dark', 'Darker face'], ['same', 'Same colour']]],
-  ['size', 'Size', 'seg', [['s', 'Small'], ['m', 'Medium'], ['l', 'Large'], ['xl', 'Extra large']], P => P.type === 'dog'],
-  ['ears', 'Ears', 'seg', [['floppy', 'Floppy'], ['up', 'Pointy']], P => P.type === 'dog'],
+  ['size', 'Size', 'seg', [['s', 'Small'], ['m', 'Medium'], ['l', 'Large'], ['xl', 'Extra large']], isDog],
+  ['ears', 'Ears', 'seg', [['floppy', 'Floppy'], ['up', 'Pointy'], ['big', 'Big and pointy']], isDog],
+];
+// the extra dog options live in the pet editor, so the pet card stays short
+const PET_MORE = [
+  ['breed', 'Breed', 'seg', Object.entries(BREEDS).map(([id, [label]]) => [id, label]), isDog, (P, v) => Object.assign(P, BREEDS[v][1])],
+  ['build', 'Body shape', 'seg', [['standard', 'Medium'], ['tall', 'Tall and lean'], ['stocky', 'Stocky'], ['long', 'Long and low'], ['tiny', 'Tiny']], isDog],
+  ['snout', 'Snout', 'seg', [['flat', 'Flat'], ['medium', 'Medium'], ['long', 'Long']], isDog],
+  ['tail', 'Tail', 'seg', [['long', 'Long'], ['curl', 'Curly'], ['stub', 'Stumpy']], isDog],
+  ['fur', 'Coat', 'seg', [['short', 'Short'], ['fluffy', 'Fluffy'], ['curly', 'Curly']], isDog],
+  ['marking', 'Markings', 'seg', [['none', 'None'], ['chest', 'White chest'], ['socks', 'White socks'], ['patches', 'Patches'], ['spots', 'Spots']], isDog],
+  ['markCol', 'Patch or spot colour', 'color', COAT, P => isDog(P) && (P.marking === 'patches' || P.marking === 'spots')],
 ];
 const personPhotos = {};
 const photosFor = key => [personPhotos[key], ...photos].filter(Boolean);
@@ -2472,18 +2558,20 @@ function filmTitle() { const n = (S.cfg.me.name || '').trim(); return n ? posses
 function namesChanged() { const h = $('#buildTitle'); if (h) h.textContent = filmTitle(); liveLines(); }
 // a Bitmoji-style editor: the character big at the top, options in tabs underneath
 const LOOK_TABS = [['Body', ['sex', 'agegrp', 'height', 'build', 'skin', 'chair']], ['Hair', ['hair', 'hairCol', 'grey', 'facial', 'facialCol']], ['Clothes', ['outfit', 'top', 'inner', 'pants']], ['Extras', ['hat', 'hatCol', 'glasses', 'earrings', 'freckles']]];
-let lookObj = null, lookTab = 0, lookKey = 'me', lookRAF = 0;
-function lookFieldsFor(keys) { const all = [PARTNER_SEX, ...LOOK_FIELDS]; return keys.map(k => all.find(f => f[0] === k)).filter(Boolean); }
+const PET_TABS = [['Breed', ['type', 'breed']], ['Shape', ['size', 'build', 'snout', 'ears', 'tail']], ['Coat', ['fur', 'coat', 'muzzle', 'marking', 'markCol']]];
+let lookObj = null, lookTab = 0, lookKey = 'me', lookRAF = 0, lookKind = 'person';
+function lookFieldsFor(keys) { const all = lookKind === 'pet' ? [...PET_FIELDS, ...PET_MORE] : [PARTNER_SEX, ...LOOK_FIELDS]; return keys.map(k => all.find(f => f[0] === k)).filter(Boolean); }
 function renderLookEd() {
   const tabs = $('#lookTabs'); tabs.innerHTML = '';
-  LOOK_TABS.forEach(([name], i) => tabs.append(el('button', { role: 'tab', 'aria-selected': i === lookTab ? 'true' : 'false', onclick: () => { lookTab = i; renderLookEd(); $('#lookFields').scrollTop = 0; } }, name)));
-  fieldUI(lookObj, lookFieldsFor(LOOK_TABS[lookTab][1]), $('#lookFields'), 'le-', () => { if (lookObj.unset) delete lookObj.unset; peopleChanged(); renderLookEd(); }, lookKey);
+  const TABS = lookKind === 'pet' ? (isDog(lookObj) ? PET_TABS : [['Look', ['type', 'coat', 'muzzle']]]) : LOOK_TABS; if (lookTab >= TABS.length) lookTab = 0;
+  TABS.forEach(([name], i) => tabs.append(el('button', { role: 'tab', 'aria-selected': i === lookTab ? 'true' : 'false', onclick: () => { lookTab = i; renderLookEd(); $('#lookFields').scrollTop = 0; } }, name)));
+  fieldUI(lookObj, lookFieldsFor(TABS[lookTab][1]), $('#lookFields'), 'le-', () => { if (lookObj.unset) delete lookObj.unset; peopleChanged(); renderLookEd(); }, lookKey);
 }
-function openLookEd(obj, title, key) {
-  lookObj = obj; lookKey = key; lookTab = 0; $('#lookEdTitle').textContent = title; $('#lookEd').hidden = false; renderLookEd();
+function openLookEd(obj, title, key, kind) {
+  lookObj = obj; lookKey = key; lookKind = kind || 'person'; lookTab = 0; $('#lookEdTitle').textContent = title; $('#lookEd').hidden = false; renderLookEd();
   const cv = $('#lookCanvas'), cx = cv.getContext('2d'), t0 = performance.now();
   cancelAnimationFrame(lookRAF);
-  const tick = () => { if ($('#lookEd').hidden) return; LSN.portrait(cx, lookObj, (performance.now() - t0) / 1000, cv.width, cv.height); lookRAF = requestAnimationFrame(tick); };
+  const tick = () => { if ($('#lookEd').hidden) return; LSN.portrait(cx, lookObj, (performance.now() - t0) / 1000, cv.width, cv.height, lookKind); lookRAF = requestAnimationFrame(tick); };
   tick();
 }
 $('#lookEdDone').onclick = () => { $('#lookEd').hidden = true; peopleChanged(); };
@@ -2512,7 +2600,7 @@ function renderPeople() {
   if (!S.cfg.pets.length) pb.append(el('p', { class: 'lede' }, 'None yet. Add a pet you have, or one you would love to have.'));
   S.cfg.pets.forEach((p, i) => {
     if (!p.status) p.status = 'have';
-    const body = el('div', { class: 'panel', style: 'gap:10px' }); fieldUI(p, PET_FIELDS, body, `p${i}-`, peopleChanged, 'pet' + i);
+    const body = el('div', { class: 'panel', style: 'gap:10px' }); body.append(el('button', { class: 'btn coral small lookbtn', onclick: () => openLookEd(p, (p.name || '').trim() ? possessive(p.name.trim()) + ' look' : 'Your pet\u2019s look', 'pet' + i, 'pet') }, '\u270e Breed and look')); const pfb = el('div', { class: 'panel', style: 'gap:10px' }); fieldUI(p, PET_FIELDS, pfb, `p${i}-`, peopleChanged, 'pet' + i); body.append(pfb);
     pb.append(el('div', { class: 'pcard' }, el('div', { class: 'subhead' }, el('h4', {}, p.name || `Pet ${i + 1}`), el('button', { class: 'ib', 'aria-label': 'Remove pet', onclick: () => { S.cfg.pets.splice(i, 1); peopleChanged(); } }, '×')), body));
   });
   $('#addPet').disabled = S.cfg.pets.length >= 3;
