@@ -236,6 +236,8 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
 .fullnote{font-size:.9rem;color:#C9C3B8;min-height:1.3em;text-align:center}
 
 /* hero: the example film */
+.why{margin:-12px 0 40px;padding-bottom:36px;border-bottom:1px solid var(--line)}.why h2{margin:0 0 14px}.whygrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.whycard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:6px}.whycard h3{margin:0;font-family:var(--display);font-size:1rem}.whycard p{margin:0;color:var(--muted);line-height:1.5;font-size:.95rem}.whycard a{font-size:.82rem;color:var(--muted);margin-top:auto}
+@media (max-width:860px){.whygrid{grid-template-columns:1fr}.why{margin-top:-6px}}
 .hero{display:grid;grid-template-columns:320px minmax(0,1fr);gap:48px;align-items:center;padding-block:18px 56px;border-bottom:1px solid var(--line);margin-bottom:36px}
 .herofilm{display:flex;flex-direction:column;align-items:center;gap:10px}
 .herobar{width:100%;max-width:320px;height:28px;cursor:pointer;touch-action:none;position:relative;display:flex;align-items:center}
@@ -296,6 +298,15 @@ input[type=range]{height:30px;touch-action:none}
       <p class="herolede">A short animated film of you doing the everyday things that build the life you've always wanted.</p>
       <p class="heroeg deskonly"><span>In this example</span> A job you enjoy, saving towards financial freedom, a morning dog walk, the gym, five quiet minutes of breathing, nights out on mineral water, visiting Mum and dinner cooked together. Each pair of actions ends with a glimpse of where it leads.</p>
       <button class="btn coral" id="startBuild">Make your own film</button>
+    </div>
+  </section>
+
+  <section class="why" aria-labelledby="whyTitle">
+    <h2 id="whyTitle">Why it works</h2>
+    <div class="whygrid">
+      <div class="whycard"><h3>Picture the steps, not the result</h3><p>In a UCLA study, students who pictured themselves studying studied more, scored higher and felt less anxious than students who pictured the grade.</p><a href="https://journals.sagepub.com/doi/10.1177/0146167299025002010" target="_blank" rel="noopener">Pham &amp; Taylor, 1999</a></div>
+      <div class="whycard"><h3>Specific plans get done</h3><p>Across 94 studies, deciding exactly when and how you'll act made people much more likely to reach their goals.</p><a href="https://www.thebehavioralscientist.com/glossary/implementation-intentions" target="_blank" rel="noopener">Gollwitzer &amp; Sheeran, 2006</a></div>
+      <div class="whycard"><h3>Give it two months</h3><p>New daily habits took about 66 days to stick on average, and missing a day didn't undo the progress.</p><a href="https://www.ucl.ac.uk/news/2009/aug/how-long-does-it-take-form-habit" target="_blank" rel="noopener">Lally et al., UCL, 2009</a></div>
     </div>
   </section>
 
