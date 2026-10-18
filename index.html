@@ -692,7 +692,7 @@ const ROOM_STYLES = [
   { wall: [0.27, 0.32, 0.44], floor: [0.70, 0.55, 0.40], frame: [0.95, 0.93, 0.88], decor: 'polaroids', glow: true, win: 'tall', lamp: true, view: 'city' },
   { wall: [0.81, 0.80, 0.89], floor: [0.66, 0.52, 0.42], frame: [1, 1, 1], decor: 'mirror', rug: [0.86, 0.52, 0.42], win: 'door', door: [0.95, 0.93, 0.88], view: 'mountains' }
 ];
-let ROOMSEL = null;
+let ROOMSEL = null, HATS_OFF = false;
 const roomHash = s => { let n = 7; for (const ch of String(s)) n = (n * 31 + ch.charCodeAt(0)) % 9973; return n % ROOM_STYLES.length; };
 function roomDecor(kind, t) {
   if (kind === 'frames') {
@@ -715,6 +715,7 @@ function roomDecor(kind, t) {
   }
 }
 function room(cfg, t, o = {}) {
+  HATS_OFF = true;
   const tint = cfg.tint ? C(cfg.tint) : null;
   let wall = o.wall || [0.93, 0.89, 0.83];
   // a light, everyday room takes this scene's style; a mood room (dark party, date night) keeps its own
@@ -804,6 +805,7 @@ function person(x, y, s, L, t, o = {}) {
   }
   const w = t * speed, hc = mix(C(L.hairCol), [0.8, 0.79, 0.77], ageK), skin = C(L.skin), skinD = darken(skin, 0.15);
   const dress = L.outfit === 'dress';
+  const scarf = L.hat === 'scarf', hatC = C(L.hatCol || '#2E4A62'), capOn = !HATS_OFF && (L.hat === 'cap' || L.hat === 'beanie');
   const hs = o.head || 1; const headOn = () => { X.save(); if (hs !== 1) { X.translate(0, -470); X.scale(hs, hs); X.translate(0, 470); } };
   headOn();
   // back hair
@@ -811,9 +813,13 @@ function person(x, y, s, L, t, o = {}) {
     [[0, -535, 66], [-70, -500, 44], [70, -500, 44], [-82, -460, 40], [82, -460, 40], [-80, -420, 34], [80, -420, 34], [-66, -396, 26], [66, -396, 26]].forEach(([dx, dy, r]) => { circ(dx, dy, r); fill(hc); });
     if (L.grey) [[-84, -470, 16], [78, -440, 14], [-74, -415, 12], [60, -510, 14]].forEach(([dx, dy, r]) => { circ(dx, dy, r); fill([0.62, 0.6, 0.57], 0.6); });
   } else if (L.hair === 'long') { rr(-64, -565, 128, 205, 50); fill(hc); }
+  else if (L.hair === 'afro') { circ(0, -528, 86); fill(hc); }
+  else if (L.hair === 'ponytail') { X.beginPath(); X.moveTo(30, -560); X.bezierCurveTo(95, -560, 92, -470, 70, -400); X.lineWidth = 34; X.lineCap = 'round'; X.strokeStyle = css(hc); X.stroke(); }
+  else if (L.hair === 'braids') { [-1, 1].forEach(sd => { for (let i = 0; i < 8; i++) { circ(sd * (56 + (i % 2) * 5), -500 + i * 17, 13); fill(i % 2 ? darken(hc, 0.12) : hc); } }); }
   else if (L.hair === 'curly') {
     for (let i = 0; i <= 12; i++) { const a = PI * (0.92 + 1.16 * i / 12); circ(Math.cos(a) * 60, -505 + Math.sin(a) * 66, 30); fill(hc); }
   }
+  if (scarf) { ell(0, -505, 70, 80); fill(hatC); X.beginPath(); X.moveTo(-60, -470); X.lineTo(60, -470); X.lineTo(86, -420); X.lineTo(-86, -420); X.closePath(); fill(hatC); }
   X.restore();
   X.save(); X.scale(bw, 1);
   // legs
@@ -847,6 +853,8 @@ function person(x, y, s, L, t, o = {}) {
   if (dress) { X.beginPath(); X.moveTo(-62, -448); X.lineTo(62, -448); X.lineTo(98, -165); X.lineTo(-98, -165); X.closePath(); fill(L.top); }
   else {
     X.beginPath(); X.moveTo(-82, -446); X.bezierCurveTo(-88, -380, -78, -300, -72, -250); X.lineTo(72, -250); X.bezierCurveTo(78, -300, 88, -380, 82, -446); X.closePath(); fill(L.top);
+    if (L.outfit === 'hoodie') { const hd = darken(C(L.top), 0.14); ell(0, -440, 66, 20); fill(hd); line([[-14, -432], [-16, -385]], 4, [0.95, 0.95, 0.95]); line([[14, -432], [16, -385]], 4, [0.95, 0.95, 0.95]); rr(-46, -330, 92, 54, 14); fill(hd); }
+    if (L.outfit === 'shirt') { const sd = darken(C(L.top), 0.2); X.beginPath(); X.moveTo(-30, -446); X.lineTo(0, -420); X.lineTo(30, -446); X.lineTo(20, -452); X.lineTo(0, -436); X.lineTo(-20, -452); X.closePath(); fill([0.97, 0.97, 0.97]); line([[0, -420], [0, -255]], 3, sd); [-395, -350, -305].forEach(by => { circ(0, by, 4); fill(sd); }); }
     if (L.outfit === 'jacket') { X.beginPath(); X.moveTo(-26, -444); X.lineTo(26, -444); X.lineTo(22, -252); X.lineTo(-22, -252); X.closePath(); fill(L.inner || '#17171C'); }
   }
   // arms
@@ -862,6 +870,7 @@ function person(x, y, s, L, t, o = {}) {
   // head
   rect(-18, -472, 36, 32, skinD);
   headOn();
+  if (scarf) { X.beginPath(); X.moveTo(-48, -480); X.lineTo(48, -480); X.lineTo(74, -428); X.lineTo(-74, -428); X.closePath(); fill(hatC); }
   ell(0, -502, 50, 58); fill(skin);
   const fc = mix(C(L.facialCol || L.hairCol), [0.8, 0.79, 0.77], ageK);
   if (L.facial === 'stubble' || L.facial === 'moustache') { X.save(); ell(0, -502, 50, 58); X.clip(); ell(0, -462, 56, 34); fill(fc, 0.42); X.restore(); }
@@ -870,7 +879,13 @@ function person(x, y, s, L, t, o = {}) {
     X.bezierCurveTo(40, -470, 20, -466, 0, -466); X.bezierCurveTo(-20, -466, -40, -470, -50, -505); X.closePath(); fill(fc);
   }
   // hair top
-  if (L.hair === 'short') {
+  if (scarf) {
+    X.save(); X.beginPath(); X.ellipse(0, -508, 66, 76, 0, 0, 2 * PI); X.ellipse(0, -500, 45, 51, 0, 0, 2 * PI); X.fillStyle = css(hatC); X.fill('evenodd'); X.restore();
+    X.beginPath(); X.ellipse(0, -500, 45, 51, 0, PI * 1.08, PI * 1.92); X.lineWidth = 3; X.strokeStyle = css(darken(hatC, 0.18)); X.stroke();
+  } else if (L.hair === 'fade') {
+    X.beginPath(); X.arc(0, -512, 56, PI, 2 * PI); X.lineTo(54, -500); X.bezierCurveTo(30, -540, -15, -536, -54, -498); X.closePath(); fill(hc, 0.45);
+    rr(-40, -576, 80, 28, 13); fill(hc);
+  } else if (L.hair === 'short') {
     // a natural short crop: a little height on top, a side part, short sideburns
     X.beginPath(); X.moveTo(-53, -494);
     X.bezierCurveTo(-60, -542, -40, -580, 2, -581);
@@ -884,13 +899,22 @@ function person(x, y, s, L, t, o = {}) {
     X.beginPath(); X.arc(0, -512, 58, PI, 2 * PI); X.lineTo(56, -500); X.bezierCurveTo(30, -545, -15, -540, -56, -498); X.closePath();
     fill(hc, L.hair === 'buzz' ? 0.6 : 1);
     if (L.hair === 'wavy' && L.grey) line([[-30, -560], [5, -548], [35, -530]], 6, [0.62, 0.6, 0.57], 0.7);
-    if (L.hair === 'bun') { circ(0, -585, 32); fill(hc); }
+    if (L.hair === 'bun' && !capOn) { circ(0, -585, 32); fill(hc); }
+    if (L.hair === 'afro') { circ(0, -586, 50); fill(hc); }
+    if (L.hair === 'braids' || L.hair === 'ponytail') line([[0, -566], [0, -546]], 3, darken(hc, 0.25));
     if (L.hair === 'curly') for (let i = 0; i < 5; i++) { circ(-44 + i * 22, -552 + Math.abs(i - 2) * 6, 22); fill(hc); }
   } else { ell(-20, -540, 14, 7); fill([1, 1, 1], 0.25); }
+  if (capOn && L.hat === 'cap') { X.beginPath(); X.arc(0, -520, 57, PI, 2 * PI); X.closePath(); fill(hatC); ell(18, -520, 62, 11); fill(darken(hatC, 0.22)); circ(0, -577, 6); fill(darken(hatC, 0.22)); }
+  if (capOn && L.hat === 'beanie') { rr(-57, -592, 114, 72, 34); fill(hatC); rr(-60, -540, 120, 24, 9); fill(darken(hatC, 0.15)); }
   // face
   const brow = L.hair === 'bald' ? darken(skin, 0.5) : (L.body === 'f' ? mix(hc, [0.3, 0.2, 0.15], 0.4) : hc);
   [-1, 1].forEach(side => { if (o.eyesClosed) { X.beginPath(); X.arc(side * 18, -508, 8, 0.15 * PI, 0.85 * PI); X.lineWidth = 4; X.strokeStyle = css([0.15, 0.15, 0.18]); X.stroke(); } else { circ(side * 18, -505, 5.5); fill([0.15, 0.15, 0.18]); } line([[side * 9, -523], [side * 30, -526]], 5, brow); });
-  if (L.glasses) { const gc = [0.16, 0.16, 0.2]; [-1, 1].forEach(sd => { circ(sd * 19, -506, 17); X.lineWidth = 4.5; X.strokeStyle = css(gc); X.stroke(); line([[sd * 36, -508], [sd * 49, -514]], 4, gc); }); line([[-3, -508], [3, -508]], 4, gc); }
+  if (L.freckles) [[-30, -488], [-24, -482], [-36, -481], [30, -488], [24, -482], [36, -481]].forEach(([fx, fy]) => { circ(fx, fy, 2.6); fill(darken(skin, 0.35), 0.7); });
+  if (L.earrings === 'studs') [-1, 1].forEach(sd => { circ(sd * 50, -486, 5.5); fill([0.93, 0.78, 0.35]); });
+  if (L.earrings === 'hoops') [-1, 1].forEach(sd => { X.beginPath(); X.arc(sd * 50, -474, 11, 0, 2 * PI); X.lineWidth = 3.5; X.strokeStyle = css([0.93, 0.78, 0.35]); X.stroke(); });
+  if (L.glasses === 'square') { const gc = [0.16, 0.16, 0.2]; [-1, 1].forEach(sd => { X.beginPath(); X.roundRect(sd * 19 - 17, -519, 34, 26, 5); X.lineWidth = 4.5; X.strokeStyle = css(gc); X.stroke(); line([[sd * 36, -510], [sd * 49, -514]], 4, gc); }); line([[-3, -508], [3, -508]], 4, gc); }
+  else if (L.glasses === 'sun' && !HATS_OFF) { const gc = [0.1, 0.1, 0.12]; [-1, 1].forEach(sd => { X.beginPath(); X.roundRect(sd * 20 - 19, -518, 38, 24, 9); X.fillStyle = css(gc); X.fill(); line([[sd * 38, -510], [sd * 49, -514]], 4, gc); }); line([[-3, -510], [3, -510]], 4, gc); }
+  else if (L.glasses === true) { const gc = [0.16, 0.16, 0.2]; [-1, 1].forEach(sd => { circ(sd * 19, -506, 17); X.lineWidth = 4.5; X.strokeStyle = css(gc); X.stroke(); line([[sd * 36, -508], [sd * 49, -514]], 4, gc); }); line([[-3, -508], [3, -508]], 4, gc); }
   // a few gentle lines with age: round the eyes from the 40s, across the forehead from the 50s
   const ag = AGE_LINES[L.agegrp] || 0;
   if (ag) { X.globalAlpha = 0.55; [-1, 1].forEach(sd => { line([[sd * 34, -512], [sd * 41, -516]], 2.5, skinD); line([[sd * 34, -503], [sd * 41, -501]], 2.5, skinD); }); if (ag > 1) { line([[-22, -541], [22, -541]], 2.5, skinD); line([[-16, -532], [16, -532]], 2.5, skinD); } X.globalAlpha = 1; }
@@ -1458,6 +1482,7 @@ function tennis(c, t) {
 }
 function surfboard(x, y, a, len = 270) { X.save(); X.translate(x, y); X.rotate(a); ell(0, 0, len, 34); fill([0.98, 0.88, 0.55]); line([[-len + 30, 0], [len - 30, 0]], 6, CORAL); X.restore(); }
 function surf(c, t, p) {
+  HATS_OFF = true;
   outdoor(c, t, 'day');
   const sx = 760 + 60 * Math.sin(t * 0.8), sy = 1205;
   X.beginPath(); X.moveTo(sx - 220, sy + 20); X.bezierCurveTo(sx - 100, sy - 70, sx + 60, sy - 90, sx + 120, sy - 30); X.bezierCurveTo(sx + 90, sy - 50, sx + 40, sy - 30, sx + 30, sy + 20); X.closePath(); fill([0.3, 0.58, 0.72]);
@@ -1485,6 +1510,7 @@ function cycle(c, t, p) {
   pet(c, bx - 470, 1760, 0.75, t, { walk: 1.3, speed: 15 });
 }
 function swim(c, t, p) {
+  HATS_OFF = true;
   sky(t, 'day', null, 1080);
   for (let i = 0; i < 12; i++) { circ(i * 100 + 30, 1010, 80); fill(gt([0.32, 0.55, 0.32], 'day')); }
   rect(0, 1040, W, 60, gt([0.32, 0.55, 0.32], 'day'));
@@ -1710,7 +1736,7 @@ function render(ctx, cfg, tl, T) {
   const it = tl.items[i], t = T - it.start, p = t / it.d, d = it.d;
   X.save(); X.fillStyle = css(CREAM); X.fillRect(0, 0, W, H);
   const sc = it.world && it.world !== cfg.world ? Object.assign({}, cfg, { world: it.world }) : cfg;
-  ROOMSEL = it.room != null ? it.room : roomHash(it.scene);
+  ROOMSEL = it.room != null ? it.room : roomHash(it.scene); HATS_OFF = false;
   try { (SCENES[it.scene] || SCENES.sunrise).fn(sc, t, p); } catch (e) { console.error(e); }
   ROOMSEL = null;
   X.restore();
@@ -1734,7 +1760,7 @@ function render(ctx, cfg, tl, T) {
   if (a > 0) rect(0, 0, W, H, it.last && t > d / 2 ? [0.05, 0.04, 0.06] : CREAM, a);
   X.restore();
 }
-function drawScene(ctx, cfg, key, t, p = 0.5, roomIx) { X = ctx; X.save(); X.fillStyle = css(CREAM); X.fillRect(0, 0, W, H); ROOMSEL = roomIx != null ? roomIx : roomHash(key); try { (SCENES[key] || SCENES.sunrise).fn(cfg, t, p); } finally { ROOMSEL = null; } X.restore(); }
+function drawScene(ctx, cfg, key, t, p = 0.5, roomIx) { X = ctx; X.save(); X.fillStyle = css(CREAM); X.fillRect(0, 0, W, H); ROOMSEL = roomIx != null ? roomIx : roomHash(key); HATS_OFF = false; try { (SCENES[key] || SCENES.sunrise).fn(cfg, t, p); } finally { ROOMSEL = null; } X.restore(); }
 
 return { W, H, SCENES, homeWorld, openingText, closingText, DEFAULT_KID, petsOf, PICKABLE, WORLDS: Object.keys(WORLDS), DEFAULT_ME, DEFAULT_PARTNER, timeline, render, drawScene, fillText, petName };
 })();
@@ -2313,15 +2339,19 @@ const LOOK_FIELDS = [
   ['agegrp', 'Age', 'seg', [['20s', '20s'], ['30s', '30s'], ['40s', '40s'], ['50s', '50s'], ['60s', '60s+']]],
   ['height', 'Height', 'seg', [['short', 'Shorter'], ['avg', 'Average'], ['tall', 'Taller']]],
   ['build', 'Build', 'seg', [['slim', 'Slim'], ['avg', 'Average'], ['big', 'Bigger']]],
-  ['hair', 'Hair', 'seg', [['short', 'Short'], ['wavy', 'Long wavy'], ['long', 'Long straight'], ['curly', 'Curly'], ['bun', 'Bun'], ['buzz', 'Buzz cut'], ['bald', 'Bald']]],
-  ['hairCol', 'Hair colour', 'color', HAIR],
+  ['hat', 'Headwear', 'seg', [[false, 'None'], ['cap', 'Cap'], ['beanie', 'Beanie'], ['scarf', 'Headscarf']]],
+  ['hatCol', 'Headwear colour', 'color', CLOTH, L => !!L.hat],
+  ['hair', 'Hair', 'seg', [['short', 'Short'], ['fade', 'Fade'], ['buzz', 'Buzz cut'], ['wavy', 'Long wavy'], ['long', 'Long straight'], ['ponytail', 'Ponytail'], ['bun', 'Bun'], ['curly', 'Curly'], ['afro', 'Afro'], ['braids', 'Braids'], ['bald', 'Bald']], L => L.hat !== 'scarf'],
+  ['hairCol', 'Hair colour', 'color', HAIR, L => L.hat !== 'scarf'],
   ['grey', 'Grey streaks', 'seg', [[false, 'No'], [true, 'Yes']], L => L.hair === 'wavy'],
   ['skin', 'Skin tone', 'color', SKIN],
-  ['glasses', 'Glasses', 'seg', [[false, 'No'], [true, 'Yes']]],
+  ['glasses', 'Glasses', 'seg', [[false, 'None'], [true, 'Round'], ['square', 'Square'], ['sun', 'Sunglasses']]],
+  ['earrings', 'Earrings', 'seg', [[false, 'None'], ['studs', 'Studs'], ['hoops', 'Hoops']]],
+  ['freckles', 'Freckles', 'seg', [[false, 'No'], [true, 'Yes']]],
   ['chair', 'Uses a wheelchair', 'seg', [[false, 'No'], [true, 'Yes']]],
   ['facial', 'Facial hair', 'seg', [['none', 'None'], ['stubble', 'Stubble'], ['moustache', 'Moustache'], ['beard', 'Beard']]],
   ['facialCol', 'Facial hair colour', 'color', HAIR, L => L.facial !== 'none'],
-  ['outfit', 'Outfit', 'seg', [['jacket', 'Jacket'], ['tee', 'T-shirt'], ['dress', 'Dress']]],
+  ['outfit', 'Outfit', 'seg', [['tee', 'T-shirt'], ['shirt', 'Shirt'], ['hoodie', 'Hoodie'], ['jacket', 'Jacket'], ['dress', 'Dress']]],
   ['top', 'Top colour', 'color', CLOTH],
   ['inner', 'Shirt under jacket', 'color', CLOTH, L => L.outfit === 'jacket'],
   ['pants', 'Pants colour', 'color', CLOTH, L => L.outfit !== 'dress'],
@@ -2397,7 +2427,8 @@ function fieldUI(obj, fields, box, prefix, onChange, pkey) {
     } else {
       ctl = el('input', { type: 'text', id: prefix + k, value: obj[k] || '', maxlength: 24, placeholder: opts || '', autocomplete: 'off' });
       ctl.oninput = () => { obj[k] = ctl.value; namesChanged(); save(); };
-      ctl.onchange = () => peopleChanged();
+      // no redraw here: leaving the name box by tapping a button would swallow that tap
+      ctl.onchange = () => { liveLines(); save(); setPreviewForStep(); };
     }
     box.append(el('div', { class: 'field' }, el('span', {}, label), ctl));
   });
