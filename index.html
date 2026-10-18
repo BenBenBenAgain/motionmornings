@@ -954,11 +954,14 @@ function person(x, y, s, L, t, o = {}) {
 // dog shapes: a Great Dane, a bulldog and a sausage dog are built from the same parts in different proportions
 const DOG_BUILD = {
   standard: { leg: 125, rx: 118, ry: 52, lw: 24, hr: 47, neck: 0 },
+  solid: { leg: 118, rx: 124, ry: 62, lw: 31, hr: 55, neck: -4 },
   tall: { leg: 178, rx: 124, ry: 46, lw: 20, hr: 45, neck: 34 },
   stocky: { leg: 72, rx: 106, ry: 64, lw: 32, hr: 56, neck: -10 },
   long: { leg: 52, rx: 162, ry: 44, lw: 20, hr: 44, neck: -4 },
   tiny: { leg: 96, rx: 86, ry: 40, lw: 18, hr: 52, neck: -2 }
 };
+const DOG_SIZES = { xs: 0.5, s: 0.68, m: 0.86, l: 1, xl: 1.2 };
+const dogSize = P => DOG_SIZES[P.size] || 1;
 function dogGeo(P) {
   const B = DOG_BUILD[P.build] || DOG_BUILD.standard, k = B.rx / 118, by = -(B.leg + 20);
   return { B, k, by, hx: 135 * k + (P.build === 'long' ? 10 : 0), hy: by - 80 - B.neck };
@@ -968,8 +971,8 @@ function dogCollar(P) { const g = dogGeo(P); return [g.hx - 40, g.hy + 50]; }
 function dog(x, y, s, t, P, o = {}) {
   const walk = o.walk || 0, speed = o.speed || 9, flip = o.flip || 1, tongue = o.tongue !== false, lookUp = o.lookUp || 0;
   const coat = C(P.coat || '#A14F26'), coatD = darken(coat, 0.25), muzzle = P.muzzle === 'same' ? darken(coat, 0.08) : mix(coat, [0.1, 0.06, 0.05], 0.75);
-  const white = [0.97, 0.95, 0.92], markC = P.markCol ? C(P.markCol) : mix(coat, [0.1, 0.07, 0.06], 0.7);
-  const sz = { s: 0.68, m: 0.86, l: 1, xl: 1.2 }[P.size] || 1; s *= sz;
+  const white = [0.97, 0.95, 0.92], tan = P.marking === 'tan', markC = P.markCol ? C(P.markCol) : tan ? [0.71, 0.4, 0.18] : mix(coat, [0.1, 0.07, 0.06], 0.7);
+  const sz = dogSize(P); s *= sz;
   const { B, k, by, hx, hy } = dogGeo(P), fluffy = P.fur === 'fluffy', curly = P.fur === 'curly';
   X.save(); X.translate(x, y); X.scale(s * flip, s);
   const w = t * speed, wag = 0.35 * Math.sin(t * 11);
@@ -985,11 +988,11 @@ function dog(x, y, s, t, P, o = {}) {
   // legs
   [[-80, 0, coatD], [55, PI, coatD], [-55, PI, coat], [82, 0, coat]].forEach(([lx0, ph, c]) => {
     const lx = lx0 * k, a = walk * 0.45 * Math.sin(w + ph), L = B.leg, top = by + 15, fx = lx + L * Math.sin(a), fy = -L + L * Math.cos(a);
-    const sock = P.marking === 'socks';
+    const sock = P.marking === 'socks' || tan, sc = tan ? markC : white;
     line([[lx, top], [fx, fy]], B.lw, c);
-    if (sock) line([[lx + (fx - lx) * 0.6, top + (fy - top) * 0.6], [fx, fy]], B.lw, white);
+    if (sock) line([[lx + (fx - lx) * (tan ? 0.74 : 0.6), top + (fy - top) * (tan ? 0.74 : 0.6)], [fx, fy]], B.lw, sc);
     if (fluffy) { line([[lx, top + 10], [lx + (fx - lx) * 0.5, top + (fy - top) * 0.5]], B.lw + 10, c); }
-    ell(fx + 6, fy, B.lw * 0.66, 9); fill(sock ? white : c);
+    ell(fx + 6, fy, B.lw * 0.66, 9); fill(sock ? sc : c);
   });
   // body and chest
   if (curly) { const n = 16; for (let i = 0; i < n; i++) { const a = (i / n) * 2 * PI; circ(B.rx * 0.92 * Math.cos(a), by + B.ry * 0.9 * Math.sin(a), 17); fill(coat); } }
@@ -999,6 +1002,7 @@ function dog(x, y, s, t, P, o = {}) {
   if (P.marking === 'patches') { X.save(); ell(0, by, B.rx, B.ry); X.clip(); ell(-35 * k, by - 18, 42 * k, 30); fill(markC); ell(30 * k, by + 20, 26 * k, 18); fill(markC); X.restore(); }
   if (P.marking === 'spots') { X.save(); ell(0, by, B.rx, B.ry); X.clip(); [[-70, -20, 9], [-40, 12, 7], [-10, -28, 8], [20, 6, 10], [50, -24, 7], [-60, 22, 6], [5, 30, 6], [70, 10, 7]].forEach(([sx, sy, r]) => { circ(sx * k, by + sy, r); fill(markC); }); X.restore(); }
   if (P.marking === 'chest' || P.marking === 'socks') { ell(100 * k, by + 4, 24, B.ry * 0.8); fill(white); }
+  if (tan) { ell(100 * k, by + 2, 22, B.ry * 0.7); fill(markC); }
   if (curly) for (let i = 0; i < 14; i++) { const a = i * 2.39996, rr2 = 0.75 * Math.sqrt((i + 0.5) / 14); circ(Math.cos(a) * B.rx * rr2, by + Math.sin(a) * B.ry * rr2, 11); fill(mix(coat, [1, 1, 1], 0.12)); }
   // neck and head
   X.save(); X.translate(0, -18 * lookUp);
@@ -1013,7 +1017,8 @@ function dog(x, y, s, t, P, o = {}) {
   if (P.marking === 'patches') { ell(4, -10, 18, 16); fill(markC); }
   const sn = P.snout || 'medium';
   const mz = sn === 'flat' ? [R * 0.52, 18, 30, 24] : sn === 'long' ? [R * 0.95, 16, 46, 20] : [37, 17, 34, 26];
-  ell(mz[0], mz[1], mz[2], mz[3]); fill(P.marking === 'chest' ? white : muzzle);
+  ell(mz[0], mz[1], mz[2], mz[3]); fill(P.marking === 'chest' ? white : tan ? markC : muzzle);
+  if (tan) { ell(8, -26, 7, 5); fill(markC); }
   const nx = sn === 'flat' ? R * 0.55 + 14 : sn === 'long' ? R * 0.95 + 40 : 63;
   ell(nx, sn === 'flat' ? 6 : 9, 11, 9); fill([0.05, 0.05, 0.05]);
   if (sn === 'flat') { line([[R * 0.2, 2], [R * 0.45, 10]], 3, darken(coat, 0.4), 0.6); if (P.build === 'stocky') { const jw = P.marking === 'chest' ? white : muzzle; ell(mz[0] - 10, mz[1] + 18, 20, 15); fill(jw); ell(mz[0] + 14, mz[1] + 18, 18, 14); fill(jw); line([[mz[0] - 6, mz[1] + 8], [mz[0] + 22, mz[1] + 8]], 3, darken(coat, 0.45), 0.5); } }
@@ -1651,7 +1656,7 @@ const SCENES = {
   title: { label: 'Opening sunrise', fn(c, t, p) { outdoor(c, t, 'sunrise', 1080 - 140 * ease(p)); const q = clamp((p - 0.3) / 0.7), x = -480 + 1500 * q, m = q > 0 && q < 1; if (!(c.me && c.me.unset)) person(x, 1660, 1, ME(c), t, { walk: m ? 1 : 0, armL: [0.12, 0.05], armR: [0.3, 0.2] }); pet(c, x + 250, 1710, 0.9, t, { walk: m ? 1 : 0 }); } },
   end: { label: 'Closing sunset walk', fn(c, t, p) { outdoor(c, t, 'sunset', 960 + 60 * p); const n = 1 + (hasPartner(c) ? 1 : 0) + kidsOf(c).length; const x0 = n > 1 ? 200 : 420; const x = x0 + (1100 + n * 150) * ease(clamp((p - 0.25) / 0.75)), m = p > 0.25; const right = familyRow(c, x, 1690, t, { walk: m ? 1 : 0, s: n > 3 ? 0.85 : 1 }); pet(c, right + 70, 1730, 0.85, t, { walk: m ? 1 : 0 }); } },
 
-  walk: { label: 'Walking with my dog', fn(c, t, p) { outdoor(c, t, 'day'); const x = 80 + 520 * p, dx = x + 270 + 40 * Math.sin(t * 1.5); const h = person(x, 1660, 1, ME(c), t, { walk: 1, armL: [0.12, 0.05], armR: [0.55, 0.35] }); const P0 = petsOf(c)[0]; if (P0 && P0.type === 'dog') { const k = 0.85 * ({ s: 0.68, m: 0.86, l: 1, xl: 1.2 }[P0.size] || 1), dc = dogCollar(P0), cx = dx + dc[0] * k, cy = 1720 + dc[1] * k; X.beginPath(); X.moveTo(h.R[0], h.R[1]); X.quadraticCurveTo((h.R[0] + cx) / 2, Math.max(h.R[1], cy) + 70, cx, cy); X.lineWidth = 5; X.strokeStyle = css([0.85, 0.3, 0.25]); X.stroke(); } pet(c, dx, 1720, 0.85, t, { walk: 1, speed: 12 }); } },
+  walk: { label: 'Walking with my dog', fn(c, t, p) { outdoor(c, t, 'day'); const x = 80 + 520 * p, dx = x + 270 + 40 * Math.sin(t * 1.5); const h = person(x, 1660, 1, ME(c), t, { walk: 1, armL: [0.12, 0.05], armR: [0.55, 0.35] }); const P0 = petsOf(c)[0]; if (P0 && P0.type === 'dog') { const k = 0.85 * dogSize(P0), dc = dogCollar(P0), cx = dx + dc[0] * k, cy = 1720 + dc[1] * k; X.beginPath(); X.moveTo(h.R[0], h.R[1]); X.quadraticCurveTo((h.R[0] + cx) / 2, Math.max(h.R[1], cy) + 70, cx, cy); X.lineWidth = 5; X.strokeStyle = css([0.85, 0.3, 0.25]); X.stroke(); } pet(c, dx, 1720, 0.85, t, { walk: 1, speed: 12 }); } },
   start: { label: 'Stepping out at sunrise', fn(c, t, p) { outdoor(c, t, 'sunrise', 940); const [x, m] = walkX(p, -120, 420, 0, 0.6); person(x, 1660, 1.05, ME(c), t, { walk: m ? 1 : 0 }); pet(c, x + 250, 1700, 0.9, t, { walk: m ? 1 : 0 }); } },
   sunrise: { label: 'Standing tall at sunrise', fn(c, t) { outdoor(c, t, 'sunrise', 920); person(400, 1680, 1.1, ME(c), t, { armL: [0.6, 0.6], armR: [0.6, 0.6], bob: 4 * Math.sin(t * 2) }); pet(c, 700, 1740, 0.9, t, { flip: -1, lookUp: 0.6 }); } },
   celebrate: { label: 'Arms up, feeling great', fn(c, t) { outdoor(c, t, 'sunrise', 1000); sunBurst(400, 1250, t); person(400, 1680, 1.05, ME(c), t, { armL: [2.6, 2.7], armR: [2.6, 2.7], bob: Math.abs(Math.sin(t * 3)) * 60 }); pet(c, 520 + 260 * Math.sin(t * 0.9), 1760, 0.85, t, { walk: 1, speed: 14, flip: Math.cos(t * 0.9) > 0 ? 1 : -1 }); } },
@@ -1842,9 +1847,9 @@ function portrait(ctx, L, t, w, hgt, kind) {
   const s = (hgt - 70) / 640, wave = 0.25 * Math.sin(t * 3);
   if (kind === 'pet' && L) {
     // sized so a Great Dane and a chihuahua both fill the frame, the way a pet photo would
-    const g = L.type === 'dog' ? dogGeo(L) : null, sz = L.type === 'dog' ? ({ s: 0.68, m: 0.86, l: 1, xl: 1.2 }[L.size] || 1) : 1;
+    const g = L.type === 'dog' ? dogGeo(L) : null, sz = L.type === 'dog' ? dogSize(L) : 1;
     const tall = L.type === 'dog' ? (-g.hy + g.B.hr + 60) * sz : 330, wide = L.type === 'dog' ? (g.hx + g.B.hr + 70 + g.B.rx * 0.85 + 60) * sz : 360;
-    const ps = Math.min((hgt - 90) / tall, (w - 60) / wide), left = L.type === 'dog' ? (g.B.rx * 0.85 + 60) * sz : 170;
+    const ps = L.type === 'dog' ? Math.min((hgt - 90) / 500, (w - 40) / 610) : Math.min((hgt - 90) / tall, (w - 60) / wide), left = L.type === 'dog' ? (g.B.rx * 0.85 + 60) * sz : 170;
     const px = (w - wide * ps) / 2 + left * ps;
     if (L.type === 'dog') dog(px, hgt - 40, ps, t, L, { tongue: true }); else cat(px, hgt - 40, ps, t, L, {});
   } else if (L && !L.unset) person(w / 2, hgt - 36, s, L, t, { armR: [2.3, 2.6 + wave], armL: [0.18, 0.1], bob: 2 * Math.abs(Math.sin(t * 1.5)) });
@@ -2484,15 +2489,16 @@ const BREEDS = {
   lab: ['Labrador', { build: 'standard', snout: 'medium', fur: 'short', tail: 'long', ears: 'floppy', size: 'l', coat: '#D9A95B', muzzle: 'same', marking: 'none' }],
   golden: ['Golden retriever', { build: 'standard', snout: 'medium', fur: 'fluffy', tail: 'long', ears: 'floppy', size: 'l', coat: '#D9A04F', muzzle: 'same', marking: 'none' }],
   cavoodle: ['Cavoodle or spoodle', { build: 'standard', snout: 'medium', fur: 'curly', tail: 'long', ears: 'floppy', size: 's', coat: '#C98E52', muzzle: 'same', marking: 'none' }],
-  kelpie: ['Kelpie', { build: 'standard', snout: 'long', fur: 'short', tail: 'long', ears: 'up', size: 'm', coat: '#2B2220', muzzle: 'dark', marking: 'none' }],
+  kelpie: ['Kelpie', { build: 'standard', snout: 'long', fur: 'short', tail: 'long', ears: 'up', size: 'm', coat: '#2B2220', muzzle: 'same', marking: 'tan', markCol: '#B5652E' }],
+  rottweiler: ['Rottweiler', { build: 'solid', snout: 'medium', fur: 'short', tail: 'long', ears: 'floppy', size: 'xl', coat: '#1E1A18', muzzle: 'same', marking: 'tan', markCol: '#A0522D' }],
   collie: ['Border collie', { build: 'standard', snout: 'long', fur: 'fluffy', tail: 'long', ears: 'floppy', size: 'm', coat: '#1E1A18', muzzle: 'same', marking: 'chest' }],
   staffy: ['Staffy', { build: 'stocky', snout: 'medium', fur: 'short', tail: 'long', ears: 'floppy', size: 'm', coat: '#6E6A6B', muzzle: 'same', marking: 'chest' }],
   bulldog: ['Bulldog', { build: 'stocky', snout: 'flat', fur: 'short', tail: 'stub', ears: 'floppy', size: 'm', coat: '#F2E8DA', muzzle: 'same', marking: 'patches', markCol: '#C08A55' }],
-  pug: ['Pug', { build: 'stocky', snout: 'flat', fur: 'short', tail: 'curl', ears: 'floppy', size: 's', coat: '#D8B98C', muzzle: 'dark', marking: 'none' }],
+  pug: ['Pug', { build: 'stocky', snout: 'flat', fur: 'short', tail: 'curl', ears: 'floppy', size: 'xs', coat: '#D8B98C', muzzle: 'dark', marking: 'none' }],
   sausage: ['Sausage dog', { build: 'long', snout: 'long', fur: 'short', tail: 'long', ears: 'floppy', size: 's', coat: '#8A4B2A', muzzle: 'same', marking: 'none' }],
   greyhound: ['Greyhound', { build: 'tall', snout: 'long', fur: 'short', tail: 'long', ears: 'floppy', size: 'l', coat: '#9B9590', muzzle: 'same', marking: 'none' }],
   dane: ['Great Dane', { build: 'tall', snout: 'long', fur: 'short', tail: 'long', ears: 'floppy', size: 'xl', coat: '#C9A56E', muzzle: 'dark', marking: 'none' }],
-  chihuahua: ['Chihuahua', { build: 'tiny', snout: 'medium', fur: 'short', tail: 'curl', ears: 'big', size: 's', coat: '#E2C08F', muzzle: 'same', marking: 'none' }],
+  chihuahua: ['Chihuahua', { build: 'tiny', snout: 'medium', fur: 'short', tail: 'curl', ears: 'big', size: 'xs', coat: '#E2C08F', muzzle: 'same', marking: 'none' }],
   dalmatian: ['Dalmatian', { build: 'standard', snout: 'long', fur: 'short', tail: 'long', ears: 'floppy', size: 'l', coat: '#F2EDE4', muzzle: 'same', marking: 'spots', markCol: '#1E1A18' }],
   mixed: ['Mixed or other', {}]
 };
@@ -2503,18 +2509,18 @@ const PET_FIELDS = [
   ['name', 'Name', 'text', 'e.g. Max'],
   ['coat', 'Coat colour', 'color', COAT],
   ['muzzle', 'Face', 'seg', [['dark', 'Darker face'], ['same', 'Same colour']]],
-  ['size', 'Size', 'seg', [['s', 'Small'], ['m', 'Medium'], ['l', 'Large'], ['xl', 'Extra large']], isDog],
+  ['size', 'Size', 'seg', [['xs', 'Extra small'], ['s', 'Small'], ['m', 'Medium'], ['l', 'Large'], ['xl', 'Extra large']], isDog],
   ['ears', 'Ears', 'seg', [['floppy', 'Floppy'], ['up', 'Pointy'], ['big', 'Big and pointy']], isDog],
 ];
 // the extra dog options live in the pet editor, so the pet card stays short
 const PET_MORE = [
   ['breed', 'Breed', 'seg', Object.entries(BREEDS).map(([id, [label]]) => [id, label]), isDog, (P, v) => Object.assign(P, BREEDS[v][1])],
-  ['build', 'Body shape', 'seg', [['standard', 'Medium'], ['tall', 'Tall and lean'], ['stocky', 'Stocky'], ['long', 'Long and low'], ['tiny', 'Tiny']], isDog],
+  ['build', 'Body shape', 'seg', [['standard', 'Medium'], ['tall', 'Tall and lean'], ['solid', 'Big and solid'], ['stocky', 'Stocky'], ['long', 'Long and low'], ['tiny', 'Tiny']], isDog],
   ['snout', 'Snout', 'seg', [['flat', 'Flat'], ['medium', 'Medium'], ['long', 'Long']], isDog],
   ['tail', 'Tail', 'seg', [['long', 'Long'], ['curl', 'Curly'], ['stub', 'Stumpy']], isDog],
   ['fur', 'Coat', 'seg', [['short', 'Short'], ['fluffy', 'Fluffy'], ['curly', 'Curly']], isDog],
-  ['marking', 'Markings', 'seg', [['none', 'None'], ['chest', 'White chest'], ['socks', 'White socks'], ['patches', 'Patches'], ['spots', 'Spots']], isDog],
-  ['markCol', 'Patch or spot colour', 'color', COAT, P => isDog(P) && (P.marking === 'patches' || P.marking === 'spots')],
+  ['marking', 'Markings', 'seg', [['none', 'None'], ['chest', 'White chest'], ['socks', 'White socks'], ['tan', 'Tan points'], ['patches', 'Patches'], ['spots', 'Spots']], isDog],
+  ['markCol', 'Marking colour', 'color', COAT, P => isDog(P) && ['patches', 'spots', 'tan'].includes(P.marking)],
 ];
 const personPhotos = {};
 const photosFor = key => [personPhotos[key], ...photos].filter(Boolean);
