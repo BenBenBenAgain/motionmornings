@@ -126,6 +126,7 @@ textarea{min-height:76px}
 .mequick input[type=text]{max-width:none;width:min(260px,62vw)}
   .filltip{color:var(--coral);font-size:.82rem}
 .newfilm{display:flex;justify-content:flex-end;margin:-2px 0 4px}.newfilm .linkbtn{font-size:.85rem}
+#lookEd{padding:0}#lookEd .lookbox{max-width:520px;height:100%;max-height:100%;border-radius:0;padding:0;gap:0}@media (min-width:600px){#lookEd{padding:16px}#lookEd .lookbox{height:auto;max-height:92vh;border-radius:16px}}.lookhead{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}.lookhead h3{margin:0;font-family:var(--display)}#lookCanvas{width:100%;height:auto;aspect-ratio:600/560;max-height:42vh;object-fit:contain;border-radius:0;cursor:default;flex:none;background:#F3C9A8}.looktabs{display:flex;gap:6px;padding:10px 12px;overflow-x:auto;border-bottom:1px solid var(--line);flex:none}.looktabs button{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:7px 14px;font-weight:600;white-space:nowrap;cursor:pointer}.looktabs button[aria-selected=true]{background:var(--ink);color:var(--surface);border-color:var(--ink)}.lookfields{padding:14px 16px 24px;overflow:auto;flex:1 1 auto;min-height:0}.lookbtn{align-self:flex-start}
 #resetBox h3{margin:0}#resetBox p{margin:0;line-height:1.5}
 .menote{flex:1 1 100%;margin:0;font-size:.85rem}
 .mequick .sw input[type=color],.mequick .sw .frompic{display:none}
@@ -341,7 +342,7 @@ input[type=range]{height:30px;touch-action:none}
       <section class="panel" data-step="1" hidden>
         <header><h2>Who's in your life</h2><p class="lede">The people and pets you have now, and the ones you're hoping for. Simple and cartoony, recognisably yours.</p></header>
         <div class="banner"><strong>Picture the life you're building.</strong> No partner, kids or dog yet but you'd love them one day? Add them anyway. Seeing them in your film each morning is part of the point.</div>
-        <div class="card"><div class="subhead"><h3>You</h3></div><p class="meta">Make them look like you.</p><div id="meFields" class="panel" style="gap:12px"></div></div>
+        <div class="card"><div class="subhead"><h3>You</h3></div><p class="meta">Make them look like you.</p><button class="btn coral small lookbtn" id="meLookBtn">\u270e Customise your look</button><div id="meFields" class="panel" style="gap:12px"></div></div>
         <div class="card">
           <div class="subhead"><h3>A partner</h3><label class="switch"><input type="checkbox" id="partnerOn"> Include</label></div>
           <div id="partnerFields" class="panel" style="gap:12px"></div>
@@ -430,6 +431,14 @@ input[type=range]{height:30px;touch-action:none}
   <p class="fullnote" id="fullNote" aria-live="polite"></p>
 </div>
 
+<div class="modal" id="lookEd" hidden role="dialog" aria-modal="true" aria-labelledby="lookEdTitle">
+  <div class="box lookbox">
+    <div class="lookhead"><h3 id="lookEdTitle">Your look</h3><button class="btn coral small" id="lookEdDone">Done</button></div>
+    <canvas id="lookCanvas" width="600" height="560" aria-label="Your character"></canvas>
+    <div class="looktabs" role="tablist" id="lookTabs"></div>
+    <div class="lookfields panel" id="lookFields" style="gap:12px"></div>
+  </div>
+</div>
 <div class="modal" id="resetBox" hidden role="dialog" aria-modal="true" aria-labelledby="resetTitle">
   <div class="box">
     <h3 id="resetTitle">Start a new film?</h3>
@@ -1773,7 +1782,17 @@ function render(ctx, cfg, tl, T) {
 }
 function drawScene(ctx, cfg, key, t, p = 0.5, roomIx) { X = ctx; X.save(); X.fillStyle = css(CREAM); X.fillRect(0, 0, W, H); ROOMSEL = roomIx != null ? roomIx : roomHash(key); HATS_OFF = false; try { (SCENES[key] || SCENES.sunrise).fn(cfg, t, p); } finally { ROOMSEL = null; } X.restore(); }
 
-return { W, H, SCENES, homeWorld, openingText, closingText, DEFAULT_KID, petsOf, PICKABLE, WORLDS: Object.keys(WORLDS), DEFAULT_ME, DEFAULT_PARTNER, timeline, render, drawScene, fillText, petName };
+function portrait(ctx, L, t, w, hgt) {
+  X = ctx; HATS_OFF = false;
+  X.save(); X.clearRect(0, 0, w, hgt);
+  const g = X.createRadialGradient(w / 2, hgt * 0.42, 10, w / 2, hgt * 0.5, w * 0.7);
+  g.addColorStop(0, '#FCE3CF'); g.addColorStop(1, '#F3C9A8'); X.fillStyle = g; X.fillRect(0, 0, w, hgt);
+  ell(w / 2, hgt - 34, w * 0.28, 16); fill([0.55, 0.38, 0.3], 0.18);
+  const s = (hgt - 70) / 640, wave = 0.25 * Math.sin(t * 3);
+  if (L && !L.unset) person(w / 2, hgt - 36, s, L, t, { armR: [2.3, 2.6 + wave], armL: [0.18, 0.1], bob: 2 * Math.abs(Math.sin(t * 1.5)) });
+  X.restore();
+}
+return { W, H, SCENES, portrait, homeWorld, openingText, closingText, DEFAULT_KID, petsOf, PICKABLE, WORLDS: Object.keys(WORLDS), DEFAULT_ME, DEFAULT_PARTNER, timeline, render, drawScene, fillText, petName };
 })();
 </script>
 <script>
@@ -2446,11 +2465,30 @@ function fieldUI(obj, fields, box, prefix, onChange, pkey) {
 }
 function peopleChanged() { liveLines(); save(); renderMe(); renderPeople(); setPreviewForStep(); }
 function step0Ok() { const e = $('#step0Err'); if (e && !e.hidden && !S.cfg.me.unset && S.cfg.me.skin && S.themes.length) e.hidden = true; }
-function renderMe() { step0Ok(); if (!S.cfg.me.sex && !S.cfg.me.unset) S.cfg.me.sex = S.cfg.me.body === 'f' ? 'f' : 'm'; fieldUI(S.cfg.me, ME_QUICK, $('#meQuick'), 'me-', peopleChanged, 'me'); $('#meQuick').append(el('p', { class: 'meta menote' }, 'Refine your look in step 2.')); }
+function renderMe() { step0Ok(); if (!S.cfg.me.sex && !S.cfg.me.unset) S.cfg.me.sex = S.cfg.me.body === 'f' ? 'f' : 'm'; fieldUI(S.cfg.me, ME_QUICK, $('#meQuick'), 'me-', peopleChanged, 'me'); $('#meQuick').append(S.cfg.me.unset ? el('p', { class: 'meta menote' }, 'Pick a look, then make it yours.') : el('div', { class: 'menote' }, el('button', { class: 'btn coral small lookbtn', onclick: () => openLookEd(S.cfg.me, 'Your look', 'me') }, '\u270e Customise your look'))); }
 // "Ben's Motion Mornings": the film is titled with the person's name, the lines stay in their own voice
 const possessive = n => n + (/s$/i.test(n) ? '’' : '’s');
 function filmTitle() { const n = (S.cfg.me.name || '').trim(); return n ? possessive(n) + ' Motion Mornings' : 'Make your film'; }
 function namesChanged() { const h = $('#buildTitle'); if (h) h.textContent = filmTitle(); liveLines(); }
+// a Bitmoji-style editor: the character big at the top, options in tabs underneath
+const LOOK_TABS = [['Body', ['sex', 'agegrp', 'height', 'build', 'skin', 'chair']], ['Hair', ['hair', 'hairCol', 'grey', 'facial', 'facialCol']], ['Clothes', ['outfit', 'top', 'inner', 'pants']], ['Extras', ['hat', 'hatCol', 'glasses', 'earrings', 'freckles']]];
+let lookObj = null, lookTab = 0, lookKey = 'me', lookRAF = 0;
+function lookFieldsFor(keys) { const all = [PARTNER_SEX, ...LOOK_FIELDS]; return keys.map(k => all.find(f => f[0] === k)).filter(Boolean); }
+function renderLookEd() {
+  const tabs = $('#lookTabs'); tabs.innerHTML = '';
+  LOOK_TABS.forEach(([name], i) => tabs.append(el('button', { role: 'tab', 'aria-selected': i === lookTab ? 'true' : 'false', onclick: () => { lookTab = i; renderLookEd(); $('#lookFields').scrollTop = 0; } }, name)));
+  fieldUI(lookObj, lookFieldsFor(LOOK_TABS[lookTab][1]), $('#lookFields'), 'le-', () => { if (lookObj.unset) delete lookObj.unset; peopleChanged(); renderLookEd(); }, lookKey);
+}
+function openLookEd(obj, title, key) {
+  lookObj = obj; lookKey = key; lookTab = 0; $('#lookEdTitle').textContent = title; $('#lookEd').hidden = false; renderLookEd();
+  const cv = $('#lookCanvas'), cx = cv.getContext('2d'), t0 = performance.now();
+  cancelAnimationFrame(lookRAF);
+  const tick = () => { if ($('#lookEd').hidden) return; LSN.portrait(cx, lookObj, (performance.now() - t0) / 1000, cv.width, cv.height); lookRAF = requestAnimationFrame(tick); };
+  tick();
+}
+$('#lookEdDone').onclick = () => { $('#lookEd').hidden = true; peopleChanged(); };
+$('#lookEd').onclick = e => { if (e.target.id === 'lookEd') $('#lookEdDone').click(); };
+$('#meLookBtn').onclick = () => openLookEd(S.cfg.me, 'Your look', 'me');
 function renderPeople() {
   [S.cfg.me, S.cfg.partner].forEach(o => { if (!o.agegrp) o.agegrp = '30s'; if (!o.height) o.height = 'avg'; if (!o.build) o.build = 'avg'; });
   if (!S.cfg.me.sex) S.cfg.me.sex = S.cfg.me.body === 'f' ? 'f' : 'm';
@@ -2461,7 +2499,7 @@ function renderPeople() {
   if (S.cfg.partner.on) {
     const st = el('div', {}); fieldUI(S.cfg.partner, [['status', 'Status', 'seg', [['have', 'Together now'], ['hoping', 'Hoping to meet']]], PARTNER_NAME, PARTNER_SEX], st, 'pts-', peopleChanged);
     const lk = el('div', { class: 'panel', style: 'gap:12px' }); fieldUI(S.cfg.partner, LOOK_FIELDS, lk, 'pt-', peopleChanged, 'partner');
-    pf.append(st, lk);
+    pf.append(st, el('button', { class: 'btn coral small lookbtn', onclick: () => openLookEd(S.cfg.partner, ((S.cfg.partner.name || '').trim() || 'Partner') + '\u2019s look', 'partner') }, '\u270e Customise their look'), lk);
   } else pf.append(el('p', { class: 'lede' }, 'Tick Include to add a partner you have now, or one you hope to meet. Leave it off and love scenes show you on your own.'));
   const kb = $('#kidsBox'); kb.innerHTML = '';
   if (!S.cfg.kids.length) kb.append(el('p', { class: 'lede' }, 'None yet. Add kids you have now, or the ones you hope for one day.'));
