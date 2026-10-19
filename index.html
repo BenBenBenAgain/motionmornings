@@ -2725,8 +2725,13 @@ function varyScenesInner(sections) {
         const alt = th.a.map(x => ({ text: fillT(x[0], fills, S.cfg), scene: sceneFor(x[1], fills) })).find(x => !used.has(lookOf(x.scene)) && !sec.actions.some(y => y.text === x.text));
         if (alt) { a.text = alt.text; a.scene = alt.scene; }
         // no other line of theirs has a fresh picture: keep their words, borrow a picture that hasn't been used yet
-        else { const near = { talk: ['call', 'friends', 'cafe', 'hug'], call: ['talk', 'hug', 'friends'], friends: ['talk', 'campfire', 'bbq'], date: ['cuddle', 'couple', 'talk'], excited: ['kitbag', 'start', 'sunrise'] }[a.scene] || [];
-          const spare = [...near, 'excited', 'steady', 'sunrise', 'checklist', 'start', 'selflove'].find(sc => SCENES_OK(sc) && !used.has(lookOf(sc))); if (spare) a.scene = spare; }
+        // only a related picture or a neutral moment (standing tall at sunrise, calm, looking ahead), never an unrelated activity
+        else { const near = { talk: ['call', 'friends', 'hug'], call: ['talk', 'hug'], friends: ['talk', 'campfire', 'bbq'], hug: ['call', 'talk'], date: ['cuddle', 'couple'], cuddle: ['couple', 'date'], couple: ['together', 'cuddle'],
+            cook: ['cook_together', 'fridge', 'eat'], cook_together: ['cook', 'familydinner'], eat: ['fridge', 'cook'], fridge: ['eat', 'cook'], soda: ['cuppa'], cuppa: ['soda'],
+            gym: ['strong', 'kitbag'], strong: ['gym', 'champion'], jog: ['walk', 'start'], walk: ['hike', 'start', 'unwind'], hike: ['walk'], cycle: ['kitbag'], swim: ['kitbag'],
+            read: ['idea'], idea: ['clockplan', 'read'], clockplan: ['idea', 'checklist'], checklist: ['clockplan', 'idea'], laptop: ['cafe', 'hardfirst'], cafe: ['laptop', 'hardfirst'], hardfirst: ['laptop', 'cafe'],
+            money: ['jar'], jar: ['money'], parkday: ['schoolrun', 'family'], family: ['together', 'parkday'], excited: ['kitbag', 'start'], kitbag: ['excited', 'start'], calm: ['steady'], wake: ['sunrise'] }[a.scene] || [];
+          const spare = [...near, 'steady', 'sunrise', 'selflove'].find(sc => SCENES_OK(sc) && !used.has(lookOf(sc))); if (spare) a.scene = spare; }
       }
       used.add(lookOf(a.scene));
     });
