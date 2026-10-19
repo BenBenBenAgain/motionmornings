@@ -8,13 +8,19 @@
 <meta name="theme-color" content="#FBF3E6">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest" id="manifestLink">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mornings">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>if (/^#r=/.test(location.hash)) document.documentElement.className += ' restoring';</script>
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://motionmornings.com/">
 <meta property="og:title" content="Motion Mornings">
 <meta property="og:description" content="A short animated film of you, doing the things. Watch it every morning.">
 <meta property="og:image" content="https://motionmornings.com/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
-<style>html,body{margin:0}</style>
+<style>html,body{margin:0}html.restoring body::after{content:'Bringing back your film...';position:fixed;inset:0;z-index:999;background:#FBF3E6;color:#1F2E4D;display:flex;align-items:center;justify-content:center;font:600 1.1rem system-ui,sans-serif}</style>
 </head>
 <body>
 
@@ -277,12 +283,48 @@ input[type=range]{height:30px;touch-action:none}
   .stagecol .stagenote{text-align:left;font-size:.82rem}
   .stagecol .player{max-width:none}
 }
+
+/* mornings: streak chip, today screen, home screen and backup */
+.topright{gap:10px}
+.streakchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;font:700 .95rem var(--body);cursor:pointer}
+.streakchip b{font-variant-numeric:tabular-nums}
+.today{position:fixed;inset:0;z-index:90;background:radial-gradient(120% 70% at 50% 0%,color-mix(in srgb,var(--gold) 30%,var(--bg)),var(--bg) 70%);overflow:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(20px + env(safe-area-inset-bottom,0px))}
+.todaybox{max-width:440px;margin:0 auto;display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px}
+.todaytop{width:100%;display:flex;justify-content:space-between;align-items:center}
+.todaytop .logo{width:44px;height:44px;color:var(--ink)}
+.today h2{font-family:var(--display);font-size:1.7rem;margin:6px 0 0;line-height:1.2}
+.today .lede{margin:0;min-height:2.6em}
+.ringwrap{position:relative;width:min(230px,62vw);aspect-ratio:1}
+.ringwrap svg{width:100%;height:100%;display:block}
+.rbg{fill:none;stroke:color-mix(in srgb,var(--line) 80%,transparent);stroke-width:14}
+.rfg{fill:none;stroke:var(--coral);stroke-width:14;stroke-linecap:round;transition:stroke-dashoffset .8s ease}
+.rfg.gold{stroke:var(--gold)}
+.tk{fill:var(--surface);stroke:var(--line);stroke-width:2}.tk.on{fill:var(--gold);stroke:var(--gold)}
+.ringnum{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ringnum b{font-family:var(--display);font-size:3.6rem;line-height:1;font-variant-numeric:tabular-nums}
+.ringnum span{color:var(--muted);font-size:.9rem;margin-top:4px}
+.ringmeta{margin:0}
+.week{display:flex;gap:10px;justify-content:center}
+.wd{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.75rem;color:var(--muted);font-weight:600}
+.wd i{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:block}
+.wd.on i{background:var(--coral);border-color:var(--coral)}
+.wd.now{color:var(--ink)}.wd.now i{outline:2px solid var(--ink);outline-offset:2px}
+.bigbtn{width:100%;justify-content:center;padding:16px 20px;font-size:1.1rem;margin-top:6px}
+.todayfoot{margin:0}
+.todaylinks{justify-content:center;gap:18px;flex-wrap:wrap}
+.linkbtn{background:none;border:0;padding:4px;color:var(--sea);font:600 .92rem var(--body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.streaktoast{position:absolute;left:50%;top:calc(16px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:#FFFDF8;color:#1F2E4D;border-radius:999px;padding:10px 18px;font-weight:700;box-shadow:0 6px 24px rgba(0,0,0,.35);width:max-content;max-width:calc(100% - 32px);text-align:center;animation:toastin .5s ease}
+@keyframes toastin{from{opacity:0;transform:translate(-50%,-10px)}to{opacity:1;transform:translate(-50%,0)}}
+.homesteps{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px}
+.shareico{display:inline-flex;vertical-align:-3px;color:var(--sea)}
+#homeBox,#backupBox{z-index:120}
+.backuplink{width:100%;font:.85rem ui-monospace,monospace;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--sunk);color:var(--ink)}
 </style>
 
 <div class="wrap">
   <div class="top">
     <div class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><path d="M16.5 51 Q21.5 41.5 30 52 Q38.5 41.5 43.5 51" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M37.5 35 Q41.5 27.2 47 35.5 Q52.5 27.2 56.5 35" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M40 78 A28 28 0 0 1 96 78 Z" fill="var(--coral)"/><line x1="14" y1="78" x2="106" y2="78" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><line x1="54" y1="90" x2="84" y2="90" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/><line x1="61" y1="101" x2="77" y2="101" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/></svg><h1>Motion Mornings</h1></div>
-    <a class="btn ghost small toplink" href="#builder">Make your film</a>
+    <div class="row topright"><button class="streakchip" id="streakChip" hidden><span aria-hidden="true">🌅</span><b id="chipN">0</b></button><a class="btn ghost small toplink" href="#builder">Make your film</a></div>
   </div>
   <section class="hero" aria-labelledby="heroTitle">
     <div class="herofilm">
@@ -404,7 +446,7 @@ input[type=range]{height:30px;touch-action:none}
             <div class="row"><button class="btn coral" id="saveBtn">Save to my device</button></div>
             <p class="meta" id="shareHint" hidden>Send it straight to Instagram, TikTok or your camera roll.</p>
             <p class="status" id="saveStatus"></p>
-            <div class="banner"><strong>Now make it a habit.</strong> Save it to your phone and watch it every morning, before you check anything else. Keep it in your favourites so it's one tap away.</div>
+            <div class="banner habitbanner"><strong>Now make it a habit.</strong> Add Motion Mornings to your home screen. It opens straight to your film each morning and counts your streak, so you can see the mornings add up.<div class="row" style="margin-top:8px"><button class="btn coral small" data-addhome>Add to home screen</button></div></div>
           </div>
         </div>
         <div class="navrow"><button class="btn ghost" data-prev>Back</button><span></span></div>
@@ -434,6 +476,43 @@ input[type=range]{height:30px;touch-action:none}
   <input type="range" class="fullscrub" id="fullScrub" min="0" max="1000" value="0" aria-label="Position in your film">
   <div class="fullctl"><button class="btn coral" id="fullPlay">Play</button><span class="time" id="fullTime">0:00</span><button class="btn ghost" data-mute aria-pressed="false">Mute</button><button class="btn ghost" id="fullClose">Close</button></div>
   <p class="fullnote" id="fullNote" aria-live="polite"></p>
+  <div class="streaktoast" id="streakToast" hidden role="status"></div>
+</div>
+
+<div class="today" id="today" hidden role="dialog" aria-modal="true" aria-labelledby="todayHi">
+  <div class="todaybox">
+    <div class="todaytop"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><path d="M16.5 51 Q21.5 41.5 30 52 Q38.5 41.5 43.5 51" fill="none" stroke="currentColor" stroke-width="3.6"/><path d="M37.5 35 Q41.5 27.2 47 35.5 Q52.5 27.2 56.5 35" fill="none" stroke="currentColor" stroke-width="3.2"/><path d="M40 78 A28 28 0 0 1 96 78 Z" fill="var(--coral)"/><line x1="14" y1="78" x2="106" y2="78" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><line x1="54" y1="90" x2="84" y2="90" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/><line x1="61" y1="101" x2="77" y2="101" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/></svg><button class="btn ghost small" id="todayEdit">Edit my film</button></div>
+    <h2 id="todayHi">Good morning.</h2>
+    <p class="lede" id="todaySub"></p>
+    <div class="ringwrap"><div id="ring"></div><div class="ringnum"><b id="ringN">0</b><span id="ringLbl">mornings in a row</span></div></div>
+    <p class="meta ringmeta" id="ringMeta"></p>
+    <div class="week" id="week" aria-label="The last seven days"></div>
+    <button class="btn coral bigbtn" id="todayWatch">▶ Watch this morning's film</button>
+    <button class="btn ghost small" id="todayElse">I watched it from my camera roll today</button>
+    <div class="banner" id="backupNudge" hidden><strong>A week of mornings.</strong> Back up your film and streak so a new phone never loses them.<div class="row" style="margin-top:8px"><button class="btn small" data-backup>Back up now</button></div></div>
+    <p class="meta todayfoot">One rest day a week won't break your streak.</p>
+    <div class="row todaylinks"><button class="linkbtn" id="todayAdd">Add to home screen</button><button class="linkbtn" data-backup>Back up my film and streak</button></div>
+  </div>
+</div>
+
+<div class="modal" id="homeBox" hidden role="dialog" aria-modal="true" aria-labelledby="homeTitle">
+  <div class="box">
+    <div class="subhead"><h3 id="homeTitle">Add it to your home screen</h3><button class="btn ghost small" id="homeClose">Close</button></div>
+    <p>It opens like an app, straight to your film, and keeps count of your mornings.</p>
+    <ol class="homesteps" id="homeIOS"><li>Tap the <b>Share</b> button <span class="shareico" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></span> at the bottom of Safari (or top right on iPad).</li><li>Scroll down and tap <b>Add to Home Screen</b>.</li><li>Tap <b>Add</b>. Your film comes with it.</li></ol>
+    <ol class="homesteps" id="homeOther"><li>Open the browser menu <b>⋮</b> (top right in Chrome).</li><li>Tap <b>Add to Home screen</b> or <b>Install app</b>.</li><li>Open Motion Mornings from your home screen each morning.</li></ol>
+  </div>
+</div>
+
+<div class="modal" id="backupBox" hidden role="dialog" aria-modal="true" aria-labelledby="backupTitle">
+  <div class="box">
+    <div class="subhead"><h3 id="backupTitle">Back up your film and streak</h3><button class="btn ghost small" id="backupClose">Close</button></div>
+    <p>This link holds your whole film and your streak. Keep it in Notes or email it to yourself. Open it on any phone and everything comes back, even if you get a new phone.</p>
+    <input class="backuplink" id="backupLink" readonly aria-label="Your backup link">
+    <div class="row" style="gap:10px;flex-wrap:wrap"><button class="btn coral" id="backupShare">Send it to myself</button><button class="btn ghost" id="backupCopy">Copy link</button></div>
+    <p class="status" id="backupStatus" aria-live="polite"></p>
+    <p class="meta">Make a fresh one every few weeks so it's up to date. Songs you added from your own files aren't included, so add them again after restoring.</p>
+  </div>
 </div>
 
 <div class="modal" id="lookEd" hidden role="dialog" aria-modal="true" aria-labelledby="lookEdTitle">
@@ -2634,7 +2713,7 @@ if (S.isExample) { S.isExample = false; S.linesTouched = false; }
 if (typeof S.reached !== 'number') S.reached = S.step;
 liveLines();
 let saveTimer;
-const save = () => { clearTimeout(saveTimer); try { showNewFilm(); } catch (e) {} saveTimer = setTimeout(() => { if (typeof resetting !== 'undefined' && resetting) return; try { localStorage.setItem('lsn-draft-v2', JSON.stringify(S)); } catch (e) {} }, 400); };
+const save = () => { clearTimeout(saveTimer); try { showNewFilm(); } catch (e) {} saveTimer = setTimeout(() => { if (typeof resetting !== 'undefined' && resetting) return; try { S.savedAt = Date.now(); const j = JSON.stringify(S); localStorage.setItem('lsn-draft-v2', j); window.__mmMirror && window.__mmMirror(j); } catch (e) {} }, 400); };
 const photos = [];
 let song = null;
 
@@ -3392,6 +3471,7 @@ function frame(now) {
   if (!recording) {
     if (mode.type === 'movie' || playing) {
       const tl = movieTL();
+      if (playing) trackWatch((now - lastFrame) / 1000, tl.total);
       if (playing) { movieT = song && !tl.loop ? audio.currentTime - S.song.offset : movieT + (now - lastFrame) / 1000; if (song) setGain(songGain(movieT, tl.total)); if (movieT >= tl.total - 0.05) { movieT = 0; if (song) { audio.currentTime = tl.loop ? S.song.offset % song.duration : S.song.offset; setGain(S.song.offset > 0 ? 0 : 1); audio.play().catch(() => {}); } } }
       LSN.render(fullOpen ? fx : sx, filmCfg(), tl, !playing && movieT === 0 ? 2 : movieT);
       if (fullOpen) { if (!scrubbing) $('#fullScrub').value = Math.round(1000 * movieT / tl.total); $('#fullTime').textContent = fmt(movieT) + ' / ' + fmt(tl.total); $('#fullPlay').textContent = playing ? 'Pause' : 'Play'; }
@@ -3604,6 +3684,7 @@ function closeFull() {
   stopMovie(); fullOpen = false; full.hidden = true; document.body.style.overflow = '';
   try { if (document.fullscreenElement) document.exitFullscreen(); else if (document.webkitFullscreenElement) document.webkitExitFullscreen(); } catch (e) {}
   setPreviewForStep(); if (lastFocus && lastFocus.focus) lastFocus.focus();
+  if (appMode && hasFilm()) openToday(); else renderStreak();
 }
 $('#stageOpen').onclick = openFull; $('#fullBtn').onclick = openFull;
 $('#fullClose').onclick = closeFull;
@@ -3705,12 +3786,176 @@ $('#saveBtn').onclick = async () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 60000); done();
 };
 
+// ------------------------------------------------ mornings: streak, today screen, home screen, backup
+// the streak lives on the phone next to the draft, mirrored into a second store so one being cleared doesn't lose it
+const STK = 'mm-streak-v1';
+const dayKey = d => { const z = new Date(d); return z.getFullYear() + '-' + String(z.getMonth() + 1).padStart(2, '0') + '-' + String(z.getDate()).padStart(2, '0'); };
+const addDays = (d, n) => { const z = new Date(d); z.setDate(z.getDate() + n); return z; };
+const idb = (() => {
+  let dbp = null;
+  const open = () => dbp || (dbp = new Promise((res, rej) => { try { const r = indexedDB.open('motion-mornings', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); } catch (e) { rej(e); } }));
+  const tx = (mode, fn) => open().then(db => new Promise((res, rej) => { const t = db.transaction('kv', mode), st = t.objectStore('kv'), q = fn(st); t.oncomplete = () => res(q && q.result); t.onerror = () => rej(t.error); }));
+  return { get: k => tx('readonly', st => st.get(k)).catch(() => null), set: (k, v) => tx('readwrite', st => st.put(v, k)).catch(() => null) };
+})();
+let ST = { days: [], best: 0, bridged: [], backupAt: null };
+try { const r = JSON.parse(localStorage.getItem(STK) || 'null'); if (r && Array.isArray(r.days)) ST = Object.assign(ST, r); } catch (e) {}
+window.__mmMirror = v => idb.set('lsn-draft-v2', v);
+const saveStreak = () => { try { localStorage.setItem(STK, JSON.stringify(ST)); } catch (e) {} idb.set(STK, JSON.stringify(ST)); };
+function streakInfo() {
+  const set = new Set(ST.days), bridge = new Set(ST.bridged || []), first = ST.days.slice().sort()[0], today = new Date();
+  const watchedToday = set.has(dayKey(today));
+  let d = watchedToday ? today : addDays(today, -1), n = 0, lastFree = null;
+  // one missed morning a week is forgiven; a second within seven days ends the run
+  for (let i = 0; first && dayKey(d) >= first && i < 5000; i++, d = addDays(d, -1)) {
+    const k = dayKey(d);
+    if (set.has(k)) n++;
+    else if (bridge.has(k)) continue;
+    else if (lastFree === null || i - lastFree >= 7) lastFree = i;
+    else break;
+  }
+  const yest = dayKey(addDays(today, -1));
+  return { n, watchedToday, total: set.size, best: Math.max(ST.best || 0, n), missedYesterday: !watchedToday && n > 0 && !set.has(yest) && !bridge.has(yest) };
+}
+const hasFilm = () => (S.cfg.sections || []).some(s => (s.actions || []).some(a => a.text && a.text.trim()));
+const isStandalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+const appMode = isStandalone() || /[?&]app=1/.test(location.search);
+const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+let watchedSec = 0;
+function trackWatch(dt, total) {
+  if (!hasFilm() || streakInfo().watchedToday) return;
+  watchedSec += Math.min(dt, 0.25);
+  if (watchedSec >= total * 0.85) markWatched();
+}
+function markWatched(elsewhere) {
+  const k = dayKey(new Date()); if (ST.days.includes(k)) return;
+  ST.days.push(k); const info = streakInfo(); ST.best = Math.max(ST.best || 0, info.n); saveStreak();
+  try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
+  renderStreak();
+  if (!elsewhere) {
+    const t = $('#streakToast'), ms = { 7: ' One week. ', 21: ' Three weeks. ', 66: ' 66 mornings. This is who you are now. ' }[info.n];
+    t.textContent = `🌅 ${info.n} ${info.n === 1 ? 'morning' : 'mornings'} in a row.${ms || ' '}See you tomorrow.`.replace(/\s+/g, ' ');
+    t.hidden = false; clearTimeout(t._h); t._h = setTimeout(() => { t.hidden = true; }, 6000);
+  }
+}
+const ringSVG = (n, goal) => {
+  const r = 84, c = 2 * Math.PI * r, f = Math.min(1, n / goal), done = n >= goal;
+  const ticks = [7, 21].map(m => { const a = -Math.PI / 2 + 2 * Math.PI * m / goal; return `<circle cx="${100 + r * Math.cos(a)}" cy="${100 + r * Math.sin(a)}" r="4.5" class="${n >= m ? 'tk on' : 'tk'}"/>`; }).join('');
+  return `<svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="${r}" class="rbg"/><circle cx="100" cy="100" r="${r}" class="${done ? 'rfg gold' : 'rfg'}" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - f)}" transform="rotate(-90 100 100)"/>${ticks}</svg>`;
+};
+function renderStreak() {
+  const info = streakInfo(), chip = $('#streakChip');
+  chip.hidden = !(ST.days.length || appMode) || !hasFilm(); $('#chipN').textContent = info.n;
+  chip.setAttribute('aria-label', `${info.n} mornings in a row. Open today's film`);
+  if ($('#today').hidden) return;
+  const nm = (S.cfg.me.name || '').trim(), h = new Date().getHours();
+  $('#todayHi').textContent = (h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening') + (nm ? ', ' + nm : '') + '.';
+  $('#todaySub').textContent = info.watchedToday ? "Today's done. Go live it." : info.missedYesterday ? 'You missed yesterday, and that’s fine. Your rest day kept your streak. Watch today to keep it going.' : 'Your film is ready. One minute, then go live it.';
+  $('#ring').innerHTML = ringSVG(info.n, 66); $('#ringN').textContent = info.n; $('#ringLbl').textContent = info.n === 1 ? 'morning in a row' : 'mornings in a row';
+  const next = [7, 21, 66].find(m => m > info.n);
+  $('#ringMeta').textContent = (info.n >= 66 ? 'Habit made. Keep it going.' : next === 66 ? `${66 - info.n} to go until 66, when new habits usually stick.` : `${next - info.n} to go until ${next}.`) + (info.best > info.n ? ` Best: ${info.best}.` : '');
+  const set = new Set(ST.days), wk = $('#week'); wk.innerHTML = '';
+  for (let i = 6; i >= 0; i--) { const d = addDays(new Date(), -i), on = set.has(dayKey(d)); const el = document.createElement('span'); el.className = 'wd' + (on ? ' on' : '') + (i === 0 ? ' now' : ''); el.innerHTML = `<i></i>${'SMTWTFS'[d.getDay()]}`; el.title = d.toDateString() + (on ? ': watched' : ''); wk.append(el); }
+  $('#todayWatch').textContent = info.watchedToday ? '▶ Watch it again' : "▶ Watch this morning's film";
+  $('#todayElse').hidden = info.watchedToday || appMode;
+  $('#todayAdd').hidden = isStandalone();
+  const stale = !ST.backupAt || (Date.now() - ST.backupAt) > 14 * 864e5;
+  $('#backupNudge').hidden = !(info.n >= 7 && stale);
+}
+function openToday() { if (!hasFilm()) return; $('#today').hidden = false; document.body.style.overflow = 'hidden'; renderStreak(); $('#todayWatch').focus(); }
+function closeToday() { $('#today').hidden = true; document.body.style.overflow = ''; }
+$('#streakChip').onclick = openToday;
+$('#todayWatch').onclick = () => { closeToday(); watchedSec = 0; openFull(); };
+$('#todayEdit').onclick = () => { closeToday(); const b = $('#builder'); if (b) b.scrollIntoView({ block: 'start' }); };
+$('#todayElse').onclick = () => { markWatched(true); renderStreak(); };
+
+// the film and streak packed into a link: carries a film into the home-screen app, and works as a backup on any phone
+async function packFilm() {
+  const json = JSON.stringify({ v: 1, S, ST, at: Date.now() });
+  const b64 = bytes => { let s = ''; for (let i = 0; i < bytes.length; i += 32768) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 32768)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+  const raw = new TextEncoder().encode(json);
+  if (window.CompressionStream) { try { const z = new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer()); return 'z' + b64(z); } catch (e) {} }
+  return 'j' + b64(raw);
+}
+async function unpackFilm(p) {
+  const bin = s => { const t = atob(s.replace(/-/g, '+').replace(/_/g, '/')); const u = new Uint8Array(t.length); for (let i = 0; i < t.length; i++) u[i] = t.charCodeAt(i); return u; };
+  const kind = p[0], data = bin(p.slice(1));
+  const bytes = kind === 'z' ? new Uint8Array(await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer()) : data;
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+async function restoreFrom(p) {
+  try {
+    const d = await unpackFilm(p);
+    if (d && d.S && d.S.cfg && d.S.v === 2) {
+      // keep whichever film is newer; a fresh phone always takes the backup
+      const localNewer = hasFilm() && (S.savedAt || 0) > (d.S.savedAt || d.at || 0);
+      if (!localNewer) localStorage.setItem('lsn-draft-v2', JSON.stringify(Object.assign({}, d.S, { isExample: false })));
+    }
+    if (d && d.ST && Array.isArray(d.ST.days)) {
+      const mine = new Set(ST.days), last = d.ST.days.slice().sort().pop(), today = dayKey(new Date());
+      const days = [...new Set([...ST.days, ...d.ST.days])].sort();
+      // the days between an older backup and today don't count against the streak (up to a week)
+      const bridged = new Set([...(ST.bridged || []), ...(d.ST.bridged || [])]);
+      if (last) { const gap = []; for (let x = addDays(new Date(last + 'T12:00'), 1); dayKey(x) < today; x = addDays(x, 1)) gap.push(dayKey(x)); if (gap.length <= 7 && !gap.some(k => mine.has(k))) gap.forEach(k => bridged.add(k)); }
+      ST = { days, best: Math.max(ST.best || 0, d.ST.best || 0), bridged: [...bridged], backupAt: Math.max(ST.backupAt || 0, d.ST.backupAt || 0) || null };
+      localStorage.setItem(STK, JSON.stringify(ST)); await idb.set(STK, JSON.stringify(ST));
+    }
+    try { sessionStorage.setItem('mm-restored', '1'); } catch (e) {}
+  } catch (e) { console.error(e); }
+  location.replace(location.pathname + (appMode ? '?app=1' : ''));
+}
+
+// home screen: Android shows its own install prompt; iPhone needs the Share menu, and gets the film tucked into the link
+let installEvt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; });
+window.addEventListener('appinstalled', () => { installEvt = null; $('#homeBox').hidden = true; });
+async function addToHome() {
+  if (installEvt) { installEvt.prompt(); try { await installEvt.userChoice; } catch (e) {} installEvt = null; return; }
+  $('#homeIOS').hidden = !isIOS; $('#homeOther').hidden = isIOS; $('#homeBox').hidden = false;
+  if (isIOS) {
+    // the iPhone home-screen app has its own storage, so the link it saves carries the film across
+    try {
+      const p = await packFilm(), start = location.origin + '/?app=1#r=' + p;
+      history.replaceState(null, '', '/?app=1#r=' + p);
+      const man = { name: 'Motion Mornings', short_name: 'Mornings', start_url: start, scope: location.origin + '/', display: 'standalone', background_color: '#FBF3E6', theme_color: '#FBF3E6', icons: [192, 512].map(s => ({ src: location.origin + '/icon-' + s + '.png', sizes: s + 'x' + s, type: 'image/png' })) };
+      $('#manifestLink').href = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(man));
+    } catch (e) {}
+  }
+}
+$('#homeClose').onclick = () => { $('#homeBox').hidden = true; if (/#r=/.test(location.hash)) history.replaceState(null, '', location.pathname); };
+$$('[data-addhome]').forEach(b => b.onclick = addToHome);
+$('#todayAdd').onclick = addToHome;
+
+async function openBackup() {
+  $('#backupBox').hidden = false; $('#backupLink').value = 'Making your link...';
+  const url = location.origin + '/#r=' + await packFilm(); $('#backupLink').value = url;
+  ST.backupAt = Date.now(); saveStreak(); renderStreak();
+  $('#backupShare').hidden = !navigator.share;
+}
+$$('[data-backup]').forEach(b => b.onclick = openBackup);
+$('#backupClose').onclick = () => { $('#backupBox').hidden = true; };
+$('#backupShare').onclick = async () => { try { await navigator.share({ title: 'My Motion Mornings backup', text: 'Open this to bring back my film and my streak.', url: $('#backupLink').value }); $('#backupStatus').textContent = 'Sent. Keep it somewhere you can find it.'; } catch (e) {} };
+$('#backupCopy').onclick = async () => { const i = $('#backupLink'); try { await navigator.clipboard.writeText(i.value); } catch (e) { i.select(); try { document.execCommand('copy'); } catch (e2) {} } $('#backupStatus').textContent = 'Copied. Paste it into Notes or an email to yourself.'; };
+
+// if this phone's main store was cleared, bring the film and streak back from the second copy
+(async () => {
+  const [dr, sk] = await Promise.all([idb.get('lsn-draft-v2'), idb.get(STK)]);
+  let changed = false;
+  try { if (!localStorage.getItem('lsn-draft-v2') && dr) { localStorage.setItem('lsn-draft-v2', dr); changed = true; } } catch (e) {}
+  try { if (sk) { const o = JSON.parse(sk); if (o && Array.isArray(o.days) && o.days.some(k => !ST.days.includes(k))) { ST.days = [...new Set([...ST.days, ...o.days])].sort(); ST.best = Math.max(ST.best || 0, o.best || 0); saveStreak(); renderStreak(); } } } catch (e) {}
+  if (changed && !sessionStorage.getItem('mm-recovered')) { try { sessionStorage.setItem('mm-recovered', '1'); } catch (e) {} location.reload(); }
+})();
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+const hashR = (location.hash.match(/^#r=([A-Za-z0-9_-]+)/) || [])[1];
+if (hashR) restoreFrom(hashR);
+renderStreak();
+if (!hashR && appMode && hasFilm()) openToday();
+
 // ------------------------------------------------ boot
 document.fonts.load('italic 400 40px Poppins').catch(() => {}); document.fonts.load('700 40px Poppins').catch(() => {});
 
 renderThemes(); renderThumbs(); renderSteps(); $('#buildTitle').textContent = filmTitle();
 requestAnimationFrame(frame);
-window.__lsn = { S, go, tl: () => movieTL(), song: () => song, demo: DEMO_CFG };
+window.__lsn = { S, go, tl: () => movieTL(), song: () => song, demo: DEMO_CFG, streak: () => streakInfo(), mark: markWatched };
 })();
 
 </script>
