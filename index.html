@@ -363,7 +363,7 @@ input[type=range]{height:30px;touch-action:none}
       </section>
 
       <section class="panel" data-step="3" hidden>
-        <header><h2>Pick your song</h2><p class="lede">Three ways to add music: one of our <b>free tracks</b> below, an <b>MP3 of your own</b>, or <b>save it without music</b> and add any song inside Instagram or TikTok.</p></header>
+        <header><h2>Pick your song</h2><p class="lede">Three ways to add music: a <b>classic</b> or a track <b>made for your film</b> below, an <b>MP3 of your own</b>, or <b>save it without music</b> and add any song inside Instagram or TikTok.</p></header>
         <div class="card">
           <div class="subhead"><h3>Classics</h3></div>
           <p class="meta">Famous classical recordings in the public domain. Free to use anywhere, including when you share your film.</p>
@@ -371,8 +371,8 @@ input[type=range]{height:30px;touch-action:none}
           <p class="meta" id="classicCredits"></p>
         </div>
         <div class="card">
-          <div class="subhead"><h3>Free tracks</h3><button class="btn ghost small" data-mute aria-pressed="false">Mute</button></div>
-          <p class="meta">Original cinematic music, made right here for the length of your film. Free to use anywhere, including when you share it.</p>
+          <div class="subhead"><h3>Made for your film</h3><button class="btn ghost small" data-mute aria-pressed="false">Mute</button></div>
+          <p class="meta">Original music composed to fit your film exactly, scene changes on the beat. Free to use anywhere, including when you share it.</p>
           <div class="tiles" id="tracks"></div>
           <div class="subhead" style="margin-top:6px"><h3>Or your own song</h3></div>
           <p class="meta">Buying a song on Bandcamp gets you the MP3 and pays the artist directly. Songs you add are for your own viewing; posting a film with someone else's song publicly can break copyright.</p>
@@ -2618,7 +2618,7 @@ function renderSteps() {
   if (S.step === 1) renderPeople();
   if (S.step === 2) renderLines();
   // nobody should reach the last step with a silent film by accident, so a free track goes on to start
-  if (S.step === 3) { if (!song && !S.song.track && !composing) pickTrack('sunrise', false); renderSongOpts(); }
+  if (S.step === 3) { if (!song && !S.song.track && !composing) pickTrack('grieg', false); renderSongOpts(); }
   setPreviewForStep();
 }
 // moving on from step one needs at least one thing ticked, otherwise there's nothing to make a film from
@@ -3512,7 +3512,7 @@ async function pickTrack(id, andPlay, quiet) {
     const tr = await MUSIC.make(id, len);
     composing = null;
     if (S.song.track !== id) return;
-    useSong(tr.blob, tr.name + ' (free track)', { bpm: tr.bpm, period: tr.period, barPhase: 0, forLen: len }, andPlay, quiet);
+    useSong(tr.blob, tr.name + ' (made for your film)', { bpm: tr.bpm, period: tr.period, barPhase: 0, forLen: len }, andPlay, quiet);
     renderTracks();
   } catch (e) { composing = null; renderTracks(); const m = "Couldn't make the track on this device. Try adding an MP3 instead."; $('#songStatus').textContent = m; const fn = $('#fullNote'); if (fn && !$('#fullview').hidden) fn.textContent = m + ' The film still plays silent.'; }
 }
