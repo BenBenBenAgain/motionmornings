@@ -2052,6 +2052,24 @@ const SCENES = {
   laptop: { label: 'Focused work on my laptop', fn(c, t, p) { room(c, t, { wall: [0.88, 0.9, 0.93], window: 'sunrise' }); person(380, 1650, 1, ME(c), t, typing(t)); desk(120, 720); laptop(400, 1440, 'back'); rr(600, 1370, 50, 70, 8); fill([0.95, 0.95, 0.92]); clockRing(500, 600, p); pet(c, 860, 1780, 0.75, t, { flip: -1 }); } },
   hardfirst: { label: 'Doing the hard task first', fn(c, t) { room(c, t, { wall: [0.92, 0.9, 0.86] }); checklist(520, 700, 460, 3, t, 1.2, 99); person(300, 1650, 1, ME(c), t, typing(t)); desk(60, 620); laptop(320, 1440, 'back'); pet(c, 800, 1780, 0.75, t, { flip: -1 }); } },
   ship: { label: 'Finishing and launching', fn(c, t) { room(c, t, { wall: [0.9, 0.92, 0.95] }); const u = ease(clamp((t - 1.8) / 0.4)); desk(520, 1040); laptop(780, 1440, (x, y, w, h) => tick(x + w / 2, y + h / 2, 50, clamp((t - 1) / 0.6))); person(300, 1660, 1, ME(c), t, { armL: [0.2 + 2.5 * u, 0.2 + 2.6 * u], armR: [0.2 + 2.5 * u, 0.2 + 2.6 * u], bob: 20 * u * Math.abs(Math.sin(t * 6)) }); confetti(t, 1.8); pet(c, 140, 1790, 0.7, t, { lookUp: 0.6 }); } },
+  call: { label: 'A call with someone I love', fn(c, t) {
+    room(c, t, { wall: [0.95, 0.9, 0.86], window: 'day' });
+    // a video call: phone held up at chest height, their person smiling back on the screen
+    const L = ME(c), x = 420, y = 1680, s = 1.05;
+    const ss = s * ({ short: 0.92, tall: 1.08 }[L.height] || 1), bw = ({ slim: 0.86, big: 1.26 }[L.build] || 1);
+    const sway = 6 * Math.sin(t * 1.8), hand = [x + 128 * ss * bw, y - 430 * ss + sway], a = armsTo(x, y, s, L, hand[0], hand[1], true);
+    const h = person(x, y, s, L, t, { armR: a.armR, armL: [0.25, 0.45 + 0.12 * Math.sin(t * 1.6)] });
+    const pw = 84, ph2 = 150, px = hand[0] - pw / 2 + 8, py = hand[1] - ph2 + 26;
+    rr(px, py, pw, ph2, 14); fill([0.15, 0.16, 0.2]); rr(px + 6, py + 8, pw - 12, ph2 - 16, 9); fill([0.75, 0.86, 0.92]);
+    const other = hasPartner(c) ? PT(c) : FRIEND1, fx = px + pw / 2, fy = py + 60;
+    circ(fx, fy + 52, 30); fill(C(other.top || '#5A8C73')); circ(fx, fy, 22); fill(C(other.skin || '#C98E66')); X.beginPath(); X.arc(fx, fy - 4, 23, PI, 2 * PI); fill(C(other.hairCol || '#2b2220'));
+    circ(fx - 8, fy + 2, 2.6); fill(NAVY); circ(fx + 8, fy + 2, 2.6); fill(NAVY); X.beginPath(); X.arc(fx, fy + 8, 7, 0.15 * PI, 0.85 * PI); X.lineWidth = 2.5; X.strokeStyle = css([0.55, 0.25, 0.22]); X.stroke();
+    circ(hand[0], hand[1], 20 * s); fill(C(L.skin)); rr(hand[0] - 30, hand[1] - 26, 22, 12, 6); fill(C(L.skin));
+    const ph = Math.floor(t / 1.4) % 2, k = Math.sin(((t % 1.4) / 1.4) * PI);
+    if (ph) { rr(110, 860, 220, 130, 30); fill([1, 1, 1], k); X.save(); X.globalAlpha = k; X.translate(220, 925); X.beginPath(); X.moveTo(0, 28); X.bezierCurveTo(-60, -10, -30, -60, 0, -28); X.bezierCurveTo(30, -60, 60, -10, 0, 28); X.fillStyle = css(CORAL); X.fill(); X.restore(); }
+    else { rr(110, 860, 220, 130, 30); fill([0.88, 0.95, 0.9], k); X.save(); X.globalAlpha = k; X.fillStyle = css(NAVY); X.font = '700 56px Poppins, sans-serif'; X.textAlign = 'center'; X.fillText('haha', 220, 945); X.restore(); }
+    pet(c, 170, 1790, 0.7, t, { lookUp: 0.4 });
+  } },
   talk: { label: 'Talking with someone', fn(c, t) { room(c, t, { wall: [0.95, 0.88, 0.8], floor: [0.6, 0.46, 0.36] }); person(300, 1660, 1, ME(c), t, { armR: [0.5 + 0.2 * Math.sin(t * 3), 1] }); person(780, 1660, 0.98, FRIEND1, t, { flip: -1, armR: [0.4, 1 + 0.2 * Math.sin(t * 2.5)] }); const ph = Math.floor(t / 1.2) % 2, a = Math.sin(((t % 1.2) / 1.2) * PI); ph ? bubble(640, 820, 280, 140, a, [0.88, 0.95, 0.9], 1) : bubble(120, 820, 280, 140, a); } },
   excited: { label: 'Heading out, excited for the day', fn(c, t, p) { room(c, t, { wall: [0.95, 0.9, 0.84], window: 'sunrise' }); const [x, m] = walkX(p, 200, 520, 0.2, 0.8); person(x, 1660, 1, ME(c), t, { walk: m ? 1 : 0 }); pet(c, x + 240, 1740, 0.85, t, { walk: m ? 1 : 0 }); } },
   date: { label: 'Date night', fn(c, t) { room(c, t, { wall: [0.38, 0.32, 0.4], floor: [0.42, 0.32, 0.28], lights: true }); person(300, 1660, 1, ME(c), t, { armR: [0.45, 1.2] }); if (hasPartner(c)) person(760, 1660, 0.94, PT(c), t, { flip: -1, armR: [0.4, 1.2] }); rr(420, 1420, 240, 24, 10); fill([0.6, 0.45, 0.32]); rect(530, 1444, 20, 230, [0.6, 0.45, 0.32]); glass(470, 1410, t); glass(610, 1410, t); hearts(530, 1000, t); } },
@@ -2381,7 +2399,7 @@ const THEMES = [
     a: [['I check my numbers every Sunday', 'money'], ['Every payday, some goes to {saving|savings}', 'jar'], ['I learn a skill that pays', 'laptop']],
     g: [['{saving|The savings goal}, done', 'progress'], ['Calm about money, with room to spare', 'steady']] },
   { id: 'people', title: 'People I love', hint: 'Friends and family', qs: [['who', 'Who do you want more time with?', 'Mum, Auntie June, old mates']],
-    a: [['I visit {who|family} and stay for dinner', 'hug'], ['I call {who|the people I love} every week', 'talk'], ['I host the barbecue this time', 'bbq'], ['I say yes when friends make plans', 'friends']],
+    a: [['I visit {who|family} and stay for dinner', 'hug'], ['I call {who|the people I love} every week', 'call'], ['I host the barbecue this time', 'bbq'], ['I say yes when friends make plans', 'friends']],
     g: [['Surrounded by people I love', 'campfire'], ['A full table and a lot of laughs', 'bbq']] },
   { id: 'sport', title: 'Sport', hint: 'Playing the game', qs: [['sport', 'What sport?', 'footy, tennis, surfing']],
     a: [['I get out for {sport|sport} every week', '@sport'], ['I train between sessions to stay sharp', 'jog'], ['I stretch and recover after every session', 'calm']],
@@ -2691,6 +2709,7 @@ function fillPreviews() {
 
 // A one minute film should never show the same picture twice. Scenes that look alike share a group.
 function lookOf(sc) { return ({ footy: 'kick', soccer: 'kick', strong: 'pose', champion: 'pose', celebrate: 'pose', cook: 'kitchen', cook_together: 'kitchen', calm: 'calm', wake: 'bedroom', sunrise: 'sunrise', start: 'sunrise', idea: 'plan', clockplan: 'plan', laptop: 'desk', hardfirst: 'desk', cafe: 'desk' })[sc] || sc; }
+const SCENES_OK = sc => !!(LSN.SCENES && LSN.SCENES[sc]);
 function varyScenes(sections) { try { varyScenesInner(sections); } catch (e) { console.error(e); } }
 function varyScenesInner(sections) {
   const GLIMPSE_SPARE = ['celebrate', 'champion', 'sunrise', 'steady', 'excited', 'unwind', 'selflove', 'together', 'progress'];
@@ -2705,6 +2724,9 @@ function varyScenesInner(sections) {
         // swap for another of this goal's lines whose picture hasn't been used yet
         const alt = th.a.map(x => ({ text: fillT(x[0], fills, S.cfg), scene: sceneFor(x[1], fills) })).find(x => !used.has(lookOf(x.scene)) && !sec.actions.some(y => y.text === x.text));
         if (alt) { a.text = alt.text; a.scene = alt.scene; }
+        // no other line of theirs has a fresh picture: keep their words, borrow a picture that hasn't been used yet
+        else { const near = { talk: ['call', 'friends', 'cafe', 'hug'], call: ['talk', 'hug', 'friends'], friends: ['talk', 'campfire', 'bbq'], date: ['cuddle', 'couple', 'talk'], excited: ['kitbag', 'start', 'sunrise'] }[a.scene] || [];
+          const spare = [...near, 'excited', 'steady', 'sunrise', 'checklist', 'start', 'selflove'].find(sc => SCENES_OK(sc) && !used.has(lookOf(sc))); if (spare) a.scene = spare; }
       }
       used.add(lookOf(a.scene));
     });
@@ -3028,7 +3050,7 @@ const SCENE_WORDS = [
   [/\b(gym|weights?|lift(ing)?|strength|squats?|deadlifts?|pump)\b/, 'gym'], [/\b(run|running|jog|jogging|marathon|parkrun)\b/, 'jog'],
   [/\b(footy|afl|aussie rules|rugby|kick(ing)? the ball)\b/, 'footy'], [/\b(soccer|futsal)\b/, 'soccer'], [/\b(tennis|padel|squash|badminton|pickleball)\b/, 'tennis'],
   [/\b(surf\w*|bodyboard\w*)\b/, 'surf'], [/\b(swim\w*|laps|pool)\b/, 'swim'], [/\b(cycl\w*|bike|ride|riding)\b/, 'cycle'],
-  [/\b(barbecue|bbq|barbie|host\w*)\b/, 'bbq'], [/\b(visit\w*|hug|mum|dad|mom|nan|grandma|grandpa|parents)\b/, 'hug'],
+  [/\b(call|calls|calling|phone|ring|facetime)\b/, 'call'], [/\b(barbecue|bbq|barbie|host\w*)\b/, 'bbq'], [/\b(visit\w*|hug|mum|dad|mom|nan|grandma|grandpa|parents)\b/, 'hug'],
   [/\b(ocean|beach)\b/, 'celebrate'], [/\b(yoga|stretch\w*|pilates|meditat\w*|breathe|breath\w*|calm|quiet|mindful\w*|present)\b/, 'calm'],
   [/\b(walk|walking|stroll|hike|hiking|bush|outside|outdoors|nature)\b/, 'walk'],
   [/\b(move|moving|exercise|workout|work out|train|training|fit|fitness|sport|active)\b/, 'gym'],
@@ -3102,7 +3124,7 @@ const SCENE_GROUPS = [
   ['Outdoors', ['hike', 'paddle', 'fishing', 'garden']],
   ['Food and drink', ['cook', 'eat', 'fridge', 'soda', 'cuppa']],
   ['Love and family', ['cuddle', 'date', 'couple', 'cook_together', 'family', 'familydinner', 'parkday', 'schoolrun', 'bedtime', 'pram', 'holdbaby']],
-  ['Friends and fun', ['hug', 'bbq', 'friends', 'campfire', 'party']],
+  ['Friends and fun', ['hug', 'call', 'talk', 'bbq', 'friends', 'campfire', 'party']],
   ['Work and money', ['cafe', 'ship', 'idea', 'money', 'jar', 'talk']],
   ['Making and learning', ['read', 'paint', 'songs_outdoor', 'guitar', 'travel']],
   ['Home', ['clean', 'excited']],
@@ -3461,7 +3483,7 @@ function useSong(f, name, beat, andPlay, quiet) {
     $('#songStatus').textContent = `${name} \u00b7 ${fmt(audio.duration)}`;
     if (beat) song.beat = beat;
     if (join && playing) { ensureAudioGraph(); audio.currentTime = Math.min(movieT, audio.duration - 1); audio.play().catch(() => {}); $('#stageNote').textContent = 'Now playing: ' + name; if (fullOpen) $('#fullNote').textContent = 'Music: ' + name; }
-    else { movieT = 0; if (!quiet) setPreviewForStep(); if (andPlay && !recording) { playMovie(); $('#stageNote').textContent = 'Now playing: ' + name; } }
+    else { movieT = 0; if (!quiet) setPreviewForStep(); if (andPlay && !recording) { playMovie(); $('#stageNote').textContent = 'Now playing: ' + name; if (fullOpen) $('#fullNote').textContent = 'Music: ' + name; } }
     renderSongOpts();
     if (beat) { /* beat known from the composer */ }
     else analyseBeat(f).then(b => { if (song && song.url === url) { song.beat = b && b.bpm > 50 && b.bpm < 200 ? b : null; renderSongOpts(); } }).catch(() => { if (song) { song.beat = null; renderSongOpts(); } });
@@ -3495,6 +3517,7 @@ function renderTracks() {
 }
 // tapping a track composes it and plays it with the film; tapping it again pauses or plays
 function tapTrack(id) {
+  S.song.chosen = true;
   if (S.song.track === id && song && !composing) { if (playing) stopMovie(); else playMovie(); renderTracks(); return; }
   unlockAudio(); pickTrack(id, true);
 }
@@ -3517,6 +3540,8 @@ async function pickTrack(id, andPlay, quiet) {
   } catch (e) { composing = null; renderTracks(); const m = "Couldn't make the track on this device. Try adding an MP3 instead."; $('#songStatus').textContent = m; const fn = $('#fullNote'); if (fn && !$('#fullview').hidden) fn.textContent = m + ' The film still plays silent.'; }
 }
 renderTracks();
+// films started before the classics arrived had a made-up track picked for them automatically: give them Morning Mood unless they chose one
+if (S.song.track && !CLASSICS[S.song.track] && !S.song.chosen) { S.song.track = 'grieg'; save(); }
 if (S.song.track) setTimeout(() => pickTrack(S.song.track), 600);
 
 // ------------------------------------------------ full-size player
