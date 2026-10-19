@@ -2059,12 +2059,17 @@ const SCENES = {
     const ss = s * ({ short: 0.92, tall: 1.08 }[L.height] || 1), bw = ({ slim: 0.86, big: 1.26 }[L.build] || 1);
     const sway = 6 * Math.sin(t * 1.8), hand = [x + 128 * ss * bw, y - 430 * ss + sway], a = armsTo(x, y, s, L, hand[0], hand[1], true);
     const h = person(x, y, s, L, t, { armR: a.armR, armL: [0.25, 0.45 + 0.12 * Math.sin(t * 1.6)] });
-    const pw = 84, ph2 = 150, px = hand[0] - pw / 2 + 8, py = hand[1] - ph2 + 26;
-    rr(px, py, pw, ph2, 14); fill([0.15, 0.16, 0.2]); rr(px + 6, py + 8, pw - 12, ph2 - 16, 9); fill([0.75, 0.86, 0.92]);
-    const other = hasPartner(c) ? PT(c) : FRIEND1, fx = px + pw / 2, fy = py + 60;
-    circ(fx, fy + 52, 30); fill(C(other.top || '#5A8C73')); circ(fx, fy, 22); fill(C(other.skin || '#C98E66')); X.beginPath(); X.arc(fx, fy - 4, 23, PI, 2 * PI); fill(C(other.hairCol || '#2b2220'));
-    circ(fx - 8, fy + 2, 2.6); fill(NAVY); circ(fx + 8, fy + 2, 2.6); fill(NAVY); X.beginPath(); X.arc(fx, fy + 8, 7, 0.15 * PI, 0.85 * PI); X.lineWidth = 2.5; X.strokeStyle = css([0.55, 0.25, 0.22]); X.stroke();
-    circ(hand[0], hand[1], 20 * s); fill(C(L.skin)); rr(hand[0] - 30, hand[1] - 26, 22, 12, 6); fill(C(L.skin));
+    // they look at the screen, so we see the back of the phone with their fingers wrapped round it; the person they're talking to pops up beside it
+    const sk = C(L.skin), pw = 78, ph2 = 140, px = hand[0] - pw / 2, py = hand[1] - ph2 + 40;
+    rr(px, py, pw, ph2, 14); fill([0.2, 0.21, 0.26]); rr(px + 10, py + 10, 26, 34, 8); fill([0.12, 0.12, 0.15]); circ(px + 18, py + 19, 5); fill([0.3, 0.32, 0.4]); circ(px + 28, py + 34, 5); fill([0.3, 0.32, 0.4]);
+    // palm cups the bottom of the phone, four fingertips curl round the far edge, the thumb hooks the near edge
+    ell(hand[0], hand[1] + 18, 30 * s, 22 * s); fill(sk);
+    [0, 1, 2, 3].forEach(i => { rr(px + pw - 12, py + ph2 - 92 + i * 18, 22, 15, 7); fill(i % 2 ? darken(sk, 0.06) : sk); });
+    rr(px - 10, py + ph2 - 66, 20, 34, 9); fill(darken(sk, 0.04));
+    const other = hasPartner(c) ? PT(c) : FRIEND1, wx = hand[0] + 70, wy = hand[1] - 330, ww = 170, wh = 210;
+    rr(wx, wy, ww, wh, 22); fill([1, 1, 1]); rr(wx + 10, wy + 10, ww - 20, wh - 20, 16); fill([0.75, 0.86, 0.92]);
+    X.beginPath(); X.moveTo(wx + 30, wy + wh - 4); X.lineTo(wx - 20, wy + wh + 40); X.lineTo(wx + 70, wy + wh - 4); X.closePath(); fill([1, 1, 1]);
+    X.save(); X.beginPath(); X.rect(wx + 10, wy + 10, ww - 20, wh - 20); X.clip(); person(wx + ww / 2, wy + 90 + 502 * 0.62, 0.62, other, t, { armL: [0.15, 0.1], armR: [2.4 + 0.3 * Math.sin(t * 5), 2.6] }); X.restore();
     const ph = Math.floor(t / 1.4) % 2, k = Math.sin(((t % 1.4) / 1.4) * PI);
     if (ph) { rr(110, 860, 220, 130, 30); fill([1, 1, 1], k); X.save(); X.globalAlpha = k; X.translate(220, 925); X.beginPath(); X.moveTo(0, 28); X.bezierCurveTo(-60, -10, -30, -60, 0, -28); X.bezierCurveTo(30, -60, 60, -10, 0, 28); X.fillStyle = css(CORAL); X.fill(); X.restore(); }
     else { rr(110, 860, 220, 130, 30); fill([0.88, 0.95, 0.9], k); X.save(); X.globalAlpha = k; X.fillStyle = css(NAVY); X.font = '700 56px Poppins, sans-serif'; X.textAlign = 'center'; X.fillText('haha', 220, 945); X.restore(); }
@@ -2461,8 +2466,8 @@ const ACTS = [
   [/gym|weight|lift|strength|crossfit|f45|squat|deadlift|workout/, 'gym']
 ];
 const ACT_SCENE = (v, fb) => { const hit = ACTS.find(([re]) => re.test(v)); return hit ? hit[1] : fb; };
-const MOVE_SCENE = v => v.trim() ? ACT_SCENE(v, 'kitbag') : 'gym';
-const SPORT_SCENE = v => v.trim() ? ACT_SCENE(v, 'kitbag') : 'footy';
+const MOVE_SCENE = v => v.trim() ? ACT_SCENE(v, 'sunrise') : 'gym';
+const SPORT_SCENE = v => v.trim() ? ACT_SCENE(v, 'sunrise') : 'footy';
 const drinkKind = v => { v = String(v || '').toLowerCase(); return /\b(tea|chai|herbal|matcha|cuppa)\b/.test(v) ? 'tea' : /\b(coffee|latte|flat white|espresso|cappuccino|long black|decaf)\b/.test(v) ? 'coffee' : /kombucha/.test(v) ? 'kombucha' : /juice|smoothie/.test(v) ? 'juice' : /mocktail|zero|non.?alc|0%|alcohol.?free/.test(v) ? 'mocktail' : /\bwater\b/.test(v) && !/soda|sparkling|mineral|fizzy/.test(v) ? 'water' : 'soda'; };
 const isMusic = v => /music|song|guitar|sing|band|piano|beat/.test(v);
 function sceneFor(sc, fills) {
@@ -2728,9 +2733,9 @@ function varyScenesInner(sections) {
         // only a related picture or a neutral moment (standing tall at sunrise, calm, looking ahead), never an unrelated activity
         else { const near = { talk: ['call', 'friends', 'hug'], call: ['talk', 'hug'], friends: ['talk', 'campfire', 'bbq'], hug: ['call', 'talk'], date: ['cuddle', 'couple'], cuddle: ['couple', 'date'], couple: ['together', 'cuddle'],
             cook: ['cook_together', 'fridge', 'eat'], cook_together: ['cook', 'familydinner'], eat: ['fridge', 'cook'], fridge: ['eat', 'cook'], soda: ['cuppa'], cuppa: ['soda'],
-            gym: ['strong', 'kitbag'], strong: ['gym', 'champion'], jog: ['walk', 'start'], walk: ['hike', 'start', 'unwind'], hike: ['walk'], cycle: ['kitbag'], swim: ['kitbag'],
+            gym: ['strong', 'mat'], strong: ['gym', 'champion'], jog: ['walk', 'start'], walk: ['hike', 'start', 'unwind'], hike: ['walk'], cycle: ['jog'], swim: ['surf'],
             read: ['idea'], idea: ['clockplan', 'read'], clockplan: ['idea', 'checklist'], checklist: ['clockplan', 'idea'], laptop: ['cafe', 'hardfirst'], cafe: ['laptop', 'hardfirst'], hardfirst: ['laptop', 'cafe'],
-            money: ['jar'], jar: ['money'], parkday: ['schoolrun', 'family'], family: ['together', 'parkday'], excited: ['kitbag', 'start'], kitbag: ['excited', 'start'], calm: ['steady'], wake: ['sunrise'] }[a.scene] || [];
+            money: ['jar'], jar: ['money'], parkday: ['schoolrun', 'family'], family: ['together', 'parkday'], excited: ['start'], calm: ['steady'], wake: ['sunrise'] }[a.scene] || [];
           const spare = [...near, 'steady', 'sunrise', 'selflove'].find(sc => SCENES_OK(sc) && !used.has(lookOf(sc))); if (spare) a.scene = spare; }
       }
       used.add(lookOf(a.scene));
@@ -3124,7 +3129,7 @@ function sceneCard(kind, item, onRemove) {
 // picture chooser: every scene drawn small, with the person's own character
 // one of each kind of moment, grouped so it's quick to scan (look-alikes left out; they still play if already chosen)
 const SCENE_GROUPS = [
-  ['Body', ['walk', 'jog', 'gym', 'mat', 'dance', 'kitbag', 'calm', 'celebrate', 'wake']],
+  ['Body', ['walk', 'jog', 'gym', 'mat', 'dance', 'calm', 'celebrate', 'wake']],
   ['Sport', ['footy', 'soccer', 'cricket', 'tennis', 'hoop', 'golf', 'boxing', 'surf', 'cycle', 'swim']],
   ['Outdoors', ['hike', 'paddle', 'fishing', 'garden']],
   ['Food and drink', ['cook', 'eat', 'fridge', 'soda', 'cuppa']],
