@@ -487,7 +487,7 @@ input[type=range]{height:30px;touch-action:none}
     <div class="ringwrap"><div id="ring"></div><div class="ringnum"><b id="ringN">0</b><span id="ringLbl">mornings in a row</span></div></div>
     <p class="meta ringmeta" id="ringMeta"></p>
     <div class="week" id="week" aria-label="The last seven days"></div>
-    <button class="btn coral bigbtn" id="todayWatch">▶ Watch this morning's film</button>
+    <button class="btn coral bigbtn" id="todayWatch">▶ Watch my film</button>
     <button class="btn ghost small" id="todayElse">I watched it from my camera roll today</button>
     <div class="banner" id="backupNudge" hidden><strong>A week of mornings.</strong> Back up your film and streak so a new phone never loses them.<div class="row" style="margin-top:8px"><button class="btn small" data-backup>Back up now</button></div></div>
     <p class="meta todayfoot">One rest day a week won't break your streak.</p>
@@ -3855,7 +3855,7 @@ function renderStreak() {
   $('#ringMeta').textContent = (info.n >= 66 ? 'Habit made. Keep it going.' : next === 66 ? `${66 - info.n} to go until 66, when new habits usually stick.` : `${next - info.n} to go until ${next}.`) + (info.best > info.n ? ` Best: ${info.best}.` : '');
   const set = new Set(ST.days), wk = $('#week'); wk.innerHTML = '';
   for (let i = 6; i >= 0; i--) { const d = addDays(new Date(), -i), on = set.has(dayKey(d)); const el = document.createElement('span'); el.className = 'wd' + (on ? ' on' : '') + (i === 0 ? ' now' : ''); el.innerHTML = `<i></i>${'SMTWTFS'[d.getDay()]}`; el.title = d.toDateString() + (on ? ': watched' : ''); wk.append(el); }
-  $('#todayWatch').textContent = info.watchedToday ? '▶ Watch it again' : "▶ Watch this morning's film";
+  $('#todayWatch').textContent = info.watchedToday ? '▶ Watch it again' : '▶ Watch my film';
   $('#todayElse').hidden = info.watchedToday || appMode;
   $('#todayAdd').hidden = isStandalone();
   const stale = !ST.backupAt || (Date.now() - ST.backupAt) > 14 * 864e5;
