@@ -228,8 +228,7 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
 .phonebtn .expand{position:absolute;right:8px;bottom:8px;width:30px;height:30px;border-radius:50%;background:rgba(15,18,28,.6);color:#fff;display:grid;place-items:center}
 .fullview{position:fixed;inset:0;z-index:100;background:#0E121B;color:#F5EDDF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(14px + env(safe-area-inset-bottom,0px))}
 .fullview canvas{height:calc(100dvh - 150px);max-height:calc(100vh - 150px);width:auto;max-width:100%;aspect-ratio:9/16;border-radius:16px;background:#000}
-.fullbar{width:min(420px,90vw);height:5px;border-radius:99px;background:rgba(255,255,255,.15);overflow:hidden}
-.fullbar i{display:block;height:100%;width:0;background:var(--coral)}
+.fullscrub{width:min(420px,90vw);accent-color:var(--coral);height:28px;touch-action:none}
 .fullctl{display:flex;gap:14px;align-items:center}
 .fullctl .btn.ghost{color:#F5EDDF;border-color:rgba(255,255,255,.3)}
 .fullctl .time{color:#C9C3B8}
@@ -426,7 +425,7 @@ input[type=range]{height:30px;touch-action:none}
 
 <div class="fullview" id="fullview" hidden role="dialog" aria-modal="true" aria-label="Your film, full size">
   <canvas id="fullStage" width="720" height="1280" aria-label="Your film"></canvas>
-  <div class="fullbar"><i id="fullProg"></i></div>
+  <input type="range" class="fullscrub" id="fullScrub" min="0" max="1000" value="0" aria-label="Position in your film">
   <div class="fullctl"><button class="btn coral" id="fullPlay">Play</button><span class="time" id="fullTime">0:00</span><button class="btn ghost" data-mute aria-pressed="false">Mute</button><button class="btn ghost" id="fullClose">Close</button></div>
   <p class="fullnote" id="fullNote" aria-live="polite"></p>
 </div>
@@ -1341,6 +1340,17 @@ function guitar(x, y, ang) {
   circ(-30, 0, 24); fill([0.18, 0.12, 0.1]); rect(-150, -14, 14, 28, [0.35, 0.22, 0.14]);
   X.restore();
 }
+function playGuitar(c, t, px, py, s, gx, gy) {
+  const L = ME(c), a = -0.55, ca = Math.cos(a), sa = Math.sin(a), st = Math.sin(t * 9);
+  const neck = [gx + 175 * ca, gy + 175 * sa], strum = [gx - 40 * ca - 26 * st * sa, gy - 40 * sa + 26 * st * ca];
+  const aR = armsTo(px, py, s, L, neck[0], neck[1], true), aL = armsTo(px, py, s, L, strum[0], strum[1]);
+  person(px, py, s, L, t, { armL: aL.armL, armR: aR.armR });
+  guitar(gx, gy, a);
+  const fore = (L.outfit === 'tee' || L.outfit === 'dress') ? C(L.skin) : C(L.top), sk = C(L.skin);
+  // the strumming forearm crosses in front of the guitar body, fingers wrap the neck
+  line([[strum[0] - 70 * s, strum[1] - 40 * s], strum], 32 * s, fore); circ(strum[0], strum[1], 20 * s); fill(sk);
+  ell(neck[0], neck[1] + 4, 20 * s, 24 * s); fill(sk);
+}
 function micStand(x, y) {
   [-60, 0, 60].forEach(dx => line([[x, y - 60], [x + dx, y]], 6, [0.15, 0.15, 0.17]));
   line([[x, y - 60], [x, y - 520], [x - 90, y - 560]], 8, [0.15, 0.15, 0.17]); ell(x - 100, y - 566, 26, 16); fill([0.3, 0.3, 0.32]);
@@ -1727,18 +1737,18 @@ function fishingScene(c, t) {
   pet(c, 120, 1440, 0.55, t, { lookUp: 0.3 });
 }
 // ---- reaching: both hands to one point, so a club, bat or paddle is really held
-function reachArm(side, lx, ly) {
+function reachArm(side, lx, ly, low) {
   const A = 112, B = 104, sx = side * 72, sy = -426;
   let dx = side * (lx - sx), dy = ly - sy, D = Math.hypot(dx, dy);
   if (D > A + B - 2) { const k = (A + B - 2) / D; dx *= k; dy *= k; D = A + B - 2; }
   D = Math.max(D, 24);
-  const th = Math.atan2(dx, dy), al = Math.acos(clamp((A * A + D * D - B * B) / (2 * A * D), -1, 1)), u = th + al;
+  const th = Math.atan2(dx, dy), al = Math.acos(clamp((A * A + D * D - B * B) / (2 * A * D), -1, 1)), u = low ? th - al : th + al;
   return [u, Math.atan2(dx - A * Math.sin(u), dy - A * Math.cos(u))];
 }
-function armsTo(x, y, s, L, tx, ty) {
+function armsTo(x, y, s, L, tx, ty, low) {
   const ss = s * ({ short: 0.92, tall: 1.08 }[L.height] || 1), bw = ({ slim: 0.86, big: 1.26 }[L.build] || 1), D = L.chair ? 92 : 0;
   const lx = (tx - x) / ss / bw, ly = (ty - y) / ss - D;
-  return { armL: reachArm(-1, lx, ly), armR: reachArm(1, lx, ly), ss, bw };
+  return { armL: reachArm(-1, lx, ly, low), armR: reachArm(1, lx, ly, low), ss, bw };
 }
 // a two-handed swing: wind up to the right, through the ball, finish high on the left
 function swingPose(q) {
@@ -1964,7 +1974,7 @@ const SCENES = {
   bedtime: { label: 'Bedtime story', fn(c, t) { room(c, t, { wall: [0.45, 0.45, 0.62], floor: [0.42, 0.36, 0.38], window: 'dusk' }); X.save(); X.translate(470, 1440); X.scale(1.3, 1.3); bed(0, 0, 440, firstKid(c), t); X.restore(); const h = person(280, 1680, 1, ME(c), t, { armL: [0.5, 1.75], armR: [0.5, 1.75] }); book((h.L[0] + h.R[0]) / 2, h.R[1] + 70, t, true); const g = X.createRadialGradient(300, 1250, 10, 300, 1250, 420); g.addColorStop(0, css([1, 0.85, 0.55], 0.35)); g.addColorStop(1, css([1, 0.85, 0.55], 0)); circ(300, 1250, 420); X.fillStyle = g; X.fill(); pet(c, 820, 1840, 0.6, t, { flip: -1, tongue: false }); } },
   familydinner: { label: 'Family dinner', fn(c, t) { room(c, t, { wall: [0.42, 0.34, 0.36], floor: [0.42, 0.32, 0.28], lights: true }); person(200, 1680, 1, ME(c), t, { armR: [0.6, 1.4] }); if (hasPartner(c)) person(880, 1680, 0.95, PT(c), t, { flip: -1, armR: [0.6, 1.4] }); const kids = kidsOf(c); kids.slice(0, 3).forEach((k, i) => drawKid(k, 420 + i * 130, 1560, t + i, { armL: [0.6, 1.5], armR: [0.6, 1.5] })); const bb = babiesOf(c); if (bb.length) baby(420 + Math.min(kids.length, 3) * 130, 1420, 0.8, bb[0], t); table(110, 970, 1450); [300, 540, 780].forEach(bx => bowl(bx, 1440, t)); hearts(540, 1000, t, 2); pet(c, 80, 1840, 0.65, t, { lookUp: 0.8 }); } },
   paint: { label: 'Painting or making art', fn(c, t) { room(c, t, { wall: [0.94, 0.92, 0.88], window: 'day' }); easel(720, 1700, t); const s = 0.25 * Math.sin(t * 4); const h = person(380, 1670, 1, ME(c), t, { armR: [1.35 + s, 1.05 - s] }); line([[h.R[0], h.R[1]], [h.R[0] + 60, h.R[1] - 50]], 8, [0.55, 0.4, 0.28]); circ(h.R[0] + 64, h.R[1] - 54, 9); fill(CORAL); pet(c, 140, 1790, 0.7, t, { tongue: false }); } },
-  songs_outdoor: { label: 'Playing music outside at dusk', fn(c, t) { outdoor(c, t, 'dusk'); const s = 0.2 * Math.sin(t * 9); person(440, 1700, 1.05, ME(c), t, { armL: [0.9, 1.9], armR: [0.35 + s, 1 + s] }); guitar(430, 1320, -0.55); line([[512, 1265], [472, 1325]], 38, ME(c).outfit === 'dress' ? ME(c).skin : ME(c).top); pet(c, 760, 1760, 0.85, t, { flip: -1, tongue: false }); notes(600, 1050, t, 3, [1, 1, 1]); } },
+  songs_outdoor: { label: 'Playing music outside at dusk', fn(c, t) { outdoor(c, t, 'dusk'); playGuitar(c, t, 440, 1700, 1.05, 430, 1320); pet(c, 760, 1760, 0.85, t, { flip: -1, tongue: false }); notes(600, 1050, t, 3, [1, 1, 1]); } },
   calm: { label: 'Breathing, calm mind', fn(c, t) { outdoor(c, t, 'sunrise', 930); calmRings(440, 1310, t); const b = Math.sin(t * 1.2); seated(440, 1740, 1.05, ME(c), t, b); pet(c, 790, 1760, 0.8, t, { flip: -1, tongue: false }); } },
 
   wake: { label: 'Waking up fresh', fn(c, t) { room(c, t, { wall: [0.95, 0.9, 0.84], window: 'sunrise' }); const u = ease(clamp((t - 0.6) / 0.8)) * (0.85 + 0.15 * Math.sin(t * 2)); person(380, 1660, 1, ME(c), t, { armL: [0.15 + 2.7 * u, 0.1 + 2.8 * u], armR: [0.15 + 2.7 * u, 0.1 + 2.8 * u], bob: 6 * u }); pet(c, 760, 1760, 0.85, t, { flip: -1 }); } },
@@ -1988,7 +1998,7 @@ const SCENES = {
   talk: { label: 'Talking with someone', fn(c, t) { room(c, t, { wall: [0.95, 0.88, 0.8], floor: [0.6, 0.46, 0.36] }); person(300, 1660, 1, ME(c), t, { armR: [0.5 + 0.2 * Math.sin(t * 3), 1] }); person(780, 1660, 0.98, FRIEND1, t, { flip: -1, armR: [0.4, 1 + 0.2 * Math.sin(t * 2.5)] }); const ph = Math.floor(t / 1.2) % 2, a = Math.sin(((t % 1.2) / 1.2) * PI); ph ? bubble(640, 820, 280, 140, a, [0.88, 0.95, 0.9], 1) : bubble(120, 820, 280, 140, a); } },
   excited: { label: 'Heading out, excited for the day', fn(c, t, p) { room(c, t, { wall: [0.95, 0.9, 0.84], window: 'sunrise' }); const [x, m] = walkX(p, 200, 520, 0.2, 0.8); person(x, 1660, 1, ME(c), t, { walk: m ? 1 : 0 }); pet(c, x + 240, 1740, 0.85, t, { walk: m ? 1 : 0 }); } },
   date: { label: 'Date night', fn(c, t) { room(c, t, { wall: [0.38, 0.32, 0.4], floor: [0.42, 0.32, 0.28], lights: true }); person(300, 1660, 1, ME(c), t, { armR: [0.45, 1.2] }); if (hasPartner(c)) person(760, 1660, 0.94, PT(c), t, { flip: -1, armR: [0.4, 1.2] }); rr(420, 1420, 240, 24, 10); fill([0.6, 0.45, 0.32]); rect(530, 1444, 20, 230, [0.6, 0.45, 0.32]); glass(470, 1410, t); glass(610, 1410, t); hearts(530, 1000, t); } },
-  guitar: { label: 'Recording music', fn(c, t) { room(c, t, { wall: [0.55, 0.74, 0.85], floor: [0.72, 0.62, 0.52], pattern: true }); micStand(760, 1680); const s = 0.2 * Math.sin(t * 9); person(420, 1680, 1, ME(c), t, { armL: [0.9, 1.9], armR: [0.35 + s, 1 + s] }); guitar(410, 1300, -0.55); line([[490, 1250], [450, 1310]], 36, ME(c).outfit === 'dress' ? ME(c).skin : ME(c).top); notes(700, 1000, t); pet(c, 160, 1790, 0.7, t, { tongue: false }); } },
+  guitar: { label: 'Recording music', fn(c, t) { room(c, t, { wall: [0.55, 0.74, 0.85], floor: [0.72, 0.62, 0.52], pattern: true }); micStand(760, 1680); playGuitar(c, t, 420, 1680, 1, 410, 1300); notes(700, 1000, t); pet(c, 160, 1790, 0.7, t, { tongue: false }); } },
   songcard: { label: 'Finishing a song', fn(c, t) { room(c, t, { wall: [0.55, 0.74, 0.85], floor: [0.72, 0.62, 0.52], pattern: true }); songCard(560, 760, t); const u = ease(clamp((t - 2.2) / 0.4)); person(300, 1680, 1, ME(c), t, { armR: [0.15 + 2 * u, 0.4 + 2.4 * u] }); guitar(760, 1640, -1.35); notes(650, 1100, t, 3, [1, 1, 1]); pet(c, 120, 1800, 0.65, t); } },
   travel: { label: 'Planning a trip', fn(c, t) { room(c, t, { wall: [0.95, 0.9, 0.82], window: 'day', inWindow: () => plane(-200 + 1500 * ((t * 0.18) % 1), 820 + 20 * Math.sin(t), 0.6) }); mapCard(120, 700, t); jar(900, 1440, 6); person(360, 1660, 1, ME(c), t, { armR: [0.3, 0.3] }); suitcase(600, 1700); pet(c, 850, 1800, 0.7, t, { flip: -1 }); } },
   party: { label: 'Dancing at a party', fn(c, t) { room(c, t, { wall: [0.2, 0.18, 0.3], floor: [0.26, 0.22, 0.3], lights: true }); discoBall(540, 330, t); const dn = (ph, sp = 6) => ({ armL: [2.3 + 0.4 * Math.sin(t * sp + ph), 2.6 + 0.3 * Math.sin(t * sp + ph)], armR: [1.1 + 0.6 * Math.sin(t * sp + ph + 1.5), 1.6], bob: 22 * Math.abs(Math.sin(t * sp / 2 + ph)) }); person(900, 1620, 0.85, FRIEND1, t, { flip: -1, ...dn(1.2) }); person(120, 1630, 0.85, F2(c), t, dn(2.4)); if (hasPartner(c)) person(680, 1690, 0.95, PT(c), t, { flip: -1, ...dn(0.6) }); const h = person(380, 1700, 1.02, ME(c), t, { armL: [2.3 + 0.4 * Math.sin(t * 6), 2.6], armR: [1.9, 2.75 + 0.15 * Math.sin(t * 3)], bob: 22 * Math.abs(Math.sin(t * 3)) }); glass(h.R[0] + 4, h.R[1] + 16, t); confetti(t % 3, 0); } },
@@ -3180,7 +3190,7 @@ const filmCfg = () => S.cfg;
 let refitTimer = null;
 function refitTrack(base) {
   if (!song || !S.song.track || !song.beat || composing || playing || recording) return;
-  if (Math.abs(song.duration - base.total) <= 3) return;
+  if (Math.abs((song.beat.forLen || song.duration) - Math.max(20, base.total)) <= 1.5) return;
   clearTimeout(refitTimer); refitTimer = setTimeout(() => { if (!playing && !composing && S.song.track) pickTrack(S.song.track, false, true); }, 1500);
 }
 function movieTL() {
@@ -3245,9 +3255,9 @@ function frame(now) {
   if (!recording) {
     if (mode.type === 'movie' || playing) {
       const tl = movieTL();
-      if (playing) { movieT = song && !tl.loop ? audio.currentTime - S.song.offset : movieT + (now - lastFrame) / 1000; if (song) setGain(songGain(movieT, tl.total)); if (movieT >= tl.total - 0.05) { stopMovie(); movieT = 0; } }
+      if (playing) { movieT = song && !tl.loop ? audio.currentTime - S.song.offset : movieT + (now - lastFrame) / 1000; if (song) setGain(songGain(movieT, tl.total)); if (movieT >= tl.total - 0.05) { movieT = 0; if (song) { audio.currentTime = tl.loop ? S.song.offset % song.duration : S.song.offset; setGain(S.song.offset > 0 ? 0 : 1); audio.play().catch(() => {}); } } }
       LSN.render(fullOpen ? fx : sx, filmCfg(), tl, !playing && movieT === 0 ? 2 : movieT);
-      if (fullOpen) { $('#fullProg').style.width = (100 * movieT / tl.total).toFixed(2) + '%'; $('#fullTime').textContent = fmt(movieT) + ' / ' + fmt(tl.total); $('#fullPlay').textContent = playing ? 'Pause' : 'Play'; }
+      if (fullOpen) { if (!scrubbing) $('#fullScrub').value = Math.round(1000 * movieT / tl.total); $('#fullTime').textContent = fmt(movieT) + ' / ' + fmt(tl.total); $('#fullPlay').textContent = playing ? 'Pause' : 'Play'; }
       if (!scrubbing) $('#scrub').value = Math.round(1000 * movieT / tl.total); $('#timeLbl').textContent = fmt(movieT) + ' / ' + fmt(tl.total);
     } else if (mode.type === 'line') {
       const it = mode.item, t = ((now - t0) / 1000) % 5.5;
@@ -3285,10 +3295,15 @@ function unlockAudio() {
 async function playMovie() {
   if (heroSound) { heroSound = false; heroAudio.pause(); soundLabel(); }
   mode = { type: 'movie' }; if (movieT >= movieTL().total - 0.1) movieT = 0;
+  // the film changed length since the track was made: refit first, then start from the top once, rather than playing and jumping back
+  if (song && S.song.track && song.beat && Math.abs((song.beat.forLen || song.duration) - Math.max(20, LSN.timeline(filmCfg()).total)) > 1.5) {
+    audio.pause(); URL.revokeObjectURL(song.url); song = null; movieT = 0; ensureAudioGraph(); unlockAudio();
+    const m = 'Fitting the music to your film. It starts in a moment.'; $('#stageNote').textContent = m; if (fullOpen) $('#fullNote').textContent = m;
+    if (!composing) pickTrack(S.song.track, true); return;
+  }
   playing = true; $('#playBtn').textContent = 'Pause'; if (S.step === 3) renderTracks();
   // no music chosen yet: start the default track now, inside the tap, and let it join when it's ready
   ensureAudioGraph();
-  if (song && S.song.track && song.beat && Math.abs(song.duration - LSN.timeline(filmCfg()).total) > 3) { audio.pause(); URL.revokeObjectURL(song.url); song = null; movieT = 0; }
   if (!song) { unlockAudio(); if (!composing) { pickTrack(S.song.track || 'sunrise'); $('#stageNote').textContent = 'Adding music. It joins in a moment.'; } }
   if (song) { ensureAudioGraph(); const tl = movieTL(); audio.loop = !!tl.loop; audio.currentTime = tl.loop ? (S.song.offset + movieT) % song.duration : S.song.offset + movieT; try { await audio.play(); } catch (e) { stopMovie(); } }
 }
@@ -3347,8 +3362,11 @@ function heroFrame(dt) {
   $('#heroBar').style.width = (100 * Math.min(1, heroT / tl.total)).toFixed(2) + '%';
 }
 let scrubbing = false;
-['pointerdown', 'touchstart'].forEach(ev => $('#scrub').addEventListener(ev, () => { scrubbing = true; }, { passive: true }));
-['pointerup', 'pointercancel', 'touchend', 'change'].forEach(ev => $('#scrub').addEventListener(ev, () => { scrubbing = false; }));
+['#scrub', '#fullScrub'].forEach(sel => {
+  ['pointerdown', 'touchstart'].forEach(ev => $(sel).addEventListener(ev, () => { scrubbing = true; }, { passive: true }));
+  ['pointerup', 'pointercancel', 'touchend', 'change'].forEach(ev => $(sel).addEventListener(ev, () => { scrubbing = false; }));
+});
+$('#fullScrub').oninput = e => $('#scrub').oninput(e);
 $('#scrub').oninput = e => { if (recording) return; mode = { type: 'movie' }; const tl = movieTL(); movieT = tl.total * e.target.value / 1000; if (song) audio.currentTime = tl.loop ? (S.song.offset + movieT) % song.duration : S.song.offset + movieT; };
 $('#songBtn').onclick = () => $('#songInput').click();
 function useSong(f, name, beat, andPlay, quiet) {
@@ -3399,7 +3417,7 @@ async function pickTrack(id, andPlay, quiet) {
     const tr = await MUSIC.make(id, len);
     composing = null;
     if (S.song.track !== id) return;
-    useSong(tr.blob, tr.name + ' (free track)', { bpm: tr.bpm, period: tr.period, barPhase: 0 }, andPlay, quiet);
+    useSong(tr.blob, tr.name + ' (free track)', { bpm: tr.bpm, period: tr.period, barPhase: 0, forLen: len }, andPlay, quiet);
     renderTracks();
   } catch (e) { composing = null; renderTracks(); const m = "Couldn't make the track on this device. Try adding an MP3 instead."; $('#songStatus').textContent = m; const fn = $('#fullNote'); if (fn && !$('#fullview').hidden) fn.textContent = m + ' The film still plays silent.'; }
 }
@@ -3419,9 +3437,10 @@ function openFull() {
   btn.disabled = false;
   if (song && song.duration) { note.textContent = ''; playMovie(); }
   else {
-    note.textContent = 'Getting your music ready. You can press play now and watch it silent.';
-    const want = S.song.track || 'sunrise'; if (!song) pickTrack(want);
-    songReady().then(() => { if (!fullOpen || playing) return; note.textContent = 'Music ready: ' + MUSIC.STYLES[S.song.track || want].name + '. Press play. You can change it on the last step.'; });
+    note.textContent = 'Getting your music ready. It starts in a moment.';
+    const want = S.song.track || 'sunrise'; ensureAudioGraph(); unlockAudio();
+    if (!song && !composing) pickTrack(want, true);
+    songReady().then(() => { if (!fullOpen) return; note.textContent = 'Music: ' + MUSIC.STYLES[S.song.track || want].name + '. Change it on the last step.'; if (!playing) playMovie(); });
   }
   btn.focus();
 }
