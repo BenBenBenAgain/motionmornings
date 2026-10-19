@@ -2959,7 +2959,8 @@ function liveLines() {
   if (S.linesTouched) return;
   const ids = THEMES.map(t => t.id).filter(id => S.themes.includes(id));
   const keep = {}; (S.cfg.sections || []).forEach(s => { if (s.theme) keep[s.theme] = s; });
-  const names = [S.cfg.partner.on && S.cfg.partner.name, (S.cfg.kids || []).map(k => k.name)];
+  // who's in their life changes which picture a line gets ("I play fetch with Pawsha"), so the lines are rebuilt when people change
+  const names = [S.cfg.partner.on && (S.cfg.partner.name || true), (S.cfg.kids || []).map(k => k.name || '?'), (S.cfg.pets || []).map(p => (p.type || '') + ':' + (p.name || ''))];
   const key = id => JSON.stringify(['w5', S.fills[id] || {}, names]);
   S.cfg.sections = ids.map(id => keep[id] && key(id) === keep[id]._fills ? keep[id] : Object.assign(buildSection(TH(id), S.fills[id] || {}, S.cfg), { _fills: key(id) }));
   varyScenes(S.cfg.sections);
@@ -3256,6 +3257,7 @@ $('#addPet').onclick = () => { S.cfg.pets.push({ type: 'dog', name: '', coat: ra
 // ------------------------------------------------ step 4: lines
 // Words typed into a scene pick a matching picture, until someone chooses one by hand
 const SCENE_WORDS = [
+  [/\b(spend(ing)? (more |quality )?time with|time with|hang(ing)? out with|catch(ing)? up with)\b/, 'friends'],
   [/\b(baby|newborn|pregnan\w*|nursery)\b/, 'holdbaby'], [/\b(pram|stroller)\b/, 'pram'],
   [/\b(bedtime|story|stories|tuck)\b/, 'bedtime'], [/\b(school run|school drop|drop.?off)\b/, 'schoolrun'],
   [/\b(kids?|children|son|daughter|play(ing)? with)\b/, 'parkday'], [/\b(family dinner|dinner together|eat together)\b/, 'familydinner'],
@@ -3319,7 +3321,7 @@ function guessSceneInner(t) {  if (/\b(walk|walking|stroll)\b/.test(t) && !/\b(w
   return null;
 }
 const hasPartnerNow = () => S.cfg.partner && S.cfg.partner.on;
-(S.cfg.sections || []).forEach(sec => (sec.actions || []).forEach(a => { if (a.guess) { const g = guessScene(a.text); if (g && LSN.SCENES[g]) a.scene = g; delete a.guess; } }));
+{ let fixed = false; (S.cfg.sections || []).forEach(sec => (sec.actions || []).forEach(a => { if (a.guess) { const g = guessScene(a.text); if (g && LSN.SCENES[g]) { a.scene = g; if (a._o) a._o.scene = g; } delete a.guess; fixed = true; } })); if (fixed) { varyScenes(S.cfg.sections); save(); } }
 // small moving pictures on each scene card
 let liveThumbs = [], thumbClock = 0;
 const thumbObs = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { const t = liveThumbs.find(x => x.cv === e.target); if (t) t.vis = e.isIntersecting; })) : null;
