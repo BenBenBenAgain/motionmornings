@@ -294,6 +294,8 @@ input[type=range]{height:30px;touch-action:none}
 .todaytop .logo{width:44px;height:44px;color:var(--ink)}
 .today h2{font-family:var(--display);font-size:1.7rem;margin:6px 0 0;line-height:1.2}
 .today .lede{margin:0;min-height:2.6em}
+.todaynote{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 16px;text-align:left;display:flex;flex-direction:column;gap:4px}
+.todaynote p{margin:0;font-family:var(--display);font-weight:600;font-size:1.05rem;line-height:1.4}
 .ringwrap{position:relative;width:min(230px,62vw);aspect-ratio:1}
 .ringwrap svg{width:100%;height:100%;display:block}
 .rbg{fill:none;stroke:color-mix(in srgb,var(--line) 80%,transparent);stroke-width:14}
@@ -484,6 +486,7 @@ input[type=range]{height:30px;touch-action:none}
     <div class="todaytop"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><path d="M16.5 51 Q21.5 41.5 30 52 Q38.5 41.5 43.5 51" fill="none" stroke="currentColor" stroke-width="3.6"/><path d="M37.5 35 Q41.5 27.2 47 35.5 Q52.5 27.2 56.5 35" fill="none" stroke="currentColor" stroke-width="3.2"/><path d="M40 78 A28 28 0 0 1 96 78 Z" fill="var(--coral)"/><line x1="14" y1="78" x2="106" y2="78" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><line x1="54" y1="90" x2="84" y2="90" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/><line x1="61" y1="101" x2="77" y2="101" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/></svg><button class="btn ghost small" id="todayEdit">Edit my film</button></div>
     <h2 id="todayHi">Good morning.</h2>
     <p class="lede" id="todaySub"></p>
+    <div class="todaynote"><span class="pill">Today</span><p id="todayNote"></p></div>
     <div class="ringwrap"><div id="ring"></div><div class="ringnum"><b id="ringN">0</b><span id="ringLbl">mornings in a row</span></div></div>
     <p class="meta ringmeta" id="ringMeta"></p>
     <div class="week" id="week" aria-label="The last seven days"></div>
@@ -3842,6 +3845,40 @@ const ringSVG = (n, goal) => {
   const ticks = [7, 21].map(m => { const a = -Math.PI / 2 + 2 * Math.PI * m / goal; return `<circle cx="${100 + r * Math.cos(a)}" cy="${100 + r * Math.sin(a)}" r="4.5" class="${n >= m ? 'tk on' : 'tk'}"/>`; }).join('');
   return `<svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="${r}" class="rbg"/><circle cx="100" cy="100" r="${r}" class="${done ? 'rfg gold' : 'rfg'}" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - f)}" transform="rotate(-90 100 100)"/>${ticks}</svg>`;
 };
+// a note for each morning: about their goals without quoting the film, or about keeping the ritual going
+const NOTES = {
+  move: ["Your body doesn't need a perfect session today. It just needs you to turn up.", 'Ten minutes of moving still counts. Start small and see where it goes.', "Strong isn't built in a day. It's built on days like this one.", 'Notice how you feel after you move today. That feeling is the reason.'],
+  food: ["One good meal today is a win. You don't have to nail every one.", 'Feed yourself like someone you care about.', "Next time you're hungry, reach for something that gives you energy back.", 'Good food is a quiet way of backing yourself.'],
+  money: ["Every dollar you don't spend on a whim is working for future you.", 'Small amounts, put aside often, turn into real money.', 'Before you buy something today, ask if it matters more than your goal.', 'Financial freedom is built on steady, boring days. This is one of them.'],
+  people: ['Who would love to hear from you today? Send them a message.', "The people you love don't need a big gesture. Ten minutes of your full attention is plenty.", 'Make a plan with someone today, even a small one.', 'Good friendships are kept alive by little check-ins.'],
+  sport: ['Every training session makes game day easier.', 'Play for the love of it today. The results follow.', "Get a few reps in today, even if it's just in the backyard.", 'Your team is better with you at your best. Look after your body.'],
+  calm: ['Take five slow breaths before you check your phone today.', "You don't have to do everything today. Pick what matters and let the rest wait.", 'A calm mind is trained like a muscle. A few quiet minutes counts.', 'Give yourself a proper wind-down tonight. Tomorrow you will thank you.'],
+  screen: ['Leave your phone in another room for a while today.', 'When you go to scroll, take one breath and decide if you really want to.', "Swap ten minutes of scrolling for something you'll actually remember.", "The best parts of today won't happen on a screen."],
+  drink: ["Clear mornings feel good. You've earned every one of them.", 'If tonight gets tempting, order your swap first and settle in.', "You're not missing out. You're choosing how you feel tomorrow.", 'Every clear night makes the next one easier.'],
+  brave: ["Say yes to one thing today you'd normally talk yourself out of.", 'Confidence comes after you act, not before. Go first.', 'Your voice is worth hearing. Speak up once today.', 'Feeling nervous just means it matters. Do it anyway.'],
+  love: ['Stay open today. The right person could be anywhere.', "The best way to meet someone is to be out living a life you love.", "Look after yourself the way you'd want a partner to.", "Say hello to someone new today. That's how it starts."],
+  partner: ["Ask your partner something today you've never asked before.", "Put your phone down when they're talking tonight. They'll notice.", 'A small kindness today counts for more than a big gesture once a year.', 'Tell them one thing you love about them. Out loud.'],
+  family: ["Your kids won't remember perfect days. They'll remember you being there.", 'Ten minutes of full attention beats an hour half on your phone.', 'Let them lead the game today.', 'Ask them about the best part of their day tonight.'],
+  grow: ['Every healthy choice now is part of getting ready for them.', "Look after yourselves today. You're building the home they'll grow up in.", 'Talk about the family you want tonight. Dream a little.', "Getting ready isn't about being perfect. It's about being ready to love."],
+  work: ['Do the hardest task first, while your head is fresh.', 'One focused hour today beats a whole day of busy.', 'Small progress on what matters is still progress. Finish something.', 'Remember why this work matters to you.'],
+  start: ["A fresh start isn't one big day. It's a run of small ones, and this is one.", "Leave yesterday where it is. Today's a clean page.", "You don't need it all figured out. Just take the next step.", "Notice one thing that's already better than it was."],
+  create: ["Make something today, even if it's rough. Rough is how good starts.", 'Ten minutes on your craft today keeps the momentum going.', "Don't wait for inspiration. Start, and it usually turns up.", 'Finish one small thing today. Finishing is a skill too.'],
+  learn: ['Fifteen minutes of practice today beats two hours once a month.', 'Getting it wrong is part of learning it. Keep going.', "Teach someone one thing you've learnt. It locks it in.", 'Look back a month. You know more than you think.'],
+  travel: ['Every bit you put away today gets you closer to the trip.', 'Look up one thing you want to do when you get there.', 'Adventure starts with a plan. Add one thing to yours today.', 'Picture the first morning there. Keep it in mind today.'],
+  home: ['Do one small thing today that makes your place feel more like home.', 'Clear one surface today. The whole room feels calmer.', 'Home is built in little habits. Pick one and do it.', 'Every step towards the place you love counts, even the boring ones.'],
+};
+const RITUAL = ['Watching first thing sets the tone before the world gets a say.', 'The film works best when you feel each scene, not just watch it.', 'Same time, same place each morning makes it easier to keep going.', "One minute a morning. It's the easiest win of your day.", "You're training your mind to see you as someone who does these things.", "Some mornings it'll feel flat. Watch it anyway. That's how habits stick.", 'Before you look at your messages, give yourself this minute.', 'Pick one scene and do it for real today.', 'Picturing yourself doing something makes you more likely to do it.', 'Each morning you watch, the habit gets a little easier.', 'Think of today as one more scene in your film.'];
+function todayNote(info) {
+  if (!info.total) return 'Welcome. Watch your film, then go and live one bit of it today.';
+  if (info.watchedToday && info.n === 1 && info.total === 1) return 'Day one done. Come back tomorrow and do it again.';
+  if (info.watchedToday && { 7: 1, 21: 1, 66: 1 }[info.n]) return { 7: 'A full week of mornings. This is starting to become part of who you are.', 21: 'Three weeks in. Most people never get this far. Keep going.', 66: "66 mornings. That's about how long a habit takes to stick. This one's yours now." }[info.n];
+  if (info.missedYesterday) return "Missed yesterday? That's fine. Missing a day doesn't undo a habit. Back at it today.";
+  const day = Math.floor((Date.now() - new Date().getTimezoneOffset() * 6e4) / 864e5), mine = (S.themes || []).filter(k => NOTES[k]);
+  // two days in three about their goals, one about the ritual; cycling so the same note doesn't come back for weeks
+  if (!mine.length || day % 3 === 2) return RITUAL[Math.floor(day / 3) % RITUAL.length];
+  const k = mine[day % mine.length], list = NOTES[k];
+  return list[Math.floor(day / mine.length) % list.length];
+}
 function renderStreak() {
   const info = streakInfo(), chip = $('#streakChip');
   chip.hidden = !(ST.days.length || appMode) || !hasFilm(); $('#chipN').textContent = info.n;
@@ -3849,7 +3886,8 @@ function renderStreak() {
   if ($('#today').hidden) return;
   const nm = (S.cfg.me.name || '').trim(), h = new Date().getHours();
   $('#todayHi').textContent = (h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening') + (nm ? ', ' + nm : '') + '.';
-  $('#todaySub').textContent = info.watchedToday ? "Today's done. Go live it." : info.missedYesterday ? 'You missed yesterday, and that’s fine. Your rest day kept your streak. Watch today to keep it going.' : 'Your film is ready. One minute, then go live it.';
+  $('#todaySub').textContent = info.watchedToday ? "Today's done. Go live it." : info.missedYesterday ? 'Your rest day kept your streak going.' : 'Your film is ready. One minute, then go live it.';
+  $('#todayNote').textContent = todayNote(info);
   $('#ring').innerHTML = ringSVG(info.n, 66); $('#ringN').textContent = info.n; $('#ringLbl').textContent = info.n === 1 ? 'morning in a row' : 'mornings in a row';
   const next = [7, 21, 66].find(m => m > info.n);
   $('#ringMeta').textContent = (info.n >= 66 ? 'Habit made. Keep it going.' : next === 66 ? `${66 - info.n} to go until 66, when new habits usually stick.` : `${next - info.n} to go until ${next}.`) + (info.best > info.n ? ` Best: ${info.best}.` : '');
