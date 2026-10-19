@@ -1805,33 +1805,40 @@ function paddleScene(c, t, p) {
   ell(x, y, 330, 46); fill([0.93, 0.52, 0.43]); ell(x, y - 18, 110, 26); fill([0.2, 0.2, 0.24]); line([[x - 320, y + 6], [x + 320, y + 6]], 4, [1, 1, 1], 0.6);
   for (let i = 0; i < 4; i++) line([[x - 380 - i * 60, y + 30 + i * 8], [x - 330 - i * 60, y + 30 + i * 8]], 5, [1, 1, 1], 0.5);
 }
-// ---- a side-on body for poses the front-facing figure can't do (yoga)
-function posed(x, y, s, L, J) {
+// ---- a body for poses the front-facing figure can't do (yoga), built from the same parts:
+// the very same head (face, hair, hats, glasses) is borrowed from the main character, so it stays on brand
+function brandHead(cx, cy, s, L, t, rot) {
+  const LL = Object.assign({}, L, { height: 'avg', build: 'avg', chair: false });
+  X.save(); X.translate(cx, cy); X.rotate(rot);
+  X.beginPath(); X.rect(-150 * s, -135 * s, 300 * s, 185 * s); X.clip();
+  person(0, 502 * s, s, LL, t, { armL: [0, 0], armR: [0, 0] });
+  X.restore();
+}
+function posed(x, y, s, L, J, t) {
   const P = k => [x + J[k][0] * s, y + J[k][1] * s];
-  const top = C(L.top), skin = C(L.skin), legC = L.outfit === 'dress' ? skin : C(L.pants || '#30406E'), hc = C(L.hairCol || '#383130');
-  const limb = (a, b, c2, w, col) => { line([P(a), P(b), P(c2)], w * s, col); };
-  limb('hip', 'kneeB', 'footB', 44, darken(legC, 0.12)); ell(P('footB')[0] + 14 * s, P('footB')[1] - 6 * s, 26 * s, 12 * s); fill(darken(skin, 0.1));
-  limb('shoulder', 'elbowB', 'handB', 32, darken(top, 0.12)); circ(...P('handB'), 17 * s); fill(darken(skin, 0.08));
-  line([P('hip'), P('shoulder')], 82 * s, top);
-  if (L.outfit === 'dress') { circ(...P('hip'), 46 * s); fill(top); }
-  limb('hip', 'kneeF', 'footF', 44, legC); ell(P('footF')[0] + 14 * s, P('footF')[1] - 6 * s, 26 * s, 12 * s); fill(skin);
-  const [hx, hy] = P('head'), [sx, sy] = P('shoulder');
-  line([[sx, sy], [hx, hy]], 30 * s, darken(skin, 0.12));
-  circ(hx, hy, 48 * s); fill(skin);
-  const dirX = J.face || 1;
-  if (L.hair !== 'bald' && L.hair !== 'buzz' && L.hat !== 'scarf') {
-    X.beginPath(); X.arc(hx, hy, 50 * s, Math.atan2(-1, -dirX * 0.4) - 1.2, Math.atan2(-1, -dirX * 0.4) + 1.5); X.lineTo(hx, hy); X.closePath(); fill(hc);
-    if (['long', 'wavy', 'ponytail', 'braids', 'curly', 'afro'].includes(L.hair)) { const bx = hx - dirX * 46 * s; ell(bx, hy + 30 * s * (J.hang || 1), 18 * s, 44 * s); fill(hc); }
-    if (L.hair === 'bun') { circ(hx - dirX * 40 * s, hy - 36 * s, 22 * s); fill(hc); }
-  }
-  if (L.hat === 'scarf') { circ(hx, hy, 54 * s); fill(C(L.hatCol || '#2E4A62')); circ(hx + dirX * 14 * s, hy + 4 * s, 36 * s); fill(skin); }
-  circ(hx + dirX * 26 * s, hy - 6 * s, 5 * s); fill([0.15, 0.15, 0.18]);
-  limb('shoulder', 'elbowF', 'handF', 32, top); circ(...P('handF'), 17 * s); fill(skin);
+  const top = C(L.top), skin = C(L.skin), dress = L.outfit === 'dress', legC = dress ? skin : C(L.pants || '#30406E');
+  const shoe = [0.13, 0.11, 0.10], longSleeve = !dress && L.outfit !== 'tee';
+  const leg = (kn, ft, col) => { line([P('hip'), P(kn), P(ft)], (dress ? 26 : 48) * s, col); const [fx, fy] = P(ft); ell(fx + 10 * s, fy - 8 * s, 34 * s, 16 * s); fill(dress ? [0.55, 0.3, 0.25] : shoe); };
+  const arm = (el2, hd, dark) => { const up = dress ? skin : top, fore = longSleeve ? top : skin; line([P('shoulder'), P(el2)], 38 * s, dark ? darken(up, 0.1) : up); line([P(el2), P(hd)], 34 * s, dark ? darken(fore, 0.1) : fore); circ(...P(hd), 20 * s); fill(dark ? darken(skin, 0.08) : skin); };
+  leg('kneeB', 'footB', darken(legC, 0.1));
+  arm('elbowB', 'handB', true);
+  // torso: the same flat block as the standing figure, just turned to follow the pose
+  const [hx, hy] = P('hip'), [sx, sy] = P('shoulder'), ang = Math.atan2(sx - hx, -(sy - hy)), len = Math.hypot(sx - hx, sy - hy);
+  X.save(); X.translate(hx, hy); X.rotate(ang); X.beginPath(); X.moveTo(-50 * s, 10 * s); X.lineTo(50 * s, 10 * s); X.bezierCurveTo(58 * s, -len * 0.4, 62 * s, -len * 0.8, 56 * s, -len - 10 * s); X.lineTo(-56 * s, -len - 10 * s); X.bezierCurveTo(-62 * s, -len * 0.8, -58 * s, -len * 0.4, -50 * s, 10 * s); X.closePath(); fill(top);
+  if (dress) { X.beginPath(); X.moveTo(-56 * s, -len * 0.35); X.lineTo(56 * s, -len * 0.35); X.lineTo(80 * s, 60 * s); X.lineTo(-80 * s, 60 * s); X.closePath(); fill(top); }
+  X.restore();
+  leg('kneeF', 'footF', legC);
+  // head sits on the neck, tipped with the spine, but never so far the face disappears
+  const [qx, qy] = P('head'), hr = clamp(Math.atan2(qx - sx, -(qy - sy)), -1.3, 1.3);
+  line([[sx, sy], [qx, qy]], 34 * s, darken(skin, 0.15));
+  if (J.armsUp) arm('elbowF', 'handF', false);
+  brandHead(qx, qy, s, L, t, hr);
+  if (!J.armsUp) arm('elbowF', 'handF', false);
 }
 const YOGA = {
-  dog: { footB: [-170, 0], footF: [-150, 0], kneeB: [-110, -120], kneeF: [-95, -112], hip: [-50, -240], shoulder: [130, -90], head: [175, -30], elbowB: [190, -50], elbowF: [200, -45], handB: [255, 0], handF: [265, 0], face: 1, hang: 0.2 },
-  warrior: { footB: [-200, 0], footF: [180, 0], kneeB: [-100, -110], kneeF: [170, -125], hip: [0, -215], shoulder: [0, -425], head: [10, -490], elbowB: [-100, -425], elbowF: [100, -425], handB: [-205, -425], handF: [205, -425], face: 1 },
-  tree: { footB: [0, 0], footF: [20, -150], kneeB: [0, -122], kneeF: [95, -175], hip: [0, -245], shoulder: [0, -455], head: [6, -518], elbowB: [-55, -560], elbowF: [55, -560], handB: [0, -660], handF: [6, -660], face: 1 }
+  dog: { footB: [-190, 0], footF: [-170, 0], kneeB: [-130, -120], kneeF: [-112, -116], hip: [-60, -250], shoulder: [120, -95], head: [170, -45], elbowB: [190, -48], elbowF: [204, -44], handB: [258, 0], handF: [270, 0] },
+  warrior: { footB: [-210, 0], footF: [190, 0], kneeB: [-105, -118], kneeF: [178, -128], hip: [0, -228], shoulder: [0, -430], head: [0, -505], elbowB: [-108, -426], elbowF: [108, -426], handB: [-212, -426], handF: [212, -426] },
+  tree: { footB: [0, 0], footF: [22, -150], kneeB: [0, -124], kneeF: [100, -180], hip: [0, -250], shoulder: [0, -452], head: [0, -527], elbowB: [-70, -565], elbowF: [74, -565], handB: [-4, -668], handF: [6, -668], armsUp: true }
 };
 function yogaPose(t) {
   const order = ['dog', 'warrior', 'tree'], seg = 2.4, i = Math.floor(t / seg) % 3, f = (t % seg) / seg;
@@ -1854,7 +1861,7 @@ function matScene(c, t) {
   plant(110, 1460);
   X.save(); X.translate(560, 1735); X.scale(1, 0.3); rr(-330, -100, 660, 200, 30); fill([0.42, 0.66, 0.62]); X.restore();
   pet(c, 170, 1830, 0.6, t, { tongue: false });
-  posed(580, 1735, 1.05, ME(c), yogaPose(t));
+  if (ME(c).chair) seated(580, 1745, 1.05, ME(c), t, Math.sin(t * 1.2)); else posed(580, 1735, 1.05, ME(c), yogaPose(t), t);
 }
 // ---- hiking: a bush track winding up towards the ranges, a real pack on
 function hikeScene(c, t, p) {
