@@ -1652,6 +1652,169 @@ function bbq(c, t) {
 const firstBaby = cfg => babiesOf(cfg)[0] || { age: 'baby', hairCol: '#6B4A33', skin: ME(cfg).skin, top: '#F7D9C4' };
 const typing = t => ({ armL: [0.45, 1.45 + 0.1 * Math.sin(t * 14)], armR: [0.45, 1.45 + 0.1 * Math.sin(t * 14 + 1)] });
 
+// ---- activity scenes: the most common things Australians do (AusPlay top 20)
+function hoopScene(c, t) {
+  outdoor(c, t, 'day');
+  // an outdoor court: blue surface, white key, a pole and backboard on the right
+  rect(0, 1300, W, H - 1300, [0.32, 0.47, 0.62]); rect(0, 1300, W, 12, [1, 1, 1], 0.85);
+  X.beginPath(); X.ellipse(860, 1520, 330, 120, 0, PI * 0.5, PI * 1.5); X.lineWidth = 8; X.strokeStyle = css([1, 1, 1], 0.8); X.stroke();
+  rect(860, 1400, 220, 240, [0.85, 0.42, 0.33], 0.55);
+  line([[970, 1660], [970, 720]], 20, [0.35, 0.37, 0.42]);
+  rr(770, 640, 250, 170, 10); fill([1, 1, 1]); X.lineWidth = 7; X.strokeStyle = css([0.85, 0.42, 0.33]); X.strokeRect(850, 690, 90, 66);
+  const rimX = 800, rimY = 800;
+  const T = 2.8, q = (t % T) / T, ballC = [0.93, 0.52, 0.25];
+  let arms, ball;
+  if (q < 0.45) {
+    const b = Math.abs(Math.sin(t * 6));
+    arms = { armL: [0.25, 0.3], armR: [0.5, 0.9 + 0.4 * b] };
+  } else if (q < 0.62) { const k = (q - 0.45) / 0.17; arms = { armL: [0.3 + 2.5 * k, 0.3 + 2.6 * k], armR: [0.5 + 2.3 * k, 0.9 + 2.0 * k] }; }
+  else arms = { armL: [2.8, 2.9], armR: [2.8, 2.9] };
+  const h = person(330, 1700, 1, ME(c), t, Object.assign({ bob: q > 0.55 && q < 0.7 ? 18 : 0 }, arms));
+  if (q < 0.45) { const b = Math.abs(Math.sin(t * 6)); ball = [h.R[0] + 14, h.R[1] + 30 + b * (1660 - h.R[1] - 30)]; }
+  else if (q < 0.62) ball = [(h.L[0] + h.R[0]) / 2, (h.L[1] + h.R[1]) / 2 - 30];
+  else { const k = clamp((q - 0.62) / 0.28), sx = (h.L[0] + h.R[0]) / 2, sy = (h.L[1] + h.R[1]) / 2 - 30; ball = k < 1 ? [sx + (rimX - sx) * k, sy + (rimY - 20 - sy) * k - 260 * Math.sin(k * PI)] : [rimX, rimY + 80 * clamp((q - 0.9) / 0.1) + 20]; }
+  // rim in front of the ball's drop, net below
+  circ(ball[0], ball[1], 30); fill(ballC); X.lineWidth = 3; X.strokeStyle = css([0.4, 0.18, 0.08], 0.7); X.beginPath(); X.moveTo(ball[0] - 30, ball[1]); X.lineTo(ball[0] + 30, ball[1]); X.moveTo(ball[0], ball[1] - 30); X.lineTo(ball[0], ball[1] + 30); X.stroke();
+  X.lineWidth = 3; X.strokeStyle = css([1, 1, 1], 0.9); X.beginPath(); for (let i = 0; i <= 6; i++) { const nx = rimX - 54 + i * 18; X.moveTo(nx, rimY + 6); X.lineTo(rimX - 34 + i * 11.3, rimY + 95); } X.stroke();
+  ell(rimX, rimY, 58, 12); X.lineWidth = 8; X.strokeStyle = css([0.9, 0.38, 0.2]); X.stroke();
+  line([[rimX + 58, rimY], [970, rimY]], 10, [0.35, 0.37, 0.42]);
+  pet(c, 130, 1840, 0.6, t, { lookUp: 0.5 });
+}
+function danceStudio(c, t) {
+  // a studio: mirror wall, a barre, timber floor
+  room(c, t, { wall: [0.74, 0.66, 0.70], floor: [0.76, 0.6, 0.44] });
+  rect(80, 520, W - 160, 900, [0.82, 0.88, 0.92]); rect(80, 520, W - 160, 900, [1, 1, 1], 0.15);
+  X.lineWidth = 10; X.strokeStyle = css([0.55, 0.5, 0.52]); X.strokeRect(80, 520, W - 160, 900);
+  [[250, 560, 140, 820], [640, 560, 90, 820]].forEach(([x, y, w, hh]) => { X.save(); X.globalAlpha = 0.18; X.beginPath(); X.moveTo(x, y + hh); X.lineTo(x + w, y); X.lineTo(x + w + 60, y); X.lineTo(x + 60, y + hh); X.closePath(); X.fillStyle = '#fff'; X.fill(); X.restore(); });
+  line([[60, 1230], [W - 60, 1230]], 14, [0.62, 0.45, 0.3]); [[150], [930]].forEach(([bx]) => line([[bx, 1230], [bx, 1300]], 10, [0.55, 0.55, 0.58]));
+  const sw = Math.sin(t * 2.2), rise = 10 + 10 * Math.max(0, Math.sin(t * 2.2 + 1));
+  const pose = { armL: [2.75 + 0.15 * sw, 3.05 + 0.1 * sw], armR: [1.55 - 0.25 * sw, 1.45 - 0.35 * sw], bob: rise };
+  // reflection first, soft, then the dancer
+  X.save(); X.beginPath(); X.rect(80, 520, W - 160, 900); X.clip(); X.globalAlpha = 0.25; person(470, 1400, 0.82, ME(c), t, Object.assign({ flip: -1 }, pose)); X.restore();
+  person(470, 1720, 1.05, ME(c), t, pose);
+  for (let i = 0; i < 3; i++) { const k = (t * 0.5 + i / 3) % 1; X.save(); X.globalAlpha = Math.sin(k * PI) * 0.8; X.fillStyle = css(NAVY); X.font = '700 64px sans-serif'; X.fillText(i % 2 ? '♪' : '♫', 760 + 60 * Math.sin(k * 6 + i), 1150 - 360 * k); X.restore(); }
+}
+function matScene(c, t) {
+  outdoor(c, t, 'sunrise', 940);
+  // a mat on the grass, a slow sun salutation: reach up, open out, back up
+  X.save(); X.translate(470, 1735); X.scale(1, 0.32); rr(-260, -90, 520, 180, 30); fill([0.42, 0.66, 0.62]); X.restore();
+  const k = (Math.sin(t * 1.1) + 1) / 2;
+  person(470, 1720, 1.05, ME(c), t, { armL: [1.5 + 1.4 * k, 1.4 + 1.6 * k], armR: [1.5 + 1.4 * k, 1.4 + 1.6 * k], bob: 4 * k });
+  pet(c, 830, 1780, 0.7, t, { flip: -1, tongue: false });
+}
+function kitbag(c, t, p) {
+  // heading out to do my thing: gear bag and water bottle, sunrise, a spring in the step
+  outdoor(c, t, 'sunrise', 940);
+  const [x, m] = walkX(p, 220, 560, 0, 0.85);
+  const h = person(x, 1680, 1.02, ME(c), t, { walk: m ? 1 : 0, armR: [0.25, 0.15], armL: [0.3, 0.6] });
+  line([[h.R[0], h.R[1]], [h.R[0] - 10, h.R[1] + 40]], 6, [0.2, 0.2, 0.24]);
+  rr(h.R[0] - 95, h.R[1] + 36, 170, 92, 30); fill([0.93, 0.52, 0.43]); rect(h.R[0] - 95, h.R[1] + 74, 170, 12, [1, 1, 1], 0.6);
+  rr(h.L[0] - 14, h.L[1] - 56, 28, 70, 9); fill([0.35, 0.6, 0.78]); rr(h.L[0] - 10, h.L[1] - 70, 20, 16, 5); fill([0.2, 0.25, 0.3]);
+  pet(c, x + 300, 1750, 0.8, t, { walk: m ? 1 : 0 });
+}
+// a two-handed swing (golf, cricket): k > 0 winds up to the right, k < 0 follows through to the left
+const swingArms = k => ({ armR: [-0.4 + k, -0.5 + k * 1.1], armL: [-0.4 - k, -0.5 - k * 1.1] });
+const swingK = q => q < 0.35 ? 0.08 * Math.sin(q * 40) : q < 0.62 ? 2.0 * ease((q - 0.35) / 0.27) : q < 0.7 ? 2.0 - 3.6 * ((q - 0.62) / 0.08) : -1.6;
+function grip(h) { return [(h.L[0] + h.R[0]) / 2, (h.L[1] + h.R[1]) / 2]; }
+function golfScene(c, t) {
+  sky(t, 'day', null, 1000);
+  for (let i = 0; i < 7; i++) { circ(i * 180 + 40, 1010, 110); fill(gt([0.36, 0.58, 0.36], 'day')); }
+  rect(0, 1000, W, H - 1000, gt([0.47, 0.72, 0.4], 'day'));
+  for (let s = 0; s < 6; s++) if (s % 2) rect(0, 1000 + s * 150, W, 150, gt([0.5, 0.76, 0.43], 'day'));
+  ell(860, 1260, 190, 50); fill(gt([0.55, 0.82, 0.48], 'day')); ell(860, 1262, 14, 5); fill([0.1, 0.12, 0.1]);
+  line([[862, 1262], [862, 1080]], 5, [0.95, 0.95, 0.95]); X.beginPath(); X.moveTo(864, 1080); X.lineTo(940, 1102 + 6 * Math.sin(t * 4)); X.lineTo(864, 1124); X.closePath(); fill(CORAL);
+  const T = 3.2, q = (t % T) / T, k = swingK(q);
+  const h = person(380, 1700, 1.05, ME(c), t, swingArms(k));
+  const [gx, gy] = grip(h), a = -1.25 * k;
+  X.save(); X.translate(gx, gy); X.rotate(a); line([[0, 0], [0, 250]], 8, [0.25, 0.25, 0.28]); ell(-14, 256, 26, 12); fill([0.45, 0.45, 0.5]); X.restore();
+  // the ball sits at the tee, then flies off towards the flag after contact
+  if (q < 0.68) { circ(gx + 4, 1694, 12); fill([1, 1, 1]); }
+  else { const f = clamp((q - 0.68) / 0.3); circ(380 + (850 - 380) * f, 1694 - (1694 - 1250) * f - 700 * Math.sin(f * PI), 12 - 6 * f); fill([1, 1, 1]); }
+  pet(c, 140, 1850, 0.6, t, { lookUp: 0.4 });
+}
+function cricketScene(c, t) {
+  outdoor(c, t, 'day');
+  X.save(); X.beginPath(); X.moveTo(380, 1180); X.lineTo(560, 1180); X.lineTo(760, H); X.lineTo(80, H); X.closePath(); X.fillStyle = css(gt([0.83, 0.74, 0.55], 'day')); X.fill(); X.restore();
+  line([[180, 1690], [700, 1690]], 6, [1, 1, 1], 0.9);
+  [210, 240, 270].forEach(sx => line([[sx, 1690], [sx, 1450]], 9, [0.92, 0.85, 0.7])); line([[205, 1450], [275, 1450]], 6, [0.8, 0.6, 0.35]);
+  const T = 3, q = (t % T) / T, k = swingK(q);
+  const h = person(420, 1720, 1.05, ME(c), t, swingArms(k));
+  const [gx, gy] = grip(h), a = -1.25 * k;
+  X.save(); X.translate(gx, gy); X.rotate(a); line([[0, 0], [0, 90]], 10, [0.2, 0.2, 0.22]); rr(-20, 86, 40, 170, 10); fill([0.9, 0.8, 0.6]); X.restore();
+  // the ball arrives from the bowler's end, bounces once, and goes for four
+  let bx, by;
+  if (q < 0.66) { const f = q / 0.66; bx = 1100 - 640 * f; by = f < 0.55 ? 1100 + 520 * (f / 0.55) : 1620 - 160 * ((f - 0.55) / 0.45); }
+  else { const f = clamp((q - 0.66) / 0.3); bx = 460 + 700 * f; by = 1460 - 900 * f + 500 * f * f; }
+  circ(bx, by, 14); fill([0.75, 0.15, 0.15]);
+  pet(c, 880, 1860, 0.6, t, { flip: -1, lookUp: 0.4 });
+}
+function boxingScene(c, t) {
+  room(c, t, { wall: [0.36, 0.38, 0.44], floor: [0.3, 0.3, 0.34] });
+  rect(0, 1460, W, 24, [0.93, 0.52, 0.43]);
+  const T = 0.9, q = (t % T) / T, hit = Math.max(0, Math.sin(q * PI * 2)), right = Math.floor(t / T) % 2;
+  const sway = 0.06 * Math.sin(t * 7) + 0.05 * hit;
+  line([[760, 0], [760, 760]], 6, [0.6, 0.6, 0.62]);
+  X.save(); X.translate(760, 760); X.rotate(-sway); rr(-90, 0, 180, 560, 60); fill([0.72, 0.2, 0.18]); rect(-90, 120, 180, 22, [0, 0, 0], 0.2); rect(-90, 420, 180, 22, [0, 0, 0], 0.2); X.restore();
+  const guard = [0.45, 2.6], jab = [1.45 + 0.12 * hit, 1.5];
+  const ext = (on) => on ? [guard[0] + (jab[0] - guard[0]) * hit, guard[1] + (jab[1] - guard[1]) * hit] : guard;
+  const h = person(360, 1700, 1.05, ME(c), t, { armR: ext(right === 1), armL: [-0.55 + (right ? 0 : -0.1 * hit), 2.6], bob: 6 * Math.abs(Math.sin(t * 7)) });
+  [h.L, h.R].forEach(([gx, gy]) => { circ(gx, gy, 34); fill([0.85, 0.15, 0.15]); circ(gx - 8, gy - 10, 10); fill([1, 1, 1], 0.25); });
+  if (right === 1 && hit > 0.8) for (let i = 0; i < 3; i++) line([[650, 1060 + i * 40], [610 - i * 6, 1040 + i * 50]], 5, [1, 1, 1], 0.7);
+}
+function hikeScene(c, t, p) {
+  outdoor(c, t, 'day');
+  const [x, m] = walkX(p, 160, 560, 0, 0.9);
+  const h = person(x, 1690, 1, ME(c), t, { walk: m ? 1 : 0, backpack: [0.36, 0.55, 0.45], armR: [0.35 + 0.15 * Math.sin(t * 7), 0.3] });
+  line([[h.R[0], h.R[1] - 20], [h.R[0] + 30, 1700]], 6, [0.45, 0.32, 0.22]);
+  [[860, 1560], [940, 1500]].forEach(([mx, my]) => { line([[mx, my + 80], [mx, my]], 8, [0.5, 0.35, 0.2]); rect(mx - 4, my, 30, 18, CORAL); });
+  pet(c, x + 270, 1760, 0.8, t, { walk: m ? 1 : 0 });
+}
+function waterBase(t, tod) {
+  sky(t, tod, null, 980);
+  for (let i = 0; i < 6; i++) { circ(i * 220 + 60, 990, 140); fill(gt([0.4, 0.55, 0.42], tod)); }
+  rect(0, 980, W, H - 980, gt([0.38, 0.6, 0.72], tod));
+  for (let i = 0; i < 9; i++) { const y = 1080 + i * 95, off = (t * 40 + i * 70) % 160; for (let x = -160 + off; x < W; x += 260) line([[x, y], [x + 90, y]], 5, [1, 1, 1], 0.35); }
+}
+function paddleScene(c, t, p) {
+  waterBase(t, 'sunrise');
+  const x = 300 + 260 * p, y = 1560 + 6 * Math.sin(t * 2), st = Math.sin(t * 3.2);
+  X.save(); X.beginPath(); X.rect(0, 0, W, y - 40); X.clip();
+  const h = person(x, y + 300, 0.95, ME(c), t, { armL: [1.0 + 0.35 * st, 1.7], armR: [1.0 - 0.35 * st, 1.7] });
+  X.restore();
+  const [gx, gy] = grip(h), a = 0.5 * st;
+  X.save(); X.translate(gx, gy); X.rotate(a); line([[-300, 0], [300, 0]], 9, [0.25, 0.25, 0.28]); [-1, 1].forEach(sd => { ell(sd * 320, 0, 34, 16); fill([0.95, 0.75, 0.3]); }); X.restore();
+  ell(x, y, 330, 46); fill([0.93, 0.52, 0.43]); ell(x, y - 18, 110, 26); fill([0.2, 0.2, 0.24]); line([[x - 320, y + 6], [x + 320, y + 6]], 4, [1, 1, 1], 0.6);
+  for (let i = 0; i < 4; i++) line([[x - 380 - i * 60, y + 30 + i * 8], [x - 330 - i * 60, y + 30 + i * 8]], 5, [1, 1, 1], 0.5);
+}
+function gardenScene(c, t, p) {
+  outdoor(c, t, 'day');
+  rr(500, 1560, 480, 150, 10); fill([0.55, 0.38, 0.24]); rect(500, 1560, 480, 30, [0.4, 0.27, 0.17]); rect(510, 1590, 460, 40, [0.36, 0.25, 0.16]);
+  const g = 0.55 + 0.45 * p;
+  [[560, 0], [650, 1], [740, 2], [830, 0], [920, 1]].forEach(([px, kind]) => {
+    const hh = (110 + 30 * kind) * g;
+    line([[px, 1590], [px, 1590 - hh]], 8, [0.3, 0.55, 0.3]);
+    [[-1, 0.5], [1, 0.7], [-1, 0.9]].forEach(([sd, f]) => { ell(px + sd * 26, 1590 - hh * f, 26 * g, 12 * g); fill([0.36, 0.64, 0.34]); });
+    if (kind === 1) { circ(px, 1590 - hh, 18 * g); fill([0.88, 0.25, 0.22]); } else if (kind === 2) { circ(px, 1590 - hh, 20 * g); fill([0.98, 0.8, 0.3]); }
+  });
+  const tip = 0.3 + 0.15 * Math.sin(t * 2);
+  const h = person(330, 1700, 1, ME(c), t, { armR: [1.25 + 0.1 * tip, 1.35], armL: [0.3, 0.4] });
+  X.save(); X.translate(h.R[0], h.R[1]); X.rotate(tip); rr(-10, -10, 120, 90, 18); fill([0.35, 0.6, 0.78]); line([[100, 10], [190, -20]], 12, [0.35, 0.6, 0.78]); X.restore();
+  for (let i = 0; i < 6; i++) { const k = (t * 1.6 + i / 6) % 1, sx = h.R[0] + 190 * Math.cos(tip) + 20 * Math.sin(tip), sy = h.R[1] - 20 + 190 * Math.sin(tip); circ(sx + 60 * k + (i % 3) * 8, sy + 380 * k * k + 20 * k, 6); fill([0.55, 0.78, 0.95], 0.85); }
+  pet(c, 160, 1840, 0.6, t, { lookUp: 0.3 });
+}
+function fishingScene(c, t) {
+  waterBase(t, 'sunrise');
+  rect(0, 1440, 640, 46, [0.6, 0.45, 0.3]); for (let i = 0; i < 8; i++) line([[i * 80, 1440], [i * 80, 1486]], 3, [0.45, 0.33, 0.22]);
+  [120, 520].forEach(px => rect(px, 1486, 28, 330, [0.5, 0.37, 0.25]));
+  const h = person(380, 1440, 0.9, ME(c), t, { armR: [1.1, 1.6], armL: [0.6, 1.2] });
+  const tipX = h.R[0] + 420, tipY = h.R[1] - 360 + 8 * Math.sin(t * 2);
+  line([[h.R[0] - 30, h.R[1] + 40], [tipX, tipY]], 7, [0.3, 0.25, 0.2]);
+  const bob = 8 * Math.sin(t * 3), bxp = tipX + 120, byp = 1400 + bob;
+  X.beginPath(); X.moveTo(tipX, tipY); X.quadraticCurveTo(tipX + 60, (tipY + byp) / 2 + 60, bxp, byp); X.lineWidth = 2; X.strokeStyle = css([1, 1, 1], 0.8); X.stroke();
+  circ(bxp, byp, 12); fill(CORAL); ell(bxp, byp + 10, 30, 6); fill([1, 1, 1], 0.4);
+  const jp = (t % 4) / 4; if (jp > 0.6 && jp < 0.85) { const f = (jp - 0.6) / 0.25; X.save(); X.translate(780 + 120 * f, 1500 - 160 * Math.sin(f * PI)); X.rotate(-0.9 + 1.8 * f); ell(0, 0, 40, 16); fill([0.75, 0.82, 0.86]); X.beginPath(); X.moveTo(-36, 0); X.lineTo(-60, -16); X.lineTo(-60, 16); X.closePath(); fill([0.75, 0.82, 0.86]); X.restore(); }
+  pet(c, 120, 1440, 0.55, t, { lookUp: 0.3 });
+}
 const SCENES = {
   title: { label: 'Opening sunrise', fn(c, t, p) { outdoor(c, t, 'sunrise', 1080 - 140 * ease(p)); const q = clamp((p - 0.3) / 0.7), x = -480 + 1500 * q, m = q > 0 && q < 1; if (!(c.me && c.me.unset)) person(x, 1660, 1, ME(c), t, { walk: m ? 1 : 0, armL: [0.12, 0.05], armR: [0.3, 0.2] }); pet(c, x + 250, 1710, 0.9, t, { walk: m ? 1 : 0 }); } },
   end: { label: 'Closing sunset walk', fn(c, t, p) { outdoor(c, t, 'sunset', 960 + 60 * p); const n = 1 + (hasPartner(c) ? 1 : 0) + kidsOf(c).length; const x0 = n > 1 ? 200 : 420; const x = x0 + (1100 + n * 150) * ease(clamp((p - 0.25) / 0.75)), m = p > 0.25; const right = familyRow(c, x, 1690, t, { walk: m ? 1 : 0, s: n > 3 ? 0.85 : 1 }); pet(c, right + 70, 1730, 0.85, t, { walk: m ? 1 : 0 }); } },
@@ -1716,6 +1879,17 @@ const SCENES = {
   surf: { label: 'Heading out for a surf', fn(c, t, p) { surf(c, t, p); } },
   cycle: { label: 'Going for a ride', fn(c, t, p) { cycle(c, t, p); } },
   swim: { label: 'Swimming laps', fn(c, t, p) { swim(c, t, p); } },
+  hoop: { label: 'Shooting hoops', fn(c, t) { hoopScene(c, t); } },
+  dance: { label: 'Dance class', fn(c, t) { danceStudio(c, t); } },
+  mat: { label: 'Yoga or pilates', fn(c, t) { matScene(c, t); } },
+  kitbag: { label: 'Heading out to do my thing', fn(c, t, p) { kitbag(c, t, p); } },
+  golf: { label: 'A round of golf', fn(c, t) { golfScene(c, t); } },
+  cricket: { label: 'Batting at cricket', fn(c, t) { cricketScene(c, t); } },
+  boxing: { label: 'Boxing or martial arts', fn(c, t) { boxingScene(c, t); } },
+  hike: { label: 'Hiking a trail', fn(c, t, p) { hikeScene(c, t, p); } },
+  paddle: { label: 'Paddling on the water', fn(c, t, p) { paddleScene(c, t, p); } },
+  garden: { label: 'In the garden', fn(c, t, p) { gardenScene(c, t, p); } },
+  fishing: { label: 'Fishing off the jetty', fn(c, t) { fishingScene(c, t); } },
   hug: { label: 'A big hug at the door', fn(c, t) { hug(c, t); } },
   bbq: { label: 'Backyard barbecue', fn(c, t) { bbq(c, t); } },
 };
@@ -1775,8 +1949,8 @@ function petName(cfg) {
   return ps.every(p => p.type === ps[0].type) ? 'my ' + ps[0].type + 's' : 'my pets';
 }
 function fillText(text, cfg) { return String(text || '').replace(/\{pet\}/g, petName(cfg) || 'my pet'); }
-const FIXED_HOME = { title: 'beach', end: 'beach', calm: 'mountains', campfire: 'mountains', friends: 'park', family: 'park', pram: 'park', parkday: 'park', footy: 'park', soccer: 'park', tennis: 'park', bbq: 'park', schoolrun: 'city', cafe: 'city', surf: 'beach', songs_outdoor: 'beach' };
-const ROAM_SCENES = new Set(['walk', 'jog', 'start', 'sunrise', 'strong', 'selflove', 'unwind', 'couple', 'cycle', 'celebrate', 'steady', 'together']);
+const FIXED_HOME = { title: 'beach', end: 'beach', calm: 'mountains', campfire: 'mountains', friends: 'park', family: 'park', pram: 'park', parkday: 'park', footy: 'park', soccer: 'park', tennis: 'park', hoop: 'park', mat: 'beach', cricket: 'park', hike: 'mountains', garden: 'country', bbq: 'park', schoolrun: 'city', cafe: 'city', surf: 'beach', songs_outdoor: 'beach' };
+const ROAM_SCENES = new Set(['kitbag', 'walk', 'jog', 'start', 'sunrise', 'strong', 'selflove', 'unwind', 'couple', 'cycle', 'celebrate', 'steady', 'together']);
 const ROAM_SHOW = { walk: 'park', jog: 'beach', couple: 'city', cycle: 'city', celebrate: 'beach', unwind: 'beach', strong: 'park' };
 // the setting a scene's picture shows in the chooser
 const homeWorld = k => FIXED_HOME[k] || ROAM_SHOW[k] || 'beach';
@@ -2066,8 +2240,21 @@ const THEMES = [
     g: [['Home, just how I want it', 'cook_together']] },
 ];
 const TH = id => THEMES.find(t => t.id === id);
-const MOVE_SCENE = v => /surf|swim|cycl|bike|ride|tennis|footy|soccer|padel/.test(v) ? SPORT_SCENE(v) : /run|jog/.test(v) ? 'jog' : /yoga|stretch|pilates|medit/.test(v) ? 'calm' : /walk|hike/.test(v) ? 'walk' : /gym|weight|lift|strength/.test(v) ? 'gym' : 'gym';
-const SPORT_SCENE = v => /soccer|futsal/.test(v) ? 'soccer' : /tennis|padel|squash|badminton|pickle/.test(v) ? 'tennis' : /surf|bodyboard/.test(v) ? 'surf' : /swim|triathl/.test(v) ? 'swim' : /cycl|bike|ride|riding|mtb/.test(v) ? 'cycle' : /run|athlet/.test(v) ? 'jog' : 'footy';
+// typed activities to pictures; anything not listed gets a neutral 'heading out' scene rather than a wrong one
+const ACTS = [
+  [/surf|bodyboard/, 'surf'], [/swim|laps|triathl|aqua/, 'swim'], [/cycl|bike|\bride|riding|mtb|spin class/, 'cycle'],
+  [/soccer|futsal/, 'soccer'], [/tennis|padel|squash|badminton|pickle/, 'tennis'],
+  [/basketball|netball|hoops?\b/, 'hoop'], [/ballet|dance|dancing|zumba|barre|salsa|tap class/, 'dance'], [/yoga|pilates|stretch/, 'mat'],
+  [/golf/, 'golf'], [/cricket/, 'cricket'], [/box|martial|karate|judo|jiu|bjj|muay|taekwondo|mma|krav/, 'boxing'],
+  [/\brow(s|ing)?\b|kayak|canoe|paddl|\bsup\b|dragon boat|outrigger/, 'paddle'], [/fish/, 'fishing'], [/garden|veggie patch|vegie patch|plants|growing (veg|food)/, 'garden'],
+  [/hike|hiking|bushwalk|trek|trail/, 'hike'],
+  [/footy|afl|aussie rules|rugby|league|football|touch/, 'footy'],
+  [/run|jog|marathon|parkrun|athlet|sprint/, 'jog'], [/medit|breath/, 'calm'], [/walk|hike|hiking|bush/, 'walk'],
+  [/gym|weight|lift|strength|crossfit|f45|squat|deadlift|workout/, 'gym']
+];
+const ACT_SCENE = (v, fb) => { const hit = ACTS.find(([re]) => re.test(v)); return hit ? hit[1] : fb; };
+const MOVE_SCENE = v => v.trim() ? ACT_SCENE(v, 'kitbag') : 'gym';
+const SPORT_SCENE = v => v.trim() ? ACT_SCENE(v, 'kitbag') : 'footy';
 const isMusic = v => /music|song|guitar|sing|band|piano|beat/.test(v);
 function sceneFor(sc, fills) {
   if (!sc.startsWith('@')) return sc;
@@ -2077,6 +2264,7 @@ function sceneFor(sc, fills) {
   if (sc === '@instead' || sc === '@unwind') {
     const a = ((sc === '@instead' ? fills.instead : fills.unwind) || '').toLowerCase();
     if (!a.trim()) return sc === '@instead' ? 'read' : 'calm';
+    { const hit = ACT_SCENE(a, null); if (['hoop', 'dance', 'mat', 'golf', 'cricket', 'boxing', 'paddle', 'fishing', 'garden', 'hike'].includes(hit)) return hit; }
     if (/surf/.test(a)) return 'surf'; if (/swim/.test(a)) return 'swim'; if (/run|jog/.test(a)) return 'jog'; if (/gym|lift|weights/.test(a)) return 'gym';
     if (/ride|bike|cycl/.test(a)) return 'cycle'; if (/read|book/.test(a)) return 'read'; if (/guitar|music|sing|song|play.*(piano|drum)/.test(a)) return 'guitar';
     if (/paint|draw|art|sketch/.test(a)) return 'paint'; if (/cook|bake/.test(a)) return 'cook'; if (/kid|son|daughter|children/.test(a)) return 'parkday';
@@ -2622,6 +2810,8 @@ const SCENE_WORDS = [
   [/\b(bedtime|story|stories|tuck)\b/, 'bedtime'], [/\b(school run|school drop|drop.?off)\b/, 'schoolrun'],
   [/\b(kids?|children|son|daughter|play(ing)? with)\b/, 'parkday'], [/\b(family dinner|dinner together|eat together)\b/, 'familydinner'],
   [/\b(date|date night|romance|romantic)\b/, 'date'], [/\b(cuddle|close|intimate|appreciate|listen to (him|her|them))\b/, 'cuddle'],
+  [/\b(basketball|netball|hoops)\b/, 'hoop'], [/\b(ballet|dance class\w*|dance lessons?|zumba|barre|salsa)\b/, 'dance'], [/\b(yoga|pilates)\b/, 'mat'], [/\b(golf)\b/, 'golf'], [/\b(cricket)\b/, 'cricket'], [/\b(boxing|martial arts?|karate|judo|jiu.?jitsu|bjj|muay thai|kickboxing|taekwondo|mma)\b/, 'boxing'],
+  [/\b(rowing|kayak\w*|canoe\w*|paddl\w*|paddleboard\w*)\b/, 'paddle'], [/\b(fish|fishing)\b/, 'fishing'], [/\b(garden\w*|veggie patch|vegie patch)\b/, 'garden'], [/\b(hike|hiking|bushwalk\w*|trek\w*)\b/, 'hike'],
   [/\b(dance|dancing|party|gig|night out)\b/, 'party'], [/\b(soda|sober|alcohol|drink(s|ing)?|beer|wine|booze|kombucha|mocktail)\b/, 'soda'],
   [/\b(gym|weights?|lift(ing)?|strength|squats?|deadlifts?|pump)\b/, 'gym'], [/\b(run|running|jog|jogging|marathon|parkrun)\b/, 'jog'],
   [/\b(footy|afl|aussie rules|rugby|kick(ing)? the ball)\b/, 'footy'], [/\b(soccer|futsal)\b/, 'soccer'], [/\b(tennis|padel|squash|badminton|pickleball)\b/, 'tennis'],
@@ -2695,8 +2885,9 @@ function sceneCard(kind, item, onRemove) {
 // picture chooser: every scene drawn small, with the person's own character
 // one of each kind of moment, grouped so it's quick to scan (look-alikes left out; they still play if already chosen)
 const SCENE_GROUPS = [
-  ['Body', ['walk', 'jog', 'gym', 'calm', 'celebrate', 'wake']],
-  ['Sport', ['footy', 'soccer', 'tennis', 'surf', 'cycle', 'swim']],
+  ['Body', ['walk', 'jog', 'gym', 'mat', 'dance', 'kitbag', 'calm', 'celebrate', 'wake']],
+  ['Sport', ['footy', 'soccer', 'cricket', 'tennis', 'hoop', 'golf', 'boxing', 'surf', 'cycle', 'swim']],
+  ['Outdoors', ['hike', 'paddle', 'fishing', 'garden']],
   ['Food and drink', ['cook', 'eat', 'fridge', 'soda']],
   ['Love and family', ['cuddle', 'date', 'couple', 'cook_together', 'family', 'familydinner', 'parkday', 'schoolrun', 'bedtime', 'pram', 'holdbaby']],
   ['Friends and fun', ['hug', 'bbq', 'friends', 'campfire', 'party']],
