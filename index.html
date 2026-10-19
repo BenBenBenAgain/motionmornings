@@ -2310,7 +2310,10 @@ function planCompanions(cfg, items) {
     spread(acts.filter(it => !it.pet && !PET_NEVER.has(it.scene)), want).forEach(it => { it.pet = true; });
   }
   if (hasPartner(cfg)) {
-    const want = Math.max(2, Math.round(n / 4)) - acts.filter(it => PT_SCENES.has(it.scene)).length;
+    // a line that names the partner (or says wife, husband and so on) has them in it, where the picture can fit them
+    const pn = ((cfg.partner || {}).name || '').trim().toLowerCase();
+    acts.forEach(it => { const t = ' ' + String(it.text || '').toLowerCase().replace(/[^a-z0-9' ]+/g, ' ') + ' '; if (/\b(partner|wife|husband|missus|hubby|girlfriend|boyfriend)\b/.test(t) || (pn && (t.includes(' ' + pn + ' ') || t.includes(' ' + pn + "'s ")))) it.pt = true; });
+    const want = Math.max(2, Math.round(n / 4)) - acts.filter(it => PT_SCENES.has(it.scene) || it.pt).length;
     spread(acts.filter(it => PT_JOIN.includes(it.scene)), want).forEach(it => { it.pt = true; });
   }
 }
@@ -3285,7 +3288,29 @@ function guessScene(text) {
   let t = ' ' + String(text || '').toLowerCase() + ' ';
   // their pet's name counts as "dog", and walking (with or without the dog) wins over what happens before or after
   (S.cfg.pets || []).forEach(p => { const n = (p.name || '').trim().toLowerCase(); if (n) t = t.split(n).join(' ' + (p.type || 'dog') + ' '); });
-  if (/\b(walk|walking|stroll)\b/.test(t) && !/\b(walk(ing)? to (work|the office|school))\b/.test(t)) return /\b(we|together|us|our)\b/.test(t) && hasPartnerNow() ? 'couple' : 'walk';
+  // names from Your people: the partner's name reads as "partner", the kids' names as "kids"
+  t = peopleWords(t);
+  const sc = guessSceneInner(t);
+  const pt = hasPartnerNow() && PARTNER_WORDS.test(t), kd = (S.cfg.kids || []).length > 0 && KID_WORDS.test(t);
+  // a line about the whole family gets a scene with everyone in it
+  if (pt && kd) return KID_OK.has(sc) && PT_OK.has(sc) ? sc : /\b(dinner|eat|eating|meal|table|cook\w*|breakfast|lunch)\b/.test(t) ? 'familydinner' : 'family';
+  if (kd) return KID_OK.has(sc) ? sc : 'parkday';
+  if (pt) return PT_OK.has(sc) ? sc : sc === 'cook' ? 'cook_together' : /\b(walk|walking|stroll|beach|dog)\b/.test(t) ? 'couple' : 'together';
+  return sc;
+}
+// scenes that can draw the partner, and the kids (the rest show just you)
+const PT_OK = new Set(['call', 'campfire', 'cook_together', 'couple', 'cuddle', 'cuppa', 'date', 'family', 'familydinner', 'newfamily', 'party', 'pram', 'start', 'steady', 'sunrise', 'together', 'unwind', 'hike', 'garden']);
+const KID_OK = new Set(['family', 'familydinner', 'parkday', 'schoolrun', 'bedtime', 'together', 'pram', 'holdbaby']);
+const PARTNER_WORDS = /\b(partner|wife|husband|missus|hubby|girlfriend|boyfriend|fianc[eé]e?)\b/;
+const KID_WORDS = /\b(kids?|children|son|sons|daughters?|boys|girls|baby|bub)\b/;
+const escRe = v => v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function peopleWords(t) {
+  const p = S.cfg.partner || {}, pn = p.on ? (p.name || '').trim().toLowerCase() : '';
+  if (pn) t = t.replace(new RegExp('\\b' + escRe(pn) + "('s)?\\b", 'g'), ' partner ');
+  (S.cfg.kids || []).forEach(k => { const n = (k.name || '').trim().toLowerCase(); if (n) t = t.replace(new RegExp('\\b' + escRe(n) + "('s)?\\b", 'g'), ' kids '); });
+  return t;
+}
+function guessSceneInner(t) {  if (/\b(walk|walking|stroll)\b/.test(t) && !/\b(walk(ing)? to (work|the office|school))\b/.test(t)) return /\b(we|together|us|our)\b/.test(t) && hasPartnerNow() ? 'couple' : 'walk';
   for (const [re, sc] of SCENE_WORDS) if (re.test(t)) {
     if (sc === 'cook' && /\b(we|together|us|our)\b/.test(t) && hasPartnerNow()) return 'cook_together';
     if (sc === 'walk' && /\b(we|together|us|our)\b/.test(t) && hasPartnerNow()) return 'couple';
