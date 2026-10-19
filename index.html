@@ -2301,7 +2301,10 @@ const PT_JOIN = ['unwind', 'start', 'cuppa', 'hike', 'garden', 'sunrise', 'stead
 const spread = (arr, k) => k <= 0 || !arr.length ? [] : k >= arr.length ? arr.slice() : Array.from({ length: k }, (_, i) => arr[Math.round(i * (arr.length - 1) / Math.max(1, k - 1))]);
 function planCompanions(cfg, items) {
   const acts = items.filter(it => it.scene !== 'title'), n = acts.length;
-  acts.forEach(it => { it.pet = PET_ALWAYS.has(it.scene); it.pt = false; });
+  // a line that names their pet, or says dog, puppy, cat and so on, always has the pet in it
+  const names = petsOf(cfg).map(p => (p.name || '').trim().toLowerCase()).filter(Boolean);
+  const saysPet = it => { const t = ' ' + String(it.text || '').toLowerCase().replace(/[^a-z0-9' ]+/g, ' ') + ' '; return /\b(dogs?|doggo|pup|puppy|pups|pooch|cats?|kitty|kitten)\b/.test(t) || names.some(n => t.includes(' ' + n + ' ') || t.includes(' ' + n + "'s ")); };
+  acts.forEach(it => { it.pet = PET_ALWAYS.has(it.scene) || (petsOf(cfg).length > 0 && saysPet(it)); it.pt = false; });
   if ((cfg.pets || []).length) {
     const want = Math.max(2, Math.round(n / 3)) - acts.filter(it => it.pet).length;
     spread(acts.filter(it => !it.pet && !PET_NEVER.has(it.scene)), want).forEach(it => { it.pet = true; });
@@ -3276,7 +3279,7 @@ const SCENE_WORDS = [
   [/\b(guitar|music|song|sing\w*|band|piano)\b/, 'songs_outdoor'],
   [/\b(travel\w*|trip|holiday|adventure|explore)\b/, 'travel'], [/\b(friends?|mates|catch up|social|people)\b/, 'friends'],
   [/\b(call|phone|talk|chat|reach out)\b/, 'talk'], [/\b(partner|wife|husband|girlfriend|boyfriend|love)\b/, 'couple'],
-  [/\b(proud|grateful|gratitude|kind to myself|myself)\b/, 'selflove'], [/\b(dog|pup|puppy|cat)\b/, 'walk'],
+  [/\b(proud|grateful|gratitude|kind to myself|myself)\b/, 'selflove'], [/\b(dogs?|pup|puppy|doggo|pooch)\b/, 'walk'],
 ];
 function guessScene(text) {
   let t = ' ' + String(text || '').toLowerCase() + ' ';
