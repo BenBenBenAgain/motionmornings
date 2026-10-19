@@ -2918,7 +2918,8 @@ function renderPeople() {
   [S.cfg.me, S.cfg.partner].forEach(o => { if (!o.agegrp) o.agegrp = '30s'; if (!o.height) o.height = 'avg'; if (!o.build) o.build = 'avg'; });
   if (!S.cfg.me.sex) S.cfg.me.sex = S.cfg.me.body === 'f' ? 'f' : 'm';
   if (!S.cfg.partner.sex) S.cfg.partner.sex = S.cfg.partner.body === 'm' ? 'm' : 'f';
-  fieldUI(S.cfg.me, ME_FIELDS, $('#meFields'), 'me-', peopleChanged, 'me'); 
+  // their name stays editable here too, so it can be added or fixed without going back to step 1
+  fieldUI(S.cfg.me, [['name', 'Your name', 'text', 'e.g. Ben'], ...ME_FIELDS], $('#meFields'), 'you-', peopleChanged, 'me'); 
   $('#partnerOn').checked = !!S.cfg.partner.on;
   const pf = $('#partnerFields'); pf.innerHTML = '';
   if (S.cfg.partner.on) {
