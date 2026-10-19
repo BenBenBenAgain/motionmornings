@@ -1157,6 +1157,25 @@ function familyRow(c, x, y, t, o = {}) {
 const hasPartner = cfg => cfg.partner && cfg.partner.on;
 
 // ---------------------------------------------------------------- props
+// drinks: whatever they said they reach for, from a cuppa to a kombucha
+function mug(x, y, t, kind) {
+  const body = kind === 'coffee' ? [0.3, 0.42, 0.55] : [0.93, 0.52, 0.43];
+  X.beginPath(); X.arc(x + 40, y - 52, 24, -PI * 0.5, PI * 0.5); X.lineWidth = 11; X.strokeStyle = css(darken(body, 0.1)); X.stroke();
+  rr(x - 42, y - 100, 84, 104, 14); fill(body); rect(x - 42, y - 70, 84, 10, [1, 1, 1], 0.35);
+  ell(x, y - 98, 40, 9); fill(kind === 'coffee' ? [0.42, 0.26, 0.16] : [0.72, 0.45, 0.2]);
+  for (let i = 0; i < 3; i++) { const k = (t * 0.6 + i / 3) % 1; X.save(); X.globalAlpha = 0.6 * Math.sin(k * PI); X.beginPath(); const sx = x - 20 + i * 20; X.moveTo(sx, y - 110 - k * 30); X.bezierCurveTo(sx + 16, y - 140 - k * 60, sx - 16, y - 170 - k * 80, sx + 6, y - 200 - k * 100); X.lineWidth = 6; X.strokeStyle = '#fff'; X.stroke(); X.restore(); }
+}
+function drink(x, y, t, kind) {
+  if (kind === 'tea' || kind === 'coffee') return mug(x, y, t, kind);
+  if (kind === 'kombucha') { rr(x - 26, y - 110, 52, 120, 14); fill([0.62, 0.36, 0.12], 0.85); rr(x - 12, y - 150, 24, 44, 6); fill([0.62, 0.36, 0.12], 0.85); rr(x - 14, y - 160, 28, 14, 4); fill([0.2, 0.2, 0.22]); rr(x - 26, y - 76, 52, 40, 4); fill([0.96, 0.92, 0.8]); for (let i = 0; i < 4; i++) { circ(x - 12 + (i * 9) % 24, y - ((t * 40 + i * 30) % 100), 3); fill([1, 1, 1], 0.6); } return; }
+  const col = kind === 'juice' ? [0.98, 0.65, 0.2] : kind === 'mocktail' ? [0.95, 0.45, 0.5] : [0.75, 0.9, 0.98];
+  X.beginPath(); X.moveTo(x - 34, y - 120); X.lineTo(x + 34, y - 120); X.lineTo(x + 28, y + 10); X.lineTo(x - 28, y + 10); X.closePath();
+  fill(col, kind === 'water' || kind === 'soda' ? 0.55 : 0.85); X.lineWidth = 4; X.strokeStyle = css([1, 1, 1], 0.9); X.stroke();
+  if (kind === 'soda' || kind === 'mocktail') for (let i = 0; i < 7; i++) { const by = y - ((t * 60 + i * 23) % 120); circ(x - 18 + (i * 13) % 36, by, 4); fill([1, 1, 1], 0.9); }
+  if (kind === 'juice' || kind === 'mocktail') line([[x + 8, y - 110], [x + 30, y - 175]], 7, kind === 'juice' ? [0.4, 0.7, 0.4] : [1, 1, 1]);
+  if (kind === 'soda') { X.beginPath(); X.arc(x + 26, y - 118, 22, PI * 0.9, PI * 2.1); fill([0.55, 0.8, 0.35]); }
+  if (kind === 'mocktail') { circ(x - 22, y - 120, 16); fill([0.98, 0.8, 0.3]); circ(x + 22, y - 124, 9); fill([0.85, 0.2, 0.25]); }
+}
 function glass(x, y, t) {
   X.beginPath(); X.moveTo(x - 34, y - 120); X.lineTo(x + 34, y - 120); X.lineTo(x + 28, y + 10); X.lineTo(x - 28, y + 10); X.closePath();
   fill([0.75, 0.9, 0.98], 0.55); X.lineWidth = 4; X.strokeStyle = css([1, 1, 1], 0.9); X.stroke();
@@ -1994,7 +2013,8 @@ const SCENES = {
   idea: { label: 'Lightbulb moment, planning', fn(c, t) { room(c, t, { window: 'day' }); person(330, 1650, 1, ME(c), t, { armL: [0.4, 1.2], armR: [0.3, 1.5] }); bulb(330, 940 - 10 * Math.sin(t * 2), t); desk(130, 620); notebook(380, 1340, t); pet(c, 760, 1720, 0.85, t, { flip: -1 }); } },
   checklist: { label: 'Ticking off small wins', fn(c, t) { room(c, t, { wall: [0.92, 0.9, 0.86] }); const u = ease(clamp((t - 2.6) / 0.5)); person(280, 1660, 1, ME(c), t, { armR: [0.4 + 2.2 * u, 0.4 + 2 * u] }); checklist(530, 760, 460, 3, t, 0.8, 0.6); pet(c, 700, 1760, 0.8, t, { flip: -1 }); } },
   read: { label: 'Reading and learning', fn(c, t) { room(c, t, { wall: [0.93, 0.9, 0.85], window: 'day' }); const h = person(420, 1660, 1, ME(c), t, { armL: [0.3, 0.25], armR: [0.3, 0.25] }); book((h.L[0] + h.R[0]) / 2, h.R[1] + 10, t); const sk = C(ME(c).skin); [h.L, h.R].forEach(([hx, hy], i) => { circ(hx + (i ? -6 : 6), hy - 12, 21); fill(sk); circ(hx + (i ? -16 : 16), hy - 34, 9); fill(sk); }); pet(c, 780, 1760, 0.8, t, { flip: -1, tongue: false }); } },
-  soda: { label: 'Choosing a soda water', fn(c, t) { room(c, t, { wall: [0.33, 0.3, 0.42], floor: [0.4, 0.3, 0.26], lights: true }); const l = ease(clamp((t - 1.2) / 0.8)); const h = person(420, 1680, 1.05, ME(c), t, { armR: [0.35 + 0.6 * l, 1.4 + 0.9 * l] }); glass(h.R[0] + 5, h.R[1] + 20, t); counter(640, 1100, 1470, [0.45, 0.33, 0.27]); pet(c, 160, 1760, 0.8, t); } },
+  soda: { label: 'Choosing a better drink', fn(c, t) { room(c, t, { wall: [0.33, 0.3, 0.42], floor: [0.4, 0.3, 0.26], lights: true }); const l = ease(clamp((t - 1.2) / 0.8)); const h = person(420, 1680, 1.05, ME(c), t, { armR: [0.35 + 0.6 * l, 1.4 + 0.9 * l] }); { const k = c.drink || 'soda'; drink(h.R[0] + 5, h.R[1] + 20, t, k === 'tea' || k === 'coffee' ? 'water' : k); } counter(640, 1100, 1470, [0.45, 0.33, 0.27]); pet(c, 160, 1760, 0.8, t); } },
+  cuppa: { label: 'A morning cuppa', fn(c, t) { room(c, t, { wall: [0.95, 0.9, 0.84], window: 'sunrise' }); counter(560, 1100); rr(820, 1300, 120, 140, 30); fill([0.85, 0.87, 0.9]); line([[940, 1330], [990, 1300]], 14, [0.85, 0.87, 0.9]); rr(850, 1280, 60, 24, 8); fill([0.3, 0.3, 0.33]); const sip = Math.max(0, Math.sin(t * 0.9 - 1.2)); const h = person(380, 1670, 1.05, ME(c), t, { armR: [0.5 + 0.55 * sip, 1.9 + 0.75 * sip] }); mug(h.R[0] + 6, h.R[1] + 30, t, c.drink === 'coffee' ? 'coffee' : c.drink === 'tea' ? 'tea' : 'coffee'); pet(c, 150, 1780, 0.75, t, { lookUp: 0.5 }); } },
   fridge: { label: 'Stocking up on good food', fn(c, t) { room(c, t, { wall: [0.92, 0.94, 0.9] }); fridge(60, 1640, ease(clamp((t - 0.4) / 0.8))); const r = ease(clamp((t - 1.4) / 0.7)); person(560, 1660, 1, ME(c), t, { armL: [0.3 + 0.9 * r, 0.5 + 0.8 * r] }); counter(700, 1100); fruitBowl(900, 1440); pet(c, 760, 1780, 0.75, t, { flip: -1, lookUp: 0.5 }); } },
   cook: { label: 'Cooking a real meal', fn(c, t) { room(c, t, { wall: [0.94, 0.9, 0.84], window: 'day' }); counter(380, 1100); stove(640, 1420, t); const s = 0.25 * Math.sin(t * 5); person(260, 1660, 1, ME(c), t, { armR: [0.6 + s, 1.5 + s] }); pet(c, 120, 1780, 0.75, t, { lookUp: 0.7 }); } },
   eat: { label: 'Eating well', fn(c, t) { room(c, t, { wall: [0.93, 0.9, 0.85], window: 'day' }); const h = person(400, 1660, 1, ME(c), t, { armR: [0.4, 1.6], armL: [0.4, 1.6] }); bowl((h.L[0] + h.R[0]) / 2, h.R[1] - 10, t); pet(c, 700, 1760, 0.85, t, { flip: -1, lookUp: 0.8 }); } },
@@ -2011,7 +2031,7 @@ const SCENES = {
   guitar: { label: 'Recording music', fn(c, t) { room(c, t, { wall: [0.55, 0.74, 0.85], floor: [0.72, 0.62, 0.52], pattern: true }); micStand(760, 1680); playGuitar(c, t, 420, 1680, 1, 410, 1300); notes(700, 1000, t); pet(c, 160, 1790, 0.7, t, { tongue: false }); } },
   songcard: { label: 'Finishing a song', fn(c, t) { room(c, t, { wall: [0.55, 0.74, 0.85], floor: [0.72, 0.62, 0.52], pattern: true }); songCard(560, 760, t); const u = ease(clamp((t - 2.2) / 0.4)); person(300, 1680, 1, ME(c), t, { armR: [0.15 + 2 * u, 0.4 + 2.4 * u] }); guitar(760, 1640, -1.35); notes(650, 1100, t, 3, [1, 1, 1]); pet(c, 120, 1800, 0.65, t); } },
   travel: { label: 'Planning a trip', fn(c, t) { room(c, t, { wall: [0.95, 0.9, 0.82], window: 'day', inWindow: () => plane(-200 + 1500 * ((t * 0.18) % 1), 820 + 20 * Math.sin(t), 0.6) }); mapCard(120, 700, t); jar(900, 1440, 6); person(360, 1660, 1, ME(c), t, { armR: [0.3, 0.3] }); suitcase(600, 1700); pet(c, 850, 1800, 0.7, t, { flip: -1 }); } },
-  party: { label: 'Dancing at a party', fn(c, t) { room(c, t, { wall: [0.2, 0.18, 0.3], floor: [0.26, 0.22, 0.3], lights: true }); discoBall(540, 330, t); const dn = (ph, sp = 6) => ({ armL: [2.3 + 0.4 * Math.sin(t * sp + ph), 2.6 + 0.3 * Math.sin(t * sp + ph)], armR: [1.1 + 0.6 * Math.sin(t * sp + ph + 1.5), 1.6], bob: 22 * Math.abs(Math.sin(t * sp / 2 + ph)) }); person(900, 1620, 0.85, FRIEND1, t, { flip: -1, ...dn(1.2) }); person(120, 1630, 0.85, F2(c), t, dn(2.4)); if (hasPartner(c)) person(680, 1690, 0.95, PT(c), t, { flip: -1, ...dn(0.6) }); const h = person(380, 1700, 1.02, ME(c), t, { armL: [2.3 + 0.4 * Math.sin(t * 6), 2.6], armR: [1.9, 2.75 + 0.15 * Math.sin(t * 3)], bob: 22 * Math.abs(Math.sin(t * 3)) }); glass(h.R[0] + 4, h.R[1] + 16, t); confetti(t % 3, 0); } },
+  party: { label: 'Dancing at a party', fn(c, t) { room(c, t, { wall: [0.2, 0.18, 0.3], floor: [0.26, 0.22, 0.3], lights: true }); discoBall(540, 330, t); const dn = (ph, sp = 6) => ({ armL: [2.3 + 0.4 * Math.sin(t * sp + ph), 2.6 + 0.3 * Math.sin(t * sp + ph)], armR: [1.1 + 0.6 * Math.sin(t * sp + ph + 1.5), 1.6], bob: 22 * Math.abs(Math.sin(t * sp / 2 + ph)) }); person(900, 1620, 0.85, FRIEND1, t, { flip: -1, ...dn(1.2) }); person(120, 1630, 0.85, F2(c), t, dn(2.4)); if (hasPartner(c)) person(680, 1690, 0.95, PT(c), t, { flip: -1, ...dn(0.6) }); const h = person(380, 1700, 1.02, ME(c), t, { armL: [2.3 + 0.4 * Math.sin(t * 6), 2.6], armR: [1.9, 2.75 + 0.15 * Math.sin(t * 3)], bob: 22 * Math.abs(Math.sin(t * 3)) }); { const k = c.drink || 'soda'; drink(h.R[0] + 4, h.R[1] + 16, t, k === 'tea' || k === 'coffee' ? 'soda' : k); } confetti(t % 3, 0); } },
   clean: { label: 'Cleaning the house', fn(c, t) { room(c, t, { wall: [0.88, 0.94, 0.95], floor: [0.82, 0.72, 0.58], window: 'day' }); plant(150, 1460); sofa(560, 1000, 1460, [0.45, 0.62, 0.68]); const sw = Math.sin(t * 3); const h = person(380, 1680, 1, ME(c), t, { armL: [0.55 + 0.1 * sw, 1.35], armR: [0.75 + 0.15 * sw, 1.25] }); const mx = 520 + 80 * sw; line([[h.L[0] - 20, h.L[1] - 50], [mx, 1840]], 10, [0.6, 0.45, 0.3]); rr(mx - 70, 1830, 140, 28, 10); fill([0.35, 0.7, 0.85]); rr(820, 1720, 110, 120, 14); fill([0.95, 0.75, 0.3]); sparkles(t, [[300, 1600, 30], [560, 1820, 34], [700, 1500, 26], [900, 1350, 30], [220, 1420, 24]]); pet(c, 940, 1860, 0.6, t, { flip: -1 }); } },
   cuddle: { label: 'Cuddling up together', fn(c, t) { room(c, t, { wall: [0.5, 0.42, 0.48], floor: [0.42, 0.32, 0.3], window: 'dusk' }); lamp(170, 1460, t); sofa(220, 960, 1500, [0.78, 0.55, 0.45]); const sw = 6 * Math.sin(t * 1.2); if (hasPartner(c)) person(600 + sw, 1690, 0.95, PT(c), t, { flip: -1, armL: [1.25, 1.75], armR: [0.4, 0.5] }); person(480 + sw, 1690, 1.02, ME(c), t, { armR: [0.95, 2.2], armL: [0.3, 0.4] }); hearts(540, 1000, t); pet(c, 860, 1850, 0.65, t, { flip: -1, tongue: false }); } },
   cafe: { label: 'Focused work at a cafe', fn(c, t) { outdoor(c, t, 'day'); rect(0, 1180, W, 40, [0.95, 0.55, 0.42]); for (let i = 0; i < 9; i++) rect(i * 130, 1220, 65, 40, [1, 1, 1], 0.9); person(420, 1660, 1, ME(c), t, typing(t)); table(200, 760, 1440); laptop(470, 1440, 'back'); rr(650, 1370, 54, 70, 10); fill([1, 1, 1]); steam(660, 1370, t, 2, 22); pet(c, 900, 1760, 0.75, t, { flip: -1 }); } },
@@ -2346,7 +2366,7 @@ const THEMES = [
     a: [['I {instead|read a book} instead of scrolling', '@instead'], ['My phone stays in the drawer at dinner', 'familydinner'], ['I head outside when I want to scroll', 'walk'], ['I wake up and look at the sky first', 'wake']],
     g: [['More time, and I’m present for it', 'sunrise'], ['Here for the good stuff', 'together']] },
   { id: 'drink', title: 'Better drinks', hint: 'Soda water, clear mornings', qs: [['swap', 'What do you love to reach for?', 'soda water, kombucha, tea']],
-    a: [['I order a {swap|soda water} and enjoy it', 'soda'], ['I dance all night with a {swap|soda water} in hand', 'party'], ['I wake up on Sunday clear and ready', 'wake'], ['I swap the after-work drink for a walk', 'unwind']],
+    a: [['I order a {swap|soda water} and enjoy it', '@drink'], ['I dance all night with a {swap|soda water} in hand', 'party'], ['I wake up on Sunday clear and ready', 'wake'], ['I swap the after-work drink for a walk', 'unwind']],
     g: [['Sharp, rested and proud of myself', 'sunrise'], ['Clear head, big mornings', 'celebrate']] },
   { id: 'brave', title: 'Confidence', hint: 'Saying yes, speaking up', qs: [['yes', 'Something you’d love to say yes to?', 'a dance class, speaking up at work']],
     a: [['I say yes to {yes|the thing that scares me}', 'excited'], ['I speak up in the meeting', 'talk'], ['I walk in and say hello first', 'friends'], ['I stand tall and take up space', 'strong']],
@@ -2398,12 +2418,14 @@ const ACTS = [
 const ACT_SCENE = (v, fb) => { const hit = ACTS.find(([re]) => re.test(v)); return hit ? hit[1] : fb; };
 const MOVE_SCENE = v => v.trim() ? ACT_SCENE(v, 'kitbag') : 'gym';
 const SPORT_SCENE = v => v.trim() ? ACT_SCENE(v, 'kitbag') : 'footy';
+const drinkKind = v => { v = String(v || '').toLowerCase(); return /\b(tea|chai|herbal|matcha|cuppa)\b/.test(v) ? 'tea' : /\b(coffee|latte|flat white|espresso|cappuccino|long black|decaf)\b/.test(v) ? 'coffee' : /kombucha/.test(v) ? 'kombucha' : /juice|smoothie/.test(v) ? 'juice' : /mocktail|zero|non.?alc|0%|alcohol.?free/.test(v) ? 'mocktail' : /\bwater\b/.test(v) && !/soda|sparkling|mineral|fizzy/.test(v) ? 'water' : 'soda'; };
 const isMusic = v => /music|song|guitar|sing|band|piano|beat/.test(v);
 function sceneFor(sc, fills) {
   if (!sc.startsWith('@')) return sc;
   const craft = (fills.craft || '').toLowerCase(), act = (fills.activity || '').toLowerCase();
   if (sc === '@move') return MOVE_SCENE(act);
   if (sc === '@sport') return SPORT_SCENE((fills.sport || '').toLowerCase());
+  if (sc === '@drink') { const k = drinkKind(fills.swap); return k === 'tea' || k === 'coffee' ? 'cuppa' : 'soda'; }
   if (sc === '@instead' || sc === '@unwind') {
     const a = ((sc === '@instead' ? fills.instead : fills.unwind) || '').toLowerCase();
     if (!a.trim()) return sc === '@instead' ? 'read' : 'calm';
@@ -2651,6 +2673,7 @@ function varyScenesInner(sections) {
 }
 // Until someone edits their lines by hand, the film follows what they tick, so the preview always shows their choices.
 function liveLines() {
+  S.cfg.drink = drinkKind((S.fills.drink || {}).swap);
   if (S.linesTouched) return;
   const ids = THEMES.map(t => t.id).filter(id => S.themes.includes(id));
   const keep = {}; (S.cfg.sections || []).forEach(s => { if (s.theme) keep[s.theme] = s; });
@@ -2658,6 +2681,7 @@ function liveLines() {
   const key = id => JSON.stringify(['w4', S.fills[id] || {}, names]);
   S.cfg.sections = ids.map(id => keep[id] && key(id) === keep[id]._fills ? keep[id] : Object.assign(buildSection(TH(id), S.fills[id] || {}, S.cfg), { _fills: key(id) }));
   varyScenes(S.cfg.sections);
+  S.cfg.drink = drinkKind((S.fills.drink || {}).swap);
   S.isExample = false;
 }
 
@@ -2956,7 +2980,7 @@ const SCENE_WORDS = [
   [/\b(date|date night|romance|romantic)\b/, 'date'], [/\b(cuddle|close|intimate|appreciate|listen to (him|her|them))\b/, 'cuddle'],
   [/\b(basketball|netball|hoops)\b/, 'hoop'], [/\b(ballet|dance class\w*|dance lessons?|zumba|barre|salsa)\b/, 'dance'], [/\b(yoga|pilates)\b/, 'mat'], [/\b(golf)\b/, 'golf'], [/\b(cricket)\b/, 'cricket'], [/\b(boxing|martial arts?|karate|judo|jiu.?jitsu|bjj|muay thai|kickboxing|taekwondo|mma)\b/, 'boxing'],
   [/\b(rowing|kayak\w*|canoe\w*|paddl\w*|paddleboard\w*)\b/, 'paddle'], [/\b(fish|fishing)\b/, 'fishing'], [/\b(garden\w*|veggie patch|vegie patch)\b/, 'garden'], [/\b(hike|hiking|bushwalk\w*|trek\w*)\b/, 'hike'],
-  [/\b(dance|dancing|party|gig|night out)\b/, 'party'], [/\b(soda|sober|alcohol|drink(s|ing)?|beer|wine|booze|kombucha|mocktail)\b/, 'soda'],
+  [/\b(dance|dancing|party|gig|night out)\b/, 'party'], [/\b(tea|coffee|cuppa|latte|chai)\b/, 'cuppa'], [/\b(soda|sober|alcohol|drink(s|ing)?|beer|wine|booze|kombucha|mocktail)\b/, 'soda'],
   [/\b(gym|weights?|lift(ing)?|strength|squats?|deadlifts?|pump)\b/, 'gym'], [/\b(run|running|jog|jogging|marathon|parkrun)\b/, 'jog'],
   [/\b(footy|afl|aussie rules|rugby|kick(ing)? the ball)\b/, 'footy'], [/\b(soccer|futsal)\b/, 'soccer'], [/\b(tennis|padel|squash|badminton|pickleball)\b/, 'tennis'],
   [/\b(surf\w*|bodyboard\w*)\b/, 'surf'], [/\b(swim\w*|laps|pool)\b/, 'swim'], [/\b(cycl\w*|bike|ride|riding)\b/, 'cycle'],
@@ -3032,7 +3056,7 @@ const SCENE_GROUPS = [
   ['Body', ['walk', 'jog', 'gym', 'mat', 'dance', 'kitbag', 'calm', 'celebrate', 'wake']],
   ['Sport', ['footy', 'soccer', 'cricket', 'tennis', 'hoop', 'golf', 'boxing', 'surf', 'cycle', 'swim']],
   ['Outdoors', ['hike', 'paddle', 'fishing', 'garden']],
-  ['Food and drink', ['cook', 'eat', 'fridge', 'soda']],
+  ['Food and drink', ['cook', 'eat', 'fridge', 'soda', 'cuppa']],
   ['Love and family', ['cuddle', 'date', 'couple', 'cook_together', 'family', 'familydinner', 'parkday', 'schoolrun', 'bedtime', 'pram', 'holdbaby']],
   ['Friends and fun', ['hug', 'bbq', 'friends', 'campfire', 'party']],
   ['Work and money', ['cafe', 'ship', 'idea', 'money', 'jar', 'talk']],
