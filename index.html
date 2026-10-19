@@ -1694,60 +1694,6 @@ function danceStudio(c, t) {
   person(470, 1720, 1.05, ME(c), t, pose);
   for (let i = 0; i < 3; i++) { const k = (t * 0.5 + i / 3) % 1; X.save(); X.globalAlpha = Math.sin(k * PI) * 0.8; X.fillStyle = css(NAVY); X.font = '700 64px sans-serif'; X.fillText(i % 2 ? '♪' : '♫', 760 + 60 * Math.sin(k * 6 + i), 1150 - 360 * k); X.restore(); }
 }
-function matScene(c, t) {
-  outdoor(c, t, 'sunrise', 940);
-  // a mat on the grass, a slow sun salutation: reach up, open out, back up
-  X.save(); X.translate(470, 1735); X.scale(1, 0.32); rr(-260, -90, 520, 180, 30); fill([0.42, 0.66, 0.62]); X.restore();
-  const k = (Math.sin(t * 1.1) + 1) / 2;
-  person(470, 1720, 1.05, ME(c), t, { armL: [1.5 + 1.4 * k, 1.4 + 1.6 * k], armR: [1.5 + 1.4 * k, 1.4 + 1.6 * k], bob: 4 * k });
-  pet(c, 830, 1780, 0.7, t, { flip: -1, tongue: false });
-}
-function kitbag(c, t, p) {
-  // heading out to do my thing: gear bag and water bottle, sunrise, a spring in the step
-  outdoor(c, t, 'sunrise', 940);
-  const [x, m] = walkX(p, 220, 560, 0, 0.85);
-  const h = person(x, 1680, 1.02, ME(c), t, { walk: m ? 1 : 0, armR: [0.25, 0.15], armL: [0.3, 0.6] });
-  line([[h.R[0], h.R[1]], [h.R[0] - 10, h.R[1] + 40]], 6, [0.2, 0.2, 0.24]);
-  rr(h.R[0] - 95, h.R[1] + 36, 170, 92, 30); fill([0.93, 0.52, 0.43]); rect(h.R[0] - 95, h.R[1] + 74, 170, 12, [1, 1, 1], 0.6);
-  rr(h.L[0] - 14, h.L[1] - 56, 28, 70, 9); fill([0.35, 0.6, 0.78]); rr(h.L[0] - 10, h.L[1] - 70, 20, 16, 5); fill([0.2, 0.25, 0.3]);
-  pet(c, x + 300, 1750, 0.8, t, { walk: m ? 1 : 0 });
-}
-// a two-handed swing (golf, cricket): k > 0 winds up to the right, k < 0 follows through to the left
-const swingArms = k => ({ armR: [-0.4 + k, -0.5 + k * 1.1], armL: [-0.4 - k, -0.5 - k * 1.1] });
-const swingK = q => q < 0.35 ? 0.08 * Math.sin(q * 40) : q < 0.62 ? 2.0 * ease((q - 0.35) / 0.27) : q < 0.7 ? 2.0 - 3.6 * ((q - 0.62) / 0.08) : -1.6;
-function grip(h) { return [(h.L[0] + h.R[0]) / 2, (h.L[1] + h.R[1]) / 2]; }
-function golfScene(c, t) {
-  sky(t, 'day', null, 1000);
-  for (let i = 0; i < 7; i++) { circ(i * 180 + 40, 1010, 110); fill(gt([0.36, 0.58, 0.36], 'day')); }
-  rect(0, 1000, W, H - 1000, gt([0.47, 0.72, 0.4], 'day'));
-  for (let s = 0; s < 6; s++) if (s % 2) rect(0, 1000 + s * 150, W, 150, gt([0.5, 0.76, 0.43], 'day'));
-  ell(860, 1260, 190, 50); fill(gt([0.55, 0.82, 0.48], 'day')); ell(860, 1262, 14, 5); fill([0.1, 0.12, 0.1]);
-  line([[862, 1262], [862, 1080]], 5, [0.95, 0.95, 0.95]); X.beginPath(); X.moveTo(864, 1080); X.lineTo(940, 1102 + 6 * Math.sin(t * 4)); X.lineTo(864, 1124); X.closePath(); fill(CORAL);
-  const T = 3.2, q = (t % T) / T, k = swingK(q);
-  const h = person(380, 1700, 1.05, ME(c), t, swingArms(k));
-  const [gx, gy] = grip(h), a = -1.25 * k;
-  X.save(); X.translate(gx, gy); X.rotate(a); line([[0, 0], [0, 250]], 8, [0.25, 0.25, 0.28]); ell(-14, 256, 26, 12); fill([0.45, 0.45, 0.5]); X.restore();
-  // the ball sits at the tee, then flies off towards the flag after contact
-  if (q < 0.68) { circ(gx + 4, 1694, 12); fill([1, 1, 1]); }
-  else { const f = clamp((q - 0.68) / 0.3); circ(380 + (850 - 380) * f, 1694 - (1694 - 1250) * f - 700 * Math.sin(f * PI), 12 - 6 * f); fill([1, 1, 1]); }
-  pet(c, 140, 1850, 0.6, t, { lookUp: 0.4 });
-}
-function cricketScene(c, t) {
-  outdoor(c, t, 'day');
-  X.save(); X.beginPath(); X.moveTo(380, 1180); X.lineTo(560, 1180); X.lineTo(760, H); X.lineTo(80, H); X.closePath(); X.fillStyle = css(gt([0.83, 0.74, 0.55], 'day')); X.fill(); X.restore();
-  line([[180, 1690], [700, 1690]], 6, [1, 1, 1], 0.9);
-  [210, 240, 270].forEach(sx => line([[sx, 1690], [sx, 1450]], 9, [0.92, 0.85, 0.7])); line([[205, 1450], [275, 1450]], 6, [0.8, 0.6, 0.35]);
-  const T = 3, q = (t % T) / T, k = swingK(q);
-  const h = person(420, 1720, 1.05, ME(c), t, swingArms(k));
-  const [gx, gy] = grip(h), a = -1.25 * k;
-  X.save(); X.translate(gx, gy); X.rotate(a); line([[0, 0], [0, 90]], 10, [0.2, 0.2, 0.22]); rr(-20, 86, 40, 170, 10); fill([0.9, 0.8, 0.6]); X.restore();
-  // the ball arrives from the bowler's end, bounces once, and goes for four
-  let bx, by;
-  if (q < 0.66) { const f = q / 0.66; bx = 1100 - 640 * f; by = f < 0.55 ? 1100 + 520 * (f / 0.55) : 1620 - 160 * ((f - 0.55) / 0.45); }
-  else { const f = clamp((q - 0.66) / 0.3); bx = 460 + 700 * f; by = 1460 - 900 * f + 500 * f * f; }
-  circ(bx, by, 14); fill([0.75, 0.15, 0.15]);
-  pet(c, 880, 1860, 0.6, t, { flip: -1, lookUp: 0.4 });
-}
 function boxingScene(c, t) {
   room(c, t, { wall: [0.36, 0.38, 0.44], floor: [0.3, 0.3, 0.34] });
   rect(0, 1460, W, 24, [0.93, 0.52, 0.43]);
@@ -1761,46 +1707,11 @@ function boxingScene(c, t) {
   [h.L, h.R].forEach(([gx, gy]) => { circ(gx, gy, 34); fill([0.85, 0.15, 0.15]); circ(gx - 8, gy - 10, 10); fill([1, 1, 1], 0.25); });
   if (right === 1 && hit > 0.8) for (let i = 0; i < 3; i++) line([[650, 1060 + i * 40], [610 - i * 6, 1040 + i * 50]], 5, [1, 1, 1], 0.7);
 }
-function hikeScene(c, t, p) {
-  outdoor(c, t, 'day');
-  const [x, m] = walkX(p, 160, 560, 0, 0.9);
-  const h = person(x, 1690, 1, ME(c), t, { walk: m ? 1 : 0, backpack: [0.36, 0.55, 0.45], armR: [0.35 + 0.15 * Math.sin(t * 7), 0.3] });
-  line([[h.R[0], h.R[1] - 20], [h.R[0] + 30, 1700]], 6, [0.45, 0.32, 0.22]);
-  [[860, 1560], [940, 1500]].forEach(([mx, my]) => { line([[mx, my + 80], [mx, my]], 8, [0.5, 0.35, 0.2]); rect(mx - 4, my, 30, 18, CORAL); });
-  pet(c, x + 270, 1760, 0.8, t, { walk: m ? 1 : 0 });
-}
 function waterBase(t, tod) {
   sky(t, tod, null, 980);
   for (let i = 0; i < 6; i++) { circ(i * 220 + 60, 990, 140); fill(gt([0.4, 0.55, 0.42], tod)); }
   rect(0, 980, W, H - 980, gt([0.38, 0.6, 0.72], tod));
   for (let i = 0; i < 9; i++) { const y = 1080 + i * 95, off = (t * 40 + i * 70) % 160; for (let x = -160 + off; x < W; x += 260) line([[x, y], [x + 90, y]], 5, [1, 1, 1], 0.35); }
-}
-function paddleScene(c, t, p) {
-  waterBase(t, 'sunrise');
-  const x = 300 + 260 * p, y = 1560 + 6 * Math.sin(t * 2), st = Math.sin(t * 3.2);
-  X.save(); X.beginPath(); X.rect(0, 0, W, y - 40); X.clip();
-  const h = person(x, y + 300, 0.95, ME(c), t, { armL: [1.0 + 0.35 * st, 1.7], armR: [1.0 - 0.35 * st, 1.7] });
-  X.restore();
-  const [gx, gy] = grip(h), a = 0.5 * st;
-  X.save(); X.translate(gx, gy); X.rotate(a); line([[-300, 0], [300, 0]], 9, [0.25, 0.25, 0.28]); [-1, 1].forEach(sd => { ell(sd * 320, 0, 34, 16); fill([0.95, 0.75, 0.3]); }); X.restore();
-  ell(x, y, 330, 46); fill([0.93, 0.52, 0.43]); ell(x, y - 18, 110, 26); fill([0.2, 0.2, 0.24]); line([[x - 320, y + 6], [x + 320, y + 6]], 4, [1, 1, 1], 0.6);
-  for (let i = 0; i < 4; i++) line([[x - 380 - i * 60, y + 30 + i * 8], [x - 330 - i * 60, y + 30 + i * 8]], 5, [1, 1, 1], 0.5);
-}
-function gardenScene(c, t, p) {
-  outdoor(c, t, 'day');
-  rr(500, 1560, 480, 150, 10); fill([0.55, 0.38, 0.24]); rect(500, 1560, 480, 30, [0.4, 0.27, 0.17]); rect(510, 1590, 460, 40, [0.36, 0.25, 0.16]);
-  const g = 0.55 + 0.45 * p;
-  [[560, 0], [650, 1], [740, 2], [830, 0], [920, 1]].forEach(([px, kind]) => {
-    const hh = (110 + 30 * kind) * g;
-    line([[px, 1590], [px, 1590 - hh]], 8, [0.3, 0.55, 0.3]);
-    [[-1, 0.5], [1, 0.7], [-1, 0.9]].forEach(([sd, f]) => { ell(px + sd * 26, 1590 - hh * f, 26 * g, 12 * g); fill([0.36, 0.64, 0.34]); });
-    if (kind === 1) { circ(px, 1590 - hh, 18 * g); fill([0.88, 0.25, 0.22]); } else if (kind === 2) { circ(px, 1590 - hh, 20 * g); fill([0.98, 0.8, 0.3]); }
-  });
-  const tip = 0.3 + 0.15 * Math.sin(t * 2);
-  const h = person(330, 1700, 1, ME(c), t, { armR: [1.25 + 0.1 * tip, 1.35], armL: [0.3, 0.4] });
-  X.save(); X.translate(h.R[0], h.R[1]); X.rotate(tip); rr(-10, -10, 120, 90, 18); fill([0.35, 0.6, 0.78]); line([[100, 10], [190, -20]], 12, [0.35, 0.6, 0.78]); X.restore();
-  for (let i = 0; i < 6; i++) { const k = (t * 1.6 + i / 6) % 1, sx = h.R[0] + 190 * Math.cos(tip) + 20 * Math.sin(tip), sy = h.R[1] - 20 + 190 * Math.sin(tip); circ(sx + 60 * k + (i % 3) * 8, sy + 380 * k * k + 20 * k, 6); fill([0.55, 0.78, 0.95], 0.85); }
-  pet(c, 160, 1840, 0.6, t, { lookUp: 0.3 });
 }
 function fishingScene(c, t) {
   waterBase(t, 'sunrise');
@@ -1814,6 +1725,209 @@ function fishingScene(c, t) {
   circ(bxp, byp, 12); fill(CORAL); ell(bxp, byp + 10, 30, 6); fill([1, 1, 1], 0.4);
   const jp = (t % 4) / 4; if (jp > 0.6 && jp < 0.85) { const f = (jp - 0.6) / 0.25; X.save(); X.translate(780 + 120 * f, 1500 - 160 * Math.sin(f * PI)); X.rotate(-0.9 + 1.8 * f); ell(0, 0, 40, 16); fill([0.75, 0.82, 0.86]); X.beginPath(); X.moveTo(-36, 0); X.lineTo(-60, -16); X.lineTo(-60, 16); X.closePath(); fill([0.75, 0.82, 0.86]); X.restore(); }
   pet(c, 120, 1440, 0.55, t, { lookUp: 0.3 });
+}
+// ---- reaching: both hands to one point, so a club, bat or paddle is really held
+function reachArm(side, lx, ly) {
+  const A = 112, B = 104, sx = side * 72, sy = -426;
+  let dx = side * (lx - sx), dy = ly - sy, D = Math.hypot(dx, dy);
+  if (D > A + B - 2) { const k = (A + B - 2) / D; dx *= k; dy *= k; D = A + B - 2; }
+  D = Math.max(D, 24);
+  const th = Math.atan2(dx, dy), al = Math.acos(clamp((A * A + D * D - B * B) / (2 * A * D), -1, 1)), u = th + al;
+  return [u, Math.atan2(dx - A * Math.sin(u), dy - A * Math.cos(u))];
+}
+function armsTo(x, y, s, L, tx, ty) {
+  const ss = s * ({ short: 0.92, tall: 1.08 }[L.height] || 1), bw = ({ slim: 0.86, big: 1.26 }[L.build] || 1), D = L.chair ? 92 : 0;
+  const lx = (tx - x) / ss / bw, ly = (ty - y) / ss - D;
+  return { armL: reachArm(-1, lx, ly), armR: reachArm(1, lx, ly), ss, bw };
+}
+// a two-handed swing: wind up to the right, through the ball, finish high on the left
+function swingPose(q) {
+  if (q < 0.35) return { g: 0, wob: 0.04 * Math.sin(q * 40) };
+  if (q < 0.62) return { g: ease((q - 0.35) / 0.27) };
+  if (q < 0.7) return { g: 1 - 2 * ((q - 0.62) / 0.08) };
+  return { g: -1 };
+}
+function swingScene(c, t, q, x, y, s, addr, top, fin, phi, drawTool) {
+  const L = ME(c), sp = swingPose(q), g = sp.g, lerp = (a, b, k) => a + (b - a) * k;
+  const k = Math.abs(g), to = g >= 0 ? top : fin, lift = Math.sin(k * PI) * 40;
+  const gx = x + lerp(addr[0], to[0], k) * s, gy = y + (lerp(addr[1], to[1], k) - lift) * s;
+  const ang = (sp.wob || 0) + lerp(phi[0], g >= 0 ? phi[1] : phi[2], k);
+  const a = armsTo(x, y, s, L, gx, gy);
+  person(x, y, s, L, t, { armL: a.armL, armR: a.armR });
+  drawTool(gx, gy, ang);
+  circ(gx, gy - 6, 21 * s); fill(C(L.skin)); circ(gx, gy + 14, 21 * s); fill(darken(C(L.skin), 0.06));
+  return { gx, gy, ang, g };
+}
+function golfScene(c, t) {
+  sky(t, 'day', null, 1000);
+  for (let i = 0; i < 7; i++) { circ(i * 180 + 40, 1010, 110); fill(gt([0.36, 0.58, 0.36], 'day')); }
+  rect(0, 1000, W, H - 1000, gt([0.47, 0.72, 0.4], 'day'));
+  for (let s2 = 0; s2 < 6; s2++) if (s2 % 2) rect(0, 1000 + s2 * 150, W, 150, gt([0.5, 0.76, 0.43], 'day'));
+  ell(860, 1260, 190, 50); fill(gt([0.55, 0.82, 0.48], 'day')); ell(860, 1262, 14, 5); fill([0.1, 0.12, 0.1]);
+  line([[862, 1262], [862, 1080]], 5, [0.95, 0.95, 0.95]); X.beginPath(); X.moveTo(864, 1080); X.lineTo(940, 1102 + 6 * Math.sin(t * 4)); X.lineTo(864, 1124); X.closePath(); fill(CORAL);
+  const q = (t % 3.2) / 3.2;
+  const r = swingScene(c, t, q, 380, 1700, 1.05, [10, -235], [150, -470], [-150, -480], [0.08, 2.5, -2.3], (gx, gy, a) => {
+    const hx = gx + 255 * Math.sin(a), hy = gy + 255 * Math.cos(a);
+    line([[gx, gy], [hx, hy]], 8, [0.25, 0.25, 0.28]); ell(hx + 10 * Math.cos(a), hy - 4, 24, 12); fill([0.45, 0.45, 0.5]);
+  });
+  if (q < 0.68) { circ(412, 1694, 12); fill([1, 1, 1]); }
+  else { const f = clamp((q - 0.68) / 0.3); circ(412 + (850 - 412) * f, 1694 - (1694 - 1250) * f - 700 * Math.sin(f * PI), 12 - 6 * f); fill([1, 1, 1]); }
+  pet(c, 140, 1850, 0.6, t, { lookUp: 0.4 });
+}
+function cricketScene(c, t) {
+  outdoor(c, t, 'day');
+  X.save(); X.beginPath(); X.moveTo(380, 1180); X.lineTo(560, 1180); X.lineTo(760, H); X.lineTo(80, H); X.closePath(); X.fillStyle = css(gt([0.83, 0.74, 0.55], 'day')); X.fill(); X.restore();
+  line([[180, 1700], [700, 1700]], 6, [1, 1, 1], 0.9);
+  [210, 240, 270].forEach(sx => line([[sx, 1700], [sx, 1460]], 9, [0.92, 0.85, 0.7])); line([[205, 1460], [275, 1460]], 6, [0.8, 0.6, 0.35]);
+  const q = (t % 3) / 3;
+  swingScene(c, t, q, 430, 1720, 1.05, [20, -240], [130, -500], [-150, -500], [0.05, 2.7, -2.5], (gx, gy, a) => {
+    X.save(); X.translate(gx, gy); X.rotate(-a); line([[0, -20], [0, 80]], 11, [0.2, 0.2, 0.22]); rr(-21, 76, 42, 175, 10); fill([0.92, 0.82, 0.62]); X.restore();
+  });
+  let bx, by;
+  if (q < 0.66) { const f = q / 0.66; bx = 1100 - 620 * f; by = f < 0.55 ? 1100 + 520 * (f / 0.55) : 1620 - 160 * ((f - 0.55) / 0.45); }
+  else { const f = clamp((q - 0.66) / 0.3); bx = 480 + 700 * f; by = 1460 - 900 * f + 500 * f * f; }
+  circ(bx, by, 14); fill([0.75, 0.15, 0.15]);
+  pet(c, 880, 1860, 0.6, t, { flip: -1, lookUp: 0.4 });
+}
+function paddleScene(c, t, p) {
+  waterBase(t, 'sunrise');
+  const x = 300 + 260 * p, y = 1560 + 6 * Math.sin(t * 2), st = Math.sin(t * 3.2), L = ME(c);
+  // the shaft runs through both hands, dipping one blade then the other
+  const cxg = x, cyg = y - 210, a = 0.45 * st, hx = Math.cos(a), hy = Math.sin(a);
+  const pL = [cxg - 95 * hx, cyg - 95 * hy], pR = [cxg + 95 * hx, cyg + 95 * hy];
+  X.save(); X.beginPath(); X.rect(0, 0, W, y - 40); X.clip();
+  const aL = armsTo(x, y + 300, 0.95, L, pL[0], pL[1]), aR = armsTo(x, y + 300, 0.95, L, pR[0], pR[1]);
+  person(x, y + 300, 0.95, L, t, { armL: aL.armL, armR: aR.armR });
+  X.restore();
+  line([[cxg - 330 * hx, cyg - 330 * hy], [cxg + 330 * hx, cyg + 330 * hy]], 9, [0.25, 0.25, 0.28]);
+  [-1, 1].forEach(sd => { X.save(); X.translate(cxg + sd * 350 * hx, cyg + sd * 350 * hy); X.rotate(a); ell(0, 0, 36, 16); fill([0.95, 0.75, 0.3]); X.restore(); });
+  [pL, pR].forEach(([px, py]) => { circ(px, py, 19); fill(C(L.skin)); });
+  ell(x, y, 330, 46); fill([0.93, 0.52, 0.43]); ell(x, y - 18, 110, 26); fill([0.2, 0.2, 0.24]); line([[x - 320, y + 6], [x + 320, y + 6]], 4, [1, 1, 1], 0.6);
+  for (let i = 0; i < 4; i++) line([[x - 380 - i * 60, y + 30 + i * 8], [x - 330 - i * 60, y + 30 + i * 8]], 5, [1, 1, 1], 0.5);
+}
+// ---- a side-on body for poses the front-facing figure can't do (yoga)
+function posed(x, y, s, L, J) {
+  const P = k => [x + J[k][0] * s, y + J[k][1] * s];
+  const top = C(L.top), skin = C(L.skin), legC = L.outfit === 'dress' ? skin : C(L.pants || '#30406E'), hc = C(L.hairCol || '#383130');
+  const limb = (a, b, c2, w, col) => { line([P(a), P(b), P(c2)], w * s, col); };
+  limb('hip', 'kneeB', 'footB', 44, darken(legC, 0.12)); ell(P('footB')[0] + 14 * s, P('footB')[1] - 6 * s, 26 * s, 12 * s); fill(darken(skin, 0.1));
+  limb('shoulder', 'elbowB', 'handB', 32, darken(top, 0.12)); circ(...P('handB'), 17 * s); fill(darken(skin, 0.08));
+  line([P('hip'), P('shoulder')], 82 * s, top);
+  if (L.outfit === 'dress') { circ(...P('hip'), 46 * s); fill(top); }
+  limb('hip', 'kneeF', 'footF', 44, legC); ell(P('footF')[0] + 14 * s, P('footF')[1] - 6 * s, 26 * s, 12 * s); fill(skin);
+  const [hx, hy] = P('head'), [sx, sy] = P('shoulder');
+  line([[sx, sy], [hx, hy]], 30 * s, darken(skin, 0.12));
+  circ(hx, hy, 48 * s); fill(skin);
+  const dirX = J.face || 1;
+  if (L.hair !== 'bald' && L.hair !== 'buzz' && L.hat !== 'scarf') {
+    X.beginPath(); X.arc(hx, hy, 50 * s, Math.atan2(-1, -dirX * 0.4) - 1.2, Math.atan2(-1, -dirX * 0.4) + 1.5); X.lineTo(hx, hy); X.closePath(); fill(hc);
+    if (['long', 'wavy', 'ponytail', 'braids', 'curly', 'afro'].includes(L.hair)) { const bx = hx - dirX * 46 * s; ell(bx, hy + 30 * s * (J.hang || 1), 18 * s, 44 * s); fill(hc); }
+    if (L.hair === 'bun') { circ(hx - dirX * 40 * s, hy - 36 * s, 22 * s); fill(hc); }
+  }
+  if (L.hat === 'scarf') { circ(hx, hy, 54 * s); fill(C(L.hatCol || '#2E4A62')); circ(hx + dirX * 14 * s, hy + 4 * s, 36 * s); fill(skin); }
+  circ(hx + dirX * 26 * s, hy - 6 * s, 5 * s); fill([0.15, 0.15, 0.18]);
+  limb('shoulder', 'elbowF', 'handF', 32, top); circ(...P('handF'), 17 * s); fill(skin);
+}
+const YOGA = {
+  dog: { footB: [-170, 0], footF: [-150, 0], kneeB: [-110, -120], kneeF: [-95, -112], hip: [-50, -240], shoulder: [130, -90], head: [175, -30], elbowB: [190, -50], elbowF: [200, -45], handB: [255, 0], handF: [265, 0], face: 1, hang: 0.2 },
+  warrior: { footB: [-200, 0], footF: [180, 0], kneeB: [-100, -110], kneeF: [170, -125], hip: [0, -215], shoulder: [0, -425], head: [10, -490], elbowB: [-100, -425], elbowF: [100, -425], handB: [-205, -425], handF: [205, -425], face: 1 },
+  tree: { footB: [0, 0], footF: [20, -150], kneeB: [0, -122], kneeF: [95, -175], hip: [0, -245], shoulder: [0, -455], head: [6, -518], elbowB: [-55, -560], elbowF: [55, -560], handB: [0, -660], handF: [6, -660], face: 1 }
+};
+function yogaPose(t) {
+  const order = ['dog', 'warrior', 'tree'], seg = 2.4, i = Math.floor(t / seg) % 3, f = (t % seg) / seg;
+  const A = YOGA[order[i]], B = YOGA[order[(i + 1) % 3]], k = ease(clamp((f - 0.72) / 0.28)), J = {};
+  Object.keys(A).forEach(key => { J[key] = Array.isArray(A[key]) ? [A[key][0] + (B[key][0] - A[key][0]) * k, A[key][1] + (B[key][1] - A[key][1]) * k] : (k < 0.5 ? A[key] : B[key]); });
+  return J;
+}
+function matScene(c, t) {
+  HATS_OFF = true;
+  // a light-filled studio: big arched window, hanging plants, timber floor
+  rect(0, 0, W, 1420, lin(0, 0, 0, 1420, [[0, [0.97, 0.92, 0.86]], [1, [0.93, 0.86, 0.78]]]));
+  X.save(); X.beginPath(); X.moveTo(260, 1150); X.lineTo(260, 520); X.arc(540, 520, 280, PI, 2 * PI); X.lineTo(820, 1150); X.closePath(); X.clip();
+  rect(260, 240, 560, 910, lin(0, 240, 0, 1150, [[0, [0.98, 0.84, 0.66]], [1, [0.86, 0.9, 0.8]]]));
+  for (let i = 0; i < 6; i++) { circ(300 + i * 110, 1080 - (i % 2) * 40, 110); fill([0.5, 0.7, 0.48], 0.75); }
+  X.restore();
+  X.lineWidth = 16; X.strokeStyle = css([0.98, 0.97, 0.95]); X.beginPath(); X.moveTo(260, 1150); X.lineTo(260, 520); X.arc(540, 520, 280, PI, 2 * PI); X.lineTo(820, 1150); X.closePath(); X.stroke();
+  line([[540, 240], [540, 1150]], 10, [0.98, 0.97, 0.95]); line([[260, 760], [820, 760]], 10, [0.98, 0.97, 0.95]);
+  [[130, 300], [950, 360]].forEach(([px, py], i) => { line([[px, 0], [px, py]], 3, [0.5, 0.45, 0.4]); rr(px - 40, py, 80, 60, 14); fill([0.88, 0.65, 0.5]); for (let j = 0; j < 5; j++) { X.save(); X.translate(px - 30 + j * 15, py + 50); X.rotate(-0.3 + j * 0.15 + 0.05 * Math.sin(t + i + j)); ell(0, 60, 9, 60); fill([0.36, 0.62, 0.4]); X.restore(); } });
+  rect(0, 1420, W, H - 1420, [0.78, 0.62, 0.46]); for (let i = 1; i < 6; i++) line([[0, 1420 + i * 90], [W, 1420 + i * 90]], 3, [0.6, 0.45, 0.32], 0.5);
+  plant(110, 1460);
+  X.save(); X.translate(560, 1735); X.scale(1, 0.3); rr(-330, -100, 660, 200, 30); fill([0.42, 0.66, 0.62]); X.restore();
+  pet(c, 170, 1830, 0.6, t, { tongue: false });
+  posed(580, 1735, 1.05, ME(c), yogaPose(t));
+}
+// ---- hiking: a bush track winding up towards the ranges, a real pack on
+function hikeScene(c, t, p) {
+  sky(t, 'day', null, 1100);
+  const far = gt([0.6, 0.66, 0.78], 'day'), mid = gt([0.45, 0.55, 0.6], 'day'), bush = gt([0.4, 0.55, 0.38], 'day');
+  const ridge = (pts, col, base) => { X.beginPath(); X.moveTo(0, base); pts.forEach(q => X.lineTo(q[0], q[1])); X.lineTo(W, base); X.lineTo(W, H); X.lineTo(0, H); X.closePath(); fill(col); };
+  ridge([[0, 860], [200, 640], [380, 820], [560, 560], [760, 800], [920, 660], [W, 780]], far, 900);
+  ridge([[0, 1000], [180, 880], [400, 980], [620, 860], [840, 990], [W, 900]], mid, 1040);
+  ridge([[0, 1150], [300, 1090], [700, 1140], [W, 1080]], bush, 1180);
+  X.beginPath(); X.moveTo(470, 1160); X.bezierCurveTo(560, 1300, 360, 1420, 520, 1560); X.bezierCurveTo(640, 1680, 520, 1800, 600, H); X.lineTo(220, H); X.bezierCurveTo(240, 1780, 330, 1640, 300, 1540); X.bezierCurveTo(260, 1400, 470, 1300, 440, 1160); X.closePath(); fill(gt([0.78, 0.64, 0.46], 'day'));
+  const gum = (gx, gy, s2) => { line([[gx, gy], [gx - 8 * s2, gy - 260 * s2]], 18 * s2, [0.88, 0.85, 0.8]); line([[gx - 6 * s2, gy - 150 * s2], [gx + 50 * s2, gy - 230 * s2]], 10 * s2, [0.88, 0.85, 0.8]); [[-40, -300, 70], [30, -330, 60], [60, -260, 55], [-70, -250, 50]].forEach(([dx, dy, r]) => { circ(gx + dx * s2, gy + dy * s2, r * s2); fill(gt([0.42, 0.56, 0.42], 'day')); }); };
+  gum(90, 1500, 1.1); gum(960, 1450, 1); gum(820, 1250, 0.6);
+  [[150, 1720, 46], [880, 1760, 60], [760, 1660, 30]].forEach(([rx, ry, r]) => { ell(rx, ry, r * 1.4, r); fill([0.6, 0.58, 0.55]); ell(rx - r * 0.3, ry - r * 0.4, r * 0.6, r * 0.3); fill([1, 1, 1], 0.2); });
+  const [x, m] = walkX(p, 300, 470, 0, 0.9), L = ME(c), s = 1, packC = [0.85, 0.42, 0.3];
+  const ss = s * ({ short: 0.92, tall: 1.08 }[L.height] || 1), bw = ({ slim: 0.86, big: 1.26 }[L.build] || 1), y = 1700;
+  const W2 = (lx, ly) => [x + lx * ss * bw, y + ly * ss];
+  const [px0, py0] = W2(-102, -500); rr(px0, py0, 204 * ss * bw, 280 * ss, 40 * ss); fill(packC); const [tx0, ty0] = W2(-80, -520); rr(tx0, ty0, 160 * ss * bw, 50 * ss, 20 * ss); fill(darken(packC, 0.2));
+  const h = person(x, y, s, L, t, { walk: m ? 1 : 0, armR: [0.3 + 0.15 * Math.sin(t * 7), 0.25] });
+  [-1, 1].forEach(sd => line([W2(sd * 52, -440), W2(sd * 42, -300)], 12 * ss, darken(packC, 0.25)));
+  line([W2(-46, -360), W2(46, -360)], 7 * ss, darken(packC, 0.35));
+  line([[h.R[0], h.R[1] - 30], [h.R[0] + 40, 1705]], 6, [0.3, 0.3, 0.33]);
+  pet(c, x + 300, 1780, 0.75, t, { walk: m ? 1 : 0 });
+}
+// ---- the back garden at home: weatherboards, a paling fence, raised veggie beds
+function gardenScene(c, t, p) {
+  sky(t, 'day', null, 1100);
+  for (let i = 0; i < 6; i++) { circ(80 + i * 200, 1000, 120); fill(gt([0.38, 0.58, 0.38], 'day')); }
+  rect(0, 980, W, 300, [0.62, 0.48, 0.34]); for (let i = 0; i < W; i += 34) { rect(i, 975, 30, 305, [0.66, 0.52, 0.37]); X.beginPath(); X.moveTo(i, 975); X.lineTo(i + 15, 960); X.lineTo(i + 30, 975); X.closePath(); fill([0.66, 0.52, 0.37]); }
+  rect(0, 1280, W, H - 1280, gt([0.5, 0.72, 0.42], 'day'));
+  // the house on the right
+  rect(700, 560, 380, 900, [0.93, 0.92, 0.87]); for (let yy = 590; yy < 1460; yy += 40) line([[700, yy], [W, yy]], 3, [0.8, 0.79, 0.74]);
+  X.beginPath(); X.moveTo(660, 580); X.lineTo(W, 450); X.lineTo(W, 580); X.closePath(); fill([0.45, 0.47, 0.52]); rect(660, 570, 420, 24, [0.4, 0.42, 0.47]);
+  rect(760, 700, 220, 230, [0.98, 0.98, 0.96]); rect(776, 716, 188, 198, lin(0, 716, 0, 914, [[0, [0.7, 0.84, 0.92]], [1, [0.85, 0.92, 0.95]]])); line([[870, 716], [870, 914]], 8, [0.98, 0.98, 0.96]);
+  rect(980, 1050, 100, 410, [0.36, 0.5, 0.45]); rect(940, 1440, 140, 30, [0.7, 0.7, 0.7]);
+  // two raised beds, plants growing through the scene
+  const g = 0.55 + 0.45 * p;
+  [[150, 1560, 330], [520, 1640, 300]].forEach(([bx, by, bwid], bi) => {
+    rr(bx, by, bwid, 130, 8); fill([0.58, 0.4, 0.26]); rect(bx, by, bwid, 26, [0.45, 0.3, 0.19]); rect(bx + 8, by + 26, bwid - 16, 30, [0.36, 0.25, 0.16]);
+    for (let i = 0; i < 4; i++) { const px = bx + 45 + i * (bwid - 90) / 3, kind = (i + bi) % 3, hh = (90 + 30 * kind) * g;
+      line([[px, by + 26], [px, by + 26 - hh]], 7, [0.3, 0.55, 0.3]);
+      [[-1, 0.4], [1, 0.6], [-1, 0.85]].forEach(([sd, f]) => { ell(px + sd * 24, by + 26 - hh * f, 24 * g, 11 * g); fill([0.36, 0.64, 0.34]); });
+      if (kind === 1) { circ(px, by + 26 - hh, 16 * g); fill([0.88, 0.25, 0.22]); } else if (kind === 2) { circ(px, by + 26 - hh, 18 * g); fill([0.98, 0.8, 0.3]); } }
+  });
+  const tip = 0.35 + 0.12 * Math.sin(t * 2), x = 480, y = 1720;
+  const h = person(x, y, 1, ME(c), t, { armR: [0.95 + 0.1 * tip, 1.2], armL: [0.3, 0.4] });
+  X.save(); X.translate(h.R[0], h.R[1]); X.rotate(tip); rr(-30, -6, 120, 86, 18); fill([0.35, 0.6, 0.78]); X.beginPath(); X.arc(30, -6, 34, PI, 2 * PI); X.lineWidth = 9; X.strokeStyle = css([0.28, 0.5, 0.66]); X.stroke(); line([[84, 20], [180, -14]], 12, [0.35, 0.6, 0.78]); X.restore();
+  circ(h.R[0], h.R[1], 19); fill(C(ME(c).skin));
+  const sx = h.R[0] + 180 * Math.cos(tip) + 14 * Math.sin(tip), sy = h.R[1] - 14 + 180 * Math.sin(tip);
+  for (let i = 0; i < 7; i++) { const k = (t * 1.6 + i / 7) % 1; circ(sx + 70 * k + (i % 3) * 8, sy + 260 * k * k + 20 * k, 6); fill([0.55, 0.78, 0.95], 0.85); }
+  pet(c, 880, 1840, 0.6, t, { flip: -1, lookUp: 0.3 });
+}
+// ---- heading out the front door with my gear
+function kitbag(c, t, p) {
+  HATS_OFF = false;
+  sky(t, 'sunrise', 960, 1150);
+  rect(0, 1150, W, H - 1150, gt([0.5, 0.7, 0.42], 'sunrise'));
+  // the front of the house: weatherboards, the door wide open, porch light on
+  rect(0, 520, 560, 1000, [0.9, 0.86, 0.78]); for (let yy = 550; yy < 1520; yy += 40) line([[0, yy], [560, yy]], 3, [0.8, 0.76, 0.68]);
+  X.beginPath(); X.moveTo(-40, 540); X.lineTo(600, 540); X.lineTo(520, 440); X.lineTo(0, 440); X.closePath(); fill([0.42, 0.44, 0.5]);
+  rect(220, 900, 240, 560, [0.98, 0.86, 0.6]); X.beginPath(); X.moveTo(460, 900); X.lineTo(560, 940); X.lineTo(560, 1500); X.lineTo(460, 1460); X.closePath(); fill([0.3, 0.45, 0.42]);
+  circ(500, 840, 16); fill([1, 0.92, 0.6]); circ(500, 840, 34); fill([1, 0.92, 0.6], 0.3);
+  rect(180, 1460, 320, 40, [0.7, 0.68, 0.64]); rect(160, 1500, 360, 40, [0.62, 0.6, 0.56]);
+  X.beginPath(); X.moveTo(240, 1540); X.lineTo(440, 1540); X.lineTo(760, H); X.lineTo(340, H); X.closePath(); fill([0.82, 0.76, 0.66]);
+  [[640, 1300], [900, 1320]].forEach(([bx, by]) => { [[-30, 0, 50], [20, -20, 56], [60, 6, 44]].forEach(([dx, dy, r]) => { circ(bx + dx, by + dy, r); fill(gt([0.34, 0.56, 0.36], 'sunrise')); }); });
+  const [x, m] = walkX(p, 340, 640, 0.05, 0.85), L = ME(c), y = 1720, sc = 0.9 + 0.12 * clamp(p * 1.4);
+  const ss = sc * ({ short: 0.92, tall: 1.08 }[L.height] || 1), bw = ({ slim: 0.86, big: 1.26 }[L.build] || 1);
+  const h = person(x, y, sc, L, t, { walk: m ? 1 : 0, armR: [0.2, 0.1], armL: [0.3, 1.1] });
+  // gym bag on a strap from the right shoulder, bottle in the left hand
+  const shX = x + 60 * ss * bw, shY = y - 430 * ss, bagX = x - 70 * ss * bw, bagY = y - 230 * ss;
+  line([[shX, shY], [bagX + 20, bagY]], 9 * ss, [0.2, 0.22, 0.26]);
+  rr(bagX - 110 * ss, bagY - 20 * ss, 190 * ss, 100 * ss, 34 * ss); fill(CORAL); rect(bagX - 110 * ss, bagY + 18 * ss, 190 * ss, 12 * ss, [1, 1, 1], 0.6);
+  rr(h.L[0] - 14, h.L[1] - 62, 28, 72, 9); fill([0.35, 0.6, 0.78]); rr(h.L[0] - 10, h.L[1] - 76, 20, 16, 5); fill([0.2, 0.25, 0.3]); circ(h.L[0], h.L[1], 18); fill(C(L.skin));
+  pet(c, x + 280, 1790, 0.75, t, { walk: m ? 1 : 0 });
 }
 const SCENES = {
   title: { label: 'Opening sunrise', fn(c, t, p) { outdoor(c, t, 'sunrise', 1080 - 140 * ease(p)); const q = clamp((p - 0.3) / 0.7), x = -480 + 1500 * q, m = q > 0 && q < 1; if (!(c.me && c.me.unset)) person(x, 1660, 1, ME(c), t, { walk: m ? 1 : 0, armL: [0.12, 0.05], armR: [0.3, 0.2] }); pet(c, x + 250, 1710, 0.9, t, { walk: m ? 1 : 0 }); } },
