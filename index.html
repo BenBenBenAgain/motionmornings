@@ -1781,13 +1781,17 @@ function golfScene(c, t) {
   for (let s2 = 0; s2 < 6; s2++) if (s2 % 2) rect(0, 1000 + s2 * 150, W, 150, gt([0.5, 0.76, 0.43], 'day'));
   ell(860, 1260, 190, 50); fill(gt([0.55, 0.82, 0.48], 'day')); ell(860, 1262, 14, 5); fill([0.1, 0.12, 0.1]);
   line([[862, 1262], [862, 1080]], 5, [0.95, 0.95, 0.95]); X.beginPath(); X.moveTo(864, 1080); X.lineTo(940, 1102 + 6 * Math.sin(t * 4)); X.lineTo(864, 1124); X.closePath(); fill(CORAL);
-  const q = (t % 3.2) / 3.2;
+  // one swing per scene: the ball flies onto the green, rolls in and stays in the hole
+  const T = 3.2, q = Math.min(t / T, 0.999), tHit = 0.68 * T;
   const r = swingScene(c, t, q, 380, 1700, 1.05, [-10, -210], [70, -290], [-80, -290], [0.6, 1.5, -0.9], (gx, gy, a) => {
     const hx = gx + 262 * Math.sin(a), hy = gy + 262 * Math.cos(a);
     line([[gx, gy], [hx, hy]], 8, [0.25, 0.25, 0.28]); ell(hx + 10 * Math.cos(a), hy - 4, 24, 12); fill([0.45, 0.45, 0.5]);
   });
-  if (q < 0.68) { circ(530, 1694, 12); fill([1, 1, 1]); }
-  else { const f = clamp((q - 0.68) / 0.3); circ(530 + (850 - 530) * f, 1694 - (1694 - 1250) * f - 700 * Math.sin(f * PI), 12 - 6 * f); fill([1, 1, 1]); }
+  const tf = t - tHit, FL = 1.1, RL = 0.7;
+  if (tf < 0) { circ(530, 1694, 12); fill([1, 1, 1]); }
+  else if (tf < FL) { const f = tf / FL; circ(530 + (815 - 530) * f, 1694 - (1694 - 1250) * f - 650 * Math.sin(f * PI), 12 - 5 * f); fill([1, 1, 1]); }
+  else if (tf < FL + RL) { const f = ease((tf - FL) / RL); circ(815 + 45 * f, 1250 + 10 * f, 7 - 2 * f); fill([1, 1, 1]); }
+  else if (tf < FL + RL + 0.6) { const f = (tf - FL - RL) / 0.6; ell(862, 1262, 14 + 40 * f, 5 + 12 * f); X.lineWidth = 3; X.strokeStyle = css([1, 1, 1], 0.8 * (1 - f)); X.stroke(); }
   pet(c, 140, 1850, 0.6, t, { lookUp: 0.4 });
 }
 function cricketScene(c, t) {
