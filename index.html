@@ -2062,12 +2062,13 @@ const SCENES = {
     // they look at the screen, so we see the back of the phone with their fingers wrapped round it; the person they're talking to pops up beside it
     const sk = C(L.skin), pw = 78, ph2 = 140, px = hand[0] - pw / 2, py = hand[1] - ph2 + 40;
     rr(px, py, pw, ph2, 14); fill([0.2, 0.21, 0.26]); rr(px + 10, py + 10, 26, 34, 8); fill([0.12, 0.12, 0.15]); circ(px + 18, py + 19, 5); fill([0.3, 0.32, 0.4]); circ(px + 28, py + 34, 5); fill([0.3, 0.32, 0.4]);
-    // the hand wraps the lower half: wrist into a palm, four fingers lying across the back, thumb up the near edge
-    const fore = (L.outfit === 'tee' || L.outfit === 'dress') ? sk : C(L.top);
-    line([[hand[0], hand[1] + 70], [hand[0] + 4, hand[1] + 30]], 30 * s, sk);
-    rr(px - 6, py + ph2 - 74, pw + 4, 56, 22); fill(sk);
-    [0, 1, 2, 3].forEach(i => { rr(px + 8, py + ph2 - 112 + i * 15, pw + 4, 15, 7.5); fill(i % 2 ? darken(sk, 0.07) : sk); line([[px + 14, py + ph2 - 112 + i * 15 + 15], [px + pw + 4, py + ph2 - 112 + i * 15 + 15]], 1.5, darken(sk, 0.18), 0.6); });
-    rr(px - 12, py + ph2 - 110, 20, 60, 10); fill(darken(sk, 0.04));
+    // the hand holds the bottom third only: palm under the base, three fingers across the back, one finger reaching up the far edge, thumb on the near edge
+    const fore = (L.outfit === 'tee' || L.outfit === 'dress') ? sk : C(L.top), gy = py + ph2 - 46;
+    line([[hand[0], hand[1] + 80], [hand[0] + 2, py + ph2 + 6]], 30 * s, sk);
+    rr(px - 4, py + ph2 - 22, pw + 6, 34, 16); fill(sk);
+    rr(px + pw - 10, gy - 34, 15, 44, 7.5); fill(darken(sk, 0.04));
+    [0, 1, 2].forEach(i => { rr(px + 10, gy + i * 14, pw + 2, 14, 7); fill(i % 2 ? darken(sk, 0.07) : sk); if (i) line([[px + 16, gy + i * 14], [px + pw, gy + i * 14]], 1.5, darken(sk, 0.18), 0.6); });
+    rr(px - 10, gy - 6, 18, 46, 9); fill(darken(sk, 0.04));
     // the person they're talking to, waving from a pop-out on the left, little hearts floating up from it
     const other = hasPartner(c) ? PT(c) : FRIEND1, wx = 90, wy = 830, ww = 200, wh = 240;
     rr(wx, wy, ww, wh, 24); fill([1, 1, 1]); rr(wx + 10, wy + 10, ww - 20, wh - 20, 16); fill([0.75, 0.86, 0.92]);
