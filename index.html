@@ -1158,8 +1158,9 @@ const hasPartner = cfg => cfg.partner && cfg.partner.on;
 
 // ---------------------------------------------------------------- props
 // drinks: whatever they said they reach for, from a cuppa to a kombucha
-function mug(x, y, t, kind) {
+function mug(x, y, t, kind, sc = 1) {
   // a rounded teacup with the handle on the left, where the hand holds it
+  X.save(); X.translate(x, y); X.scale(sc, sc); x = 0; y = 0;
   const body = kind === 'coffee' ? [0.3, 0.42, 0.55] : [0.93, 0.52, 0.43];
   X.beginPath(); X.arc(x - 50, y - 58, 21, PI * 0.5, PI * 1.5); X.lineWidth = 11; X.strokeStyle = css(darken(body, 0.12)); X.stroke();
   X.beginPath(); X.moveTo(x - 52, y - 92); X.lineTo(x + 52, y - 92); X.bezierCurveTo(x + 54, y - 30, x + 30, y, x, y); X.bezierCurveTo(x - 30, y, x - 54, y - 30, x - 52, y - 92); X.closePath(); fill(body);
@@ -1167,13 +1168,17 @@ function mug(x, y, t, kind) {
   ell(x, y - 92, 52, 10); fill(darken(body, 0.15)); ell(x, y - 91, 44, 7); fill(kind === 'coffee' ? [0.42, 0.26, 0.16] : [0.72, 0.45, 0.2]);
   ell(x, y + 2, 22, 5); fill(darken(body, 0.2));
   for (let i = 0; i < 3; i++) { const k = (t * 0.6 + i / 3) % 1; X.save(); X.globalAlpha = 0.6 * Math.sin(k * PI); X.beginPath(); const sx = x - 20 + i * 20; X.moveTo(sx, y - 104 - k * 30); X.bezierCurveTo(sx + 16, y - 134 - k * 60, sx - 16, y - 164 - k * 80, sx + 6, y - 194 - k * 100); X.lineWidth = 6; X.strokeStyle = '#fff'; X.stroke(); X.restore(); }
+  X.restore();
 }
 // holding a drink: the drink sits just past the hand, then the hand and fingers wrap over it
 function holdDrink(hand, t, kind, L) {
   const sk = C(L.skin), [hx, hy] = hand;
   if (kind === 'tea' || kind === 'coffee') {
-    mug(hx + 58, hy + 52, t, kind);
-    circ(hx, hy, 19); fill(sk); rr(hx - 4, hy - 14, 26, 12, 6); fill(sk); rr(hx - 4, hy + 2, 24, 11, 6); fill(darken(sk, 0.06));
+    // fingers go through the handle from behind, so the hand is drawn first and the handle sits over it; the thumb rests on top
+    const sc = 0.68;
+    circ(hx, hy, 19); fill(sk); rr(hx - 2, hy - 8, 30, 11, 5); fill(darken(sk, 0.08)); rr(hx - 2, hy + 4, 28, 10, 5); fill(darken(sk, 0.08));
+    mug(hx + 8 + 50 * sc, hy + 58 * sc, t, kind, sc);
+    ell(hx + 6, hy - 14, 13, 8); fill(sk);
     return;
   }
   const gx = hx + 30, gy = hy + 62;
