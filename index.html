@@ -365,6 +365,12 @@ input[type=range]{height:30px;touch-action:none}
       <section class="panel" data-step="3" hidden>
         <header><h2>Pick your song</h2><p class="lede">Three ways to add music: one of our <b>free tracks</b> below, an <b>MP3 of your own</b>, or <b>save it without music</b> and add any song inside Instagram or TikTok.</p></header>
         <div class="card">
+          <div class="subhead"><h3>Classics</h3></div>
+          <p class="meta">Famous classical recordings in the public domain. Free to use anywhere, including when you share your film.</p>
+          <div class="tiles" id="classics"></div>
+          <p class="meta" id="classicCredits"></p>
+        </div>
+        <div class="card">
           <div class="subhead"><h3>Free tracks</h3><button class="btn ghost small" data-mute aria-pressed="false">Mute</button></div>
           <p class="meta">Original cinematic music, made right here for the length of your film. Free to use anywhere, including when you share it.</p>
           <div class="tiles" id="tracks"></div>
@@ -3377,7 +3383,7 @@ async function playMovie() {
   playing = true; $('#playBtn').textContent = 'Pause'; if (S.step === 3) renderTracks();
   // no music chosen yet: start the default track now, inside the tap, and let it join when it's ready
   ensureAudioGraph();
-  if (!song) { unlockAudio(); if (!composing) { pickTrack(S.song.track || 'sunrise'); $('#stageNote').textContent = 'Adding music. It joins in a moment.'; } }
+  if (!song) { unlockAudio(); if (!composing) { pickTrack(S.song.track || 'grieg'); $('#stageNote').textContent = 'Adding music. It joins in a moment.'; } }
   if (song) { ensureAudioGraph(); const tl = movieTL(); audio.loop = !!tl.loop; audio.currentTime = tl.loop ? (S.song.offset + movieT) % song.duration : S.song.offset + movieT; try { await audio.play(); } catch (e) { stopMovie(); } }
 }
 function stopMovie() { if (!playing) return; playing = false; audio.pause(); setGain(1); $('#playBtn').textContent = 'Play my film'; if (S.step === 3) renderTracks(); }
@@ -3470,7 +3476,14 @@ $('#songInput').onchange = () => {
 };
 // free tracks, composed to fit the length of this film
 let composing = null;
+// real recordings, public domain, trimmed to their best minute and a half with a fade
+const CLASSICS = {
+  grieg: { name: 'Morning Mood', by: 'Grieg', mood: 'The classic sunrise, gentle build', src: 'music/morning-mood.mp3?v=1', credit: 'Morning Mood: Edvard Grieg, Peer Gynt Suite No. 1, performed by the Musopen Symphony. Public domain.' }
+};
+const trackName = id => (CLASSICS[id] || MUSIC.STYLES[id] || {}).name || '';
 function renderTracks() {
+  const cb = $('#classics');
+  if (cb) { cb.innerHTML = ''; Object.entries(CLASSICS).forEach(([id, ct]) => { const on = S.song.track === id, state = !on ? '' : composing === id ? 'Loading...' : playing ? 'Playing. Tap to pause' : 'Tap to play'; cb.append(el('button', { class: 'tile', 'aria-pressed': on ? 'true' : 'false', onclick: () => tapTrack(id) }, el('b', {}, ct.name), el('small', {}, ct.by + ' \u00b7 ' + ct.mood), state ? el('small', { class: 'trackstate' }, state) : null)); }); $('#classicCredits').textContent = Object.values(CLASSICS).map(c => c.credit).join(' '); }
   const box = $('#tracks'); if (!box) return; box.innerHTML = '';
   Object.entries(MUSIC.STYLES).forEach(([id, st]) => {
     const on = S.song.track === id, state = !on ? '' : composing === id ? 'Composing...' : playing ? 'Playing. Tap to pause' : 'Tap to play';
@@ -3484,6 +3497,12 @@ function tapTrack(id) {
 }
 async function pickTrack(id, andPlay, quiet) {
   S.song.track = id; composing = id; save(); renderTracks();
+  if (CLASSICS[id]) {
+    const ct = CLASSICS[id]; $('#songStatus').textContent = 'Loading ' + ct.name + '...';
+    try { const r = await fetch(ct.src); if (!r.ok) throw new Error('fetch'); const blob = await r.blob(); composing = null; if (S.song.track !== id) return; useSong(blob, ct.name + ' (' + ct.by + ')', null, andPlay, quiet); renderTracks(); }
+    catch (e) { composing = null; renderTracks(); $('#songStatus').textContent = "Couldn't load " + ct.name + '. Check your connection and tap it again.'; }
+    return;
+  }
   $('#songStatus').textContent = 'Composing your track...';
   try {
     const len = Math.max(20, LSN.timeline(S.cfg).total);
@@ -3511,9 +3530,9 @@ function openFull() {
   if (song && song.duration) { note.textContent = ''; playMovie(); }
   else {
     note.textContent = 'Getting your music ready. It starts in a moment.';
-    const want = S.song.track || 'sunrise'; ensureAudioGraph(); unlockAudio();
+    const want = S.song.track || 'grieg'; ensureAudioGraph(); unlockAudio();
     if (!song && !composing) pickTrack(want, true);
-    songReady().then(() => { if (!fullOpen) return; note.textContent = 'Music: ' + MUSIC.STYLES[S.song.track || want].name + '. Change it on the last step.'; if (!playing) playMovie(); });
+    songReady().then(() => { if (!fullOpen) return; note.textContent = 'Music: ' + trackName(S.song.track || want) + '. Change it on the last step.'; if (!playing) playMovie(); });
   }
   btn.focus();
 }
@@ -3524,7 +3543,7 @@ function closeFull() {
 }
 $('#stageOpen').onclick = openFull; $('#fullBtn').onclick = openFull;
 $('#fullClose').onclick = closeFull;
-$('#fullPlay').onclick = () => { if (playing) stopMovie(); else { $('#fullNote').textContent = S.song.track ? 'Music: ' + MUSIC.STYLES[S.song.track].name : ''; playMovie(); } };
+$('#fullPlay').onclick = () => { if (playing) stopMovie(); else { $('#fullNote').textContent = S.song.track ? 'Music: ' + trackName(S.song.track) : ''; playMovie(); } };
 fcv.onclick = () => { if (!$('#fullPlay').disabled) { if (playing) stopMovie(); else playMovie(); } };
 full.addEventListener('keydown', e => { if (e.key === 'Escape') closeFull(); });
 function renderSongOpts() {
