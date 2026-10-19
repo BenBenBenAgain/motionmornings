@@ -2884,12 +2884,16 @@ function renderThemes() {
       inp.oninput = () => { S.fills[th.id][k] = inp.value; tip.hidden = inp.value.trim().split(/\s+/).length <= 6; liveLines(); fillPreviews(); save(); };
       card.append(el('label', { for: id }, label, inp, tip));
     });
-    MINE_KEYS.forEach((k, i) => {
+    // one box to start; a second shows up once the first has words in it
+    const mineLabels = MINE_KEYS.map((k, i) => {
       const id = `f-${th.id}-${k}`, inp = el('input', { type: 'text', id, placeholder: i ? 'Another one, if you like' : 'e.g. ' + (MINE_EX[th.id] || 'something you do'), maxlength: 80 });
       inp.value = S.fills[th.id][k] || '';
-      inp.oninput = () => { S.fills[th.id][k] = inp.value; liveLines(); fillPreviews(); save(); };
-      card.append(el('label', { for: id, class: 'minelabel' }, i ? '' : 'Something you do, in your own words', inp));
+      inp.oninput = () => { S.fills[th.id][k] = inp.value; showSecond(); liveLines(); fillPreviews(); save(); };
+      return el('label', { for: id, class: 'minelabel' }, i ? '' : 'Something you do, in your own words', inp);
     });
+    const showSecond = () => { mineLabels[1].hidden = !String(S.fills[th.id].mine1 || '').trim() && !String(S.fills[th.id].mine2 || '').trim(); };
+    showSecond();
+    card.append(...mineLabels);
     card.append(el('div', { class: 'fillprev', 'data-theme': th.id }));
     fills.append(card);
   });
