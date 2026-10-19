@@ -1338,6 +1338,8 @@ function guitar(x, y, ang) {
   rect(0, -10, 230, 20, [0.45, 0.28, 0.18]); rr(225, -16, 50, 32, 6); fill([0.35, 0.22, 0.14]);
   ell(-95, 0, 85, 72); fill([0.8, 0.56, 0.32]); ell(0, 0, 62, 55); fill([0.8, 0.56, 0.32]);
   circ(-30, 0, 24); fill([0.18, 0.12, 0.1]); rect(-150, -14, 14, 28, [0.35, 0.22, 0.14]);
+  for (let i = 0; i < 6; i++) { const yy = -7.5 + i * 3; line([[-143, yy * 1.3], [262, yy]], 1.6, [0.93, 0.9, 0.82], 0.85); }
+  [-6, 6].forEach(dy => [240, 255].forEach(px => { circ(px, dy * 2.4, 4); fill([0.8, 0.78, 0.72]); }));
   X.restore();
 }
 function playGuitar(c, t, px, py, s, gx, gy) {
@@ -1346,9 +1348,13 @@ function playGuitar(c, t, px, py, s, gx, gy) {
   const aR = armsTo(px, py, s, L, neck[0], neck[1], true), aL = armsTo(px, py, s, L, strum[0], strum[1]);
   person(px, py, s, L, t, { armL: aL.armL, armR: aR.armR });
   guitar(gx, gy, a);
-  const fore = (L.outfit === 'tee' || L.outfit === 'dress') ? C(L.skin) : C(L.top), sk = C(L.skin);
-  // the strumming forearm crosses in front of the guitar body, fingers wrap the neck
-  line([[strum[0] - 70 * s, strum[1] - 40 * s], strum], 32 * s, fore); circ(strum[0], strum[1], 20 * s); fill(sk);
+  const dress = L.outfit === 'dress', tee = L.outfit === 'tee', sk = C(L.skin), up = dress ? sk : C(L.top), fore = (tee || dress) ? sk : C(L.top);
+  // the strumming arm is redrawn whole, shoulder to hand, in front of the guitar, so the elbow joins up
+  const k = aL.ss, bw = aL.bw, [u] = aL.armL, D = L.chair ? 92 : 0;
+  const sh = [px - 72 * k * bw, py + (-426 + D) * k], el = [px + (-72 - 112 * Math.sin(u)) * k * bw, py + (-426 + D + 112 * Math.cos(u)) * k];
+  const wd = (dress ? 30 : 38) * k;
+  line([sh, el], wd, up); if (tee) { circ(el[0], el[1], wd / 2); fill(up); }
+  line([el, strum], wd * (tee ? 0.8 : 1), fore); circ(strum[0], strum[1], 20 * s); fill(sk);
   ell(neck[0], neck[1] + 4, 20 * s, 24 * s); fill(sk);
 }
 function micStand(x, y) {
