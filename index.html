@@ -2484,8 +2484,23 @@ const LEADS = {
 };
 const NAME_KEYS = new Set(['who', 'pname', 'kids', 'place']);
 const SMALL = new Set(['my', 'and', 'the', 'old', 'friends', 'family', 'parents', 'mum', 'dad', 'mom', 'mates', 'kids', 'grandparents', 'sister', 'sisters', 'brother', 'brothers', 'auntie', 'aunty', 'aunt', 'uncle', 'nan', 'nanna', 'grandma', 'grandpa', 'pop', 'cousin', 'cousins', 'best', 'friend', 'mate', 'partner', 'husband', 'wife', 'son', 'daughter', 'of', 'a', 'an', 'to', 'in', 'our', 'little', 'big', 'whole', 'crew', 'team', 'neighbours', 'people', 'girls', 'boys', 'bestie', 'gran', 'granny', 'mother', 'father', 'in-laws']);
+// phones autocorrect typos but not the right word in the wrong place, so fix the common mix-ups and misspellings
+const SPELL = [
+  [/\b(\d+|once|twice|one|two|three|four|five|six|seven|times?|a|per|each|every|this|next|last|the)\s+weak(s?)\b/gi, (m, a, s) => a + ' week' + s],
+  [/\bweak(ly|end|ends|day|days|night|nights)\b/gi, (m, s) => 'week' + s],
+  [/\b(\d+|once|twice|one|two|three|four|five|six|seven|times?|a|per|each|every)\s+(?:a\s+)?(?:mounth|munth|montth)\b/gi, (m, a) => a + ' month'],
+  [/\b(?:excercise|exersize|exercize|excersize)\b/gi, 'exercise'], [/\b(?:freind|frend)(s?)\b/gi, (m, s) => 'friend' + s],
+  [/\b(?:tommorow|tomorow|tommorrow)\b/gi, 'tomorrow'], [/\b(?:definately|definatly|defiantly)\b/gi, 'definitely'],
+  [/\b(?:untill)\b/gi, 'until'], [/\b(?:alot)\b/gi, 'a lot'], [/\b(?:wich|whitch)\b/gi, 'which'], [/\b(?:recieve)\b/gi, 'receive'],
+  [/\b(?:beleive|belive)\b/gi, 'believe'], [/\b(?:healthey|helthy)\b/gi, 'healthy'], [/\b(?:mediate|meditatate)\b/gi, 'meditate'],
+  [/\b(?:morining|mornin|moring)(s?)\b/gi, (m, s) => 'morning' + s], [/\b(?:buisness|bussiness|busness)\b/gi, 'business'],
+  [/\b(?:jym)\b/gi, 'gym'], [/\b(?:runing)\b/gi, 'running'], [/\b(?:swiming)\b/gi, 'swimming'], [/\b(?:writting)\b/gi, 'writing'],
+  [/\b(?:famly|familly)\b/gi, 'family'], [/\b(?:savings?)\s+acount\b/gi, m => m.replace(/acount/i, 'account')],
+  [/\bi\b(?=\s|'|$)/g, 'I']
+];
+const spellFix = v => SPELL.reduce((s, [re, to]) => s.replace(re, to), v);
 function tidyAnswer(k, raw) {
-  let v = String(raw || '').trim().replace(/[.!?,;:]+$/, '').replace(/\s+/g, ' ');
+  let v = spellFix(String(raw || '').trim().replace(/[.!?,;:]+$/, '').replace(/\s+/g, ' '));
   if (!v) return '';
   for (let pass = 0; pass < 3; pass++) {
     const before = v;
