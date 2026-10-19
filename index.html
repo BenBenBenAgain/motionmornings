@@ -1161,6 +1161,8 @@ function familyRow(c, x, y, t, o = {}) {
   return cx;
 }
 const hasPartner = cfg => cfg.partner && cfg.partner.on;
+// the planner marks a few everyday scenes for the partner to join
+const ptJoins = cfg => !!cfg._pt && hasPartner(cfg);
 
 // ---------------------------------------------------------------- props
 // drinks: whatever they said they reach for, from a cuppa to a kombucha
@@ -1947,6 +1949,7 @@ function hikeScene(c, t, p) {
   const ss = s * ({ short: 0.92, tall: 1.08 }[L.height] || 1), bw = ({ slim: 0.86, big: 1.26 }[L.build] || 1), y = 1700;
   const W2 = (lx, ly) => [x + lx * ss * bw, y + ly * ss];
   const [px0, py0] = W2(-102, -500); rr(px0, py0, 204 * ss * bw, 280 * ss, 40 * ss); fill(packC); const [tx0, ty0] = W2(-80, -520); rr(tx0, ty0, 160 * ss * bw, 50 * ss, 20 * ss); fill(darken(packC, 0.2));
+  if (ptJoins(c)) person(x - 265, y - 40, 0.9, PT(c), t, { walk: m ? 1 : 0, speed: 9.5 });
   const h = person(x, y, s, L, t, { walk: m ? 1 : 0, armR: [0.3 + 0.15 * Math.sin(t * 7), 0.25] });
   [-1, 1].forEach(sd => line([W2(sd * 52, -440), W2(sd * 42, -300)], 12 * ss, darken(packC, 0.25)));
   line([W2(-46, -360), W2(46, -360)], 7 * ss, darken(packC, 0.35));
@@ -1979,7 +1982,8 @@ function gardenScene(c, t, p) {
   circ(h.R[0], h.R[1], 19); fill(C(ME(c).skin));
   const sx = h.R[0] + 180 * Math.cos(tip) + 14 * Math.sin(tip), sy = h.R[1] - 14 + 180 * Math.sin(tip);
   for (let i = 0; i < 7; i++) { const k = (t * 1.6 + i / 7) % 1; circ(sx + 70 * k + (i % 3) * 8, sy + 260 * k * k + 20 * k, 6); fill([0.55, 0.78, 0.95], 0.85); }
-  pet(c, 880, 1840, 0.6, t, { flip: -1, lookUp: 0.3 });
+  if (ptJoins(c)) person(890, 1730, 0.92, PT(c), t, { flip: -1, armR: [2.4 + 0.3 * Math.sin(t * 4), 2.6] });
+  pet(c, ptJoins(c) ? 120 : 880, 1840, 0.6, t, { flip: ptJoins(c) ? 1 : -1, lookUp: 0.3 });
 }
 // ---- heading out the front door with my gear
 function kitbag(c, t, p) {
@@ -2009,14 +2013,14 @@ const SCENES = {
   end: { label: 'Closing sunset walk', fn(c, t, p) { outdoor(c, t, 'sunset', 960 + 60 * p); const n = 1 + (hasPartner(c) ? 1 : 0) + kidsOf(c).length; const x0 = n > 1 ? 200 : 420; const x = x0 + (1100 + n * 150) * ease(clamp((p - 0.25) / 0.75)), m = p > 0.25; const right = familyRow(c, x, 1690, t, { walk: m ? 1 : 0, s: n > 3 ? 0.85 : 1 }); pet(c, right + 70, 1730, 0.85, t, { walk: m ? 1 : 0 }); } },
 
   walk: { label: 'Walking with my dog', fn(c, t, p) { outdoor(c, t, 'day'); const x = 80 + 520 * p, dx = x + 270 + 40 * Math.sin(t * 1.5); const h = person(x, 1660, 1, ME(c), t, { walk: 1, armL: [0.12, 0.05], armR: [0.55, 0.35] }); const P0 = petsOf(c)[0]; if (P0 && P0.type === 'dog') { const k = 0.85 * dogSize(P0), dc = dogCollar(P0), cx = dx + dc[0] * k, cy = 1720 + dc[1] * k; X.beginPath(); X.moveTo(h.R[0], h.R[1]); X.quadraticCurveTo((h.R[0] + cx) / 2, Math.max(h.R[1], cy) + 70, cx, cy); X.lineWidth = 5; X.strokeStyle = css([0.85, 0.3, 0.25]); X.stroke(); } pet(c, dx, 1720, 0.85, t, { walk: 1, speed: 12 }); } },
-  start: { label: 'Stepping out at sunrise', fn(c, t, p) { outdoor(c, t, 'sunrise', 940); const [x, m] = walkX(p, -120, 420, 0, 0.6); person(x, 1660, 1.05, ME(c), t, { walk: m ? 1 : 0 }); pet(c, x + 250, 1700, 0.9, t, { walk: m ? 1 : 0 }); } },
-  sunrise: { label: 'Standing tall at sunrise', fn(c, t) { outdoor(c, t, 'sunrise', 920); person(400, 1680, 1.1, ME(c), t, { armL: [0.6, 0.6], armR: [0.6, 0.6], bob: 4 * Math.sin(t * 2) }); pet(c, 700, 1740, 0.9, t, { flip: -1, lookUp: 0.6 }); } },
+  start: { label: 'Stepping out at sunrise', fn(c, t, p) { outdoor(c, t, 'sunrise', 940); const [x, m] = walkX(p, -120, 420, 0, 0.6); if (ptJoins(c)) person(x - 200, 1650, 0.98, PT(c), t, { walk: m ? 1 : 0, speed: 9.5 }); person(x, 1660, 1.05, ME(c), t, { walk: m ? 1 : 0 }); pet(c, x + 250, 1700, 0.9, t, { walk: m ? 1 : 0 }); } },
+  sunrise: { label: 'Standing tall at sunrise', fn(c, t) { outdoor(c, t, 'sunrise', 920); const pj = ptJoins(c); person(pj ? 330 : 400, 1680, 1.1, ME(c), t, { armL: [0.6, 0.6], armR: [0.6, 0.6], bob: 4 * Math.sin(t * 2) }); if (pj) person(620, 1670, 1.02, PT(c), t, { flip: -1, armL: [0.6, 0.6], armR: [0.6, 0.6], bob: 4 * Math.sin(t * 2 + 1) }); pet(c, pj ? 860 : 700, 1740, 0.9, t, { flip: -1, lookUp: 0.6 }); } },
   celebrate: { label: 'Arms up, feeling great', fn(c, t) { outdoor(c, t, 'sunrise', 1000); sunBurst(400, 1250, t); person(400, 1680, 1.05, ME(c), t, { armL: [2.6, 2.7], armR: [2.6, 2.7], bob: Math.abs(Math.sin(t * 3)) * 60 }); pet(c, 520 + 260 * Math.sin(t * 0.9), 1760, 0.85, t, { walk: 1, speed: 14, flip: Math.cos(t * 0.9) > 0 ? 1 : -1 }); } },
   champion: { label: 'Fit and strong at the sports ground', fn(c, t) { sportsGround(t); const f = ease(clamp((t - 0.4) / 0.6)); person(440, 1700, 1.12, ME(c), t, { armL: [1.6 * f + 0.15, 0.1 + 2.9 * f], armR: [1.6 * f + 0.15, 0.1 + 2.9 * f] }); pet(c, 760, 1770, 0.9, t, { flip: -1, lookUp: 0.6 }); } },
   strong: { label: 'Strong pose', fn(c, t) { outdoor(c, t, 'day'); const f = ease(clamp((t - 0.5) / 0.6)); person(420, 1690, 1.12, ME(c), t, { armL: [1.6 * f + 0.15, 0.1 + 2.9 * f], armR: [1.6 * f + 0.15, 0.1 + 2.9 * f] }); pet(c, 720, 1750, 0.9, t, { flip: -1, lookUp: 0.6 }); } },
   jog: { label: 'Running', fn(c, t, p) { outdoor(c, t, 'day'); const x = -150 + 1100 * p; speedLines(x - 150, 1330, t); person(x, 1660, 1, ME(c), t, { walk: 1.3, speed: 12, armL: [-0.5 * Math.sin(t * 12), 1.3], armR: [0.5 * Math.sin(t * 12), 1.3], bob: 8 * Math.abs(Math.sin(t * 12)) }); pet(c, x + 260, 1700, 0.85, t, { walk: 1.3, speed: 15 }); } },
-  unwind: { label: 'Sunset stroll to wind down', fn(c, t, p) { outdoor(c, t, 'sunset'); const x = 120 + 520 * p; person(x, 1660, 1, ME(c), t, { walk: 1, armL: [0.12, 0.05], armR: [0.12, 0.05] }); pet(c, x + 230 + 30 * Math.sin(t), 1700, 0.85, t, { walk: 1 }); } },
-  steady: { label: 'Calm, looking ahead', fn(c, t) { outdoor(c, t, 'sunrise', 900); person(520, 1700, 1.05, ME(c), t, { flip: -1 }); pet(c, 260, 1740, 0.9, t); } },
+  unwind: { label: 'Sunset stroll to wind down', fn(c, t, p) { outdoor(c, t, 'sunset'); const pj = ptJoins(c), x = (pj ? 60 : 120) + 480 * p; person(x, 1660, 1, ME(c), t, { walk: 1, armL: [0.12, 0.05], armR: [0.12, 0.05] }); if (pj) person(x + 175, 1665, 0.94, PT(c), t, { walk: 1, armL: [0.12, 0.05], armR: [0.12, 0.05] }); pet(c, x + (pj ? 400 : 230) + 30 * Math.sin(t), 1700, 0.85, t, { walk: 1 }); } },
+  steady: { label: 'Calm, looking ahead', fn(c, t) { outdoor(c, t, 'sunrise', 900); const pj = ptJoins(c); if (pj) person(740, 1695, 0.98, PT(c), t, { flip: -1 }); person(pj ? 500 : 520, 1700, 1.05, ME(c), t, { flip: -1 }); pet(c, 260, 1740, 0.9, t); } },
   selflove: { label: 'Hand on heart', fn(c, t) { outdoor(c, t, 'sunrise', 930); const k = ease(clamp((t - 0.5) / 0.6)); person(440, 1680, 1.08, ME(c), t, { armR: [0.15 + 0.05 * k, 0.1 - 2.52 * k], bob: 3 * Math.sin(t * 2) }); hearts(440, 1040, t); pet(c, 730, 1740, 0.9, t, { flip: -1, lookUp: 0.7 }); } },
   friends: { label: 'Out with friends', fn(c, t) { outdoor(c, t, 'day'); const wv = 0.4 * Math.sin(t * 6); person(250, 1680, 1, ME(c), t, { armR: [2.5, 2.9 + wv] }); person(640, 1660, 0.95, F2(c), t, { flip: -1, armR: [2.4, 2.9 - wv] }); person(880, 1650, 0.97, FRIEND1, t, { flip: -1 }); pet(c, 430, 1760, 0.8, t); } },
   campfire: { label: 'Evening with my people', fn(c, t) { outdoor(c, t, 'dusk'); campfire(540, 1740, t); person(200, 1700, 0.95, ME(c), t, { armR: [0.6, 1.2] }); person(420, 1640, 0.85, FRIEND1, t); person(680, 1640, 0.85, F2(c), t, { flip: -1 }); if (hasPartner(c)) person(900, 1700, 0.93, PT(c), t, { flip: -1 }); pet(c, 70, 1840, 0.7, t); nightTint(0.15); } },
@@ -2041,7 +2045,7 @@ const SCENES = {
   checklist: { label: 'Ticking off small wins', fn(c, t) { room(c, t, { wall: [0.92, 0.9, 0.86] }); const u = ease(clamp((t - 2.6) / 0.5)); person(280, 1660, 1, ME(c), t, { armR: [0.4 + 2.2 * u, 0.4 + 2 * u] }); checklist(530, 760, 460, 3, t, 0.8, 0.6); pet(c, 700, 1760, 0.8, t, { flip: -1 }); } },
   read: { label: 'Reading and learning', fn(c, t) { room(c, t, { wall: [0.93, 0.9, 0.85], window: 'day' }); const h = person(420, 1660, 1, ME(c), t, { armL: [0.3, 0.25], armR: [0.3, 0.25] }); book((h.L[0] + h.R[0]) / 2, h.R[1] + 10, t); const sk = C(ME(c).skin); [h.L, h.R].forEach(([hx, hy], i) => { circ(hx + (i ? -6 : 6), hy - 12, 21); fill(sk); circ(hx + (i ? -16 : 16), hy - 34, 9); fill(sk); }); pet(c, 780, 1760, 0.8, t, { flip: -1, tongue: false }); } },
   soda: { label: 'Choosing a better drink', fn(c, t) { room(c, t, { wall: [0.33, 0.3, 0.42], floor: [0.4, 0.3, 0.26], lights: true }); const l = ease(clamp((t - 1.2) / 0.8)); const h = person(420, 1680, 1.05, ME(c), t, { armR: [0.35 + 0.6 * l, 1.4 + 0.9 * l] }); { const k = c.drink || 'soda'; holdDrink(h.R, t, k === 'tea' || k === 'coffee' ? 'water' : k, ME(c)); } counter(640, 1100, 1470, [0.45, 0.33, 0.27]); pet(c, 160, 1760, 0.8, t); } },
-  cuppa: { label: 'A morning cuppa', fn(c, t) { room(c, t, { wall: [0.95, 0.9, 0.84], window: 'sunrise' }); counter(560, 1100); rr(820, 1300, 120, 140, 30); fill([0.85, 0.87, 0.9]); line([[940, 1330], [990, 1300]], 14, [0.85, 0.87, 0.9]); rr(850, 1280, 60, 24, 8); fill([0.3, 0.3, 0.33]); const sip = Math.max(0, Math.sin(t * 0.9 - 1.2)); const h = person(380, 1670, 1.05, ME(c), t, { armR: [0.5 + 0.55 * sip, 1.9 + 0.75 * sip] }); holdDrink(h.R, t, c.drink === 'tea' ? 'tea' : 'coffee', ME(c)); pet(c, 150, 1780, 0.75, t, { lookUp: 0.5 }); } },
+  cuppa: { label: 'A morning cuppa', fn(c, t) { room(c, t, { wall: [0.95, 0.9, 0.84], window: 'sunrise' }); counter(560, 1100); rr(820, 1300, 120, 140, 30); fill([0.85, 0.87, 0.9]); line([[940, 1330], [990, 1300]], 14, [0.85, 0.87, 0.9]); rr(850, 1280, 60, 24, 8); fill([0.3, 0.3, 0.33]); const sip = Math.max(0, Math.sin(t * 0.9 - 1.2)); const h = person(380, 1670, 1.05, ME(c), t, { armR: [0.5 + 0.55 * sip, 1.9 + 0.75 * sip] }); holdDrink(h.R, t, c.drink === 'tea' ? 'tea' : 'coffee', ME(c)); if (ptJoins(c)) { const hp = person(720, 1665, 0.97, PT(c), t, { flip: -1, armR: [0.5 + 0.55 * Math.max(0, Math.sin(t * 0.9 + 0.8)), 1.9 + 0.75 * Math.max(0, Math.sin(t * 0.9 + 0.8))] }); holdDrink(hp.R, t, 'coffee', PT(c)); } pet(c, 150, 1780, 0.75, t, { lookUp: 0.5 }); } },
   fridge: { label: 'Stocking up on good food', fn(c, t) { room(c, t, { wall: [0.92, 0.94, 0.9] }); fridge(60, 1640, ease(clamp((t - 0.4) / 0.8))); const r = ease(clamp((t - 1.4) / 0.7)); person(560, 1660, 1, ME(c), t, { armL: [0.3 + 0.9 * r, 0.5 + 0.8 * r] }); counter(700, 1100); fruitBowl(900, 1440); pet(c, 760, 1780, 0.75, t, { flip: -1, lookUp: 0.5 }); } },
   cook: { label: 'Cooking a real meal', fn(c, t) { room(c, t, { wall: [0.94, 0.9, 0.84], window: 'day' }); counter(380, 1100); stove(640, 1420, t); const s = 0.25 * Math.sin(t * 5); person(260, 1660, 1, ME(c), t, { armR: [0.6 + s, 1.5 + s] }); pet(c, 120, 1780, 0.75, t, { lookUp: 0.7 }); } },
   eat: { label: 'Eating well', fn(c, t) { room(c, t, { wall: [0.93, 0.9, 0.85], window: 'day' }); const h = person(400, 1660, 1, ME(c), t, { armR: [0.4, 1.6], armL: [0.4, 1.6] }); bowl((h.L[0] + h.R[0]) / 2, h.R[1] - 10, t); pet(c, 700, 1760, 0.85, t, { flip: -1, lookUp: 0.8 }); } },
@@ -2172,6 +2176,24 @@ const homeWorld = k => FIXED_HOME[k] || ROAM_SHOW[k] || 'beach';
 // opening and closing are in the viewer's own voice, like every line in between
 function openingText(cfg) { return (cfg.opening || '').trim() || 'This is me.'; }
 function closingText(cfg) { return (cfg.closing || '').trim() || 'I\u2019m off to live it.'; }
+// pets and partners: present enough that they feel part of your life, never so often it looks silly
+const PET_ALWAYS = new Set(['walk', 'newfamily', 'together']);
+const PET_NEVER = new Set(['gym', 'talk', 'date', 'party', 'dance', 'boxing', 'paddle', 'footy', 'soccer', 'tennis', 'surf', 'cycle', 'swim', 'hoop', 'mat', 'golf', 'cricket', 'laptop', 'hardfirst', 'money', 'cafe', 'jar', 'checklist', 'progress', 'clockplan', 'idea', 'ship', 'guitar', 'songcard', 'title', 'end']);
+const PT_SCENES = new Set(['campfire', 'couple', 'together', 'family', 'pram', 'familydinner', 'newfamily', 'call', 'date', 'party', 'cuddle', 'cook_together', 'tennis', 'bbq']);
+const PT_JOIN = ['unwind', 'start', 'cuppa', 'hike', 'garden', 'sunrise', 'steady'];
+const spread = (arr, k) => k <= 0 || !arr.length ? [] : k >= arr.length ? arr.slice() : Array.from({ length: k }, (_, i) => arr[Math.round(i * (arr.length - 1) / Math.max(1, k - 1))]);
+function planCompanions(cfg, items) {
+  const acts = items.filter(it => it.scene !== 'title'), n = acts.length;
+  acts.forEach(it => { it.pet = PET_ALWAYS.has(it.scene); it.pt = false; });
+  if ((cfg.pets || []).length) {
+    const want = Math.max(2, Math.round(n / 3)) - acts.filter(it => it.pet).length;
+    spread(acts.filter(it => !it.pet && !PET_NEVER.has(it.scene)), want).forEach(it => { it.pet = true; });
+  }
+  if (hasPartner(cfg)) {
+    const want = Math.max(2, Math.round(n / 4)) - acts.filter(it => PT_SCENES.has(it.scene)).length;
+    spread(acts.filter(it => PT_JOIN.includes(it.scene)), want).forEach(it => { it.pt = true; });
+  }
+}
 function timeline(cfg, targetDur) {
   const items = [{ kind: 'g', text: openingText(cfg), scene: 'title', d: cfg.openD || 5, size: 100 }];
   (cfg.sections || []).forEach(sec => {
@@ -2185,6 +2207,7 @@ function timeline(cfg, targetDur) {
   items.forEach((it, k) => {
     if (!it.world && ROAM_SCENES.has(it.scene)) { const last = (items[k - 1] || {}).world; it.world = ROAMS.filter(w => w !== last).sort((a, b) => used[a] - used[b] || ((ROAMS.indexOf(a) + k) % ROAMS.length) - ((ROAMS.indexOf(b) + k) % ROAMS.length))[0]; used[it.world]++; }
   });
+  planCompanions(cfg, items);
   items.push({ kind: 'g', text: closingText(cfg), scene: 'end', d: 7, last: true });
   const roomUse = ROOM_STYLES.map(() => 0); let prevRoom = -1;
   const indoor = sc => { const s = SCENES[sc]; return !!s && /\broom\(/.test(s.fn.toString()); };
@@ -2200,7 +2223,8 @@ function render(ctx, cfg, tl, T) {
   let i = 0; while (i < tl.items.length - 1 && tl.items[i + 1].start <= T) i++;
   const it = tl.items[i], t = T - it.start, p = t / it.d, d = it.d;
   X.save(); X.fillStyle = css(CREAM); X.fillRect(0, 0, W, H);
-  const sc = it.world && it.world !== cfg.world ? Object.assign({}, cfg, { world: it.world }) : cfg;
+  let sc = it.world && it.world !== cfg.world ? Object.assign({}, cfg, { world: it.world }) : cfg;
+  if (it.pet === false || it.pt) sc = Object.assign({}, sc, it.pet === false ? { pets: [] } : {}, { _pt: !!it.pt });
   ROOMSEL = it.room != null ? it.room : roomHash(it.scene); HATS_OFF = false;
   try { (SCENES[it.scene] || SCENES.sunrise).fn(sc, t, p); } catch (e) { console.error(e); }
   ROOMSEL = null;
