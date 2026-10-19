@@ -368,7 +368,7 @@ input[type=range]{height:30px;touch-action:none}
         <p class="status err steperr" id="step0Err" hidden></p>
         <div class="card mequick" id="meQuick" aria-label="You"></div>
         <div class="card"><p class="meta goalmeta" id="goalMeta"></p><div class="tiles" id="tiles"></div></div>
-        <div class="card" id="fillsCard"><div class="subhead"><h3>Make each goal yours</h3></div><p class="lede fillslede">Your answers become the lines in your film. Leave any blank and we'll fill it in for you.</p><div class="fills" id="fills"></div></div>
+        <div class="card" id="fillsCard"><div class="subhead"><h3>Make each goal yours</h3></div><p class="lede fillslede">Write the things you actually do, in your own words, and they go in your film just as you wrote them. Leave any blank and we'll fill it in for you.</p><div class="fills" id="fills"></div></div>
         <div class="navrow"><span></span><button class="btn coral" data-next>Next: your people</button></div>
       </section>
 
@@ -1291,7 +1291,8 @@ function holdDrink(hand, t, kind, L) {
     ell(hx + 6, hy - 14, 13, 8); fill(sk);
     return;
   }
-  const gx = hx + 30, gy = hy + 62;
+  // a wine glass is held by the stem, so the bowl sits above the fingers
+  const gx = kind === 'wine' ? hx + 16 : hx + 30, gy = kind === 'wine' ? hy + 30 : hy + 62;
   drink(gx, gy, t, kind);
   circ(hx, hy, 19); fill(sk);
   [-14, 0, 14].forEach((dy, i) => { rr(hx - 2, hy + dy - 6, 40 - i * 3, 12, 6); fill(i % 2 ? darken(sk, 0.06) : sk); });
@@ -1299,6 +1300,20 @@ function holdDrink(hand, t, kind, L) {
 function drink(x, y, t, kind) {
   if (kind === 'tea' || kind === 'coffee') return mug(x, y, t, kind);
   if (kind === 'kombucha') { rr(x - 26, y - 110, 52, 120, 14); fill([0.62, 0.36, 0.12], 0.85); rr(x - 12, y - 150, 24, 44, 6); fill([0.62, 0.36, 0.12], 0.85); rr(x - 14, y - 160, 28, 14, 4); fill([0.2, 0.2, 0.22]); rr(x - 26, y - 76, 52, 40, 4); fill([0.96, 0.92, 0.8]); for (let i = 0; i < 4; i++) { circ(x - 12 + (i * 9) % 24, y - ((t * 40 + i * 30) % 100), 3); fill([1, 1, 1], 0.6); } return; }
+  if (kind === 'beer') {
+    // a pint: amber body, white head, bubbles rising
+    X.beginPath(); X.moveTo(x - 32, y - 124); X.lineTo(x + 32, y - 124); X.lineTo(x + 26, y + 10); X.lineTo(x - 26, y + 10); X.closePath(); fill([0.93, 0.66, 0.2], 0.92); X.lineWidth = 4; X.strokeStyle = css([1, 1, 1], 0.9); X.stroke();
+    rr(x - 34, y - 140, 68, 26, 13); fill([0.99, 0.97, 0.9]); circ(x - 16, y - 142, 12); fill([0.99, 0.97, 0.9]); circ(x + 10, y - 144, 14); fill([0.99, 0.97, 0.9]);
+    for (let i = 0; i < 6; i++) { const by = y - ((t * 50 + i * 21) % 110); circ(x - 16 + (i * 11) % 32, by, 3); fill([1, 1, 1], 0.7); }
+    return;
+  }
+  if (kind === 'wine') {
+    // a wine glass: the bowl sits by the fingers, stem and foot below
+    X.beginPath(); X.moveTo(x - 34, y - 130); X.lineTo(x + 34, y - 130); X.bezierCurveTo(x + 36, y - 80, x + 20, y - 58, x, y - 56); X.bezierCurveTo(x - 20, y - 58, x - 36, y - 80, x - 34, y - 130); X.closePath(); fill([0.95, 0.95, 1], 0.35); X.lineWidth = 4; X.strokeStyle = css([1, 1, 1], 0.9); X.stroke();
+    X.beginPath(); X.moveTo(x - 32, y - 104); X.lineTo(x + 32, y - 104); X.bezierCurveTo(x + 30, y - 76, x + 16, y - 62, x, y - 61); X.bezierCurveTo(x - 16, y - 62, x - 30, y - 76, x - 32, y - 104); X.closePath(); fill([0.55, 0.1, 0.2], 0.9);
+    line([[x, y - 56], [x, y + 4]], 6, [0.95, 0.95, 1]); ell(x, y + 6, 26, 6); fill([0.95, 0.95, 1], 0.9);
+    return;
+  }
   const col = kind === 'juice' ? [0.98, 0.65, 0.2] : kind === 'mocktail' ? [0.95, 0.45, 0.5] : [0.75, 0.9, 0.98];
   X.beginPath(); X.moveTo(x - 34, y - 120); X.lineTo(x + 34, y - 120); X.lineTo(x + 28, y + 10); X.lineTo(x - 28, y + 10); X.closePath();
   fill(col, kind === 'water' || kind === 'soda' ? 0.55 : 0.85); X.lineWidth = 4; X.strokeStyle = css([1, 1, 1], 0.9); X.stroke();
@@ -2543,7 +2558,7 @@ const THEMES = [
   { id: 'screen', title: 'Less screen time', hint: 'Phone down, life up', qs: [['instead', 'What will you do instead?', 'read, go for a surf, play with the kids']],
     a: [['I {instead|read a book} instead of scrolling', '@instead'], ['My phone stays in the drawer at dinner', 'familydinner'], ['I head outside when I want to scroll', 'walk'], ['I wake up and look at the sky first', 'wake']],
     g: [['More time, and I’m present for it', 'sunrise'], ['Here for the good stuff', 'together']] },
-  { id: 'drink', title: 'Better drinks', hint: 'Soda water, clear mornings', qs: [['swap', 'What do you love to reach for?', 'soda water, kombucha, tea']],
+  { id: 'drink', title: 'Better drinks', hint: 'Less or none, clear mornings', qs: [['swap', 'What does a better drink look like for you?', 'soda water, kombucha, one beer and done']],
     a: [['I reach for a {swap|soda water} and enjoy it', '@drink'], ['I dance all night with a {nightdrink|soda water} in hand', 'party'], ['I wake up on Sunday clear and ready', 'wake'], ['I swap the after-work drink for a walk', 'unwind']],
     g: [['Sharp, rested and proud of myself', 'sunrise'], ['Clear head, big mornings', 'celebrate']] },
   { id: 'brave', title: 'Confidence', hint: 'Saying yes, speaking up', qs: [['yes', 'Something you’d love to say yes to?', 'a dance class, speaking up at work']],
@@ -2581,6 +2596,12 @@ const THEMES = [
     g: [['Home, just how I want it', 'cook_together']] },
 ];
 const TH = id => THEMES.find(t => t.id === id);
+// "In your own words": an example of a real thing someone does, per goal
+const MINE_EX = { move: 'I walk the dog every morning before breakfast', food: 'I cook a proper dinner most nights', money: 'I check my bank app every Sunday', people: 'I ring Mum on the drive home', sport: 'I train Tuesday and Thursday nights', calm: 'I sit outside with a cuppa before work', screen: 'My phone charges in the kitchen overnight', drink: 'I go out with friends and one beer is enough', brave: 'I say hello first', love: 'I say yes when friends invite me out', partner: 'I bring her a coffee in bed on Sunday', family: 'I put my phone away when the kids get home', grow: 'We cook healthy dinners together', work: 'I do one hour on my project before work', start: 'I lay out my clothes the night before', create: 'I play guitar for twenty minutes after dinner', learn: 'I do a lesson on the train', travel: 'I put twenty dollars aside every payday', home: 'I clear one drawer every Sunday' };
+const MINE_KEYS = ['mine1', 'mine2'];
+const drinkWords = f => { f = f || {}; return String(f.swap || '').trim() || MINE_KEYS.map(k => f[k] || '').filter(v => ALC.test(v) || /\b(tea|coffee|soda|kombucha|juice|mocktail|water)\b/i.test(v)).join(' '); };
+// their own line, tidied: spelling, a capital at the start, no full stop at the end
+const tidyMine = raw => { let v = spellFix(String(raw || '').trim().replace(/\s+/g, ' ').replace(/[.!,;:]+$/, '')).replace(/\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday|january|february|march|april|june|july|august|september|october|november|december)\b/gi, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()); return v ? v.charAt(0).toUpperCase() + v.slice(1) : ''; };
 // typed activities to pictures; anything not listed gets a neutral 'heading out' scene rather than a wrong one
 const ACTS = [
   [/surf|bodyboard/, 'surf'], [/swim|laps|triathl|aqua/, 'swim'], [/cycl|bike|\bride|riding|mtb|spin class/, 'cycle'],
@@ -2596,14 +2617,14 @@ const ACTS = [
 const ACT_SCENE = (v, fb) => { const hit = ACTS.find(([re]) => re.test(v)); return hit ? hit[1] : fb; };
 const MOVE_SCENE = v => v.trim() ? ACT_SCENE(v, 'sunrise') : 'gym';
 const SPORT_SCENE = v => v.trim() ? ACT_SCENE(v, 'sunrise') : 'footy';
-const drinkKind = v => { v = String(v || '').toLowerCase(); return /\b(tea|chai|herbal|matcha|cuppa)\b/.test(v) ? 'tea' : /\b(coffee|latte|flat white|espresso|cappuccino|long black|decaf)\b/.test(v) ? 'coffee' : /kombucha/.test(v) ? 'kombucha' : /juice|smoothie/.test(v) ? 'juice' : /mocktail|zero|non.?alc|0%|alcohol.?free/.test(v) ? 'mocktail' : /\bwater\b/.test(v) && !/soda|sparkling|mineral|fizzy/.test(v) ? 'water' : 'soda'; };
+const drinkKind = v => { v = String(v || '').toLowerCase(); return /\b(tea|chai|herbal|matcha|cuppa)\b/.test(v) ? 'tea' : /\b(coffee|latte|flat white|espresso|cappuccino|long black|decaf)\b/.test(v) ? 'coffee' : /kombucha/.test(v) ? 'kombucha' : /\b(beers?|pints?|schooners?|pots?|middys?|lagers?|ales?|ipa|ciders?|stubb(y|ies)|tinnies|tinny|brew(sky|skies)?)\b/.test(v) ? 'beer' : /\b(wines?|vino|prosecco|champagne|bubbles|spritz|ros[eé]|reds?|whites?)\b/.test(v) && !/water/.test(v) ? 'wine' : /juice|smoothie/.test(v) ? 'juice' : /mocktail|zero|non.?alc|0%|alcohol.?free/.test(v) ? 'mocktail' : /\bwater\b/.test(v) && !/soda|sparkling|mineral|fizzy/.test(v) ? 'water' : 'soda'; };
 const isMusic = v => /music|song|guitar|sing|band|piano|beat/.test(v);
 function sceneFor(sc, fills) {
   if (!sc.startsWith('@')) return sc;
   const craft = (fills.craft || '').toLowerCase(), act = (fills.activity || '').toLowerCase();
   if (sc === '@move') return MOVE_SCENE(act);
   if (sc === '@sport') return SPORT_SCENE((fills.sport || '').toLowerCase());
-  if (sc === '@drink') { const k = drinkKind(fills.swap); return k === 'tea' || k === 'coffee' ? 'cuppa' : 'soda'; }
+  if (sc === '@drink') { const k = drinkKind(drinkWords(fills)); return k === 'tea' || k === 'coffee' ? 'cuppa' : 'soda'; }
   if (sc === '@instead' || sc === '@unwind') {
     const a = ((sc === '@instead' ? fills.instead : fills.unwind) || '').toLowerCase();
     if (!a.trim()) return sc === '@instead' ? 'read' : 'calm';
@@ -2679,17 +2700,35 @@ function tidyAnswer(k, raw) {
   }
   return v;
 }
+// Some answers are a whole thought ("one beer is enough", "I spend less on takeaway") rather than a thing to slot into a line.
+// Those become a line of their own, in their words, and any line with a blank for that answer uses its default instead.
+const STATEMENT_WORDS = /\b(?:is|are|am|was|were|be|will|won't|wont|can't|cant|don't|dont|doesn't|should|must|enough|less|fewer|stop|quit|never|no more|only|max|limit|cut (?:back|down))\b/i;
+function asStatement(k, v) {
+  if (!v || k === 'freq') return '';
+  if (/^I\b/.test(v) || (!NAME_KEYS.has(k) && STATEMENT_WORDS.test(v))) return v.charAt(0).toUpperCase() + v.slice(1);
+  return '';
+}
+const slotAnswer = (k, raw) => { const v = tidyAnswer(k, raw); return asStatement(k, v) ? '' : v; };
+// "one beer", "two wines", "a beer": drinking less rather than none, so the lines are about enjoying it and stopping there
+const ALC = /\b(beers?|pints?|schooners?|middys?|lagers?|ales?|ipa|ciders?|stubb(y|ies)|tinnies|wines?|vino|prosecco|champagne|spritz|cocktails?|drinks?|alcohol|booze|gin|vodka|rum|whisk(e)?y|bourbon|tequila|seltzers?)\b/i;
+const NOALC = /\b(zero|non.?alc\w*|0%|alcohol.?free|no.?alc\w*|mocktails?|sober|soda|sparkling|water|kombucha|tea|coffee)\b/i;
+const isCutBack = v => ALC.test(v || '') && !NOALC.test(v || '');
+function drinkLimit(raw) {
+  const v = String(raw || '').toLowerCase();
+  const n = (v.match(/\b(one|two|three|1|2|3|a couple)\b/) || [])[1];
+  return n ? ({ 1: 'one', 2: 'two', 3: 'three' })[n] || n : '';
+}
 function fillT(tpl, fills, cfg) {
   // names from "Your people" fill in when the theme's own question is left blank
   const kidNames = (cfg.kids || []).filter(k => k.status !== 'hoping' && (k.name || '').trim()).map(k => k.name.trim());
   const joinN = a => a.length === 1 ? a[0] : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
   // a night out never ends up with a flat white in hand: tea and coffee fall back to soda water there
-  const dk = drinkKind(fills.swap);
-  const auto = { nightdrink: dk === 'tea' || dk === 'coffee' ? '' : tidyAnswer('swap', fills.swap), pname: cfg.partner && cfg.partner.on && cfg.partner.status !== 'hoping' ? (cfg.partner.name || '').trim() : '', kids: kidNames.length ? joinN(kidNames) : '' };
-  let out = tpl.replace(/\{(\w+)\|([^}]*)\}/g, (m, k, fb, at) => { let v = tidyAnswer(k, fills[k]) || auto[k] || ''; if (v && /\b(?:my|our|his|her|their|a|an)\s*$/i.test(tpl.slice(0, at))) v = v.replace(/^(?:a|an|the|my|our)\s+/i, ''); return v || fb; });
+  const dk = drinkKind(drinkWords(fills));
+  const auto = { nightdrink: dk === 'tea' || dk === 'coffee' || isCutBack(drinkWords(fills)) ? '' : slotAnswer('swap', fills.swap), pname: cfg.partner && cfg.partner.on && cfg.partner.status !== 'hoping' ? (cfg.partner.name || '').trim() : '', kids: kidNames.length ? joinN(kidNames) : '' };
+  let out = tpl.replace(/\{(\w+)\|([^}]*)\}/g, (m, k, fb, at) => { let v = slotAnswer(k, fills[k]) || auto[k] || ''; if (v && /\b(?:my|our|his|her|their|a|an)\s*$/i.test(tpl.slice(0, at))) v = v.replace(/^(?:a|an|the|my|our)\s+/i, ''); return v || fb; });
   out = out.replace(/\{pet\}/g, LSN.petName(cfg) || 'outside');
   if (/I walk outside/.test(out)) out = out.replace('I walk outside', 'I get outside');
-  out = out.replace(/\s+/g, ' ').trim().replace(/\ba (?=[aeiou])/g, 'an ');
+  out = out.replace(/\s+/g, ' ').trim().replace(/\ba (?=[aeiou])(?!one\b|once\b|uni|use|usu|eu)/gi, m => m[0] === 'A' ? 'An ' : 'an ');
   return out.charAt(0).toUpperCase() + out.slice(1);
 }
 function autoFills(cfg) {
@@ -2704,11 +2743,34 @@ function autoFills(cfg) {
 function buildSection(th, fills, cfg) {
   const own = {}; Object.entries(fills || {}).forEach(([k, v]) => { if (String(v || '').trim()) own[k] = v; });
   fills = Object.assign(autoFills(cfg), own);
+  let a = th.a, gs = th.g;
+  // drinking less, not none: enjoy the one and stop there, rather than reaching for a soda water
+  if (th.id === 'drink' && isCutBack(drinkWords(fills))) {
+    const n = drinkLimit(drinkWords(fills)), what = slotAnswer('swap', fills.swap);
+    a = [[n && what ? `I enjoy ${what} and leave it there` : 'I enjoy one and leave it there', '@drink'], [n ? `I have a great night and stop at ${n}` : 'I have a great night and know when I\u2019m done', 'party'], a[2], a[3]];
+  }
+  // an answer that is a whole thought becomes the first line, word for word, with the goal's first picture
+  const keys = th.qs.map(q => q[0]);
+  const mine = keys.map(k => asStatement(k, tidyAnswer(k, fills[k]))).find(Boolean);
+  const written0 = MINE_KEYS.some(k => String(fills[k] || '').trim());
+  if (mine || written0) { const open = keys.filter(k => !slotAnswer(k, fills[k])); const ok = gs.filter(g => !open.some(k => g[0].includes('{' + k + '|'))); if (ok.length) gs = ok; }
   // two actions per goal keeps a four-goal film around a minute
-  const n = Math.min(th.a.length, 2);
-  const idx = [0, ...[...th.a.keys()].slice(1).sort(() => Math.random() - 0.5).slice(0, n - 1)].sort((a, b) => a - b);
-  const g = rand(th.g);
-  return { theme: th.id, title: th.title, actions: idx.map(i => ({ text: fillT(th.a[i][0], fills, cfg), scene: sceneFor(th.a[i][1], fills) })), glimpse: { text: fillT(g[0], fills, cfg), scene: sceneFor(g[1], fills) } };
+  const n = Math.min(a.length, 2);
+  const idx = [0, ...[...a.keys()].slice(1).sort(() => Math.random() - 0.5).slice(0, n - 1)].sort((x, y) => x - y);
+  const g = rand(gs);
+  let actions = idx.map(i => ({ text: fillT(a[i][0], fills, cfg), scene: sceneFor(a[i][1], fills) }));
+  if (mine) actions[0] = { text: mine, scene: actions[0].scene, own: true };
+  // lines they wrote themselves always make the film, with a picture matched to their words
+  const written = MINE_KEYS.map(k => tidyMine(fills[k])).filter(Boolean);
+  if (written.length) {
+    const firstScene = actions[0].scene;
+    const theirs = written.map(t => { let sc = null, early = false; try { sc = guessScene(t); } catch (e) { early = true; } return Object.assign({ text: t, scene: sc && LSN.SCENES[sc] ? sc : firstScene, own: true }, early ? { guess: true } : {}); });
+    // topped up from the goal's other ideas, not its headline line (theirs replaces that), and never a picture they already have
+    const pool = [...[...a.keys()].slice(1).sort(() => Math.random() - 0.5), 0].map(i => ({ text: fillT(a[i][0], fills, cfg), scene: sceneFor(a[i][1], fills) }));
+    const extra = pool.filter(x => !theirs.some(y => y.text === x.text || lookOf(y.scene) === lookOf(x.scene)));
+    actions = [...theirs, ...extra].slice(0, Math.max(2, theirs.length));
+  }
+  return { theme: th.id, title: th.title, actions, glimpse: { text: fillT(g[0], fills, cfg), scene: sceneFor(g[1], fills) } };
 }
 
 // ------------------------------------------------ palettes & state
@@ -2810,7 +2872,7 @@ function renderThemes() {
     box.append(el('button', { class: 'tile' + (full ? ' full' : ''), 'aria-pressed': on ? 'true' : 'false', onclick: () => { if (full) { goalNote(true); return; } S.themes = on ? S.themes.filter(x => x !== th.id) : [...S.themes, th.id]; step0Ok(); liveLines(); save(); renderThemes(); if (!on) { const sec = S.cfg.sections.find(s => s.theme === th.id); const a = sec && sec.actions.find(x => x.text && x.text.trim()); if (a) { preview('action', a); $('#stageNote').textContent = 'Added to your film: ' + th.title; } } else { $('#stageNote').textContent = 'Taken out of your film: ' + th.title; } } }, el('b', {}, th.title), el('small', {}, th.hint), on ? el('small', { class: 'tileedit' }, '✎ Make it yours below') : ''));
   });
   const fills = $('#fills'); fills.innerHTML = '';
-  const withQs = THEMES.filter(t => S.themes.includes(t.id) && t.qs.length);
+  const withQs = THEMES.filter(t => S.themes.includes(t.id));
   $('#fillsCard').hidden = !withQs.length;
   withQs.forEach(th => {
     S.fills[th.id] = S.fills[th.id] || {};
@@ -2821,6 +2883,12 @@ function renderThemes() {
       const tip = el('small', { class: 'filltip' }, 'Short works best, just a few words.'); tip.hidden = (inp.value || '').trim().split(/\s+/).length <= 6;
       inp.oninput = () => { S.fills[th.id][k] = inp.value; tip.hidden = inp.value.trim().split(/\s+/).length <= 6; liveLines(); fillPreviews(); save(); };
       card.append(el('label', { for: id }, label, inp, tip));
+    });
+    MINE_KEYS.forEach((k, i) => {
+      const id = `f-${th.id}-${k}`, inp = el('input', { type: 'text', id, placeholder: i ? 'Another one, if you like' : 'e.g. ' + (MINE_EX[th.id] || 'something you do'), maxlength: 80 });
+      inp.value = S.fills[th.id][k] || '';
+      inp.oninput = () => { S.fills[th.id][k] = inp.value; liveLines(); fillPreviews(); save(); };
+      card.append(el('label', { for: id, class: 'minelabel' }, i ? '' : 'Something you do, in your own words', inp));
     });
     card.append(el('div', { class: 'fillprev', 'data-theme': th.id }));
     fills.append(card);
@@ -2855,7 +2923,7 @@ function varyScenesInner(sections) {
     (sec.actions || []).forEach(a => {
       if (used.has(lookOf(a.scene)) && th) {
         // swap for another of this goal's lines whose picture hasn't been used yet
-        const alt = th.a.map(x => ({ text: fillT(x[0], fills, S.cfg), scene: sceneFor(x[1], fills) })).find(x => !used.has(lookOf(x.scene)) && !sec.actions.some(y => y.text === x.text));
+        const alt = a.own ? null : th.a.map(x => ({ text: fillT(x[0], fills, S.cfg), scene: sceneFor(x[1], fills) })).find(x => !used.has(lookOf(x.scene)) && !sec.actions.some(y => y.text === x.text));
         if (alt) { a.text = alt.text; a.scene = alt.scene; }
         // no other line of theirs has a fresh picture: keep their words, borrow a picture that hasn't been used yet
         // only a related picture or a neutral moment (standing tall at sunrise, calm, looking ahead), never an unrelated activity
@@ -2877,15 +2945,15 @@ function varyScenesInner(sections) {
 }
 // Until someone edits their lines by hand, the film follows what they tick, so the preview always shows their choices.
 function liveLines() {
-  S.cfg.drink = drinkKind((S.fills.drink || {}).swap);
+  S.cfg.drink = drinkKind(drinkWords(S.fills.drink));
   if (S.linesTouched) return;
   const ids = THEMES.map(t => t.id).filter(id => S.themes.includes(id));
   const keep = {}; (S.cfg.sections || []).forEach(s => { if (s.theme) keep[s.theme] = s; });
   const names = [S.cfg.partner.on && S.cfg.partner.name, (S.cfg.kids || []).map(k => k.name)];
-  const key = id => JSON.stringify(['w4', S.fills[id] || {}, names]);
+  const key = id => JSON.stringify(['w5', S.fills[id] || {}, names]);
   S.cfg.sections = ids.map(id => keep[id] && key(id) === keep[id]._fills ? keep[id] : Object.assign(buildSection(TH(id), S.fills[id] || {}, S.cfg), { _fills: key(id) }));
   varyScenes(S.cfg.sections);
-  S.cfg.drink = drinkKind((S.fills.drink || {}).swap);
+  S.cfg.drink = drinkKind(drinkWords(S.fills.drink));
   S.isExample = false;
 }
 
@@ -3184,7 +3252,7 @@ const SCENE_WORDS = [
   [/\b(date|date night|romance|romantic)\b/, 'date'], [/\b(cuddle|close|intimate|appreciate|listen to (him|her|them))\b/, 'cuddle'],
   [/\b(basketball|netball|hoops)\b/, 'hoop'], [/\b(ballet|dance class\w*|dance lessons?|zumba|barre|salsa)\b/, 'dance'], [/\b(yoga|pilates)\b/, 'mat'], [/\b(golf)\b/, 'golf'], [/\b(cricket)\b/, 'cricket'], [/\b(boxing|martial arts?|karate|judo|jiu.?jitsu|bjj|muay thai|kickboxing|taekwondo|mma)\b/, 'boxing'],
   [/\b(rowing|kayak\w*|canoe\w*|paddl\w*|paddleboard\w*)\b/, 'paddle'], [/\b(fish|fishing)\b/, 'fishing'], [/\b(garden\w*|veggie patch|vegie patch)\b/, 'garden'], [/\b(hike|hiking|bushwalk\w*|trek\w*)\b/, 'hike'],
-  [/\b(dance|dancing|party|gig|night out)\b/, 'party'], [/\b(tea|coffee|cuppa|latte|chai)\b/, 'cuppa'], [/\b(soda|sober|alcohol|drink(s|ing)?|beer|wine|booze|kombucha|mocktail)\b/, 'soda'],
+  [/\b(dance|dancing|party|gig|night out|go(ing)? out|out with (friends|mates)|pub|bar)\b/, 'party'], [/\b(tea|coffee|cuppa|latte|chai)\b/, 'cuppa'], [/\b(soda|sober|alcohol|drink(s|ing)?|beer|wine|booze|kombucha|mocktail)\b/, 'soda'],
   [/\b(gym|weights?|lift(ing)?|strength|squats?|deadlifts?|pump)\b/, 'gym'], [/\b(run|running|jog|jogging|marathon|parkrun)\b/, 'jog'],
   [/\b(footy|afl|aussie rules|rugby|kick(ing)? the ball)\b/, 'footy'], [/\b(soccer|futsal)\b/, 'soccer'], [/\b(tennis|padel|squash|badminton|pickleball)\b/, 'tennis'],
   [/\b(surf\w*|bodyboard\w*)\b/, 'surf'], [/\b(swim\w*|laps|pool)\b/, 'swim'], [/\b(cycl\w*|bike|ride|riding)\b/, 'cycle'],
@@ -3207,7 +3275,10 @@ const SCENE_WORDS = [
   [/\b(proud|grateful|gratitude|kind to myself|myself)\b/, 'selflove'], [/\b(dog|pup|puppy|cat)\b/, 'walk'],
 ];
 function guessScene(text) {
-  const t = ' ' + String(text || '').toLowerCase() + ' ';
+  let t = ' ' + String(text || '').toLowerCase() + ' ';
+  // their pet's name counts as "dog", and walking (with or without the dog) wins over what happens before or after
+  (S.cfg.pets || []).forEach(p => { const n = (p.name || '').trim().toLowerCase(); if (n) t = t.split(n).join(' ' + (p.type || 'dog') + ' '); });
+  if (/\b(walk|walking|stroll)\b/.test(t) && !/\b(walk(ing)? to (work|the office|school))\b/.test(t)) return /\b(we|together|us|our)\b/.test(t) && hasPartnerNow() ? 'couple' : 'walk';
   for (const [re, sc] of SCENE_WORDS) if (re.test(t)) {
     if (sc === 'cook' && /\b(we|together|us|our)\b/.test(t) && hasPartnerNow()) return 'cook_together';
     if (sc === 'walk' && /\b(we|together|us|our)\b/.test(t) && hasPartnerNow()) return 'couple';
@@ -3216,6 +3287,7 @@ function guessScene(text) {
   return null;
 }
 const hasPartnerNow = () => S.cfg.partner && S.cfg.partner.on;
+(S.cfg.sections || []).forEach(sec => (sec.actions || []).forEach(a => { if (a.guess) { const g = guessScene(a.text); if (g && LSN.SCENES[g]) a.scene = g; delete a.guess; } }));
 // small moving pictures on each scene card
 let liveThumbs = [], thumbClock = 0;
 const thumbObs = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { const t = liveThumbs.find(x => x.cv === e.target); if (t) t.vis = e.isIntersecting; })) : null;
