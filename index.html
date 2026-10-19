@@ -2366,7 +2366,7 @@ const THEMES = [
     a: [['I {instead|read a book} instead of scrolling', '@instead'], ['My phone stays in the drawer at dinner', 'familydinner'], ['I head outside when I want to scroll', 'walk'], ['I wake up and look at the sky first', 'wake']],
     g: [['More time, and I’m present for it', 'sunrise'], ['Here for the good stuff', 'together']] },
   { id: 'drink', title: 'Better drinks', hint: 'Soda water, clear mornings', qs: [['swap', 'What do you love to reach for?', 'soda water, kombucha, tea']],
-    a: [['I order a {swap|soda water} and enjoy it', '@drink'], ['I dance all night with a {swap|soda water} in hand', 'party'], ['I wake up on Sunday clear and ready', 'wake'], ['I swap the after-work drink for a walk', 'unwind']],
+    a: [['I reach for a {swap|soda water} and enjoy it', '@drink'], ['I dance all night with a {nightdrink|soda water} in hand', 'party'], ['I wake up on Sunday clear and ready', 'wake'], ['I swap the after-work drink for a walk', 'unwind']],
     g: [['Sharp, rested and proud of myself', 'sunrise'], ['Clear head, big mornings', 'celebrate']] },
   { id: 'brave', title: 'Confidence', hint: 'Saying yes, speaking up', qs: [['yes', 'Something you’d love to say yes to?', 'a dance class, speaking up at work']],
     a: [['I say yes to {yes|the thing that scares me}', 'excited'], ['I speak up in the meeting', 'talk'], ['I walk in and say hello first', 'friends'], ['I stand tall and take up space', 'strong']],
@@ -2490,11 +2490,13 @@ function fillT(tpl, fills, cfg) {
   // names from "Your people" fill in when the theme's own question is left blank
   const kidNames = (cfg.kids || []).filter(k => k.status !== 'hoping' && (k.name || '').trim()).map(k => k.name.trim());
   const joinN = a => a.length === 1 ? a[0] : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
-  const auto = { pname: cfg.partner && cfg.partner.on && cfg.partner.status !== 'hoping' ? (cfg.partner.name || '').trim() : '', kids: kidNames.length ? joinN(kidNames) : '' };
-  let out = tpl.replace(/\{(\w+)\|([^}]*)\}/g, (m, k, fb, at) => { let v = tidyAnswer(k, fills[k]) || auto[k] || ''; if (v && /\b(?:my|our|his|her|their)\s*$/i.test(tpl.slice(0, at))) v = v.replace(/^(?:a|an|the|my|our)\s+/i, ''); return v || fb; });
+  // a night out never ends up with a flat white in hand: tea and coffee fall back to soda water there
+  const dk = drinkKind(fills.swap);
+  const auto = { nightdrink: dk === 'tea' || dk === 'coffee' ? '' : tidyAnswer('swap', fills.swap), pname: cfg.partner && cfg.partner.on && cfg.partner.status !== 'hoping' ? (cfg.partner.name || '').trim() : '', kids: kidNames.length ? joinN(kidNames) : '' };
+  let out = tpl.replace(/\{(\w+)\|([^}]*)\}/g, (m, k, fb, at) => { let v = tidyAnswer(k, fills[k]) || auto[k] || ''; if (v && /\b(?:my|our|his|her|their|a|an)\s*$/i.test(tpl.slice(0, at))) v = v.replace(/^(?:a|an|the|my|our)\s+/i, ''); return v || fb; });
   out = out.replace(/\{pet\}/g, LSN.petName(cfg) || 'outside');
   if (/I walk outside/.test(out)) out = out.replace('I walk outside', 'I get outside');
-  out = out.replace(/\s+/g, ' ').trim();
+  out = out.replace(/\s+/g, ' ').trim().replace(/\ba (?=[aeiou])/g, 'an ');
   return out.charAt(0).toUpperCase() + out.slice(1);
 }
 function autoFills(cfg) {
