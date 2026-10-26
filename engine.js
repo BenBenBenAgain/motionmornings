@@ -2013,6 +2013,32 @@ const KIDS = (() => {
     return q;
   }
 
+  // ---- kinder or school: a classroom with a door, bag hooks, an alphabet strip and a whiteboard
+  const HOOKS_Y = 1385;
+  function classroom(t) {
+    room(PARK, t, { wall: [0.86, 0.92, 0.95], floor: [0.74, 0.62, 0.5] }); HATS_OFF = false;
+    const cs = [CORAL, GOLD, [0.55, 0.78, 0.5], [0.47, 0.7, 0.83], [0.85, 0.55, 0.75]];
+    X.font = '700 46px Poppins, sans-serif'; X.textAlign = 'center';
+    'ABCDEFGHIJ'.split('').forEach((ch, i) => { const x = 60 + i * 106; rr(x - 42, 560, 84, 84, 12); fill(cs[i % 5]); X.fillStyle = css([1, 1, 1]); X.fillText(ch, x, 618); });
+    // the door they come in and out of
+    rect(30, 900, 210, 560, [0.98, 0.97, 0.94]); rect(46, 916, 178, 544, [0.47, 0.62, 0.72]); circ(206, 1200, 10); fill(GOLD); rr(80, 960, 110, 120, 10); fill([0.82, 0.92, 0.98]);
+    // whiteboard with a drawing on it
+    rect(660, 700, 380, 270, [0.42, 0.42, 0.46]); rect(672, 712, 356, 246, [1, 1, 1]);
+    circ(760, 790, 34); fill(GOLD, 0.9); line([[700, 930], [790, 860], [860, 910], [1000, 830]], 6, [0.47, 0.7, 0.83]); X.font = '700 40px Poppins, sans-serif'; X.fillStyle = css(CORAL); X.fillText('Hello!', 930, 790);
+    // hooks with little bags at kid height
+    rect(300, HOOKS_Y - 30, 330, 14, [0.62, 0.46, 0.33]);
+    [340, 410, 550, 610].forEach((x, i) => { line([[x, HOOKS_Y - 18], [x, HOOKS_Y + 6]], 6, [0.5, 0.5, 0.55]); rr(x - 26, HOOKS_Y + 2, 52, 66, 12); fill(cs[(i + 2) % 5]); rr(x - 18, HOOKS_Y + 30, 36, 24, 6); fill([1, 1, 1], 0.35); });
+  }
+  // a little one sitting cross-legged: legs tucked under, drawn over the cut-off body
+  function sitKid(k, x, y, t, o = {}) {
+    const s = ks(k, o.s || 1), L = Object.assign({ pants: '#30406E' }, k), dress = L.outfit === 'dress';
+    X.save(); X.beginPath(); X.rect(0, 0, W, y - 8 * s); X.clip();
+    const h = drawKid(k, x, y + 190 * s, t, o); X.restore();
+    ell(x, y - 20 * s, 120 * s, 46 * s); fill(dress ? L.top : L.pants);
+    [-1, 1].forEach(sd => { ell(x + sd * 92 * s, y - 2 * s, 30 * s, 16 * s); fill([0.13, 0.11, 0.1]); });
+    return h;
+  }
+
   // ---- the scenes a story step can use. Each returns where heads are, so a speech bubble can find its speaker.
   const SC = {
     title: { label: 'Setting off', fn(c, t, p) { outdoor(PARK, t, 'sunrise', 1080 - 140 * ease(p)); const q = clamp((p - 0.25) / 0.75); return pair(c, -420 + 1500 * q, 1680, t, q > 0 && q < 1 ? 1 : 0); } },
@@ -2092,6 +2118,48 @@ const KIDS = (() => {
       const q = ease(clamp((p - 0.15) / 0.85));
       return pair(c, lerp(260, 1250, q), 1720, t, q > 0 && q < 1 ? 1 : 0, { kidWave: true });
     } },
+    hook: { label: 'Bag on the hook', fn(c, t) {
+      classroom(t); const k = KID(c), kx = 470, ky = 1720, s = ks(k), u = ease(clamp((t - 0.6) / 1.2));
+      const hand = [lerp(kx + 70, 480, u), lerp(1560, HOOKS_Y + 6, u)];
+      person(800, 1720, 1, AD(c), t, { flip: -1, armR: [0.3, 0.2] });
+      drawKid(k, kx, ky, t, { armR: reach(kx, ky, s, 1, 1, hand[0], hand[1], -1), armL: [0.2, 0.1] });
+      rr(hand[0] - 26, hand[1] + 4, 52, 66, 12); fill(CORAL); circ(hand[0], hand[1], 20 * s); fill(k.skin);
+      return { adult: adultTop(800, 1720), child: kidTop(k, kx, ky) };
+    } },
+    goodbye: { label: 'Saying goodbye at the door', helper: true, fn(c, t) {
+      classroom(t); const k = KID(c), hp = HP(c), kx = 560, tx = 760, y = 1720, s = ks(k);
+      const q = ease(clamp((t - 1.8) / 2.2)), ax = lerp(400, 150, q), m = q > 0 && q < 0.98 ? 1 : 0;
+      person(ax, y, 1, AD(c), t, { flip: -1, walk: m, armR: t < 1.9 || !m ? wave(t) : [0.2, 0.1] });
+      const hx = kx + 90, hy = y - 228;
+      person(tx, y, 0.98, hp, t, { flip: -1, armR: reach(tx, y, 0.98, -1, 1, hx, hy) });
+      drawKid(k, kx, y + 4, t, { armR: reach(kx, y + 4, s, 1, 1, hx, hy, -1), armL: wave(t, 1) });
+      return { adult: adultTop(ax, y), child: kidTop(k, kx, y + 4), helper: adultTop(tx, y, 0.98) };
+    } },
+    mattime: { label: 'Story time on the mat', helper: true, fn(c, t) {
+      classroom(t); const k = KID(c), hp = HP(c);
+      rr(60, 1600, 720, 230, 30); fill([0.47, 0.7, 0.83], 0.55); rr(90, 1625, 660, 180, 24); fill([0.99, 0.95, 0.89], 0.5);
+      const tx = 900, ty = 1720, bx = 800, by = 1380 + 4 * Math.sin(t * 1.4);
+      person(tx, ty, 1, hp, t, { flip: -1, armR: reach(tx, ty, 1, -1, 1, bx - 40, by + 30, -1), armL: reach(tx, ty, 1, -1, -1, bx + 40, by + 30, -1) });
+      X.save(); X.translate(bx, by); X.rotate(-0.08); rr(-90, -60, 180, 120, 8); fill(CORAL); rect(-82, -52, 80, 104, [1, 1, 1]); rect(2, -52, 80, 104, [1, 1, 1]); circ(-42, -12, 18); fill(GOLD); line([[20, -20], [62, -20]], 5, [0.6, 0.6, 0.65]); line([[20, 0], [62, 0]], 5, [0.6, 0.6, 0.65]); X.restore();
+      sitKid(KIDA, 200, 1700, t + 0.4, { armL: [0.5, 1.2], armR: [0.5, 1.2] }); sitKid(KIDC, 600, 1700, t + 0.9, { armL: [0.5, 1.2], armR: [0.5, 1.2] });
+      sitKid(KIDB, 290, 1790, t, { armL: [0.5, 1.2], armR: [0.5, 1.2] }); sitKid(k, 470, 1790, t, { armL: [0.5, 1.2], armR: t % 4 > 2 ? [2.6, 3] : [0.5, 1.2] });
+      return { adult: [380, 1100], child: [470, 1470], helper: adultTop(tx, ty) };
+    } },
+    lunch: { label: 'Lunch with the other kids', fn(c, t) {
+      classroom(t); const k = KID(c);
+      [[260, KIDA], [440, k], [620, KIDB], [800, KIDC]].forEach(([x, kk], i) => { const s = ks(kk); const bite = kk === k && t % 3 > 1.5; drawKid(kk, x, 1580, t + i * 0.3, { armL: reach(x, 1580, s, 1, -1, x - 40, 1450, -1), armR: bite ? reach(x, 1580, s, 1, 1, x + 20, 1580 - s * 520, -1) : reach(x, 1580, s, 1, 1, x + 40, 1450, -1) }); });
+      clothTable(150, 920, 1450, 1720);
+      [[260, CORAL], [440, [0.47, 0.7, 0.83]], [620, GOLD], [800, [0.55, 0.78, 0.5]]].forEach(([x, col]) => { rr(x - 50, 1420, 100, 40, 8); fill(col); circ(x - 20, 1418, 12); fill([0.95, 0.55, 0.22]); rr(x + 2, 1406, 30, 16, 6); fill([0.93, 0.85, 0.6]); });
+      return { adult: [300, 1000], child: kidTop(k, 440, 1580) };
+    } },
+    pickup: { label: 'Pick-up: they come back', fn(c, t) {
+      classroom(t); const k = KID(c), s = ks(k), y = 1720;
+      const q = ease(clamp(t / 1.8)), ax = lerp(120, 400, q), kx = lerp(860, 560, ease(clamp((t - 0.6) / 1.4))), m = q < 0.98 ? 1 : 0, hug = t > 2.1;
+      person(ax, y, 1, AD(c), t, { walk: m, armL: hug ? reach(ax, y, 1, 1, -1, kx - 30, y - 240, -1) : [0.2, 0.1], armR: hug ? reach(ax, y, 1, 1, 1, kx + 20, y - 220, -1) : [0.2, 0.1] });
+      drawKid(k, kx, y + 4, t, { flip: -1, walk: !hug && t > 0.6 ? 1.3 : 0, speed: 13, armL: hug ? reach(kx, y + 4, s, -1, -1, ax + 40, y - 330) : [2.6, 2.9], armR: hug ? reach(kx, y + 4, s, -1, 1, ax + 70, y - 300) : [2.6, 3.0] });
+      if (hug) hearts((ax + kx) / 2, 1150, t - 2.1, 2);
+      return { adult: adultTop(ax, y), child: kidTop(k, kx, y + 4) };
+    } },
     playball: { label: 'Playing with other kids', fn(c, t) {
       hall(t); const k = KID(c);
       person(150, 1520, 0.78, AD(c), t, { armR: [0.4 + 0.2 * Math.sin(t * 2.5), 1] });
@@ -2129,6 +2197,7 @@ const KIDS = (() => {
   const PLACES = [
     ['Getting there and home', ['goto', 'schoolrun', 'home']],
     ['Playgroup room', ['arrive', 'bounce', 'others', 'hello', 'busy', 'ears', 'mumplay', 'playball', 'leave']],
+    ['Kinder or school', ['hook', 'goodbye', 'mattime', 'lunch', 'pickup']],
     ['Cafe', ['cafe']],
     ['At home', ['food_look', 'food_bite', 'food_ok', 'familydinner', 'bedtime']],
     ['Outside', ['parkday']]];

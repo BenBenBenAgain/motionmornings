@@ -26,6 +26,15 @@
         { scene: 'hello', text: '{child} can say hi if {they} want{s} to.', say: { who: 'child', words: 'Hi, my name is {child}!' } },
         { scene: 'playball', text: '{child} can play with the other kids, or with {adult}.' },
         { scene: 'leave', text: 'When {child} is ready, they say bye and go home.', say: { who: 'child', words: 'Bye!' } }] } },
+    kinder: { label: 'Kinder or school', blurb: 'Bag on the hook, goodbye, the day, pick-up', story: {
+      title: '{child}\u2019s Day at Kinder', ending: 'Kinder was fun!', steps: [
+        { scene: 'goto', place: 'Kinder', text: 'In the morning, {adult} will take {child} to kinder.' },
+        { scene: 'hook', text: '{child} hangs {their} bag on the hook.' },
+        { scene: 'goodbye', text: '{adult} says goodbye, and {helper} looks after {child}.', say: { who: 'adult', words: 'See you after lunch!' } },
+        { scene: 'goodbye', glimpse: true, text: '{adult} always comes back.' },
+        { scene: 'mattime', text: 'There is story time on the mat with the other kids.' },
+        { scene: 'lunch', text: 'Then everyone has lunch together.' },
+        { scene: 'pickup', text: 'After lunch, {adult} comes back to pick {child} up!', say: { who: 'child', words: '{adult}!' } }] } },
     food: { label: 'Trying a new food', blurb: 'Looking, one little bite, feeling proud', story: {
       title: '{child} Tries Something New', ending: 'Trying new things is brave!', steps: [
         { scene: 'food_look', text: 'Tonight {child} will try something new for dinner.' },
@@ -288,7 +297,7 @@
     g.append(el('div', { class: 'ask' }, el('p', {}, el('b', {}, 'Can\u2019t find the right picture?'), ' Ask for it and we\u2019ll draw it.'), el('button', { class: 'btn ghost small', type: 'button', onclick: () => openRequest(st) }, 'Request a new picture')));
     $('#scenePick').hidden = false;
   }
-  // asking for a picture we haven't drawn yet: new scenes are drawn by hand, so it isn't instant
+  // asking for a picture we haven't drawn yet: each new scene is created individually, so it isn't instant
   const REQ_TO = 'hello@motionmornings.com';
   function openRequest(st) {
     $('#scenePick').hidden = true;
