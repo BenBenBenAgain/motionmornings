@@ -13,6 +13,7 @@
   const uid = () => Math.random().toString(36).slice(2, 9);
   const fmt = s => { s = Math.max(0, Math.round(s)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
   const KEY = 'mmkids.v1';
+  const MAX_STEPS = 10, MAX_LINE = 8, MAX_FILM = 90;
   // boy, girl or neutral: neutral keeps the story to 'they'
   function sexOf(L) { return (L && L.sex) || (L && L.body === 'm' ? 'm' : 'f'); }
 
@@ -188,13 +189,14 @@
   }
   const decodeAB = ab => new Promise((res, rej) => { const p = ac().decodeAudioData(ab, res, rej); if (p && p.catch) p.catch(() => {}); });
   async function decode(blob) { return await decodeAB(await blob.arrayBuffer()); }
-  async function setVoice(id, buf) { voices[id] = buf; await idbPut(id, buf ? wavBlob(buf) : null); refresh(); renderVoice(); }
+  function capLine(buf) { if (!buf || buf.duration <= MAX_LINE + 0.3) return [buf, false]; return [slice(buf, 0, MAX_LINE), true]; }
+  async function setVoice(id, buf) { let cut; [buf, cut] = capLine(buf); if (cut) micErr(`That line was longer than ${MAX_LINE} seconds, so the end was cut off. Try saying it a bit shorter.`); voices[id] = buf; await idbPut(id, buf ? wavBlob(buf) : null); refresh(); renderVoice(); }
 
   // ---------------------------------------------------------------- the film
   const stage = $('#stage'), sctx = stage.getContext('2d');
   let TL = null;
   const voiceLens = () => Object.fromEntries(Object.entries(voices).filter(([, b]) => b).map(([k, b]) => [k, b.duration]));
-  function refresh() { TL = K.timeline(S.story, voiceLens()); $('#scrub').max = 1000; $('#lenMeta').textContent = `${fmt(TL.total)} long`; $('#storyMeta').textContent = `${S.story.steps.length} step${S.story.steps.length === 1 ? '' : 's'} · about ${fmt(TL.total)}`; if (!playing) draw(pos); save(); }
+  function refresh() { TL = K.timeline(S.story, voiceLens()); $('#scrub').max = 1000; $('#lenMeta').textContent = `${fmt(TL.total)} long`; $('#storyMeta').textContent = `${S.story.steps.length} of ${MAX_STEPS} steps \u00b7 about ${fmt(TL.total)}${TL.total > MAX_FILM ? ` (over the ${fmt(MAX_FILM)} limit)` : ''}`; $('#storyMeta').classList.toggle('over', TL.total > MAX_FILM); $('#addStep').disabled = S.story.steps.length >= MAX_STEPS; $('#addCalm').disabled = S.story.steps.length > MAX_STEPS - 3; if (!playing) draw(pos); save(); }
   function draw(T, ctx = sctx, w = stage.width) { ctx.setTransform(w / W, 0, 0, w / W, 0, 0); K.frame(ctx, castFor(), S.story, TL, T); ctx.setTransform(1, 0, 0, 1, 0, 0); }
 
   // music, ducked under the voice
@@ -517,6 +519,7 @@
     rec.ondataavailable = e => e.data.size && recChunks.push(e.data);
     rec.onstop = async () => { recStream.getTracks().forEach(t => t.stop()); const blob = new Blob(recChunks, { type: rec.mimeType }); const was = recId; recId = null; try { await setVoice(was, trim(await decode(blob))); } catch (e) { micErr('That recording couldn’t be read. Try again.'); renderVoice(); } };
     rec.start(); renderVoice();
+    setTimeout(() => { if (recId === id) stopRec(); }, (MAX_LINE + 0.5) * 1000);
   }
   function stopRec() { if (rec && rec.state !== 'inactive') rec.stop(); }
   // split one long recording into its lines: the biggest pauses are the gaps between lines
@@ -530,13 +533,14 @@
     const gaps = spans.slice(1).map((s, i) => ({ i, g: s[0] - spans[i][1] })).sort((a, b) => b.g - a.g).slice(0, n - 1).map(x => x.i).sort((a, b) => a - b);
     let from = 0; const groups = [];
     gaps.forEach(gi => { groups.push([spans[from][0], spans[gi][1]]); from = gi + 1; }); groups.push([spans[from][0], spans[spans.length - 1][1]]);
-    for (let i = 0; i < n; i++) { const [a, b] = groups[i]; voices[ls[i].id] = slice(buf, Math.max(0, a - 0.12), Math.min(buf.duration, b + 0.25)); await idbPut(ls[i].id, wavBlob(voices[ls[i].id])); }
-    refresh(); renderVoice(); const s2 = $('#wholeStatus'); s2.textContent = `Split into ${n} lines. Tap Listen on each to check it.`;
+    let cutAny = false; for (let i = 0; i < n; i++) { const [a, b] = groups[i]; let cut; [voices[ls[i].id], cut] = capLine(slice(buf, Math.max(0, a - 0.12), Math.min(buf.duration, b + 0.25))); cutAny = cutAny || cut; await idbPut(ls[i].id, wavBlob(voices[ls[i].id])); }
+    refresh(); renderVoice(); const s2 = $('#wholeStatus'); s2.textContent = `Split into ${n} lines. Tap Listen on each to check it.` + (cutAny ? ` One or more lines were longer than ${MAX_LINE} seconds, so their ends were cut off.` : '');
   }
 
   // ---------------------------------------------------------------- save the film
   let resultBlob = null, resultExt = 'webm';
   $('#recBtn').addEventListener('click', async () => {
+    if (TL.total > MAX_FILM) { $('#recStatus').className = 'status err'; $('#recStatus').textContent = `Your film is ${fmt(TL.total)} long. Films can be up to ${fmt(MAX_FILM)}, so go back and remove a step or shorten a recording.`; return; }
     if (!window.MediaRecorder || !stage.captureStream) { $('#recStatus').className = 'status err'; $('#recStatus').textContent = 'This browser can’t save video. Try Safari on iPhone or Chrome.'; return; }
     const mime = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'].find(m => MediaRecorder.isTypeSupported(m)) || '';
     resultExt = /mp4/.test(mime) ? 'mp4' : 'webm';
@@ -564,6 +568,14 @@
     S.story = fromTemplate('blank'); go(1); refresh();
   }));
   $('#copyLink').addEventListener('click', async () => { const link = shareLink(), st = $('#copyStatus'); try { await navigator.clipboard.writeText(link); st.textContent = 'Copied.'; } catch (e) { st.textContent = link; } });
+
+  // clear everything: people, story, recordings
+  $('#resetAll').addEventListener('click', () => ask('Clear everything and start again?', 'This clears your people, your story and your recordings on this device. Videos you\u2019ve already saved aren\u2019t affected.', async () => {
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    try { const all = await idbAll(); for (const id of Object.keys(all)) await idbPut(id, null); } catch (e) {}
+    try { history.replaceState(null, '', location.pathname); } catch (e) {}
+    location.reload();
+  }));
 
   // ---------------------------------------------------------------- start
   readShare();
