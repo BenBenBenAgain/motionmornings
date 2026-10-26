@@ -488,9 +488,14 @@
   let rec = null, recId = null, recChunks = [], recStream = null;
   function renderVoice() {
     const list = $('#voiceList'); list.innerHTML = '';
+    // the easiest way: read along while the film plays, tapping Next at each new picture
+    list.append(el('div', { class: 'card guidecard' },
+      el('div', { class: 'subhead' }, el('h3', {}, 'Record along with the film')),
+      el('p', { class: 'meta' }, 'Each picture comes up with its words underneath. Read them, tap Next, and the next picture appears. Your voice is matched to each picture as you go.'),
+      el('div', { class: 'row' }, el('button', { class: 'btn coral', type: 'button', id: 'guideOpen', onclick: openGuide }, 'Record along with the film'))));
     // one recording of the whole story, split at the pauses
     list.append(el('div', { class: 'card' },
-      el('div', { class: 'subhead' }, el('h3', {}, 'Already recorded the whole thing?')),
+      el('div', { class: 'subhead' }, el('h3', {}, 'Already recorded it somewhere else?')),
       el('p', { class: 'meta' }, 'Upload one recording of you reading every line in order, with a short pause between lines. It gets split at the pauses. Check each line below and redo any that landed in the wrong place.'),
       el('div', { class: 'row' }, el('label', { class: 'btn ghost small', for: 'wholeFile', style: 'cursor:pointer' }, 'Upload one recording'), el('input', { type: 'file', id: 'wholeFile', accept: 'audio/*,video/*', hidden: true, onchange: e => e.target.files[0] && splitWhole(e.target.files[0]) }),
         el('label', { class: 'switch' }, el('input', { type: 'checkbox', id: 'titleRead', checked: !!S.titleRead, onchange: e => { S.titleRead = e.target.checked; save(); } }), 'I read the title too')),
@@ -522,6 +527,58 @@
     setTimeout(() => { if (recId === id) stopRec(); }, (MAX_LINE + 0.5) * 1000);
   }
   function stopRec() { if (rec && rec.state !== 'inactive') rec.stop(); }
+  // ---- record along with the film: one recording, with a mark each time they tap Next
+  let G = null;
+  function openGuide() {
+    stop(); micErr('');
+    const ls = lines().filter(l => l.words && (l.id !== 'title' || S.titleRead));
+    if (!ls.length) return;
+    G = { ls, i: 0, marks: [], rec: null, chunks: [], t0: 0, shown: performance.now(), raf: 0, stream: null };
+    $('#guide').hidden = false; guideShow(); $('#guideGo').textContent = 'Start recording'; $('#guideGo').focus();
+    const cv = $('#guideStage'), c = cv.getContext('2d');
+    const loop = now => { if (!G) return; const it = TL.items.find(x => x.id === G.ls[G.i].id) || TL.items[0]; const T = it.start + Math.min(it.d - 0.05, ((now - G.shown) / 1000) % Math.max(1, it.d)); c.setTransform(cv.width / W, 0, 0, cv.width / W, 0, 0); K.frame(c, castFor(), S.story, TL, T); c.setTransform(1, 0, 0, 1, 0, 0); G.raf = requestAnimationFrame(loop); };
+    G.raf = requestAnimationFrame(loop);
+  }
+  function guideShow() {
+    const l = G.ls[G.i];
+    $('#guideCount').textContent = `Line ${G.i + 1} of ${G.ls.length} \u00b7 ${l.note}`;
+    $('#guideLine').textContent = l.words;
+    G.shown = performance.now();
+  }
+  function guideClose() { if (!G) return; cancelAnimationFrame(G.raf); if (G.rec && G.rec.state !== 'inactive') { G.cancel = true; G.rec.stop(); } if (G.stream) G.stream.getTracks().forEach(t => t.stop()); G = null; $('#guide').hidden = true; }
+  $('#guideCancel').addEventListener('click', guideClose);
+  $('#guideGo').addEventListener('click', async () => {
+    if (!G) return; const btn = $('#guideGo');
+    if (!G.rec) {
+      try { G.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
+      catch (e) { $('#guideStatus').textContent = 'The microphone isn\u2019t available. Allow microphone access for this site, or upload a recording instead.'; return; }
+      G.rec = new MediaRecorder(G.stream); G.rec.ondataavailable = e => e.data.size && G.chunks.push(e.data);
+      G.rec.onstop = guideDone; G.rec.start(); G.t0 = performance.now(); G.marks = [0];
+      $('#guideStatus').innerHTML = ''; $('#guideStatus').append(el('span', { class: 'recdot' }), ' Recording. Read the words, then tap Next.');
+      guideShow(); btn.textContent = G.ls.length > 1 ? 'Next' : 'Finish'; return;
+    }
+    G.marks.push((performance.now() - G.t0) / 1000);
+    if (G.i < G.ls.length - 1) { G.i++; guideShow(); btn.textContent = G.i === G.ls.length - 1 ? 'Finish' : 'Next'; }
+    else { btn.disabled = true; $('#guideStatus').textContent = 'Saving your recording\u2026'; G.rec.stop(); }
+  });
+  async function guideDone() {
+    const g = G; if (!g || g.cancel) return;
+    if (g.stream) g.stream.getTracks().forEach(t => t.stop());
+    let buf; try { buf = await decode(new Blob(g.chunks, { type: g.rec.mimeType })); } catch (e) { $('#guideStatus').textContent = 'That recording couldn\u2019t be read. Try again.'; $('#guideGo').disabled = false; return; }
+    // the recorder can start a moment late, so marks are measured from the end of the audio backwards
+    const shift = Math.max(0, g.marks[g.marks.length - 1] - buf.duration);
+    let cutAny = false;
+    for (let i = 0; i < g.ls.length; i++) {
+      const a = Math.max(0, g.marks[i] - shift), b = Math.min(buf.duration, g.marks[i + 1] - shift);
+      if (b - a < 0.2) continue;
+      let line = trim(slice(buf, a, b)), cut; [line, cut] = capLine(line); cutAny = cutAny || cut;
+      voices[g.ls[i].id] = line; await idbPut(g.ls[i].id, wavBlob(line));
+    }
+    cancelAnimationFrame(g.raf); G = null; $('#guide').hidden = true; $('#guideGo').disabled = false;
+    refresh(); renderVoice();
+    const st = $('#wholeStatus'); if (st) { st.className = 'status'; st.textContent = `Recorded ${g.ls.length} lines. Tap Listen on any line to check it, and redo it on its own if you need to.` + (cutAny ? ` Lines longer than ${MAX_LINE} seconds had their ends cut off.` : ''); }
+  }
+
   // split one long recording into its lines: the biggest pauses are the gaps between lines
   async function splitWhole(file) {
     const st = $('#wholeStatus'); st.className = 'status'; st.textContent = 'Listening for the pauses…';

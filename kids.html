@@ -158,6 +158,13 @@ video.result{width:100%;max-width:280px;border-radius:14px;background:#000}
 .scenegrid canvas{width:100%;aspect-ratio:9/16;display:block;background:#1A1A1A}
 .scenegrid span{padding:6px 8px;font-weight:600;font-size:.85rem;line-height:1.25}
 .scenegrid h4{grid-column:1/-1;font-size:1rem;margin-top:6px}
+.guidebox{max-width:440px;align-items:center;text-align:center;gap:10px}
+#guideStage{width:min(240px,46vh);aspect-ratio:9/16;border-radius:16px;background:#1A1A1A}
+.guideline{font:600 1.35rem/1.35 var(--display);text-wrap:balance;min-height:3.6em;display:flex;align-items:center;justify-content:center}
+.guidebtns{justify-content:center}
+#guideStatus .recdot{background:#C9463A;margin-right:4px;vertical-align:middle}
+.guidebtns .btn{min-width:150px}
+.guidecard{border-color:color-mix(in srgb,var(--coral) 45%,var(--line))}
 .scenegrid .more{grid-column:1/-1;display:flex;justify-content:center;padding-top:4px}
 .scenegrid .ask{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;color:var(--muted);font-size:.92rem;padding:12px;margin-top:6px;border:1px dashed var(--line);border-radius:12px}
 .scenegrid .ask p{margin:0}
@@ -272,6 +279,16 @@ video.result{width:100%;max-width:280px;border-radius:14px;background:#000}
     <div class="subhead"><h3 id="scenePickTitle">Choose the picture</h3><button class="btn ghost small" id="scenePickClose">Cancel</button></div>
     <p class="meta">Can&rsquo;t see what you need? <button class="linkbtn" type="button" id="reqTop">Request a new picture</button></p>
     <div class="scenegrid" id="sceneGrid"></div>
+  </div>
+</div>
+
+<div class="modal" id="guide" hidden role="dialog" aria-modal="true" aria-labelledby="guideCount">
+  <div class="box guidebox">
+    <p class="pill" id="guideCount"></p>
+    <canvas id="guideStage" width="540" height="960" aria-hidden="true"></canvas>
+    <p class="guideline" id="guideLine"></p>
+    <p class="status" id="guideStatus">Find a quiet spot. Tap Start, then read each line in your own time.</p>
+    <div class="row guidebtns"><button class="btn coral" id="guideGo">Start recording</button><button class="btn ghost" id="guideCancel">Cancel</button></div>
   </div>
 </div>
 
