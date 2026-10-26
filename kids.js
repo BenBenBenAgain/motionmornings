@@ -26,6 +26,19 @@
         { scene: 'hello', time: '10:00', text: '{adult} says hello too.', say: { who: 'adult', words: 'Hi, nice to meet you!' } },
         { scene: 'playball', text: 'They play a little bit with the kids…' },
         { scene: 'cafe', place: 'Cafe', text: '…and then they go to a cafe.' }] } },
+    playgroup2: { label: 'Playgroup, next time', blurb: 'When it gets busy, and a way out', story: {
+      title: '{child} Goes Back to Play Group', ending: '{child} is getting braver every week!', steps: [
+        { scene: 'goto', place: 'Play group', text: 'On Monday, {adult} and {child} will go back to play group.' },
+        { scene: 'arrive', time: '9:00', text: 'They will arrive early, and {helper} will be there.', say: { who: 'child', words: 'Hi {helper}!' } },
+        { scene: 'bounce', text: '{child} can jump on the trampoline, and {adult} will clap.' },
+        { scene: 'others', time: '10:00', text: 'Other kids usually come at about 10. Sometimes they come early, and that\u2019s OK.' },
+        { scene: 'busy', text: 'Sometimes lots of people come in at once, and it gets loud.' },
+        { scene: 'ears', text: 'If it\u2019s too loud, {child} can cover {their} ears and hold {adult}\u2019s hand.' },
+        { scene: 'mumplay', text: '{child} can play with {adult}, just the two of them.' },
+        { scene: 'mumplay', glimpse: true, text: '{child} can always stay with {adult}.' },
+        { scene: 'playball', text: '{child} can join in with the other kids if {they} want{s} to.' },
+        { scene: 'leave', text: 'When {child} is ready, they say bye and go to Rex.', say: { who: 'child', words: 'Bye!' } },
+        { scene: 'cafe', place: 'Rex', glimpse: true, text: 'Rex is always there after play group.' }] } },
     food: { label: 'Trying a new food', blurb: 'Looking, one little bite, feeling proud', story: {
       title: '{child} Tries Something New', ending: 'Trying new things is brave!', steps: [
         { scene: 'food_look', text: 'Tonight {child} will try something new for dinner.' },
@@ -42,9 +55,11 @@
   function save() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }, 250); }
   function castFor() { return { child: S.cast.child, adult: S.cast.adult, helper: S.cast.helperOn ? S.cast.helper : { name: '' } }; }
   function fromTemplate(key) {
-    const t = TEMPLATES[key].story, c = castFor(), n = s => s == null ? s : K.names(s, c);
+    const t = TEMPLATES[key].story, c = castFor(), boy = S.cast.child.body === 'm', girl = S.cast.child.body === 'f';
+    const pro = s => s.replace(/\{their\}/g, boy ? 'his' : girl ? 'her' : 'their').replace(/\{they\}/g, boy ? 'he' : girl ? 'she' : 'they').replace(/\{s\}/g, boy || girl ? 's' : '');
+    const n = s => s == null ? s : pro(K.names(s, c));
     const cap = x => x && x[0].toUpperCase() + x.slice(1);
-    return { title: cap(n(t.title)), ending: n(t.ending), steps: t.steps.map(st => ({ id: uid(), scene: st.scene, place: st.place || '', time: st.time || '', text: n(st.text), say: st.say ? { who: st.say.who, words: n(st.say.words) } : { who: 'child', words: '' } })) };
+    return { title: cap(n(t.title)), ending: n(t.ending), steps: t.steps.map(st => ({ id: uid(), scene: st.scene, place: st.place || '', time: st.time || '', text: n(st.text), glimpse: !!st.glimpse, say: st.say ? { who: st.say.who, words: n(st.say.words) } : { who: 'child', words: '' } })) };
   }
   // a shared link carries the cast and the story (never the recordings)
   function readShare() {
@@ -243,7 +258,8 @@
       const thumb = el('button', { class: 'thumb', type: 'button', 'aria-label': `Step ${i + 1} picture: ${sc.label}. Change it`, onclick: () => pickScene(st) }, cv, el('span', { class: 'chg' }, 'Change'));
       const extras = el('div', { class: 'extras' },
         sc.place ? el('label', {}, 'Sign on the building', el('input', { type: 'text', id: `place-${st.id}`, value: st.place || '', maxlength: '20', placeholder: 'e.g. Play group', oninput: e => { st.place = e.target.value; sceneThumb(cv, st.scene, st.place); refresh(); seekTo(st.id); } })) : null,
-        el('label', {}, 'Clock shows a time', el('input', { type: 'text', id: `time-${st.id}`, value: st.time || '', maxlength: '8', placeholder: 'e.g. 9:00', inputmode: 'numeric', oninput: e => { st.time = e.target.value; refresh(); seekTo(st.id); } })));
+        el('label', {}, 'Clock shows a time', el('input', { type: 'text', id: `time-${st.id}`, value: st.time || '', maxlength: '8', placeholder: 'e.g. 9:00', inputmode: 'numeric', oninput: e => { st.time = e.target.value; refresh(); seekTo(st.id); } })),
+        el('label', { class: 'switch glimpse' }, el('input', { type: 'checkbox', id: `glimpse-${st.id}`, checked: !!st.glimpse, onchange: e => { st.glimpse = e.target.checked; refresh(); seekTo(st.id); } }), 'Show as big calm words'));
       st.say = st.say || { who: 'child', words: '' };
       const say = el('div', { class: 'sayrow' },
         el('select', { 'aria-label': 'Who says it', id: `who-${st.id}`, onchange: e => { st.say.who = e.target.value; refresh(); seekTo(st.id); } }, who.map(([v, n]) => el('option', { value: v, selected: st.say.who === v }, n))),
@@ -262,12 +278,16 @@
   let pickFor = null;
   function pickScene(st) {
     pickFor = st; const g = $('#sceneGrid'); g.innerHTML = '';
-    K.PICK.forEach(key => {
-      if (key === 'arrive' && !S.cast.helperOn) return;
-      const cv = el('canvas', { width: 180, height: 320 });
-      g.append(el('button', { type: 'button', 'aria-pressed': String(st.scene === key), onclick: () => { st.scene = key; if (K.SC[key].place && !st.place) st.place = key === 'cafe' ? 'Cafe' : ''; $('#scenePick').hidden = true; renderStory(); refresh(); seekTo(st.id); } }, cv, el('span', {}, K.SC[key].label)));
-      sceneThumb(cv, key, st.place || (key === 'cafe' ? 'Cafe' : key === 'goto' ? 'Play group' : ''));
+    K.PLACES.forEach(([where, keys]) => {
+      g.append(el('h4', {}, where));
+      keys.forEach(key => {
+        if (key === 'arrive' && !S.cast.helperOn) return;
+        const cv = el('canvas', { width: 180, height: 320 });
+        g.append(el('button', { type: 'button', 'aria-pressed': String(st.scene === key), onclick: () => { st.scene = key; if (K.SC[key].place && !st.place) st.place = key === 'cafe' ? 'Cafe' : ''; $('#scenePick').hidden = true; renderStory(); refresh(); seekTo(st.id); } }, cv, el('span', {}, K.SC[key].label)));
+        sceneThumb(cv, key, st.place || (key === 'cafe' ? 'Cafe' : key === 'goto' ? 'Play group' : ''));
+      });
     });
+    g.append(el('p', { class: 'ask' }, el('b', {}, 'Can\u2019t find the right picture? '), 'Email what you need to ', el('span', { class: 'addr' }, 'hello@motionmornings.com'), ' and we\u2019ll draw it. For now, pick the closest one, or tick \u201cShow as big calm words\u201d to show just the words.'));
     $('#scenePick').hidden = false;
   }
   $('#scenePickClose').addEventListener('click', () => $('#scenePick').hidden = true);

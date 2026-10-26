@@ -1833,6 +1833,11 @@ const KIDS = (() => {
   const MUM3 = { body: 'f', hair: 'bun', hairCol: '#D9B373', skin: '#F2D3BC', facial: 'none', outfit: 'tee', top: '#E9A23B', inner: '#E9A23B', pants: '#404D73' };
   const KIDA = { age: 'little', body: 'f', hair: 'bun', hairCol: '#2E2622', skin: '#C98E66', outfit: 'dress', top: '#F2C46F' };
   const KIDB = { age: 'little', body: 'm', hair: 'short', hairCol: '#C9A060', skin: '#F2D3BC', outfit: 'tee', top: '#6FA8DC', pants: '#30406E' };
+  const DAD1 = { body: 'm', hair: 'short', hairCol: '#3B2A20', skin: '#E8BA99', facial: 'beard', facialCol: '#3B2A20', outfit: 'hoodie', top: '#4F86C6', pants: '#2B2B30' };
+  const DAD2 = { body: 'm', hair: 'fade', hairCol: '#1F1A17', skin: '#8A5434', facial: 'stubble', facialCol: '#1F1A17', outfit: 'tee', top: '#E9A23B', inner: '#E9A23B', pants: '#30406E' };
+  const MUM4 = { body: 'f', hair: 'wavy', hairCol: '#B5523A', skin: '#F6D7C3', facial: 'none', outfit: 'dress', top: '#9B6FB5', inner: '#9B6FB5', pants: '#9B6FB5' };
+  const KIDC = { age: 'little', body: 'm', hair: 'curly', hairCol: '#1F1A17', skin: '#8A5434', outfit: 'tee', top: '#9B6FB5', pants: '#30406E' };
+  const KIDD = { age: 'little', body: 'f', hair: 'ponytail', hairCol: '#C9A060', skin: '#F6D7C3', outfit: 'dress', top: '#5FA88F' };
   const PARK = { world: 'park' }, CITY = { world: 'city' };
   const lerp = (a, b, k) => a + (b - a) * k;
   const KID = c => Object.assign({}, KID_DEF, c.child || {}), AD = c => Object.assign({}, ADULT_DEF, c.adult || {}), HP = c => Object.assign({}, HELPER_DEF, c.helper || {});
@@ -1856,10 +1861,10 @@ const KIDS = (() => {
     return { armL: reach(x, y, s, flip, -1, cx - flip * g * s, cy), armR: reach(x, y, s, flip, 1, cx + flip * g * s, cy) };
   }
   // the grown-up and the child side by side holding hands, child on the right, both facing right
-  function pair(c, x, y, t, walk = 0) {
+  function pair(c, x, y, t, walk = 0, o = {}) {
     const k = KID(c), kx = x + 160, ky = y + 4, sw = walk ? 5 * Math.sin(t * 7) : 0, hx = x + 106 + sw, hy = y - 228;
     person(x, y, 1, AD(c), t, { walk, armL: [0.15 - 0.2 * walk * Math.sin(t * 7), 0.1], armR: reach(x, y, 1, 1, 1, hx, hy) });
-    drawKid(k, kx, ky, t, { walk, speed: 11, armL: reach(kx, ky, ks(k), 1, -1, hx, hy, -1), armR: [0.25 + 0.25 * walk * Math.sin(t * 11), 0.2] });
+    drawKid(k, kx, ky, t, { walk, speed: 11, armL: reach(kx, ky, ks(k), 1, -1, hx, hy, -1), armR: o.kidWave ? wave(t, 2) : [0.25 + 0.25 * walk * Math.sin(t * 11), 0.2] });
     return { adult: adultTop(x, y), child: kidTop(k, kx, ky) };
   }
 
@@ -1994,6 +1999,20 @@ const KIDS = (() => {
     return { adult: adultTop(mx, my), child: [kx, ky - s * (470 + 118 * kidHead(k))], helper: null };
   }
 
+  // sound lines coming off a noisy group, pulsing outwards
+  function noise(x, y, t, a = 1) {
+    for (let i = 0; i < 3; i++) { const k = (t * 1.4 + i / 3) % 1, r = 40 + k * 90; X.beginPath(); X.arc(x, y, r, -0.7, 0.7); X.lineWidth = 7; X.strokeStyle = css(NAVY, a * 0.55 * (1 - k)); X.stroke(); X.beginPath(); X.arc(x, y, r, PI - 0.7, PI + 0.7); X.stroke(); }
+  }
+  // the head's centre and half-width for a kid drawn at (x, y), so hands can find their ears
+  function kidHeadAt(k, x, y, s = 1) { const sc = ks(k, s), hs = kidHead(k); return [x, y + sc * (-470 - 32 * hs), 50 * hs * sc]; }
+  // a crowd that streams in from the right and fills the back of the room
+  function crowd(t, arrive, scale = 0.86, y0 = 1560) {
+    const q = ease(clamp(t / arrive)), m = q < 0.98 ? 1 : 0;
+    [[MUM2, 900, 0], [DAD1, 1010, 0.3], [MUM3, 690, 0.6], [DAD2, 800, 0.2], [MUM4, 590, 0.5]].forEach(([L, x, d], i) => person(lerp(x + 700 + i * 60, x, q), y0, scale, L, t + d, { flip: -1, walk: m, armR: !m && i % 2 ? [0.5 + 0.2 * Math.sin(t * 3 + i), 1.1] : [0.2, 0.1] }));
+    [[KIDA, 650], [KIDC, 760], [KIDB, 880], [KIDD, 980]].forEach(([k, x], i) => drawKid(k, lerp(x + 800 + i * 50, x, q), y0 + 60, t + i * 0.4, { flip: -1, walk: m, speed: 11, s: 0.95, armL: !m ? [2.3 + 0.4 * Math.sin(t * 5 + i), 2.7] : [0.2, 0.1], armR: !m && i % 2 ? [2.4, 2.9 + 0.3 * Math.sin(t * 6 + i)] : [0.2, 0.1] }));
+    return q;
+  }
+
   // ---- the scenes a story step can use. Each returns where heads are, so a speech bubble can find its speaker.
   const SC = {
     title: { label: 'Setting off', fn(c, t, p) { outdoor(PARK, t, 'sunrise', 1080 - 140 * ease(p)); const q = clamp((p - 0.25) / 0.75); return pair(c, -420 + 1500 * q, 1680, t, q > 0 && q < 1 ? 1 : 0); } },
@@ -2032,6 +2051,47 @@ const KIDS = (() => {
       drawKid(k, kx, y + 6, t, { armR: reach(kx, y + 6, ks(k), 1, 1, hx, hy, -1) });
       return { adult: adultTop(mx, y), child: kidTop(k, kx, y + 6) };
     } },
+    busy: { label: 'Lots of people come in', fn(c, t) {
+      hall(t); const k = KID(c), q = crowd(t, 1.6);
+      if (q > 0.5) { noise(760, 1180, t, ease((q - 0.5) / 0.5)); noise(900, 1280, t + 0.4, ease((q - 0.5) / 0.5)); }
+      person(110, 1700, 1, AD(c), t, { armR: reach(110, 1700, 1, 1, 1, 220, 1478) });
+      drawKid(k, 260, 1710, t, { smile: false, armL: reach(260, 1710, ks(k), 1, -1, 220, 1478, -1) });
+      return { adult: adultTop(110, 1700), child: kidTop(k, 260, 1710) };
+    } },
+    ears: { label: 'Too loud: covering ears', fn(c, t) {
+      hall(t); crowd(99, 1, 0.72, 1500); noise(780, 1150, t, 0.7);
+      const k = KID(c), kx = 400, ky = 1720, [hx, hy, hw] = kidHeadAt(k, kx, ky), s = ks(k);
+      // Mumma stands close with a hand on his shoulder
+      person(230, 1710, 1, AD(c), t, { armR: reach(230, 1710, 1, 1, 1, kx - 30, ky - 420 * s + 6 * Math.sin(t * 2)), armL: [0.2, 0.1] });
+      const hh = drawKid(k, kx, ky, t, { smile: false, eyesClosed: t % 3 > 1.2 && t % 3 < 2.2, armL: reach(kx, ky, s, 1, -1, hx - hw + 8, hy + 2, -1), armR: reach(kx, ky, s, 1, 1, hx + hw - 8, hy + 2, -1) });
+      // hands over the ears sit on top of the hair
+      [hh.L, hh.R].forEach(h => { circ(h[0], h[1], 21 * s); fill(k.skin); });
+      return { adult: adultTop(230, 1710), child: kidTop(k, kx, ky) };
+    } },
+    mumplay: { label: 'Playing with Mumma', fn(c, t) {
+      hall(t);
+      // the busy part of the room stays small and far away
+      person(760, 1470, 0.62, MUM2, t, { flip: -1, armR: [0.4, 1 + 0.2 * Math.sin(t * 3)] }); person(900, 1470, 0.62, DAD1, t + 1, { flip: -1 }); person(1010, 1475, 0.62, MUM3, t + 2, { flip: -1 });
+      drawKid(KIDA, 800, 1520, t, { s: 0.75, armL: [2.4, 2.8], armR: [2.4, 2.8 + 0.3 * Math.sin(t * 6)] }); drawKid(KIDC, 930, 1525, t + 1, { s: 0.75, flip: -1 }); ball(860, 1430 - 120 * Math.abs(Math.sin(t * 2.2)), 18, GOLD);
+      // up close: Mumma and the child rolling a ball between them
+      // up close: Mumma and the child gently tossing a ball between them
+      const k = KID(c), mx = 200, kx = 520, y = 1740, sk = ks(k), A = [318, 1450], B = [458, 1588];
+      const per = 2.4, ph = (t % per) / per, toKid = Math.floor(t / per) % 2 === 0, fl = clamp((ph - 0.25) / 0.5), u = ease(fl);
+      const from = toKid ? A : B, to = toKid ? B : A, bx = lerp(from[0], to[0], u), by = lerp(from[1], to[1], u) - 150 * Math.sin(fl * PI);
+      const near = (P, w) => [lerp(P[0] + (P === A ? -24 : 24), bx, w), lerp(P[1] + 30, by, w)];
+      const mHold = toKid ? 1 - fl : fl, kHold = toKid ? fl : 1 - fl;
+      person(mx, y, 1, AD(c), t, { armL: [0.2, 0.1], armR: reach(mx, y, 1, 1, 1, ...near(A, mHold > 0.5 ? 1 : 0.2), -1) });
+      const kh = near(B, kHold > 0.5 ? 1 : 0.2);
+      drawKid(k, kx, y + 6, t, { flip: -1, armR: reach(kx, y + 6, sk, -1, 1, kh[0] - 14, kh[1], -1), armL: reach(kx, y + 6, sk, -1, -1, kh[0] + 14, kh[1] + 4, -1) });
+      ball(bx, by, 30, CORAL);
+      if (t > 1) hearts(360, 1180, t, 1);
+      return { adult: adultTop(mx, y), child: kidTop(k, kx, y + 6) };
+    } },
+    leave: { label: 'Leaving early, waving bye', fn(c, t, p) {
+      hall(t); crowd(99, 1, 0.72, 1500);
+      const q = ease(clamp((p - 0.15) / 0.85));
+      return pair(c, lerp(260, 1250, q), 1720, t, q > 0 && q < 1 ? 1 : 0, { kidWave: true });
+    } },
     playball: { label: 'Playing with other kids', fn(c, t) {
       hall(t); const k = KID(c);
       person(150, 1520, 0.78, AD(c), t, { armR: [0.4 + 0.2 * Math.sin(t * 2.5), 1] });
@@ -2066,7 +2126,13 @@ const KIDS = (() => {
   Object.entries(BORROW).forEach(([key, label]) => {
     SC[key] = { label, fn(c, t, p) { SCENES[key].fn({ world: 'park', me: AD(c), kids: [KID(c)], pets: [] }, t, p); return { adult: [300, 1090], child: [480, 1380] }; } };
   });
-  const PICK = ['goto', 'arrive', 'bounce', 'others', 'hello', 'playball', 'cafe', 'food_look', 'food_bite', 'food_ok', 'parkday', 'familydinner', 'bedtime', 'schoolrun', 'home'];
+  const PLACES = [
+    ['Getting there and home', ['goto', 'schoolrun', 'home']],
+    ['Playgroup room', ['arrive', 'bounce', 'others', 'hello', 'busy', 'ears', 'mumplay', 'playball', 'leave']],
+    ['Cafe', ['cafe']],
+    ['At home', ['food_look', 'food_bite', 'food_ok', 'familydinner', 'bedtime']],
+    ['Outside', ['parkday']]];
+  const PICK = PLACES.flatMap(p => p[1]);
 
   // ---- names in the words: {child} and {adult} become the cast's names
   function names(text, c) {
@@ -2123,7 +2189,7 @@ const KIDS = (() => {
     X.save();
     const tm = parseTime(st.time);
     if (tm) clock(700, 790, 120, tm[0], tm[1], tm[2], ease((t - (it.voice ? it.voiceAt : 0.4)) / 0.6));
-    if (it.kind === 'step') caption(names(it.text, cast), t);
+    if (it.kind === 'step' && !st.glimpse) caption(names(it.text, cast), t);
     else { glimpseCaption(names(it.text, cast), t, 84); if (it.kind === 'title') brand(t); }
     if (st.say && st.say.words && heads) {
       const at = it.voice ? it.voiceAt + Math.min(0.6, it.voice * 0.25) : 1.2;
@@ -2149,7 +2215,7 @@ const KIDS = (() => {
     else { const L = Object.assign({}, kind === 'helper' ? HELPER_DEF : ADULT_DEF, look); person(w / 2, h - 34, (h - 60) / 600, L, t, wv); }
     X.restore();
   }
-  return { SC, PICK, timeline, frame, still, portraitOf, names, parseTime, KID_DEF, ADULT_DEF, HELPER_DEF, stepLen };
+  return { SC, PICK, PLACES, timeline, frame, still, portraitOf, names, parseTime, KID_DEF, ADULT_DEF, HELPER_DEF, stepLen };
 })();
 return { W, H, SCENES, portrait, homeWorld, openingText, closingText, DEFAULT_KID, petsOf, PICKABLE, WORLDS: Object.keys(WORLDS), DEFAULT_ME, DEFAULT_PARTNER, timeline, render, drawScene, fillText, petName, KIDS };
 })();
