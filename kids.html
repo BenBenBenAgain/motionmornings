@@ -259,6 +259,8 @@ video.result{width:100%;max-width:280px;border-radius:14px;background:#000}
 .duohint{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--ink)!important}
 .duohint::before{content:'\1F50A';font-size:1rem}
 @media (max-width:760px){.mplay{width:34px;height:34px;right:7px;bottom:7px}.mplay svg{width:14px;height:14px}}
+.duomore{margin:-18px 0 0;font-size:.92rem;color:var(--muted);text-align:center;max-width:36ch;text-wrap:balance}
+@media (max-width:760px){.duomore{margin:6px 0 0}}
 .duohint{margin:0;font-size:.88rem;color:var(--muted)}
 @media (max-width:760px){
   .lead{grid-template-columns:minmax(0,1fr);grid-template-areas:"copy" "duo" "btns";padding-block:10px 36px;row-gap:0}
@@ -295,7 +297,8 @@ video.result{width:100%;max-width:280px;border-radius:14px;background:#000}
       <button class="mini" type="button" data-demo="playgroup" aria-label="Watch the demo film: Ava goes to playgroup"><span class="mphone"><canvas width="360" height="640" aria-hidden="true"></canvas><span class="mplay" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span></span><span class="mlabel">Playgroup</span></button>
       <button class="mini" type="button" data-demo="doctor" aria-label="Watch the demo film: Ava goes to the doctor"><span class="mphone"><canvas width="360" height="640" aria-hidden="true"></canvas><span class="mplay" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span></span><span class="mlabel">The doctor</span></button>
     </div>
-    <p class="duohint">Tap a film to watch with sound</p></div>
+    <p class="duohint">Tap a film to watch with sound</p>
+    <p class="duomore">One film for each big step. Playgroup, the doctor, the dentist, haircuts, bedtime and more.</p></div>
     <div class="leadbtns"><a class="btn coral" href="#builder">Create for your child</a></div>
   </section>
 
