@@ -1954,12 +1954,58 @@ const KIDS = (() => {
     [...text].forEach(ch => { X.fillStyle = css(cs[n % cs.length]); if (ch !== ' ') n++; X.fillText(ch, lx, y); lx += X.measureText(ch).width; });
   }
   function signFit(text, maxW, size) { X.font = `700 ${size}px Poppins, sans-serif`; let s = size; while (s > 22 && X.measureText(text).width > maxW) { s -= 2; X.font = `700 ${s}px Poppins, sans-serif`; } return s; }
+  // each kind of place gets its own building so the opening scenes don't all look alike
+  function buildingKind(sign) {
+    const s = String(sign || '').toLowerCase();
+    if (/play ?group|kinder|child ?care|day ?care|preschool|creche|nursery/.test(s)) return 'play';
+    if (/dentist|dental|orthodont/.test(s)) return 'dentist';
+    if (/doctor|clinic|hospital|\bgp\b|medical|surgery|nurse|vaccin|health/.test(s)) return 'clinic';
+    if (/school|prep\b|primary|class/.test(s)) return 'school';
+    return 'house';
+  }
+  function signBoard(x, base, sign, y = 290) { if (!sign) return; rr(x + 30, base - y, 300, 70, 16); fill(NAVY); const t = sign.toUpperCase(); rainbowText(t, x + 180, base - y + 50, signFit(t, 270, 40)); }
   function building(x, base, sign) {
+    const kind = buildingKind(sign);
+    if (kind === 'play') {
+      rect(x, base - 300, 360, 300, [0.99, 0.86, 0.55]);
+      X.beginPath(); X.moveTo(x - 30, base - 300); X.lineTo(x + 180, base - 440); X.lineTo(x + 390, base - 300); X.closePath(); fill([0.42, 0.7, 0.55]);
+      const cols = [CORAL, GOLD, [0.55, 0.78, 0.5], [0.47, 0.7, 0.83]];
+      for (let i = 0; i < 9; i++) { const bx = x - 10 + i * 42; X.beginPath(); X.moveTo(bx, base - 300); X.lineTo(bx + 36, base - 300); X.lineTo(bx + 18, base - 268); X.closePath(); fill(cols[i % 4]); }
+      circ(x + 180, base - 360, 26); fill([1, 0.97, 0.9]); circ(x + 180, base - 360, 18); fill([0.75, 0.88, 0.95]);
+      rr(x + 140, base - 160, 80, 160, 40); fill(CORAL); circ(x + 205, base - 80, 7); fill(GOLD);
+      [[x + 30, base - 190], [x + 250, base - 190]].forEach(([wx, wy]) => { rr(wx, wy, 80, 70, 14); fill([0.75, 0.88, 0.95]); X.lineWidth = 6; X.strokeStyle = css([1, 1, 1]); X.stroke(); });
+      for (let i = 0; i < 12; i++) { const fx = x - 70 + i * 42; if (fx > x + 120 && fx < x + 230) continue; rr(fx, base - 70, 22, 70, 6); fill(cols[i % 4]); }
+      rect(x - 70, base - 46, 500, 8, [1, 0.97, 0.9]);
+      signBoard(x, base, sign, 262); return;
+    }
+    if (kind === 'clinic' || kind === 'dentist') {
+      rect(x - 20, base - 330, 400, 330, [0.97, 0.98, 0.99]);
+      rect(x - 30, base - 350, 420, 24, [0.82, 0.86, 0.9]);
+      rect(x - 20, base - 120, 400, 26, [0.36, 0.62, 0.78]);
+      [[x + 10, base - 230], [x + 270, base - 230]].forEach(([wx, wy]) => { rect(wx, wy, 80, 80, [0.75, 0.88, 0.95]); X.lineWidth = 5; X.strokeStyle = css([0.82, 0.86, 0.9]); X.strokeRect(wx, wy, 80, 80); });
+      rect(x + 115, base - 200, 130, 200, [0.72, 0.86, 0.94]); line([[x + 180, base - 200], [x + 180, base]], 5, [0.82, 0.86, 0.9]); rect(x + 105, base - 212, 150, 14, [0.82, 0.86, 0.9]);
+      circ(x + 180, base - 400, 46); fill([0.3, 0.68, 0.66]);
+      if (kind === 'dentist') { X.beginPath(); const cx = x + 180, cy = base - 404; X.moveTo(cx - 24, cy - 18); X.quadraticCurveTo(cx, cy - 34, cx + 24, cy - 18); X.quadraticCurveTo(cx + 30, cy + 4, cx + 16, cy + 30); X.quadraticCurveTo(cx + 8, cy + 10, cx, cy + 10); X.quadraticCurveTo(cx - 8, cy + 10, cx - 16, cy + 30); X.quadraticCurveTo(cx - 30, cy + 4, cx - 24, cy - 18); fill([1, 1, 1]); }
+      else { rect(x + 170, base - 428, 20, 56, [1, 1, 1]); rect(x + 152, base - 410, 56, 20, [1, 1, 1]); }
+      [[x - 60, base], [x + 420, base]].forEach(([hx, hy]) => { rr(hx - 40, hy - 50, 80, 50, 25); fill([0.4, 0.65, 0.42]); });
+      signBoard(x, base, sign, 315);
+      return;
+    }
+    if (kind === 'school') {
+      rect(x - 30, base - 320, 420, 320, [0.76, 0.42, 0.35]);
+      for (let r = 0; r < 9; r++) for (let c = 0; c < 8; c++) { if ((r + c) % 3) continue; rect(x - 30 + c * 54 + (r % 2) * 26, base - 312 + r * 34, 40, 6, [0.66, 0.34, 0.29]); }
+      X.beginPath(); X.moveTo(x - 50, base - 320); X.lineTo(x + 180, base - 420); X.lineTo(x + 410, base - 320); X.closePath(); fill([0.3, 0.38, 0.5]);
+      circ(x + 180, base - 352, 30); fill([1, 0.97, 0.9]); line([[x + 180, base - 352], [x + 180, base - 372]], 5, NAVY); line([[x + 180, base - 352], [x + 194, base - 352]], 5, NAVY);
+      rr(x + 130, base - 170, 100, 170, 50); fill([0.3, 0.38, 0.5]);
+      [[x, base - 220], [x + 280, base - 220]].forEach(([wx, wy]) => { rect(wx, wy, 80, 90, [0.75, 0.88, 0.95]); X.lineWidth = 6; X.strokeStyle = css([1, 0.97, 0.9]); X.strokeRect(wx, wy, 80, 90); line([[wx + 40, wy], [wx + 40, wy + 90]], 5, [1, 0.97, 0.9]); });
+      if (sign) { rr(x + 40, base - 300, 280, 60, 12); fill([1, 0.97, 0.9]); const t = sign.toUpperCase(); X.font = `700 ${signFit(t, 250, 34)}px Poppins, sans-serif`; X.textAlign = 'center'; X.fillStyle = css(NAVY); X.fillText(t, x + 180, base - 258); }
+      return;
+    }
     rect(x, base - 300, 360, 300, [0.98, 0.9, 0.78]);
     X.beginPath(); X.moveTo(x - 30, base - 300); X.lineTo(x + 180, base - 440); X.lineTo(x + 390, base - 300); X.closePath(); fill(CORAL);
     rr(x + 140, base - 160, 80, 160, 10); fill([0.47, 0.7, 0.83]); circ(x + 205, base - 80, 7); fill(GOLD);
     [[x + 30, base - 200], [x + 250, base - 200]].forEach(([wx, wy]) => { rect(wx, wy, 80, 70, [0.75, 0.88, 0.95]); X.lineWidth = 6; X.strokeStyle = css([1, 1, 1]); X.strokeRect(wx, wy, 80, 70); });
-    if (sign) { rr(x + 30, base - 290, 300, 70, 16); fill(NAVY); const t = sign.toUpperCase(); rainbowText(t, x + 180, base - 240, signFit(t, 270, 40)); }
+    signBoard(x, base, sign);
   }
   function shopFront(t, sign) {
     outdoor(CITY, t, 'day');
