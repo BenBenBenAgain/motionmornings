@@ -308,6 +308,9 @@ input[type=range]{height:30px;touch-action:none}
 
 /* mornings: streak chip, today screen, home screen and backup */
 .topright{gap:10px}
+.top{justify-content:center;position:relative}
+@media (min-width:700px){.top .topright{position:absolute;right:0;top:50%;transform:translateY(-35%)}}
+.umbrella{text-align:center;align-items:center}.umbrella p{margin-inline:auto}
 .streakchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;font:700 .95rem var(--body);cursor:pointer}
 .streakchip b{font-variant-numeric:tabular-nums}
 .today{position:fixed;inset:0;z-index:90;background:radial-gradient(120% 70% at 50% 0%,color-mix(in srgb,var(--gold) 30%,var(--bg)),var(--bg) 70%);overflow:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(20px + env(safe-area-inset-bottom,0px))}
@@ -349,12 +352,12 @@ input[type=range]{height:30px;touch-action:none}
 <div class="wrap">
   <div class="top">
     <div class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><path d="M16.5 51 Q21.5 41.5 30 52 Q38.5 41.5 43.5 51" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M37.5 35 Q41.5 27.2 47 35.5 Q52.5 27.2 56.5 35" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M40 78 A28 28 0 0 1 96 78 Z" fill="var(--coral)"/><line x1="14" y1="78" x2="106" y2="78" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><line x1="54" y1="90" x2="84" y2="90" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/><line x1="61" y1="101" x2="77" y2="101" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/></svg><h1>Motion Mornings</h1></div>
-    <div class="row topright"><button class="streakchip" id="streakChip" hidden><span aria-hidden="true">🌅</span><b id="chipN">0</b></button><a class="kidslink" href="/kids.html" aria-label="Motion Mornings Kids"><span>K</span><span>I</span><span>D</span><span>S</span></a><a class="btn ghost small toplink" href="#builder">Make your film</a></div>
+    <div class="row topright"><button class="streakchip" id="streakChip" hidden><span aria-hidden="true">🌅</span><b id="chipN">0</b></button><a class="btn ghost small toplink" href="#builder">Make your film</a></div>
   </div>
   <header class="umbrella"><h2>Little films for big steps.</h2><p>Custom animated films starring you, or anyone in your world. See it first, then live it.</p></header>
   <nav class="choose" aria-label="Who is the film for?">
     <a class="choice" href="#builder" id="chooseMe"><img class="cimg" src="/card-you.jpg" alt="" width="600" height="400"><span class="ctag">For you</span><b>Create for yourself</b><span class="cdesc">A film of the everyday steps toward the life you want</span></a>
-    <a class="choice kidschoice" href="/kids.html"><img class="cimg" src="/card-kids.jpg" alt="" width="600" height="400"><span class="ctag">For your child <span class="kidsword" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span></span><b>Create for your child</b><span class="cdesc">A film that shows them what's going to happen, starring them</span></a>
+    <a class="choice kidschoice" href="/kids.html"><img class="cimg" src="/card-kids.jpg" alt="" width="600" height="400"><span class="ctag">For your child <span class="kidsword" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span></span><b>Create for your child</b><span class="cdesc">Starring your child, showing them what's coming so new things feel easier</span></a>
   </nav>
   <section class="hero" aria-labelledby="heroTitle">
     <div class="herofilm">
