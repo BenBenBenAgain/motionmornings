@@ -208,14 +208,17 @@
   // each phone still plays its own film in order, scene by scene with straight cuts that skip the fades
   function sceneWins(tl) { return tl.items.slice(1, -1).map(i => [i.start + Math.min(i.kind === 'g' ? 1.6 : 1.1, i.d * 0.3), i.start + i.d - Math.min(0.35, i.d * 0.1)]); }
   function makeDuo(phones) {
-    phones.forEach(p => { p.wins = sceneWins(p.tl); p.i = Math.min(p.from || 0, p.wins.length - 1); const w = p.wins[p.i]; p.hold = w[0] + Math.min(1.5, (w[1] - w[0]) * 0.4); });
-    let on = 0, tIn = 0, turn = 0; const TURN = 6; // each phone keeps the spotlight for at least this many seconds
+    phones.forEach(p => { p.wins = sceneWins(p.tl); p.i = Math.min(p.from || 0, p.wins.length - 1); const w = p.wins[p.i]; p.tIn = Math.min(1.5, (w[1] - w[0]) * 0.4); p.hold = w[0] + p.tIn; });
+    // every turn is the same length; a phone that hands over mid-scene picks up from the same spot next time
+    let on = 0, turn = 0; const TURN = 5.5;
     const mark = () => phones.forEach((p, k) => p.el.classList.toggle('on', k === on));
     mark();
     return function step(dt) {
-      const p = phones[on], w = p.wins[p.i];
-      tIn += dt; turn += dt; p.hold = Math.min(w[0] + tIn, w[1]);
-      if (w[0] + tIn >= w[1]) { p.i = (p.i + 1) % p.wins.length; tIn = 0; if (turn >= TURN) { on = (on + 1) % phones.length; turn = 0; mark(); } }
+      const p = phones[on]; let w = p.wins[p.i];
+      p.tIn += dt; turn += dt;
+      if (w[0] + p.tIn >= w[1]) { p.i = (p.i + 1) % p.wins.length; p.tIn = 0; w = p.wins[p.i]; }
+      p.hold = Math.min(w[0] + p.tIn, w[1]);
+      if (turn >= TURN) { on = (on + 1) % phones.length; turn = 0; mark(); }
       phones.forEach(q => q.draw(q.hold));
     };
   }
