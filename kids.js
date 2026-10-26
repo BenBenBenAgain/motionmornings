@@ -230,6 +230,21 @@
     if (miniVis && $('#watch').hidden) miniStep(still ? 0 : dt);
     if (!still) requestAnimationFrame(miniLoop);
   }
+  // ---- little snapshots from the kids films, tilted like photos on the fridge
+  const SNAPS = { hero: [['bike_ride', 'Learning to ride'], ['bath', 'Bath time'], ['haircut', 'First haircut'], ['dentist_chair', 'The dentist'], ['sleep', 'Bedtime']],
+    foot: [['food_bite', 'Trying new food'], ['share', 'Taking turns'], ['baby_gentle', 'A new baby']] };
+  const snapSrc = document.createElement('canvas'); snapSrc.width = 360; snapSrc.height = 640;
+  $$('[data-snaps]').forEach(box => (SNAPS[box.dataset.snaps] || []).forEach(([key, label]) => {
+    const fig = document.createElement('figure'); fig.className = 'snap';
+    const cv = document.createElement('canvas'); cv.width = 320; cv.height = 400;
+    const cap = document.createElement('figcaption'); cap.textContent = label; fig.append(cv, cap); box.append(fig);
+    const sx = snapSrc.getContext('2d'); sx.setTransform(snapSrc.width / W, 0, 0, snapSrc.width / W, 0, 0);
+    try { K.still(sx, DEMOS.playgroup.cast, key, '', 'friend'); } catch (e) {}
+    sx.setTransform(1, 0, 0, 1, 0, 0);
+    // the bottom of the frame, where the people are
+    const cw = snapSrc.width * 0.84, ch = cw * 5 / 4; cv.getContext('2d').drawImage(snapSrc, (snapSrc.width - cw) / 2, snapSrc.height - ch - 34, cw, ch, 0, 0, cv.width, cv.height);
+  }));
+
   // tapping a little phone opens it bigger, with music
   const dStage = $('#demoStage'), dctx = dStage.getContext('2d');
   let cur = DEMOS.playgroup, demoAt = 0, demoPlaying = false, demoDrag = false, demoLast = 0, demoMusic = null;
