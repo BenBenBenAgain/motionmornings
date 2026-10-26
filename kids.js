@@ -208,7 +208,7 @@
   // each phone still plays its own film in order, scene by scene with straight cuts that skip the fades
   function sceneWins(tl) { return tl.items.slice(1, -1).map(i => [i.start + Math.min(i.kind === 'g' ? 1.6 : 1.1, i.d * 0.3), i.start + i.d - Math.min(0.35, i.d * 0.1)]); }
   function makeDuo(phones) {
-    phones.forEach(p => { p.wins = sceneWins(p.tl); p.i = 0; p.hold = p.wins[0][0] + Math.min(1.5, (p.wins[0][1] - p.wins[0][0]) * 0.4); });
+    phones.forEach(p => { p.wins = sceneWins(p.tl); p.i = Math.min(p.from || 0, p.wins.length - 1); const w = p.wins[p.i]; p.hold = w[0] + Math.min(1.5, (w[1] - w[0]) * 0.4); });
     let on = 0, tIn = 0;
     const mark = () => phones.forEach((p, k) => p.el.classList.toggle('on', k === on));
     mark();
@@ -222,7 +222,7 @@
   function drawDemo(ctx, cv, d, T) { ctx.setTransform(cv.width / W, 0, 0, cv.width / W, 0, 0); K.frame(ctx, d.cast, d.story, d.tl, Math.min(T, d.tl.total - 0.01)); ctx.setTransform(1, 0, 0, 1, 0, 0); }
   let miniStep = null, miniLast = 0;
   function miniLoop(now) {
-    if (!miniStep) miniStep = makeDuo(minis.map(m => ({ el: m.b, tl: m.d.tl, draw: T => drawDemo(m.cv.getContext('2d'), m.cv, m.d, T) })));
+    if (!miniStep) miniStep = makeDuo(minis.map(m => ({ el: m.b, tl: m.d.tl, from: 2, draw: T => drawDemo(m.cv.getContext('2d'), m.cv, m.d, T) })));
     const dt = miniLast ? Math.min(0.1, (now - miniLast) / 1000) : 0; miniLast = now;
     if (miniVis && $('#watch').hidden) miniStep(still ? 0 : dt);
     if (!still) requestAnimationFrame(miniLoop);

@@ -1957,7 +1957,7 @@ try { new IntersectionObserver(es => { heroVisible = es[0].isIntersecting; if (h
 // each phone still plays its own film in order, scene by scene with straight cuts that skip the fades
 function sceneWins(tl) { return tl.items.slice(1, -1).map(i => [i.start + Math.min(i.kind === 'g' ? 1.6 : 1.1, i.d * 0.3), i.start + i.d - Math.min(0.35, i.d * 0.1)]); }
 function makeDuo(phones) {
-  phones.forEach(p => { p.wins = sceneWins(p.tl); p.i = 0; p.hold = p.wins[0][0] + Math.min(1.5, (p.wins[0][1] - p.wins[0][0]) * 0.4); });
+  phones.forEach(p => { p.wins = sceneWins(p.tl); p.i = Math.min(p.from || 0, p.wins.length - 1); const w = p.wins[p.i]; p.hold = w[0] + Math.min(1.5, (w[1] - w[0]) * 0.4); });
   let on = 0, tIn = 0;
   const mark = () => phones.forEach((p, k) => p.el.classList.toggle('on', k === on));
   mark();
