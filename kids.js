@@ -203,6 +203,11 @@
     ['sibling', 'Brother or sister', 'Their name', 'e.g. Ruby'],
     ['baby', 'A baby', 'Their name', 'e.g. Ollie']];
   const OPTIONAL = { helper: 'helperOn', sibling: 'siblingOn', baby: 'babyOn' };
+  // age in years: 2 to 5 are drawn little, 6 to 11 as a kid, 12 and up as a teenager
+  const AGES = Array.from({ length: 15 }, (_, i) => i + 2);
+  const sizeFor = y => y <= 5 ? 'little' : y <= 11 ? 'kid' : 'teen';
+  const ageOf = L => L.years || ({ little: 4, kid: 8, teen: 13 }[L.age] || 4);
+  function setAge(L, y) { L.years = y; L.age = sizeFor(y); }
   const portraits = [];
   function renderCast() {
     const box = $('#cast'); box.innerHTML = ''; portraits.length = 0;
@@ -214,6 +219,7 @@
         el('div', { class: 'subhead' }, el('h3', {}, title), on ? el('label', { class: 'switch' }, el('input', { type: 'checkbox', id: on, checked: !!S.cast[on], onchange: e => { S.cast[on] = e.target.checked; renderCast(); refresh(); } }), 'Include') : null),
         el('div', { class: 'who' }, cv, el('div', { class: 'fields' },
           el('label', { class: 'q' }, q, el('input', { type: 'text', id: `name-${role}`, value: L.name || '', placeholder: ph, maxlength: '24', disabled: off, oninput: e => { renameIn(role, L.name, e.target.value); L.name = e.target.value; refresh(); } })),
+          role === 'child' || role === 'sibling' ? el('label', { class: 'q' }, 'Age', el('select', { id: `age-${role}`, disabled: off, onchange: e => { setAge(L, +e.target.value); refresh(); drawPortraits(0); } }, AGES.map(a => el('option', { value: a, selected: ageOf(L) === a }, a === 16 ? '16+' : String(a))))) : null,
           el('button', { class: 'linkbtn', type: 'button', onclick: () => openLook(role), disabled: off }, 'Change their look'))));
       if (off) card.style.opacity = '0.55';
       box.append(card); portraits.push([cv, role]);
@@ -250,7 +256,7 @@
     const seg = (label, key, opts) => el('div', { class: 'field' }, el('span', {}, label), el('div', { class: 'seg', role: 'group', 'aria-label': label }, opts.map(([v, n]) => el('button', { type: 'button', 'aria-pressed': String(L[key] === v), onclick: e => { const was = (role === 'adult' || role === 'sibling') && key === 'body' && !(L.name || '').trim() ? standIn(role) : null; L[key] = v; if (key === 'facial') L.facialCol = L.hairCol; if (key === 'body' && role !== 'child' && v === 'm' && L.hair === 'long') { L.hair = 'short'; if (L.outfit === 'dress') L.outfit = 'tee'; } if (was) swapName(was, standIn(role)); e.target.parentNode.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === e.target))); after(); } }, n))));
     const sw = (label, key, cols) => el('div', { class: 'field' }, el('span', {}, label), el('div', { class: 'sw' }, cols.map(c => el('button', { type: 'button', 'aria-label': c, 'aria-pressed': String((L[key] || '').toLowerCase() === c.toLowerCase()), style: `background:${c}`, onclick: e => { L[key] = c; if (key === 'hairCol') L.facialCol = c; e.currentTarget.parentNode.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === e.currentTarget))); after(); } })), el('input', { type: 'color', value: L[key] || '#888888', 'aria-label': `Other ${label.toLowerCase()} colour`, oninput: e => { L[key] = e.target.value; if (key === 'hairCol') L.facialCol = e.target.value; after(); } })));
     if (role === 'baby') { f.append(sw('Skin', 'skin', SKIN), sw('Hair colour', 'hairCol', HAIRC), sw('Blanket', 'blanket', CLOTH)); start(); return; }
-    if (kid) f.append(seg('Age', 'age', [['little', 'Little (2 to 5)'], ['kid', 'Older (6 to 10)']].concat(role === 'sibling' ? [['teen', 'Teenager']] : [])), seg('Boy or girl', 'body', [['m', 'Boy'], ['f', 'Girl']]));
+    if (kid) f.append(seg('Boy or girl', 'body', [['m', 'Boy'], ['f', 'Girl']]));
     else f.append(seg('Body', 'body', [['f', 'Woman'], ['m', 'Man']]));
     f.append(sw('Skin', 'skin', SKIN), seg('Hair', 'hair', kid ? HAIR_KID : HAIR_AD), sw('Hair colour', 'hairCol', HAIRC));
     if (!kid) f.append(seg('Face', 'facial', [['none', 'None'], ['stubble', 'Stubble'], ['beard', 'Beard'], ['moustache', 'Moustache']]), seg('Glasses', 'glasses', [[false, 'No'], [true, 'Yes']]));
