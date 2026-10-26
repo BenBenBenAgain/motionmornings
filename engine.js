@@ -2639,13 +2639,13 @@ const KIDS = (() => {
   }
   // the demo family, a made-up mum and daughter, used on the home and kids pages
   const DEMO_CAST = {
-    child: Object.assign({}, KID_DEF, { name: 'Ava', sex: 'f', body: 'f', hair: 'ponytail', hairCol: '#2E2622', skin: '#C98E66', top: '#5FA88F', pants: '#30406E', years: 4, age: 'little' }),
-    adult: Object.assign({}, ADULT_DEF, { name: 'Mum', sex: 'f', body: 'f', hair: 'curly', hairCol: '#1F1A17', skin: '#BD8057', outfit: 'tee', top: '#E9A23B', inner: '#E9A23B', pants: '#30406E', earrings: 'hoops' }),
+    child: Object.assign({}, KID_DEF, { name: 'Ava', sex: 'f', body: 'f', hair: 'ponytail', hairCol: '#2E2622', skin: '#ECC3A3', top: '#5FA88F', pants: '#30406E', years: 4, age: 'little' }),
+    adult: Object.assign({}, ADULT_DEF, { name: 'Mum', sex: 'f', body: 'f', hair: 'long', hairCol: '#2A211C', skin: '#E8BA99', outfit: 'tee', top: '#E9A23B', inner: '#E9A23B', pants: '#30406E', earrings: 'hoops' }),
     helper: Object.assign({}, HELPER_DEF, { name: 'Miss Jo' }),
     siblings: [], friends: [Object.assign({}, FRIEND_DEF, { name: 'Leo', sex: 'm', body: 'm', hair: 'short', hairCol: '#C9A060', skin: '#F2D3BC', top: '#6FA8DC' })],
     pets: [{ type: 'dog', name: 'Biscuit', coat: '#C9A060', ears: 'floppy', size: 'm', muzzle: 'dark' }], baby: {} };
   const DEMOS = {
-    playgroup: { label: 'Playgroup', cast: DEMO_CAST, story: { title: 'Ava Goes to Playgroup', ending: 'Playgroup was fun!', steps: [
+    playgroup: { label: 'Playgroup', music: 'morning-mood', cast: DEMO_CAST, story: { title: 'Ava Goes to Playgroup', ending: 'Playgroup was fun!', steps: [
       { id: 'd1', scene: 'goto', place: 'Play group', text: 'On Wednesday, Mum and Ava are going to playgroup.' },
       { id: 'd2', scene: 'arrive', text: 'Miss Jo is there to say hello.', say: { who: 'child', words: 'Hi Miss Jo!' } },
       { id: 'd3', scene: 'blocks', text: 'Ava can build a big tower with the blocks.' },
@@ -2653,12 +2653,16 @@ const KIDS = (() => {
       { id: 'd5', scene: 'busy', text: 'Sometimes it gets busy and loud. That\u2019s OK.' },
       { id: 'd6', scene: 'ears', text: 'Ava can hold Mum\u2019s hand until she feels ready.' },
       { id: 'd7', scene: 'playball', text: 'Then Ava and Leo play ball together.' }] } },
-    doctor: { label: 'The doctor', cast: Object.assign({}, DEMO_CAST, { helper: Object.assign({}, HELPER_DEF, { name: 'Dr Lee' }) }), story: { title: 'Ava Goes to the Doctor', ending: 'Ava was so brave!', steps: [
-      { id: 'e1', scene: 'goto', place: 'Doctor', text: 'Today Mum and Ava are going to see the doctor.' },
+    // a different family for the second demo: Dad and his son, with their own song
+    doctor: { label: 'The doctor', music: 'italian-andante', cast: Object.assign({}, DEMO_CAST, {
+      child: Object.assign({}, KID_DEF, { name: 'Theo', sex: 'm', body: 'm', hair: 'short', hairCol: '#1F1A17', skin: '#D6A27C', outfit: 'hoodie', top: '#F2BC6B', pants: '#30406E', years: 5, age: 'little' }),
+      adult: Object.assign({}, ADULT_DEF, { name: 'Dad', sex: 'm', body: 'm', hair: 'fade', hairCol: '#1F1A17', skin: '#C98E66', facial: 'beard', facialCol: '#1F1A17', glasses: 'square', outfit: 'shirt', top: '#3F7FA3', inner: '#EFE8DC', pants: '#2F3A4F' }),
+      helper: Object.assign({}, HELPER_DEF, { name: 'Dr Lee' }), friends: [], pets: [] }), story: { title: 'Theo Goes to the Doctor', ending: 'Theo was so brave!', steps: [
+      { id: 'e1', scene: 'goto', place: 'Doctor', text: 'Today Dad and Theo are going to see the doctor.' },
       { id: 'e2', scene: 'waiting', text: 'First they wait in the waiting room. There are fish to look at!' },
-      { id: 'e3', scene: 'checkup', text: 'Dr Lee listens to Ava\u2019s heart and looks in her ears.', say: { who: 'helper', words: 'Hello Ava!' } },
-      { id: 'e4', scene: 'needle', text: 'Sometimes Ava needs a quick needle. She holds Mum\u2019s hand and takes a big breath.' },
-      { id: 'e5', scene: 'sticker', text: 'Then it\u2019s all done! Ava might get a sticker.', say: { who: 'child', words: 'I did it!' } }] } } };
+      { id: 'e3', scene: 'checkup', text: 'Dr Lee listens to Theo\u2019s heart and looks in his ears.', say: { who: 'helper', words: 'Hello Theo!' } },
+      { id: 'e4', scene: 'needle', text: 'Sometimes Theo needs a quick needle. He holds Dad\u2019s hand and takes a big breath.' },
+      { id: 'e5', scene: 'sticker', text: 'Then it\u2019s all done! Theo might get a sticker.', say: { who: 'child', words: 'I did it!' } }] } } };
   return { SC, PICK, PLACES, SIB_DEF, BABY_DEF, FRIEND_DEF, timeline, frame, still, portraitOf, names, parseTime, KID_DEF, ADULT_DEF, HELPER_DEF, stepLen, DEMOS };
 })();
 return { W, H, SCENES, portrait, homeWorld, openingText, closingText, DEFAULT_KID, petsOf, PICKABLE, WORLDS: Object.keys(WORLDS), DEFAULT_ME, DEFAULT_PARTNER, timeline, render, drawScene, fillText, petName, KIDS };

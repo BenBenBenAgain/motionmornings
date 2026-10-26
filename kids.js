@@ -253,7 +253,7 @@
   async function demoSoundOn() {
     if (playing) stop();
     const ctx = ac(); await ctx.resume().catch(() => {});
-    const mb = await loadMusic('morning-mood'); if (!mb || $('#watch').hidden) { demoLabel(); return; }
+    const mb = await loadMusic(cur.music || 'morning-mood'); if (!mb || $('#watch').hidden) { demoLabel(); return; }
     demoSoundOff();
     const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = mb; src.loop = true; g.gain.value = 0.45; src.connect(g); g.connect(ctx.destination); src.start(0, demoAt % mb.duration); demoMusic = src;
     demoLabel();
@@ -268,7 +268,7 @@
   }
   function openWatch(key) {
     cur = DEMOS[key]; demoAt = 0; demoPlaying = true; demoLast = 0;
-    $('#watchTitle').textContent = 'Demo film \u00b7 ' + ({ playgroup: 'Ava goes to playgroup', doctor: 'Ava goes to the doctor' }[key] || cur.story.title); $('#watch').hidden = false;
+    $('#watchTitle').textContent = 'Demo film \u00b7 ' + ({ playgroup: 'Ava goes to playgroup', doctor: 'Theo goes to the doctor' }[key] || cur.story.title); $('#watch').hidden = false;
     demoLabel(); requestAnimationFrame(watchLoop); demoSoundOn();
   }
   function closeWatch() { $('#watch').hidden = true; demoPlaying = false; demoSoundOff(); }
