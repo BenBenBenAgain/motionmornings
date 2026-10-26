@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Motion Mornings Kids: show them what's going to happen</title>
 <meta name="description" content="Make a short animated film that shows your child exactly what's going to happen, starring them. Watch it together before the big day.">
-<meta name="theme-color" content="#FBF3E6">
+<meta name="theme-color" content="#E3EFF7">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta property="og:type" content="website">
@@ -47,7 +47,7 @@ button,input,textarea,select{font:inherit;color:inherit}
 .logo{width:52px;height:52px;flex:none;color:var(--ink);margin-left:-6px}
 .brand h1{font-style:italic;font-weight:500;font-size:1.6rem;letter-spacing:-.01em}
 .kidsmark{font:700 1.15rem var(--display);display:inline-flex;transform:rotate(-14deg) translateY(-8px);margin-left:2px}
-.kidsmark span:nth-child(1){color:var(--coral)}.kidsmark span:nth-child(2){color:var(--gold)}.kidsmark span:nth-child(3){color:var(--green)}.kidsmark span:nth-child(4){color:#78B3D4}
+.kidsmark span:nth-child(1){color:#E07B66}.kidsmark span:nth-child(2){color:var(--gold)}.kidsmark span:nth-child(3){color:var(--green)}.kidsmark span:nth-child(4){color:#78B3D4}
 .kidsmark span{display:inline-block}.kidsmark span:nth-child(odd){transform:rotate(-5deg)}.kidsmark span:nth-child(even){transform:rotate(6deg)}
 
 .intro{display:flex;flex-direction:column;gap:8px;padding-block:8px 6px;max-width:68ch}
@@ -97,8 +97,8 @@ textarea{resize:vertical;min-height:64px}
 .linkbtn{background:none;border:0;padding:4px;color:var(--sea);font:600 .92rem var(--body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .navrow{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-top:4px}
 .status{font-size:.92rem;color:var(--muted);min-height:1.4em}
-.status.err{color:var(--coral);font-weight:600}
-.meta.over{color:var(--coral);font-weight:600}
+.status.err{color:#C9463A;font-weight:600}
+.meta.over{color:#C9463A;font-weight:600}
 .newfilm{display:flex;justify-content:center;margin-top:28px}
 .linkbtn.quiet{color:var(--muted);font-weight:500}
 .pill{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sea)}
@@ -284,12 +284,23 @@ video.result{width:100%;max-width:280px;border-radius:14px;background:#000}
 .watchbox{max-width:420px;align-items:center;text-align:center;gap:12px}
 .watchbox .phone{max-width:min(300px,62vh*.5625);width:100%}
 .watchbox .herobar{max-width:300px}
+
+/* the kids page is blue where the grown-up page is coral: blue means kids across the site */
+:root{--coral:#2B78AE;--coral-ink:#FFFFFF;--sky:#E3EFF7}
+html,body{overflow-x:clip}
+.kidstop{position:relative;isolation:isolate}
+.kidstop::before{content:'';position:absolute;top:0;bottom:0;left:calc(50% - 50vw);right:calc(50% - 50vw);background:var(--sky);z-index:-1}
+.kidstop .lead{border-bottom:0;margin-bottom:0}
+.kidstop + .builder{margin-top:36px}
+.mlabel{color:#2B78AE}
+.leadbtns .btn.ghost.you{border-color:#D0634C;color:#B9523C}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="kidstop">
   <div class="top">
-    <a class="brand" href="/" aria-label="Motion Mornings home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><path d="M16.5 51 Q21.5 41.5 30 52 Q38.5 41.5 43.5 51" fill="none" stroke="currentColor" stroke-width="3.6"/><path d="M37.5 35 Q41.5 27.2 47 35.5 Q52.5 27.2 56.5 35" fill="none" stroke="currentColor" stroke-width="3.2"/><path d="M40 78 A28 28 0 0 1 96 78 Z" fill="var(--coral)"/><line x1="14" y1="78" x2="106" y2="78" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><line x1="54" y1="90" x2="84" y2="90" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/><line x1="61" y1="101" x2="77" y2="101" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/></svg><h1>Motion Mornings</h1><span class="kidsmark" aria-label="Kids"><span>K</span><span>I</span><span>D</span><span>S</span></span></a>
+    <a class="brand" href="/" aria-label="Motion Mornings home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><path d="M16.5 51 Q21.5 41.5 30 52 Q38.5 41.5 43.5 51" fill="none" stroke="currentColor" stroke-width="3.6"/><path d="M37.5 35 Q41.5 27.2 47 35.5 Q52.5 27.2 56.5 35" fill="none" stroke="currentColor" stroke-width="3.2"/><path d="M40 78 A28 28 0 0 1 96 78 Z" fill="#E07B66"/><line x1="14" y1="78" x2="106" y2="78" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><line x1="54" y1="90" x2="84" y2="90" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/><line x1="61" y1="101" x2="77" y2="101" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/></svg><h1>Motion Mornings</h1><span class="kidsmark" aria-label="Kids"><span>K</span><span>I</span><span>D</span><span>S</span></span></a>
     <a class="backlink" href="/"><span aria-hidden="true">&larr;</span> Create for yourself</a>
   </div>
 
@@ -305,8 +316,9 @@ video.result{width:100%;max-width:280px;border-radius:14px;background:#000}
     </div>
     <p class="duohint">Tap a film to watch with sound</p>
     <p class="duomore">One film for each big step. Playgroup, the doctor, the dentist, haircuts, bedtime and more.</p></div>
-    <div class="leadbtns"><a class="btn coral" href="#builder">Create for your child <span class="btnkids" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span></a><a class="btn ghost" href="/">Create for yourself</a></div>
+    <div class="leadbtns"><a class="btn coral" href="#builder">Create for your child <span class="btnkids" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span></a><a class="btn ghost you" href="/">Create for yourself</a></div>
   </section>
+  </div>
 
   <div id="builder" class="builder">
   <header class="buildhead"><span class="pill">Build your own</span><h2>Make your film</h2><p class="lede">Add your child and their people, pick a story or write your own, then read it aloud. The preview updates as you go.</p></header>
