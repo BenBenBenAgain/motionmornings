@@ -13,6 +13,8 @@
   const uid = () => Math.random().toString(36).slice(2, 9);
   const fmt = s => { s = Math.max(0, Math.round(s)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
   const KEY = 'mmkids.v1';
+  // boy, girl or neutral: neutral keeps the story to 'they'
+  function sexOf(L) { return (L && L.sex) || (L && L.body === 'm' ? 'm' : 'f'); }
 
   // ---------------------------------------------------------------- state
   const MUSIC = [['none', 'No music'], ['morning-mood', 'Morning Mood'], ['italian-andante', 'Italian Andante'], ['vltava', 'Vltava'], ['figaro', 'Figaro']];
@@ -68,7 +70,7 @@
   function castFor() { return { child: S.cast.child, adult: S.cast.adult, helper: S.cast.helperOn ? S.cast.helper : { name: '' }, sibling: S.cast.sibling || {}, baby: S.cast.baby || {} }; }
   function fromTemplate(key) {
     if (TEMPLATES[key].needs) S.cast[TEMPLATES[key].needs] = true;
-    const t = TEMPLATES[key].story, c = castFor(), boy = S.cast.child.body === 'm', girl = S.cast.child.body === 'f';
+    const t = TEMPLATES[key].story, c = castFor(), boy = sexOf(S.cast.child) === 'm', girl = sexOf(S.cast.child) === 'f';
     const pro = s => s.replace(/\{their\}/g, boy ? 'his' : girl ? 'her' : 'their').replace(/\{they\}/g, boy ? 'he' : girl ? 'she' : 'they').replace(/\{s\}/g, boy || girl ? 's' : '').replace(/\{bigsib\}/g, boy ? 'brother' : girl ? 'sister' : 'helper');
     const n = s => s == null ? s : pro(K.names(s, c));
     const cap = x => x && x[0].toUpperCase() + x.slice(1);
@@ -228,7 +230,7 @@
   }
   // a new name flows through the story: the old name (or the stand-in) is swapped wherever it appears
   const STAND_IN = { child: 'your child', adult: 'Mum', helper: 'a friend', baby: 'the baby' };
-  const standIn = role => role === 'adult' && S.cast.adult.body === 'm' ? 'Dad' : role === 'sibling' ? (S.cast.sibling.body === 'm' ? 'their brother' : 'their sister') : STAND_IN[role];
+  const standIn = role => role === 'adult' ? ({ m: 'Dad', f: 'Mum', x: 'their grown-up' }[sexOf(S.cast.adult)]) : role === 'sibling' ? ({ m: 'their brother', f: 'their sister', x: 'their sibling' }[sexOf(S.cast.sibling)]) : STAND_IN[role];
   function renameIn(role, oldName, newName) {
     const from = (oldName || '').trim() || standIn(role), to = newName.trim() || standIn(role);
     swapName(from, to);
@@ -251,21 +253,51 @@
   let lookRole = null, lookRaf = 0;
   function openLook(role) {
     if (OPTIONAL[role] && !S.cast[OPTIONAL[role]]) return;
-    lookRole = role; const L = S.cast[role], kid = role === 'child' || role === 'sibling', f = $('#lookFields'); f.innerHTML = '';
-    $('#lookEdTitle').textContent = (L.name || ROLES.find(r => r[0] === role)[1]) + '’s look';
-    const seg = (label, key, opts) => el('div', { class: 'field' }, el('span', {}, label), el('div', { class: 'seg', role: 'group', 'aria-label': label }, opts.map(([v, n]) => el('button', { type: 'button', 'aria-pressed': String(L[key] === v), onclick: e => { const was = (role === 'adult' || role === 'sibling') && key === 'body' && !(L.name || '').trim() ? standIn(role) : null; L[key] = v; if (key === 'facial') L.facialCol = L.hairCol; if (key === 'body' && role !== 'child' && v === 'm' && L.hair === 'long') { L.hair = 'short'; if (L.outfit === 'dress') L.outfit = 'tee'; } if (was) swapName(was, standIn(role)); e.target.parentNode.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === e.target))); after(); } }, n))));
-    const sw = (label, key, cols) => el('div', { class: 'field' }, el('span', {}, label), el('div', { class: 'sw' }, cols.map(c => el('button', { type: 'button', 'aria-label': c, 'aria-pressed': String((L[key] || '').toLowerCase() === c.toLowerCase()), style: `background:${c}`, onclick: e => { L[key] = c; if (key === 'hairCol') L.facialCol = c; e.currentTarget.parentNode.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === e.currentTarget))); after(); } })), el('input', { type: 'color', value: L[key] || '#888888', 'aria-label': `Other ${label.toLowerCase()} colour`, oninput: e => { L[key] = e.target.value; if (key === 'hairCol') L.facialCol = e.target.value; after(); } })));
-    if (role === 'baby') { f.append(sw('Skin', 'skin', SKIN), sw('Hair colour', 'hairCol', HAIRC), sw('Blanket', 'blanket', CLOTH)); start(); return; }
-    if (kid) f.append(seg('Boy or girl', 'body', [['m', 'Boy'], ['f', 'Girl']]));
-    else f.append(seg('Body', 'body', [['f', 'Woman'], ['m', 'Man']]));
-    f.append(sw('Skin', 'skin', SKIN), seg('Hair', 'hair', kid ? HAIR_KID : HAIR_AD), sw('Hair colour', 'hairCol', HAIRC));
-    if (!kid) f.append(seg('Face', 'facial', [['none', 'None'], ['stubble', 'Stubble'], ['beard', 'Beard'], ['moustache', 'Moustache']]), seg('Glasses', 'glasses', [[false, 'No'], [true, 'Yes']]));
-    f.append(seg('Wearing', 'outfit', kid ? [['tee', 'T-shirt'], ['hoodie', 'Hoodie'], ['dress', 'Dress']] : [['tee', 'T-shirt'], ['shirt', 'Shirt'], ['hoodie', 'Hoodie'], ['jacket', 'Jacket'], ['dress', 'Dress']]), sw('Top colour', 'top', CLOTH), sw('Pants colour', 'pants', CLOTH));
-    if (kid) f.append(el('div', { class: 'field' }, el('span', {}, 'On their top'), el('input', { type: 'text', id: 'printIn', maxlength: '4', placeholder: 'e.g. OK', value: L.print || '', oninput: e => { L.print = e.target.value.toUpperCase(); after(); } })));
-    start();
-    function after() { if (L.outfit === 'dress' && !kid) L.inner = L.top; refresh(); }
-    function start() { $('#lookEd').hidden = false; const cv = $('#lookCanvas'), c = cv.getContext('2d'); const t0 = performance.now();
-    const loop = now => { K.portraitOf(c, cv.width, cv.height, L, role, (now - t0) / 1000); lookRaf = requestAnimationFrame(loop); }; lookRaf = requestAnimationFrame(loop); }
+    lookRole = role; const L = S.cast[role], kid = role === 'child' || role === 'sibling', f = $('#lookFields');
+    $('#lookEdTitle').textContent = (L.name || ROLES.find(r => r[0] === role)[1]) + '\u2019s look';
+    const pressSet = (e, sel) => e.currentTarget.parentNode.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === e.currentTarget)));
+    const seg = (label, key, opts, redraw) => el('div', { class: 'field' }, el('span', {}, label), el('div', { class: 'seg', role: 'group', 'aria-label': label }, opts.map(([v, n]) => el('button', { type: 'button', 'aria-pressed': String((key === 'sex' ? sexOf(L) : L[key] || false) === v), onclick: e => { pressSet(e); set(key, v); if (redraw) fields(); } }, n))));
+    const sw = (label, key, cols) => el('div', { class: 'field' }, el('span', {}, label), el('div', { class: 'sw' }, cols.map(c => el('button', { type: 'button', 'aria-label': c, 'aria-pressed': String((L[key] || '').toLowerCase() === c.toLowerCase()), style: `background:${c}`, onclick: e => { pressSet(e); set(key, c); } })), el('input', { type: 'color', value: L[key] || '#888888', 'aria-label': `Other ${label.toLowerCase()} colour`, oninput: e => set(key, e.target.value) })));
+    function set(key, v) {
+      if (key === 'sex') {
+        const was = !(L.name || '').trim() && role !== 'child' ? standIn(role) : null;
+        L.sex = v; L.body = v === 'm' ? 'm' : 'f';
+        if (v === 'm' && L.hair === 'long' && !kid) L.hair = 'short';
+        if (v !== 'f' && L.outfit === 'dress') L.outfit = 'tee';
+        if (v !== 'm') L.facial = 'none';
+        if (was) swapName(was, standIn(role));
+      } else L[key] = v;
+      if (key === 'hairCol') L.facialCol = v;
+      if (key === 'facial') L.facialCol = L.hairCol;
+      if (L.outfit === 'dress' && !kid) L.inner = L.top;
+      refresh();
+    }
+    function fields() {
+      const box = f.closest('.box'), top = box ? box.scrollTop : 0; f.innerHTML = '';
+      if (role === 'baby') { f.append(sw('Skin tone', 'skin', SKIN), sw('Hair colour', 'hairCol', HAIRC), sw('Blanket', 'blanket', CLOTH)); return; }
+      f.append(seg('Look', 'sex', kid ? [['m', 'Boy'], ['f', 'Girl'], ['x', 'Neutral']] : [['f', 'Woman'], ['m', 'Man'], ['x', 'Neutral']], true));
+      f.append(sw('Skin tone', 'skin', SKIN));
+      f.append(seg('Headwear', 'hat', [[false, 'None'], ['cap', 'Cap'], ['beanie', 'Beanie'], ['scarf', 'Headscarf']], true));
+      if (L.hat) f.append(sw('Headwear colour', 'hatCol', CLOTH));
+      if (L.hat !== 'scarf') f.append(seg('Hair', 'hair', kid ? HAIR_KID : HAIR_AD), sw('Hair colour', 'hairCol', HAIRC));
+      if (!kid) f.append(seg('Facial hair', 'facial', [['none', 'None'], ['stubble', 'Stubble'], ['moustache', 'Moustache'], ['beard', 'Beard']]));
+      f.append(seg('Glasses', 'glasses', [[false, 'None'], [true, 'Round'], ['square', 'Square'], ['sun', 'Sunglasses']]),
+        seg('Earrings', 'earrings', [[false, 'None'], ['studs', 'Studs'], ['hoops', 'Hoops']]),
+        seg('Freckles', 'freckles', [[false, 'No'], [true, 'Yes']]),
+        seg('Height', 'height', [['short', kid ? 'Smaller' : 'Shorter'], [false, 'Average'], ['tall', 'Taller']]),
+        seg('Build', 'build', [['slim', 'Slim'], [false, 'Average'], ['big', 'Bigger']]),
+        seg('Uses a wheelchair', 'chair', [[false, 'No'], [true, 'Yes']]),
+        seg('Wearing', 'outfit', kid ? [['tee', 'T-shirt'], ['hoodie', 'Hoodie'], ['dress', 'Dress']] : [['tee', 'T-shirt'], ['shirt', 'Shirt'], ['hoodie', 'Hoodie'], ['jacket', 'Jacket'], ['dress', 'Dress']], true),
+        sw('Top colour', 'top', CLOTH));
+      if (L.outfit === 'jacket') f.append(sw('Shirt under jacket', 'inner', CLOTH));
+      if (L.outfit !== 'dress') f.append(sw('Pants colour', 'pants', CLOTH));
+      if (kid) f.append(el('div', { class: 'field' }, el('span', {}, 'On their top'), el('input', { type: 'text', id: 'printIn', maxlength: '4', placeholder: 'e.g. OK', value: L.print || '', oninput: e => { L.print = e.target.value.toUpperCase(); refresh(); } })));
+      if (box) box.scrollTop = top;
+    }
+    fields();
+    $('#lookEd').hidden = false; const cv = $('#lookCanvas'), c = cv.getContext('2d'); const t0 = performance.now();
+    cancelAnimationFrame(lookRaf);
+    const loop = now => { K.portraitOf(c, cv.width, cv.height, L, role, (now - t0) / 1000); lookRaf = requestAnimationFrame(loop); }; lookRaf = requestAnimationFrame(loop);
   }
   function closeLook() { cancelAnimationFrame(lookRaf); $('#lookEd').hidden = true; renderCast(); refresh(); }
   $('#lookDone').addEventListener('click', closeLook);
@@ -281,7 +313,7 @@
     { scene: 'ears', text: 'If it\u2019s too loud, {child} can cover {their} ears and hold {adult}\u2019s hand.' },
     { scene: 'mumplay', glimpse: true, text: '{child} can always stay with {adult}.' }];
   $('#addCalm').addEventListener('click', () => {
-    const c = castFor(), boy = S.cast.child.body === 'm', girl = S.cast.child.body === 'f';
+    const c = castFor(), boy = sexOf(S.cast.child) === 'm', girl = sexOf(S.cast.child) === 'f';
     const n = t => K.names(t, c).replace(/\{their\}/g, boy ? 'his' : girl ? 'her' : 'their');
     const add = CALM.map(st => ({ id: uid(), scene: st.scene, place: '', time: '', glimpse: !!st.glimpse, text: n(st.text), say: { who: 'child', words: '' } }));
     const at = Math.max(0, S.story.steps.length - 1); S.story.steps.splice(at, 0, ...add); renderStory(); refresh(); seekTo(add[0].id);

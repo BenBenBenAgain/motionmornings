@@ -2286,9 +2286,9 @@ const KIDS = (() => {
 
   // ---- names in the words: {child} and {adult} become the cast's names
   function names(text, c) {
-    const sn = (SB(c).name || '').trim() || (SB(c).body === 'm' ? 'their brother' : 'their sister'), bn = (BB(c).name || '').trim() || 'the baby';
+    const sx = c2 => c2.sex || (c2.body === 'm' ? 'm' : 'f'), sn = (SB(c).name || '').trim() || ({ m: 'their brother', f: 'their sister', x: 'their sibling' }[sx(SB(c))]), bn = (BB(c).name || '').trim() || 'the baby';
     text = String(text || '').replace(/\{sibling\}/g, sn).replace(/\{baby\}/g, bn);
-    const kn = (KID(c).name || '').trim() || 'your child', an = (AD(c).name || '').trim() || (AD(c).body === 'm' ? 'Dad' : 'Mum'), hn = (HP(c).name || '').trim() || 'a friend';
+    const kn = (KID(c).name || '').trim() || 'your child', an = (AD(c).name || '').trim() || ({ m: 'Dad', f: 'Mum', x: 'their grown-up' }[sx(AD(c))]), hn = (HP(c).name || '').trim() || 'a friend';
     return String(text || '').replace(/\{child\}/g, kn).replace(/\{adult\}/g, an).replace(/\{helper\}/g, hn);
   }
 
