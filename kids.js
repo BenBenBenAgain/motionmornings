@@ -181,7 +181,7 @@
   // ---------------------------------------------------------------- cast
   const ROLES = [
     ['child', 'Your child', 'Their name', 'e.g. Hunter'],
-    ['adult', 'Going with them', 'What your child calls them', 'e.g. Mumma'],
+    ['adult', 'Going with them', 'What your child calls them', 'e.g. Mumma or Dad'],
     ['helper', 'Someone they’ll meet', 'Their name', 'e.g. Vicky']];
   const portraits = [];
   function renderCast() {
@@ -202,9 +202,13 @@
   }
   // a new name flows through the story: the old name (or the stand-in) is swapped wherever it appears
   const STAND_IN = { child: 'your child', adult: 'Mum', helper: 'a friend' };
+  const standIn = role => role === 'adult' && S.cast.adult.body === 'm' ? 'Dad' : STAND_IN[role];
   function renameIn(role, oldName, newName) {
-    const from = (oldName || '').trim() || STAND_IN[role], to = newName.trim() || STAND_IN[role];
-    if (!from || from === to) return;
+    const from = (oldName || '').trim() || standIn(role), to = newName.trim() || standIn(role);
+    swapName(from, to);
+  }
+  function swapName(from, to) {
+    if (!from || !to || from === to) return;
     const re = new RegExp('\\b' + from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi');
     const sw = t => typeof t === 'string' ? t.replace(re, m => (m[0] === m[0].toUpperCase() && to[0] ? to[0].toUpperCase() + to.slice(1) : to)) : t;
     S.story.title = sw(S.story.title); S.story.ending = sw(S.story.ending);
@@ -223,8 +227,8 @@
     if (role === 'helper' && !S.cast.helperOn) return;
     lookRole = role; const L = S.cast[role], kid = role === 'child', f = $('#lookFields'); f.innerHTML = '';
     $('#lookEdTitle').textContent = (L.name || ROLES.find(r => r[0] === role)[1]) + '’s look';
-    const seg = (label, key, opts) => el('div', { class: 'field' }, el('span', {}, label), el('div', { class: 'seg', role: 'group', 'aria-label': label }, opts.map(([v, n]) => el('button', { type: 'button', 'aria-pressed': String(L[key] === v), onclick: e => { L[key] = v; e.target.parentNode.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === e.target))); after(); } }, n))));
-    const sw = (label, key, cols) => el('div', { class: 'field' }, el('span', {}, label), el('div', { class: 'sw' }, cols.map(c => el('button', { type: 'button', 'aria-label': c, 'aria-pressed': String((L[key] || '').toLowerCase() === c.toLowerCase()), style: `background:${c}`, onclick: e => { L[key] = c; e.currentTarget.parentNode.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === e.currentTarget))); after(); } })), el('input', { type: 'color', value: L[key] || '#888888', 'aria-label': `Other ${label.toLowerCase()} colour`, oninput: e => { L[key] = e.target.value; after(); } })));
+    const seg = (label, key, opts) => el('div', { class: 'field' }, el('span', {}, label), el('div', { class: 'seg', role: 'group', 'aria-label': label }, opts.map(([v, n]) => el('button', { type: 'button', 'aria-pressed': String(L[key] === v), onclick: e => { const was = role === 'adult' && key === 'body' && !(L.name || '').trim() ? standIn('adult') : null; L[key] = v; if (key === 'facial') L.facialCol = L.hairCol; if (key === 'body' && role !== 'child' && v === 'm' && L.hair === 'long') { L.hair = 'short'; if (L.outfit === 'dress') L.outfit = 'tee'; } if (was) swapName(was, standIn('adult')); e.target.parentNode.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === e.target))); after(); } }, n))));
+    const sw = (label, key, cols) => el('div', { class: 'field' }, el('span', {}, label), el('div', { class: 'sw' }, cols.map(c => el('button', { type: 'button', 'aria-label': c, 'aria-pressed': String((L[key] || '').toLowerCase() === c.toLowerCase()), style: `background:${c}`, onclick: e => { L[key] = c; if (key === 'hairCol') L.facialCol = c; e.currentTarget.parentNode.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === e.currentTarget))); after(); } })), el('input', { type: 'color', value: L[key] || '#888888', 'aria-label': `Other ${label.toLowerCase()} colour`, oninput: e => { L[key] = e.target.value; if (key === 'hairCol') L.facialCol = e.target.value; after(); } })));
     if (kid) f.append(seg('Age', 'age', [['little', 'Little (2 to 5)'], ['kid', 'Older (6 to 10)']]), seg('Boy or girl', 'body', [['m', 'Boy'], ['f', 'Girl']]));
     else f.append(seg('Body', 'body', [['f', 'Woman'], ['m', 'Man']]));
     f.append(sw('Skin', 'skin', SKIN), seg('Hair', 'hair', kid ? HAIR_KID : HAIR_AD), sw('Hair colour', 'hairCol', HAIRC));

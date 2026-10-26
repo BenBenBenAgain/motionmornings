@@ -2094,7 +2094,7 @@ const KIDS = (() => {
       [hh.L, hh.R].forEach(h => { circ(h[0], h[1], 21 * s); fill(k.skin); });
       return { adult: adultTop(230, 1710), child: kidTop(k, kx, ky) };
     } },
-    mumplay: { label: 'Playing with Mumma', fn(c, t) {
+    mumplay: { label: 'Playing with their grown-up', fn(c, t) {
       hall(t);
       // the busy part of the room stays small and far away
       person(760, 1470, 0.62, MUM2, t, { flip: -1, armR: [0.4, 1 + 0.2 * Math.sin(t * 3)] }); person(900, 1470, 0.62, DAD1, t + 1, { flip: -1 }); person(1010, 1475, 0.62, MUM3, t + 2, { flip: -1 });
@@ -2205,7 +2205,7 @@ const KIDS = (() => {
 
   // ---- names in the words: {child} and {adult} become the cast's names
   function names(text, c) {
-    const kn = (KID(c).name || '').trim() || 'your child', an = (AD(c).name || '').trim() || 'Mum', hn = (HP(c).name || '').trim() || 'a friend';
+    const kn = (KID(c).name || '').trim() || 'your child', an = (AD(c).name || '').trim() || (AD(c).body === 'm' ? 'Dad' : 'Mum'), hn = (HP(c).name || '').trim() || 'a friend';
     return String(text || '').replace(/\{child\}/g, kn).replace(/\{adult\}/g, an).replace(/\{helper\}/g, hn);
   }
 
