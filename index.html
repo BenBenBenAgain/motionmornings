@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Motion Mornings: see it every morning, live it every day</title>
-<meta name="description" content="Make a short animated film of you doing the everyday things that build the life you want. Watch it each morning and train your mind to see you as the person who does them.">
+<title>Motion Mornings: little films for big steps</title>
+<meta name="description" content="Custom animated films starring you, or anyone in your world. Build the life you want, or show your child what's going to happen before the big day. See it first, then live it.">
 <meta name="theme-color" content="#FBF3E6">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -17,9 +17,11 @@
 <script>if (/^#r=/.test(location.hash) || /[?&]r=/.test(location.search)) document.documentElement.className += ' restoring';</script>
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://motionmornings.com/">
-<meta property="og:title" content="Motion Mornings">
-<meta property="og:description" content="A short animated film of you, doing the things. Watch it every morning.">
-<meta property="og:image" content="https://motionmornings.com/og-image.png">
+<meta property="og:title" content="Motion Mornings: little films for big steps">
+<meta property="og:description" content="Custom animated films starring you, or anyone in your world. See it first, then live it.">
+<meta property="og:image" content="https://motionmornings.com/og-home.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <style>html,body{margin:0}html.restoring body::after{content:'Bringing back your film...';position:fixed;inset:0;z-index:999;background:#FBF3E6;color:#1F2E4D;display:flex;align-items:center;justify-content:center;font:600 1.1rem system-ui,sans-serif}</style>
 </head>
@@ -250,6 +252,7 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
 .kidsword{font:700 .95rem var(--display);letter-spacing:0;margin-left:4px;transform:rotate(-10deg) translateY(-2px);display:inline-flex}
 .kidsband{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin:0 0 40px;padding:20px 22px;border-radius:var(--r);background:color-mix(in srgb,var(--gold) 16%,var(--surface));border:1px solid color-mix(in srgb,var(--gold) 45%,var(--line))}
 .kidsband .btn{text-decoration:none}
+.umbrella{display:flex;flex-direction:column;gap:6px;margin:6px 0 14px}.umbrella h2{margin:0;font:700 clamp(1.6rem,4.4vw,2.4rem)/1.1 var(--display);text-wrap:balance}.umbrella p{margin:0;color:var(--muted);max-width:60ch}
 .choose{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:4px 0 22px}
 .choice{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-radius:var(--r);border:1.5px solid var(--line);background:var(--surface);text-decoration:none;color:var(--ink);min-width:0;transition:border-color .15s,transform .15s}
 .choice:hover{border-color:var(--coral);transform:translateY(-1px)}
@@ -346,6 +349,7 @@ input[type=range]{height:30px;touch-action:none}
     <div class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><path d="M16.5 51 Q21.5 41.5 30 52 Q38.5 41.5 43.5 51" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M37.5 35 Q41.5 27.2 47 35.5 Q52.5 27.2 56.5 35" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M40 78 A28 28 0 0 1 96 78 Z" fill="var(--coral)"/><line x1="14" y1="78" x2="106" y2="78" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><line x1="54" y1="90" x2="84" y2="90" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/><line x1="61" y1="101" x2="77" y2="101" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/></svg><h1>Motion Mornings</h1></div>
     <div class="row topright"><button class="streakchip" id="streakChip" hidden><span aria-hidden="true">🌅</span><b id="chipN">0</b></button><a class="kidslink" href="/kids.html" aria-label="Motion Mornings Kids"><span>K</span><span>I</span><span>D</span><span>S</span></a><a class="btn ghost small toplink" href="#builder">Make your film</a></div>
   </div>
+  <header class="umbrella"><h2>Little films for big steps.</h2><p>Custom animated films starring you, or anyone in your world. See it first, then live it.</p></header>
   <nav class="choose" aria-label="Who is the film for?">
     <a class="choice" href="#builder" id="chooseMe"><span class="ctag">For you</span><b>Create for yourself</b><span class="cdesc">A film of the everyday steps toward the life you want</span></a>
     <a class="choice kidschoice" href="/kids.html"><span class="ctag">For your child <span class="kidsword" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span></span><b>Create for your child</b><span class="cdesc">A film that shows them what's going to happen, starring them</span></a>
