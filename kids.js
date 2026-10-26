@@ -197,54 +197,57 @@
   let TL = null;
   const voiceLens = () => Object.fromEntries(Object.entries(voices).filter(([, b]) => b).map(([k, b]) => [k, b.duration]));
   function refresh() { TL = K.timeline(S.story, voiceLens()); $('#scrub').max = 1000; $('#lenMeta').textContent = `${fmt(TL.total)} long`; $('#storyMeta').textContent = `${S.story.steps.length} of ${MAX_STEPS} steps \u00b7 about ${fmt(TL.total)}${TL.total > MAX_FILM ? ` (over the ${fmt(MAX_FILM)} limit)` : ''}`; $('#storyMeta').classList.toggle('over', TL.total > MAX_FILM); $('#addStep').disabled = S.story.steps.length >= MAX_STEPS; $('#addCalm').disabled = S.story.steps.length > MAX_STEPS - 3; if (!playing) draw(pos); save(); }
-  // ---- the demo film: a made-up family, playing at the top of the page
-  const DEMO_CAST = {
-    child: Object.assign({}, K.KID_DEF, { name: 'Ava', sex: 'f', body: 'f', hair: 'ponytail', hairCol: '#2E2622', skin: '#C98E66', top: '#5FA88F', pants: '#30406E', years: 4, age: 'little' }),
-    adult: Object.assign({}, K.ADULT_DEF, { name: 'Mum', sex: 'f', body: 'f', hair: 'curly', hairCol: '#1F1A17', skin: '#BD8057', outfit: 'tee', top: '#E9A23B', inner: '#E9A23B', pants: '#30406E', earrings: 'hoops' }),
-    helper: Object.assign({}, K.HELPER_DEF, { name: 'Miss Jo' }),
-    siblings: [], friends: [Object.assign({}, K.FRIEND_DEF, { name: 'Leo', sex: 'm', body: 'm', hair: 'short', hairCol: '#C9A060', skin: '#F2D3BC', top: '#6FA8DC' })],
-    pets: [{ type: 'dog', name: 'Biscuit', coat: '#C9A060', ears: 'floppy', size: 'm', muzzle: 'dark' }], baby: {} };
-  const DEMO_STORY = { title: 'Ava Goes to Playgroup', ending: 'Playgroup was fun!', steps: [
-    { id: 'd1', scene: 'goto', place: 'Play group', text: 'On Wednesday, Mum and Ava are going to playgroup.' },
-    { id: 'd2', scene: 'arrive', text: 'Miss Jo is there to say hello.', say: { who: 'child', words: 'Hi Miss Jo!' } },
-    { id: 'd3', scene: 'blocks', text: 'Ava can build a big tower with the blocks.' },
-    { id: 'd4', scene: 'others', text: 'Other kids come too. Leo is there!', say: { who: 'friend', words: 'Hi Ava!' } },
-    { id: 'd5', scene: 'busy', text: 'Sometimes it gets busy and loud. That\u2019s OK.' },
-    { id: 'd6', scene: 'ears', text: 'Ava can hold Mum\u2019s hand until she feels ready.' },
-    { id: 'd7', scene: 'playball', text: 'Then Ava and Leo play ball together.' }] };
-  const DTL = K.timeline(DEMO_STORY, {});
-  // the demo plays on its own phone at the top of the page, separate from the film they're making
+  // ---- the demo films: a made-up mum and daughter, on the little phones at the top
+  const DEMOS = K.DEMOS;
+  for (const d of Object.values(DEMOS)) d.tl = K.timeline(d.story, {});
+  const minis = $$('.mini[data-demo]').map(b => ({ b, d: DEMOS[b.dataset.demo], cv: b.querySelector('canvas') }));
+  let miniVis = true, still = false, miniT0 = performance.now();
+  try { still = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  try { new IntersectionObserver(es => { miniVis = es[0].isIntersecting; }).observe($('.duo')); } catch (e) {}
+  function drawDemo(ctx, cv, d, T) { ctx.setTransform(cv.width / W, 0, 0, cv.width / W, 0, 0); K.frame(ctx, d.cast, d.story, d.tl, Math.min(T, d.tl.total - 0.01)); ctx.setTransform(1, 0, 0, 1, 0, 0); }
+  function miniLoop(now) {
+    if (miniVis && $('#watch').hidden) { const t = still ? 0 : (now - miniT0) / 1000; minis.forEach((m, i) => drawDemo(m.cv.getContext('2d'), m.cv, m.d, (t + 6 + i * 4) % m.d.tl.total)); }
+    if (!still) requestAnimationFrame(miniLoop);
+  }
+  // tapping a little phone opens it bigger, with music
   const dStage = $('#demoStage'), dctx = dStage.getContext('2d');
-  let demoAt = 0, demoPlaying = true, demoVisible = true, demoDrag = false, demoLast = 0, demoMusic = null, demoMusicT0 = 0;
-  try { if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { demoPlaying = false; demoAt = 2; } } catch (e) {}
-  function demoFrame(T) { dctx.setTransform(dStage.width / W, 0, 0, dStage.width / W, 0, 0); K.frame(dctx, DEMO_CAST, DEMO_STORY, DTL, T); dctx.setTransform(1, 0, 0, 1, 0, 0); }
-  function demoLabel() { $('#demoPlay').textContent = demoPlaying ? 'Pause' : 'Play'; $('#demoSound').textContent = demoMusic ? 'Sound off' : '\ud83d\udd0a Tap for sound'; }
+  let cur = DEMOS.playgroup, demoAt = 0, demoPlaying = false, demoDrag = false, demoLast = 0, demoMusic = null;
+  function demoLabel() { $('#demoPlay').textContent = demoPlaying ? 'Pause' : 'Play'; $('#demoSound').textContent = demoMusic ? 'Sound off' : '\ud83d\udd0a Sound on'; }
   function demoSoundOff() { if (demoMusic) { try { demoMusic.stop(); } catch (e) {} demoMusic = null; } demoLabel(); }
   async function demoSoundOn() {
     if (playing) stop();
-    const ctx = ac(); await ctx.resume().catch(() => {}); $('#demoSound').textContent = 'Loading...';
-    const mb = await loadMusic('morning-mood'); if (!mb) { demoLabel(); return; }
+    const ctx = ac(); await ctx.resume().catch(() => {});
+    const mb = await loadMusic('morning-mood'); if (!mb || $('#watch').hidden) { demoLabel(); return; }
+    demoSoundOff();
     const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = mb; src.loop = true; g.gain.value = 0.45; src.connect(g); g.connect(ctx.destination); src.start(0, demoAt % mb.duration); demoMusic = src;
-    demoPlaying = true; demoLabel();
+    demoLabel();
   }
-  function demoLoop(now) {
+  function watchLoop(now) {
+    if ($('#watch').hidden) return;
     const dt = demoLast ? Math.min(0.1, (now - demoLast) / 1000) : 0; demoLast = now;
-    if (demoVisible) {
-      if (demoPlaying && !demoDrag) { demoAt += dt; if (demoAt >= DTL.total) demoAt = 0; }
-      demoFrame(Math.min(demoAt, DTL.total - 0.01));
-      $('#demoBar').style.width = (100 * Math.min(1, demoAt / DTL.total)).toFixed(2) + '%';
-    }
-    requestAnimationFrame(demoLoop);
+    if (demoPlaying && !demoDrag) { demoAt += dt; if (demoAt >= cur.tl.total) demoAt = 0; }
+    drawDemo(dctx, dStage, cur, demoAt);
+    $('#demoBar').style.width = (100 * Math.min(1, demoAt / cur.tl.total)).toFixed(2) + '%';
+    requestAnimationFrame(watchLoop);
   }
+  function openWatch(key) {
+    cur = DEMOS[key]; demoAt = 0; demoPlaying = true; demoLast = 0;
+    $('#watchTitle').textContent = 'Demo film \u00b7 ' + cur.story.title; $('#watch').hidden = false;
+    demoLabel(); requestAnimationFrame(watchLoop); demoSoundOn();
+  }
+  function closeWatch() { $('#watch').hidden = true; demoPlaying = false; demoSoundOff(); }
+  minis.forEach(m => m.b.addEventListener('click', () => openWatch(m.b.dataset.demo)));
+  $('#watchClose').addEventListener('click', closeWatch);
+  $('#watch').addEventListener('click', e => { if (e.target.id === 'watch') closeWatch(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#watch').hidden) closeWatch(); });
   $('#demoPlay').addEventListener('click', () => { demoPlaying = !demoPlaying; if (!demoPlaying) demoSoundOff(); demoLabel(); });
-  $('#demoSound').addEventListener('click', () => { demoMusic ? demoSoundOff() : demoSoundOn(); });
-  dStage.addEventListener('click', () => { if (!demoMusic) demoSoundOn(); else { demoPlaying = false; demoSoundOff(); } });
-  function demoSeek(e) { const r = $('#demoSeek').getBoundingClientRect(); demoAt = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * DTL.total * 0.999; }
+  $('#demoSound').addEventListener('click', () => { demoMusic ? demoSoundOff() : (demoPlaying = true, demoSoundOn()); });
+  dStage.addEventListener('click', () => $('#demoPlay').click());
+  function demoSeek(e) { const r = $('#demoSeek').getBoundingClientRect(); demoAt = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * cur.tl.total * 0.999; }
   $('#demoSeek').addEventListener('pointerdown', e => { demoDrag = true; $('#demoSeek').setPointerCapture(e.pointerId); demoSeek(e); });
   $('#demoSeek').addEventListener('pointermove', e => { if (demoDrag) demoSeek(e); });
   ['pointerup', 'pointercancel'].forEach(ev => $('#demoSeek').addEventListener(ev, () => { demoDrag = false; }));
-  $('#demoSeek').addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { demoAt = Math.max(0, Math.min(DTL.total - 0.1, demoAt + (e.key === 'ArrowRight' ? 3 : -3))); e.preventDefault(); } });
-  try { new IntersectionObserver(es => { demoVisible = es[0].isIntersecting; if (!demoVisible) demoSoundOff(); }).observe(dStage); } catch (e) {}
+  $('#demoSeek').addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { demoAt = Math.max(0, Math.min(cur.tl.total - 0.1, demoAt + (e.key === 'ArrowRight' ? 3 : -3))); e.preventDefault(); } });
 
   function draw(T, ctx = sctx, w = stage.width) { ctx.setTransform(w / W, 0, 0, w / W, 0, 0); K.frame(ctx, castFor(), S.story, TL, T); ctx.setTransform(1, 0, 0, 1, 0, 0); }
 
@@ -689,7 +692,7 @@
     const saved = await idbAll();
     for (const [id, blob] of Object.entries(saved)) { try { voices[id] = await decode(blob); } catch (e) {} }
     if (document.fonts && document.fonts.load) { try { await Promise.race([Promise.all([document.fonts.load('700 50px Poppins'), document.fonts.load('italic 500 50px Poppins'), document.fonts.load('italic 400 50px Poppins')]), new Promise(r => setTimeout(r, 2500))]); } catch (e) {} }
-    refresh(); go(S.step || 0, true); demoLabel(); requestAnimationFrame(demoLoop);
+    refresh(); go(S.step || 0, true); requestAnimationFrame(miniLoop);
     pos = Math.min(2.6, TL.total); draw(pos); showPos();
     let t = 0; const idle = () => { t += 1 / 30; if (S.step === 0 && !$('#cast').hidden) drawPortraits(t); setTimeout(() => requestAnimationFrame(idle), 33); }; idle();
   })();
