@@ -5,7 +5,7 @@
 <meta name="color-scheme" content="light">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Motion Mornings: little films for big steps</title>
-<meta name="description" content="Custom animated films starring you, or anyone in your world. Build the life you want, or show your child what's going to happen before the big day. See it first, then live it.">
+<meta name="description" content="Custom animated films starring you, or anyone in your world. Build the life you want, or show a child what's going to happen before the big day. See it first, then live it.">
 <meta name="theme-color" content="#1C2747">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -468,14 +468,14 @@ body{min-height:100vh;background:linear-gradient(180deg,#1C2747 0%,#2C3561 34%,#
     </div>
     <div class="duowrap"><div class="duo">
       <button class="mini" type="button" data-watch="you" aria-label="Watch the demo film for you, with sound"><span class="mphone"><canvas id="miniYou" width="360" height="640" aria-hidden="true"></canvas><span class="mplay" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span></span><span class="mlabel">For you</span></button>
-      <button class="mini" type="button" data-watch="kid" aria-label="Watch the demo film for kids, with sound"><span class="mphone"><canvas id="miniKid" width="360" height="640" aria-hidden="true"></canvas><span class="mplay" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span></span><span class="mlabel">For your child</span><span class="kidbadge kidsword" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span></button>
+      <button class="mini" type="button" data-watch="kid" aria-label="Watch the demo film for kids, with sound"><span class="mphone"><canvas id="miniKid" width="360" height="640" aria-hidden="true"></canvas><span class="mplay" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span></span><span class="mlabel">For a child</span><span class="kidbadge kidsword" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span></button>
     </div>
     <p class="duohint">Tap a film to watch with sound</p></div>
-    <div class="leadbtns"><a class="btn coral" href="/you.html">Create for yourself</a><a class="btn ghost" href="/kids.html">Create for your child <span class="btnkids" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span></a></div>
+    <div class="leadbtns"><a class="btn coral" href="/you.html">Create for yourself</a><a class="btn ghost" href="/kids.html">Create for a child <span class="btnkids" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span></a></div>
   </section>
   <footer class="foot">
     <p>Your films are made and kept on your device. Nothing is uploaded.</p>
-    <p><a href="/you.html">Create for yourself</a> · <a href="/kids.html">Create for your child</a> · <a href="/you.html#privacy">Privacy</a> · <a href="#contact" data-contact>Contact us</a></p>
+    <p><a href="/you.html">Create for yourself</a> · <a href="/kids.html">Create for a child</a> · <a href="/you.html#privacy">Privacy</a> · <a href="#contact" data-contact>Contact us</a></p>
   </footer>
 </div>
 
@@ -621,7 +621,7 @@ function openWatch(which) {
   $('.wyou').hidden = kid; $('.wkid').hidden = !kid;
   $('#watchTitle').textContent = 'Demo film \u00b7 ' + (kid ? 'Ava goes to playgroup' : 'My new life');
   $('#watchNote').textContent = kid ? 'A short film that shows a child what\u2019s going to happen, starring them and in your voice.' : 'Now imagine it\u2019s you, your life, your favourite song.';
-  const cta = $('#watchCta'); cta.textContent = kid ? 'Create for your child' : 'Create for yourself'; cta.href = kid ? '/kids.html' : '/you.html';
+  const cta = $('#watchCta'); cta.textContent = kid ? 'Create for a child' : 'Create for yourself'; cta.href = kid ? '/kids.html' : '/you.html';
   $('#watch').hidden = false;
   if (kid) { kidT = 0; kidLast = 0; kidPlaying = true; kidSync(); kidSoundSet(true); requestAnimationFrame(kidLoop); }
   else { heroT = 0; heroPlaying = true; heroLabel(); if (!heroSound) soundBtn.onclick(); else { try { heroAudio.currentTime = 0; } catch (e) {} } }

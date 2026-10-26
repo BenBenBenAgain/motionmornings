@@ -2554,7 +2554,7 @@ const KIDS = (() => {
     const sx = c2 => c2.sex || (c2.body === 'm' ? 'm' : 'f'), sn = (SB(c).name || '').trim() || ({ m: 'their brother', f: 'their sister', x: 'their sibling' }[sx(SB(c))]), bn = (BB(c).name || '').trim() || 'the baby';
     const fn0 = ((c.friends && c.friends[0] && c.friends[0].name) || '').trim() || 'their friend';
     text = String(text || '').replace(/\{sibling\}/g, sn).replace(/\{baby\}/g, bn).replace(/\{friend\}/g, fn0);
-    const kn = (KID(c).name || '').trim() || 'your child', an = (AD(c).name || '').trim() || ({ m: 'Dad', f: 'Mum', x: 'their grown-up' }[sx(AD(c))]), hn = (HP(c).name || '').trim() || 'a friend';
+    const kn = (KID(c).name || '').trim() || 'the child', an = (AD(c).name || '').trim() || ({ m: 'Dad', f: 'Mum', x: 'their grown-up' }[sx(AD(c))]), hn = (HP(c).name || '').trim() || 'a friend';
     return String(text || '').replace(/\{child\}/g, kn).replace(/\{adult\}/g, an).replace(/\{helper\}/g, hn);
   }
 
