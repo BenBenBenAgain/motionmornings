@@ -131,7 +131,7 @@
     const pro = s => s.replace(/\{their\}/g, boy ? 'his' : girl ? 'her' : 'their').replace(/\{they\}/g, boy ? 'he' : girl ? 'she' : 'they').replace(/\{s\}/g, boy || girl ? 's' : '').replace(/\{bigsib\}/g, boy ? 'brother' : girl ? 'sister' : 'helper').replace(/\{themself\}/g, boy ? 'himself' : girl ? 'herself' : 'themself');
     const n = s => s == null ? s : pro(K.names(s, c));
     const cap = x => x && x[0].toUpperCase() + x.slice(1);
-    return { endScene: t.endScene || '', title: cap(n(t.title)), ending: n(t.ending), steps: t.steps.map(st => ({ id: uid(), scene: st.scene, with: st.with || '', place: n(st.place || ''), time: st.time || '', text: n(st.text), glimpse: !!st.glimpse, say: st.say ? { who: st.say.who, words: n(st.say.words) } : { who: 'child', words: '' } })) };
+    return { kind: key, endScene: t.endScene || '', title: cap(n(t.title)), ending: n(t.ending), steps: t.steps.map(st => ({ id: uid(), scene: st.scene, with: st.with || '', place: n(st.place || ''), time: st.time || '', text: n(st.text), glimpse: !!st.glimpse, say: st.say ? { who: st.say.who, words: n(st.say.words) } : { who: 'child', words: '' } })) };
   }
   // a shared link carries the cast and the story (never the recordings)
   function readShare() {
@@ -431,20 +431,29 @@
     });
   }
   let pickFor = null;
-  function pickScene(st) {
+  // which place each story belongs to, so the picture picker opens on the right scenes
+  const STORY_PLACE = { playgroup: 'Playgroup room', kinder: 'Kinder or school', siblings: 'Brothers, sisters and babies', baby: 'Brothers, sisters and babies', playdate: 'Brothers, sisters and babies', doctor: 'The doctor', dentist: 'The dentist', haircut: 'Haircut', bedtime: 'Bedtime', bike: 'Learning to ride a bike', food: 'At home' };
+  function pickScene(st, all) {
     pickFor = st; const g = $('#sceneGrid'); g.innerHTML = '';
-    K.PLACES.forEach(([where, keys]) => {
+    // stories made before this remembered their kind: use the place most of their steps are in
+    const tally = {}; S.story.steps.forEach(x => K.PLACES.forEach(([w, keys]) => { if (w !== 'Getting there and home' && keys.includes(x.scene)) tally[w] = (tally[w] || 0) + 1; }));
+    const home = STORY_PLACE[S.story.kind] || Object.keys(tally).sort((a, b) => tally[b] - tally[a])[0], own = K.PLACES.filter(([w, keys]) => w === home || keys.includes(st.scene));
+    const shown = all || !own.length ? K.PLACES : own, seen = new Set();
+    shown.forEach(([where, keys]) => {
+      const list = keys.filter(k => !seen.has(k) && !(k === 'arrive' && !S.cast.helperOn)); if (!list.length) return;
       g.append(el('h4', {}, where));
-      keys.forEach(key => {
-        if (key === 'arrive' && !S.cast.helperOn) return;
+      list.forEach(key => {
+        seen.add(key);
         const cv = el('canvas', { width: 180, height: 320 });
         g.append(el('button', { type: 'button', 'aria-pressed': String(st.scene === key), onclick: () => { st.scene = key; if (K.SC[key].place && !st.place) st.place = key === 'cafe' ? 'Cafe' : ''; $('#scenePick').hidden = true; renderStory(); refresh(); seekTo(st.id); } }, cv, el('span', {}, K.SC[key].label)));
-        sceneThumb(cv, key, st.place || (key === 'cafe' ? 'Cafe' : key === 'goto' ? 'Play group' : ''));
+        sceneThumb(cv, key, st.place || (key === 'cafe' ? 'Cafe' : key === 'goto' ? 'Play group' : ''), st);
       });
     });
+    if (!all && shown !== K.PLACES) g.append(el('div', { class: 'more' }, el('button', { class: 'btn ghost', type: 'button', id: 'moreScenes', onclick: () => { pickScene(st, true); $('#scenePick .box').scrollTop = 0; } }, 'More scenes from other places')));
     g.append(el('div', { class: 'ask' }, el('p', {}, el('b', {}, 'Can\u2019t find the right picture?'), ' Ask for it and we\u2019ll draw it.'), el('button', { class: 'btn ghost small', type: 'button', onclick: () => openRequest(st) }, 'Request a new picture')));
     $('#scenePick').hidden = false;
   }
+
   // asking for a picture we haven't drawn yet: each new scene is created individually, so it isn't instant
   const REQ_TO = 'hello@motionmornings.com';
   function openRequest(st) {
