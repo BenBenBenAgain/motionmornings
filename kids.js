@@ -285,9 +285,25 @@
         sceneThumb(cv, key, st.place || (key === 'cafe' ? 'Cafe' : key === 'goto' ? 'Play group' : ''));
       });
     });
-    g.append(el('p', { class: 'ask' }, el('b', {}, 'Can\u2019t find the right picture? '), 'Email what you need to ', el('span', { class: 'addr' }, 'hello@motionmornings.com'), ' and we\u2019ll draw it. For now, pick the closest one, or tick \u201cShow as big calm words\u201d to show just the words.'));
+    g.append(el('div', { class: 'ask' }, el('p', {}, el('b', {}, 'Can\u2019t find the right picture?'), ' Ask for it and we\u2019ll draw it.'), el('button', { class: 'btn ghost small', type: 'button', onclick: () => openRequest(st) }, 'Request a new picture')));
     $('#scenePick').hidden = false;
   }
+  // asking for a picture we haven't drawn yet: new scenes are drawn by hand, so it isn't instant
+  const REQ_TO = 'hello@motionmornings.com';
+  function openRequest(st) {
+    $('#scenePick').hidden = true;
+    $('#reqWhat').value = st && st.text ? `For the step: \u201c${st.text}\u201d\n\nThe picture should show: ` : 'The picture should show: ';
+    $('#reqStatus').textContent = ''; $('#reqBox').hidden = false; $('#reqWhat').focus();
+  }
+  $('#reqCancel').addEventListener('click', () => $('#reqBox').hidden = true);
+  $('#reqTop').addEventListener('click', () => openRequest(pickFor));
+  $('#reqSend').addEventListener('click', () => {
+    const what = $('#reqWhat').value.trim(), from = $('#reqEmail').value.trim();
+    if (what.length < 12) { $('#reqStatus').className = 'status err'; $('#reqStatus').textContent = 'Tell us a little about the picture you need.'; return; }
+    const body = `${what}\n\nWho's in it: ${[S.cast.child.name, S.cast.adult.name].filter(Boolean).join(', ') || 'not named yet'}\nReply to: ${from || '(no email given)'}`;
+    location.href = `mailto:${REQ_TO}?subject=${encodeURIComponent('New picture request (Kids)')}&body=${encodeURIComponent(body)}`;
+    $('#reqStatus').className = 'status'; $('#reqStatus').textContent = `Your email app should open with the request ready to send. If it doesn\u2019t, copy what you wrote and email it to ${REQ_TO}.`;
+  });
   $('#scenePickClose').addEventListener('click', () => $('#scenePick').hidden = true);
   $('#scenePick').addEventListener('click', e => { if (e.target.id === 'scenePick') $('#scenePick').hidden = true; });
 

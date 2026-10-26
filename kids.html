@@ -80,7 +80,7 @@ button,input,textarea,select{font:inherit;color:inherit}
 .subhead h3{font-size:1.1rem}
 label.q{display:flex;flex-direction:column;gap:6px;font-weight:600}
 .hint{font-weight:400;color:var(--muted);font-size:.9rem}
-textarea,input[type=text],select{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:10px 12px}
+textarea,input[type=text],input[type=email],select{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:10px 12px}
 textarea{resize:vertical;min-height:64px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .between{justify-content:space-between}
@@ -152,7 +152,8 @@ video.result{width:100%;max-width:280px;border-radius:14px;background:#000}
 .scenegrid canvas{width:100%;aspect-ratio:9/16;display:block;background:#1A1A1A}
 .scenegrid span{padding:6px 8px;font-weight:600;font-size:.85rem;line-height:1.25}
 .scenegrid h4{grid-column:1/-1;font-size:1rem;margin-top:6px}
-.scenegrid .ask{grid-column:1/-1;color:var(--muted);font-size:.92rem;padding-top:4px}
+.scenegrid .ask{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;color:var(--muted);font-size:.92rem;padding:12px;margin-top:6px;border:1px dashed var(--line);border-radius:12px}
+.scenegrid .ask p{margin:0}
 .scenegrid .addr{user-select:all;color:var(--ink);font-weight:600}
 .extras .switch.glimpse{flex-direction:row;align-items:center;grid-column:1/-1;font-size:.9rem;color:var(--ink)}
 .templates{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
@@ -259,7 +260,19 @@ video.result{width:100%;max-width:280px;border-radius:14px;background:#000}
 <div class="modal" id="scenePick" hidden role="dialog" aria-modal="true" aria-labelledby="scenePickTitle">
   <div class="box wide">
     <div class="subhead"><h3 id="scenePickTitle">Choose the picture</h3><button class="btn ghost small" id="scenePickClose">Cancel</button></div>
+    <p class="meta">Can&rsquo;t see what you need? <button class="linkbtn" type="button" id="reqTop">Request a new picture</button></p>
     <div class="scenegrid" id="sceneGrid"></div>
+  </div>
+</div>
+
+<div class="modal" id="reqBox" hidden role="dialog" aria-modal="true" aria-labelledby="reqTitle">
+  <div class="box">
+    <h3 id="reqTitle">Request a new picture</h3>
+    <p class="meta">New pictures are drawn by hand, so this isn&rsquo;t instant. We&rsquo;ll email you when it&rsquo;s ready, usually within a few days, and it&rsquo;ll then be in the picture list for your story. In the meantime, use the closest picture, or tick &ldquo;Show as big calm words&rdquo; to show just the words.</p>
+    <label class="q">What should it show? <span class="hint">Where it is, who&rsquo;s there and what they&rsquo;re doing.</span><textarea id="reqWhat" rows="5" maxlength="600"></textarea></label>
+    <label class="q">Your email <span class="hint">So we can tell you when it&rsquo;s ready.</span><input type="email" id="reqEmail" autocomplete="email" placeholder="you@example.com"></label>
+    <div class="row"><button class="btn coral" id="reqSend">Send request</button><button class="btn ghost" id="reqCancel">Cancel</button></div>
+    <p class="status" id="reqStatus"></p>
   </div>
 </div>
 
