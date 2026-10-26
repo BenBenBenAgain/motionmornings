@@ -334,14 +334,16 @@
   // ---------------------------------------------------------------- steps (the four panels)
   const STEP_NAMES = ['Who’s in it', 'The story', 'Your voice', 'Watch and save'];
   function go(n, quiet) {
-    S.step = Math.max(0, Math.min(3, n)); save();
+    // like the grown-up builder: a step opens once the one before it is done
+    n = Math.max(0, Math.min(3, n)); if (S.reached == null) S.reached = S.step || 0; if (n > S.reached) return;
+    S.step = n; save();
     $$('#panels > .panel').forEach(p => p.hidden = +p.dataset.step !== S.step);
-    $$('#steps button').forEach((b, i) => b.setAttribute('aria-current', i === S.step ? 'step' : 'false'));
+    $$('#steps button').forEach((b, i) => { b.setAttribute('aria-current', i === S.step ? 'step' : 'false'); b.disabled = i > S.reached; b.title = i > S.reached ? 'Finish the steps before this one first' : ''; b.classList.toggle('done', i < S.reached && i !== S.step); });
     if (S.step === 1) renderStory(); if (S.step === 2) renderVoice(); if (S.step === 0) renderCast();
     if (!quiet && window.innerWidth < 860) $('#steps').scrollIntoView({ block: 'start', behavior: 'smooth' });
   }
   $('#steps').append(...STEP_NAMES.map((n, i) => el('button', { type: 'button', onclick: () => go(i) }, el('span', { class: 'n' }, String(i + 1)), n)));
-  $$('[data-next]').forEach(b => b.addEventListener('click', () => go(S.step + 1)));
+  $$('[data-next]').forEach(b => b.addEventListener('click', () => { S.reached = Math.max(S.reached || 0, S.step + 1); go(S.step + 1); }));
   $$('[data-prev]').forEach(b => b.addEventListener('click', () => go(S.step - 1)));
 
   // ---------------------------------------------------------------- cast
@@ -710,7 +712,7 @@
   });
   $('#newStory').addEventListener('click', () => ask('Start a new story?', 'Your people stay the same. This story and its recordings are cleared.', async () => {
     for (const id of Object.keys(voices)) { delete voices[id]; await idbPut(id, null); }
-    S.story = fromTemplate('blank'); go(1); refresh();
+    S.story = fromTemplate('blank'); S.reached = 1; go(1); refresh();
   }));
   $('#copyLink').addEventListener('click', async () => { const link = shareLink(), st = $('#copyStatus'); try { await navigator.clipboard.writeText(link); st.textContent = 'Copied.'; } catch (e) { st.textContent = link; } });
 
