@@ -542,7 +542,7 @@
       });
     });
     if (!all && shown !== K.PLACES) g.append(el('div', { class: 'more' }, el('button', { class: 'btn ghost', type: 'button', id: 'moreScenes', onclick: () => { pickScene(st, true); $('#scenePick .box').scrollTop = 0; } }, 'More scenes from other places')));
-    g.append(el('div', { class: 'ask' }, el('p', {}, el('b', {}, 'Can\u2019t find the right picture?'), ' Ask for it and we\u2019ll draw it.'), el('button', { class: 'btn ghost small', type: 'button', onclick: () => openRequest(st) }, 'Request a new picture')));
+    g.append(el('div', { class: 'ask' }, el('p', {}, el('b', {}, 'Can\u2019t find the right picture?'), ' Suggest one for the library.'), el('button', { class: 'btn ghost small', type: 'button', onclick: () => openRequest(st) }, 'Suggest a new picture')));
     $('#scenePick').hidden = false;
   }
 
@@ -557,13 +557,13 @@
   $('#reqTop').addEventListener('click', () => openRequest(pickFor));
   $('#reqSend').addEventListener('click', () => {
     const what = $('#reqWhat').value.trim(), from = $('#reqEmail').value.trim(), st = $('#reqStatus');
-    if (what.length < 12) { st.className = 'status err'; st.textContent = 'Tell us a little about the picture you need.'; return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(from)) { st.className = 'status err'; st.textContent = 'Add your email so we can tell you when it\u2019s ready.'; return; }
+    if (what.length < 12) { st.className = 'status err'; st.textContent = 'Tell us a little about the picture you\u2019d like.'; return; }
+    if (from && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(from)) { st.className = 'status err'; st.textContent = 'That email doesn\u2019t look quite right. Fix it, or leave it blank.'; return; }
     const who = [S.cast.child.name, S.cast.adult.name].filter(Boolean).join(', ') || 'not named yet';
     if (!window.MMContact) { st.className = 'status err'; st.textContent = `That didn\u2019t send. Please email ${REQ_TO}.`; return; }
     $('#reqSend').disabled = true; st.className = 'status'; st.textContent = 'Sending...';
-    window.MMContact.send({ subject: 'New picture request (Kids)', email: from, message: what, extra: { who: who } }).then(() => {
-      st.className = 'status'; st.textContent = 'Thanks, your request is in. We\u2019ll email you when the picture is ready.'; $('#reqWhat').value = ''; $('#reqSend').disabled = false;
+    window.MMContact.send({ subject: 'Picture suggestion (Kids)', email: from, message: what, extra: { who: who } }).then(() => {
+      st.className = 'status'; st.textContent = 'Thanks for the suggestion. We\u2019ll keep it in mind as we add new pictures.'; $('#reqWhat').value = ''; $('#reqSend').disabled = false;
     }).catch(() => { $('#reqSend').disabled = false; st.className = 'status err'; st.textContent = `That didn\u2019t send. Check your connection and try again, or email ${REQ_TO}.`; });
   });
   $('#scenePickClose').addEventListener('click', () => $('#scenePick').hidden = true);

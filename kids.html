@@ -457,7 +457,7 @@ html,body{overflow-x:clip}
 <div class="modal" id="scenePick" hidden role="dialog" aria-modal="true" aria-labelledby="scenePickTitle">
   <div class="box wide">
     <div class="subhead"><h3 id="scenePickTitle">Choose the picture</h3><button class="btn ghost small" id="scenePickClose">Cancel</button></div>
-    <p class="meta">Can&rsquo;t see what you need? <button class="linkbtn" type="button" id="reqTop">Request a new picture</button></p>
+    <p class="meta">Can&rsquo;t see what you need? <button class="linkbtn" type="button" id="reqTop">Suggest a new picture</button></p>
     <div class="scenegrid" id="sceneGrid"></div>
   </div>
 </div>
@@ -474,11 +474,11 @@ html,body{overflow-x:clip}
 
 <div class="modal" id="reqBox" hidden role="dialog" aria-modal="true" aria-labelledby="reqTitle">
   <div class="box">
-    <h3 id="reqTitle">Request a new picture</h3>
-    <p class="meta">Each new picture is created individually, so this isn&rsquo;t instant. We&rsquo;ll email you when it&rsquo;s ready, usually within a few days, and it&rsquo;ll then be in the picture list for your story. In the meantime, use the closest picture, or tick &ldquo;Show as big calm words&rdquo; to show just the words.</p>
+    <h3 id="reqTitle">Suggest a new picture</h3>
+    <p class="meta">Tell us what you&rsquo;d like to see. We read every suggestion and use them to decide which pictures to add next, though we can&rsquo;t promise every one. For now, use the closest picture, or tick &ldquo;Show as big calm words&rdquo; to show just the words.</p>
     <label class="q">What should it show? <span class="hint">Where it is, who&rsquo;s there and what they&rsquo;re doing.</span><textarea id="reqWhat" rows="5" maxlength="600"></textarea></label>
-    <label class="q">Your email <span class="hint">So we can tell you when it&rsquo;s ready.</span><input type="email" id="reqEmail" autocomplete="email" placeholder="you@example.com"></label>
-    <div class="row"><button class="btn coral" id="reqSend">Send request</button><button class="btn ghost" id="reqCancel">Cancel</button></div>
+    <label class="q">Your email <span class="hint">Optional. Only so we can ask you about it if we need to.</span><input type="email" id="reqEmail" autocomplete="email" placeholder="you@example.com"></label>
+    <div class="row"><button class="btn coral" id="reqSend">Send suggestion</button><button class="btn ghost" id="reqCancel">Cancel</button></div>
     <p class="status" id="reqStatus"></p>
   </div>
 </div>
