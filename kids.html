@@ -64,6 +64,7 @@ button,input,textarea,select{font:inherit;color:inherit}
 .stagecol{position:sticky;top:calc(env(safe-area-inset-top,0px) + 14px);display:flex;flex-direction:column;gap:10px;align-items:center}
 .phone{width:100%;max-width:320px;aspect-ratio:9/16;border-radius:28px;overflow:hidden;background:#1A1A1A;box-shadow:0 0 0 8px #1F2430,0 20px 50px -20px rgba(20,25,40,.55);position:relative}
 .phone canvas{width:100%;height:100%;display:block}
+.stagetag{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sea);margin:0}.stagetag.demo{color:var(--coral)}
 .player{display:flex;gap:10px;align-items:center;width:100%;max-width:320px}
 .player input[type=range]{flex:1;accent-color:var(--coral)}
 .time{font-variant-numeric:tabular-nums;font-size:.9rem;color:var(--muted);min-width:3.2em;text-align:right}
@@ -263,8 +264,10 @@ video.result{width:100%;max-width:280px;border-radius:14px;background:#000}
     </main>
 
     <aside class="stagecol">
-      <div class="phone"><canvas id="stage" width="720" height="1280" aria-label="Your film"></canvas></div>
+      <p class="stagetag" id="stageTag">Your film</p>
+      <div class="phone"><canvas id="stage" width="720" height="1280" aria-label="Film preview"></canvas></div>
       <div class="player"><button class="btn small" id="playBtn">Play</button><input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Position in film"><span class="time" id="timeLbl">0:00</span></div>
+      <button class="btn small" id="demoSound" hidden>&#128266; Tap for sound</button>
     </aside>
   </div>
 
