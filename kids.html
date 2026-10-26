@@ -292,22 +292,17 @@ html,body{overflow-x:clip}
 .kidstop .lead{border-bottom:0;margin-bottom:0;padding-bottom:12px}
 .kidstop{margin-bottom:40px}
 .mini[data-demo=playgroup] .mlabel{color:#4E8F44}.mini[data-demo=doctor] .mlabel{color:#3F7FA3}
-.parade{display:flex;justify-content:center;align-items:flex-end;pointer-events:none}
-.parade canvas{display:block;height:auto;margin:0 -10px}
-.parade.big{margin:-6px auto 0;max-width:640px;position:relative}
-.parade.big::after{content:'';position:absolute;left:-12%;right:-12%;bottom:6px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--k3) 70%,var(--line)) 20%,color-mix(in srgb,var(--k2) 80%,var(--line)) 50%,color-mix(in srgb,var(--k4) 70%,var(--line)) 80%,transparent)}
-.parade.big canvas{width:13%}
-.parade.small{justify-content:flex-end}
-.parade.small canvas{width:62px}
-.parade.foot{margin-top:44px}
-.parade.foot canvas{width:72px}
-.buildhead.withpals{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;column-gap:20px}
-.buildhead.withpals > :not(.parade){grid-column:1}
-.buildhead.withpals .parade{grid-column:2;grid-row:1/span 3}
+.snaps{display:flex;justify-content:center;align-items:flex-start;gap:18px;padding:6px 0 10px;pointer-events:none}
+.snap{margin:0;background:#FFFDF8;padding:8px 8px 0;border-radius:6px;box-shadow:0 10px 24px -12px rgba(20,25,40,.45),0 0 0 1px rgba(20,25,40,.06);width:150px;flex:none}
+.snap canvas{display:block;width:100%;aspect-ratio:4/5;border-radius:3px;background:#1A1A1A}
+.snap figcaption{font:italic 500 .92rem var(--display);color:var(--ink);text-align:center;padding:7px 2px 9px}
+.snap:nth-child(5n+1){transform:rotate(-5deg) translateY(6px)}.snap:nth-child(5n+2){transform:rotate(3deg)}.snap:nth-child(5n+3){transform:rotate(-2deg) translateY(10px)}.snap:nth-child(5n+4){transform:rotate(4deg) translateY(2px)}.snap:nth-child(5n){transform:rotate(-3deg) translateY(8px)}
+.snap:nth-child(1) figcaption{color:#C9604B}.snap:nth-child(2) figcaption{color:#B98A2E}.snap:nth-child(3) figcaption{color:#4E8F44}.snap:nth-child(4) figcaption{color:#3F7FA3}
+.snaps.snapsend{margin-top:48px}
+.snapsnote{text-align:center;color:var(--muted);font-size:.95rem;margin:4px 0 0}
 @media (max-width:760px){
-  .parade.big{max-width:none;margin:-4px -6px 0}.parade.big canvas{width:17%;margin:0 -6px}
-  .buildhead.withpals{display:flex}.buildhead.withpals .parade{display:none}
-  .parade.foot canvas{width:56px}
+  .snaps{gap:10px;justify-content:flex-start;overflow:hidden;margin:0 -16px;padding:6px 16px 12px}
+  .snap{width:118px;padding:6px 6px 0}.snap figcaption{font-size:.8rem;padding:5px 2px 7px}
 }
 .leadtag{color:var(--k1)}
 .steps button:nth-child(1) .n{background:color-mix(in srgb,var(--k1) 30%,var(--surface))}
@@ -343,11 +338,12 @@ html,body{overflow-x:clip}
     <p class="duomore">One film for each big step. Playgroup, the doctor, the dentist, haircuts, bedtime and more.</p></div>
     <div class="leadbtns"><a class="btn coral" href="#builder">Create for your child <span class="btnkids" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span></a><a class="btn ghost" href="/">Create for yourself</a></div>
   </section>
-  <div class="parade big" data-pals="hero" aria-hidden="true"></div>
+  <div class="snaps" data-snaps="hero" aria-hidden="true"></div>
+  <p class="snapsnote">Bikes, baths, haircuts, the dentist, bedtime. Whatever&rsquo;s coming up next.</p>
   </div>
 
   <div id="builder" class="builder">
-  <header class="buildhead withpals"><span class="pill">Build your own</span><h2>Make your film</h2><p class="lede">Add your child and their people, pick a story or write your own, then read it aloud. The preview updates as you go.</p><div class="parade small" data-pals="build" aria-hidden="true"></div></header>
+  <header class="buildhead"><span class="pill">Build your own</span><h2>Make your film</h2><p class="lede">Add your child and their people, pick a story or write your own, then read it aloud. The preview updates as you go.</p></header>
 
   <nav class="steps" id="steps" aria-label="Steps"></nav>
 
@@ -425,7 +421,7 @@ html,body{overflow-x:clip}
 
   <div class="newfilm"><button class="linkbtn quiet" id="resetAll" type="button">Clear everything and start again</button></div>
 
-  <div class="parade foot" data-pals="foot" aria-hidden="true"></div>
+  <div class="snaps snapsend" data-snaps="foot" aria-hidden="true"></div>
   <footer class="foot">
     <p>Your people, story and recordings stay on your device. Nothing is uploaded.</p>
     <p><a href="/">Motion Mornings for grown-ups</a> · <a href="mailto:hello@motionmornings.com">hello@motionmornings.com</a></p>
