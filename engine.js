@@ -2153,6 +2153,20 @@ const KIDS = (() => {
       drawKid(k, 560, y, t, { armL: [2.4 + 0.3 * Math.sin(t * 6), 2.8], armR: [2.4 + 0.3 * Math.sin(t * 6 + 1), 2.8] });
       return { adult: adultTop(150, 1700), child: kidTop(k, 560, 1440) };
     } },
+    blocks: { label: 'Building a block tower', fn(c, t) {
+      hall(t); const k = KID(c), sk = ks(k), kx = 470, ky = 1730, bx = 700, base = 1728, sz = 66;
+      const cyc = t % 6.5, n = Math.min(6, 1 + Math.floor(cyc / 0.7)), fall = clamp((cyc - 4.6) / 0.8), cols = [CORAL, GOLD, [0.47, 0.7, 0.83], [0.55, 0.78, 0.5], [0.85, 0.55, 0.75], CORAL];
+      person(170, 1720, 1, AD(c), t, cyc > 4.8 ? clap(170, 1720, 1, 1, t) : { armR: [0.3, 0.2] });
+      const top = [bx, base - n * sz], placing = cyc < 4.2;
+      drawKid(k, kx, ky, t, { armR: placing ? reach(kx, ky, sk, 1, 1, top[0] - 30, top[1] + 20, -1) : [2.5, 2.9 + 0.3 * Math.sin(t * 6)], armL: placing ? [0.3, 0.2] : [2.5, 2.8] });
+      for (let i = 0; i < n; i++) {
+        const wob = i * 0.012 * Math.sin(t * 9) * clamp((cyc - 3.8) / 0.8), d = ease(fall), dir = i % 2 ? 1 : -1;
+        const x = bx + d * dir * (40 + i * 34) + wob * i * 40, y = base - (i + 0.5) * sz + d * (i * sz - (i % 3) * 6), r = d * dir * (0.5 + i * 0.3) + wob;
+        X.save(); X.translate(x, y); X.rotate(r); rr(-sz / 2, -sz / 2, sz, sz, 8); fill(cols[i]); rr(-sz / 2 + 10, -sz / 2 + 10, sz - 20, sz - 20, 6); fill([1, 1, 1], 0.18); X.restore();
+      }
+      if (fall > 0.6) hearts(kx + 60, 1250, cyc - 5, 2);
+      return { adult: adultTop(170, 1720), child: kidTop(k, kx, ky) };
+    } },
     others: { label: 'Other kids arrive', fn(c, t) {
       hall(t); const k = KID(c);
       person(110, 1690, 1, AD(c), t, {});
@@ -2520,7 +2534,7 @@ const KIDS = (() => {
   });
   const PLACES = [
     ['Getting there and home', ['goto', 'schoolrun', 'home']],
-    ['Playgroup room', ['arrive', 'bounce', 'others', 'hello', 'busy', 'ears', 'mumplay', 'playball', 'leave']],
+    ['Playgroup room', ['arrive', 'blocks', 'bounce', 'others', 'hello', 'busy', 'ears', 'mumplay', 'playball', 'leave']],
     ['Kinder or school', ['hook', 'goodbye', 'mattime', 'lunch', 'pickup']],
     ['Brothers, sisters and babies', ['share', 'tug', 'breathe', 'sorry', 'baby_gentle', 'baby_quiet']],
     ['The doctor', ['waiting', 'checkup', 'needle', 'sticker']],

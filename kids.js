@@ -24,7 +24,7 @@
       title: '{child} Goes to Play Group', ending: 'Play group was fun!', steps: [
         { scene: 'goto', place: 'Play group', text: 'Today {adult} and {child} are going to play group.' },
         { scene: 'arrive', text: 'When they get there, {helper} will say hello.', say: { who: 'child', words: 'Hi {helper}!' } },
-        { scene: 'bounce', text: '{child} can play with all the toys.' },
+        { scene: 'blocks', text: '{child} can play with all the toys.' },
         { scene: 'others', text: 'Other kids and grown-ups will come too.' },
         { scene: 'hello', text: '{child} can say hi if {they} want{s} to.', say: { who: 'child', words: 'Hi, my name is {child}!' } },
         { scene: 'playball', text: '{child} can play with the other kids, or with {adult}.' },
@@ -208,7 +208,7 @@
   const DEMO_STORY = { title: 'Ava Goes to Playgroup', ending: 'Playgroup was fun!', steps: [
     { id: 'd1', scene: 'goto', place: 'Play group', text: 'On Wednesday, Mum and Ava are going to playgroup.' },
     { id: 'd2', scene: 'arrive', text: 'Miss Jo is there to say hello.', say: { who: 'child', words: 'Hi Miss Jo!' } },
-    { id: 'd3', scene: 'bounce', text: 'Ava can jump on the trampoline.' },
+    { id: 'd3', scene: 'blocks', text: 'Ava can build a big tower with the blocks.' },
     { id: 'd4', scene: 'others', text: 'Other kids come too. Leo is there!', say: { who: 'friend', words: 'Hi Ava!' } },
     { id: 'd5', scene: 'busy', text: 'Sometimes it gets busy and loud. That\u2019s OK.' },
     { id: 'd6', scene: 'ears', text: 'Ava can hold Mum\u2019s hand until she feels ready.' },
