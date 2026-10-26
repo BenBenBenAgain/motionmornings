@@ -204,9 +204,16 @@
   let miniVis = true, still = false, miniT0 = performance.now();
   try { still = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
   try { new IntersectionObserver(es => { miniVis = es[0].isIntersecting; }).observe($('.duo')); } catch (e) {}
+  // the little phones play scene by scene with straight cuts, skipping the fades, so every moment shows a clear picture
+  function cutTime(tl, t) {
+    const wins = tl.items.slice(1, -1).map(i => [i.start + Math.min(0.8, i.d * 0.2), i.start + i.d - Math.min(0.8, i.d * 0.2)]);
+    const total = wins.reduce((a, w) => a + w[1] - w[0], 0); let r = ((t % total) + total) % total;
+    for (const w of wins) { if (r < w[1] - w[0]) return w[0] + r; r -= w[1] - w[0]; }
+    return wins[0][0];
+  }
   function drawDemo(ctx, cv, d, T) { ctx.setTransform(cv.width / W, 0, 0, cv.width / W, 0, 0); K.frame(ctx, d.cast, d.story, d.tl, Math.min(T, d.tl.total - 0.01)); ctx.setTransform(1, 0, 0, 1, 0, 0); }
   function miniLoop(now) {
-    if (miniVis && $('#watch').hidden) { const t = still ? 0 : (now - miniT0) / 1000; minis.forEach((m, i) => drawDemo(m.cv.getContext('2d'), m.cv, m.d, (t + 6 + i * 4) % m.d.tl.total)); }
+    if (miniVis && $('#watch').hidden) { const t = still ? 0 : (now - miniT0) / 1000; minis.forEach((m, i) => drawDemo(m.cv.getContext('2d'), m.cv, m.d, cutTime(m.d.tl, t + 2 + i * 5))); }
     if (!still) requestAnimationFrame(miniLoop);
   }
   // tapping a little phone opens it bigger, with music

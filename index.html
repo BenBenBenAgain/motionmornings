@@ -376,6 +376,12 @@ input[type=range]{height:30px;touch-action:none}
   .leadbtns{margin-top:22px;flex-direction:column}
   .leadbtns .btn{justify-content:center}
 }
+.watchbox{max-width:400px;align-items:center;text-align:center;gap:12px}
+.watchbox .wyou,.watchbox .wkid{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%}
+.watchbox .phone{max-width:min(280px,calc((100vh - 260px) * .5625));width:100%;border-radius:22px;box-shadow:0 0 0 6px #1F2430}
+.modal .watchbox canvas{border-radius:0;cursor:pointer;background:#1A1A1A}
+.watchbox .herobar{max-width:280px}
+.watchbox .btn{text-decoration:none}
 </style>
 
 <div class="wrap">
@@ -390,28 +396,12 @@ input[type=range]{height:30px;touch-action:none}
       <p class="leadtag">See it first, then live it.</p>
     </div>
     <div class="duowrap"><div class="duo">
-      <a class="mini" href="#builder" id="chooseMe" aria-label="Create a film for yourself"><span class="mphone"><canvas id="miniYou" width="360" height="640" aria-hidden="true"></canvas></span><span class="mlabel">For you</span></a>
-      <a class="mini" href="/kids.html" aria-label="Create a film for your child"><span class="mphone"><canvas id="miniKid" width="360" height="640" aria-hidden="true"></canvas></span><span class="mlabel">For your child <span class="kidsword" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span></span></a>
-    </div></div>
+      <button class="mini" type="button" data-watch="you" aria-label="Watch the demo film for you, with sound"><span class="mphone"><canvas id="miniYou" width="360" height="640" aria-hidden="true"></canvas></span><span class="mlabel">For you</span></button>
+      <button class="mini" type="button" data-watch="kid" aria-label="Watch the demo film for kids, with sound"><span class="mphone"><canvas id="miniKid" width="360" height="640" aria-hidden="true"></canvas></span><span class="mlabel">For your child <span class="kidsword" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span></span></button>
+    </div>
+    <p class="duohint">Tap a film to watch it with sound</p></div>
     <div class="leadbtns"><a class="btn coral" href="#builder">Create for yourself</a><a class="btn ghost" href="/kids.html">Create for your child</a></div>
   </section>
-  <section class="hero" aria-labelledby="heroTitle">
-    <div class="herofilm">
-      <p class="herokick mobonly">Create a 1-minute film of the everyday steps that build the life you want. Watch it every morning, then go live it.</p>
-      <span class="pill demotag">Demo film</span>
-      <div class="phone"><canvas id="heroStage" width="720" height="1280" aria-label="Example film: heading to work, saving, a dog walk, the gym, breathing, dancing, visiting Mum and cooking together"></canvas></div>
-      <div class="herobar" id="heroSeek" role="slider" aria-label="Position in demo film" tabindex="0"><i id="heroBar"></i></div>
-      <div class="row" style="justify-content:center"><button class="btn ghost small" id="heroPlay">Pause</button><button class="btn small" id="heroSound">🔊 Tap for sound</button></div>
-      <p class="herosong">Now imagine it’s you, your life, your favourite song.</p>    </div>
-    <div class="herocopy">
-      <span class="pill">Life in motion</span>
-      <h2 id="heroTitle"><span class="hl">See it every morning.</span> <span class="hl">Live it every day.</span></h2>
-      <p class="herolede">A short animated film of you doing the everyday things that build the life you've always wanted.</p>
-      <p class="heroeg deskonly"><span>In this example</span> A job you enjoy, saving towards financial freedom, a morning dog walk, the gym, five quiet minutes of breathing, nights out on mineral water, visiting Mum and dinner cooked together. Each pair of actions ends with a glimpse of where it leads.</p>
-      <div class="row"><button class="btn coral" id="startBuild">Create for yourself</button><a class="btn ghost" href="/kids.html" style="text-decoration:none">Create for your child</a></div>
-    </div>
-  </section>
-
   <section class="why" aria-labelledby="whyTitle">
     <h2 id="whyTitle">Why it works</h2>
     <div class="whygrid">
@@ -575,6 +565,24 @@ input[type=range]{height:30px;touch-action:none}
     <div class="banner" id="backupNudge" hidden><strong>A week of mornings.</strong> Back up your film and streak so a new phone never loses them.<div class="row" style="margin-top:8px"><button class="btn small" data-backup>Back up now</button></div></div>
     <p class="meta todayfoot">One rest day a week won't break your streak.</p>
     <div class="row todaylinks"><button class="linkbtn" id="todayAdd">Add to home screen</button><button class="linkbtn" data-backup>Back up my film and streak</button></div>
+  </div>
+</div>
+
+<div class="modal" id="watch" hidden role="dialog" aria-modal="true" aria-labelledby="watchTitle">
+  <div class="box watchbox">
+    <p class="pill demotag" id="watchTitle">Demo film</p>
+    <div class="wyou">
+      <div class="phone"><canvas id="heroStage" width="720" height="1280" aria-label="Example film: heading to work, saving, a dog walk, the gym, breathing, dancing, visiting Mum and cooking together"></canvas></div>
+      <div class="herobar" id="heroSeek" role="slider" aria-label="Position in demo film" tabindex="0"><i id="heroBar"></i></div>
+      <div class="row" style="justify-content:center"><button class="btn ghost small" id="heroPlay">Pause</button><button class="btn small" id="heroSound">Sound off</button></div>
+    </div>
+    <div class="wkid">
+      <div class="phone"><canvas id="kidStage" width="720" height="1280" aria-label="Example film: Ava goes to playgroup"></canvas></div>
+      <div class="herobar" id="kidSeek" role="slider" aria-label="Position in demo film" tabindex="0"><i id="kidBar"></i></div>
+      <div class="row" style="justify-content:center"><button class="btn ghost small" id="kidPlay">Pause</button><button class="btn small" id="kidSound">Sound off</button></div>
+    </div>
+    <p class="meta" id="watchNote"></p>
+    <div class="row" style="justify-content:center"><a class="btn coral" id="watchCta" href="#builder">Create for yourself</a><button class="btn ghost" id="watchClose">Close</button></div>
   </div>
 </div>
 
@@ -1929,23 +1937,71 @@ heroCv.addEventListener('click', () => { if (!heroSound) soundBtn.onclick(); els
 try { new IntersectionObserver(es => { heroVisible = es[0].isIntersecting; if (heroSound) { if (heroVisible && heroPlaying) heroAudio.play().catch(() => {}); else heroAudio.pause(); } }).observe(heroCv); } catch (e) {}
 
 // ------------------------------------------------ the two little phones at the top
+// they play each film scene by scene with straight cuts, skipping the fades, so every moment shows a clear picture
+function cutTime(tl, t) {
+  const wins = tl.items.slice(1, -1).map(i => [i.start + Math.min(0.8, i.d * 0.2), i.start + i.d - Math.min(0.8, i.d * 0.2)]);
+  const total = wins.reduce((a, w) => a + w[1] - w[0], 0); let r = ((t % total) + total) % total;
+  for (const w of wins) { if (r < w[1] - w[0]) return w[0] + r; r -= w[1] - w[0]; }
+  return wins[0][0];
+}
+const KD = LSN.KIDS.DEMOS.playgroup, KTL = LSN.KIDS.timeline(KD.story, {});
 (() => {
-  const you = $('#miniYou'), kid = $('#miniKid'); if (!you || !LSN.KIDS || !LSN.KIDS.DEMOS) return;
-  const yx = you.getContext('2d'), kx = kid.getContext('2d'), KD = LSN.KIDS.DEMOS.playgroup, KTL = LSN.KIDS.timeline(KD.story, {});
+  const you = $('#miniYou'), kid = $('#miniKid'); if (!you) return;
+  const yx = you.getContext('2d'), kx = kid.getContext('2d');
   let t0 = performance.now(), vis = true, still = false;
   try { still = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
   try { new IntersectionObserver(es => { vis = es[0].isIntersecting; }).observe(you); } catch (e) {}
   function loop(now) {
-    if (vis) {
+    if (vis && $('#watch').hidden) {
       const t = still ? 0 : (now - t0) / 1000;
-      yx.setTransform(you.width / 1080, 0, 0, you.width / 1080, 0, 0); LSN.render(yx, DEMO_CFG, heroTL, (t + 9) % heroTL.total);
-      kx.setTransform(kid.width / LSN.W, 0, 0, kid.width / LSN.W, 0, 0); LSN.KIDS.frame(kx, KD.cast, KD.story, KTL, (t + 7) % KTL.total);
+      yx.setTransform(you.width / 1080, 0, 0, you.width / 1080, 0, 0); LSN.render(yx, DEMO_CFG, heroTL, cutTime(heroTL, t + 12));
+      kx.setTransform(kid.width / LSN.W, 0, 0, kid.width / LSN.W, 0, 0); LSN.KIDS.frame(kx, KD.cast, KD.story, KTL, cutTime(KTL, t + 4));
     }
     if (!still) requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
 })();
-$('#startBuild').onclick = () => { const b = $('#builder'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+// ------------------------------------------------ tapping a little phone opens that film bigger, with sound
+const kidCv = $('#kidStage'), kidx = kidCv.getContext('2d'), kidAudio = new Audio('music/morning-mood.mp3');
+kidAudio.loop = true; kidAudio.preload = 'none'; kidAudio.volume = 0.6;
+let kidT = 0, kidPlaying = false, kidSound = false, kidDrag = false, kidLast = 0;
+const kidLabel = () => { $('#kidPlay').textContent = kidPlaying ? 'Pause' : 'Play'; $('#kidSound').textContent = kidSound ? 'Sound off' : '\ud83d\udd0a Sound on'; };
+function kidLoop(now) {
+  if ($('#watch').hidden || $('.wkid').hidden) return;
+  const dt = kidLast ? Math.min(0.1, (now - kidLast) / 1000) : 0; kidLast = now;
+  if (kidPlaying && !kidDrag) { kidT += dt; if (kidT >= KTL.total) kidT = 0; }
+  kidx.setTransform(kidCv.width / LSN.W, 0, 0, kidCv.width / LSN.W, 0, 0); LSN.KIDS.frame(kidx, KD.cast, KD.story, KTL, Math.min(kidT, KTL.total - 0.01));
+  $('#kidBar').style.width = (100 * Math.min(1, kidT / KTL.total)).toFixed(2) + '%';
+  requestAnimationFrame(kidLoop);
+}
+function kidSoundSet(on) { kidSound = on; if (on && kidPlaying) kidAudio.play().catch(() => { kidSound = false; kidLabel(); }); else kidAudio.pause(); kidLabel(); }
+$('#kidPlay').onclick = () => { kidPlaying = !kidPlaying; if (kidSound) kidSoundSet(true); if (!kidPlaying) kidAudio.pause(); kidLabel(); };
+$('#kidSound').onclick = () => { if (!kidSound) kidPlaying = true; kidSoundSet(!kidSound); };
+kidCv.addEventListener('click', () => $('#kidPlay').onclick());
+function kidSeekAt(e) { const r = $('#kidSeek').getBoundingClientRect(); kidT = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * KTL.total * 0.999; }
+$('#kidSeek').addEventListener('pointerdown', e => { kidDrag = true; $('#kidSeek').setPointerCapture(e.pointerId); kidSeekAt(e); });
+$('#kidSeek').addEventListener('pointermove', e => { if (kidDrag) kidSeekAt(e); });
+['pointerup', 'pointercancel'].forEach(ev => $('#kidSeek').addEventListener(ev, () => { kidDrag = false; }));
+function openWatch(which) {
+  if (playing) stopMovie();
+  const kid = which === 'kid';
+  $('.wyou').hidden = kid; $('.wkid').hidden = !kid;
+  $('#watchTitle').textContent = kid ? 'Demo film \u00b7 Ava goes to playgroup' : 'Demo film';
+  $('#watchNote').textContent = kid ? 'A short film that shows a child what\u2019s going to happen, starring them and in your voice.' : 'Now imagine it\u2019s you, your life, your favourite song.';
+  const cta = $('#watchCta'); cta.textContent = kid ? 'Create for your child' : 'Create for yourself'; cta.href = kid ? '/kids.html' : '#builder';
+  $('#watch').hidden = false;
+  if (kid) { kidT = 0; kidLast = 0; kidPlaying = true; kidSoundSet(true); requestAnimationFrame(kidLoop); }
+  else { heroT = 0; heroPlaying = true; heroLabel(); if (!heroSound) soundBtn.onclick(); else { try { heroAudio.currentTime = 0; } catch (e) {} } }
+}
+function closeWatch() {
+  $('#watch').hidden = true; kidPlaying = false; kidSoundSet(false);
+  if (heroSound) { heroSound = false; heroAudio.pause(); soundLabel(); }
+}
+$$('[data-watch]').forEach(b => b.onclick = () => openWatch(b.dataset.watch));
+$('#watchClose').onclick = closeWatch;
+$('#watch').addEventListener('click', e => { if (e.target.id === 'watch') closeWatch(); });
+$('#watchCta').addEventListener('click', () => { if ($('#watchCta').getAttribute('href') === '#builder') closeWatch(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#watch').hidden) closeWatch(); });
 // drag along the demo's bar to jump anywhere in the film
 let heroDrag = false;
 function heroSeek(e) {
