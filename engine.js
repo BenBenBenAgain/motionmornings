@@ -2064,6 +2064,67 @@ const KIDS = (() => {
   // little cross scribbles over someone who's upset
   function cross(x, y, t) { for (let i = 0; i < 2; i++) { const a = 0.6 + 0.4 * Math.sin(t * 8 + i * 2); X.save(); X.translate(x + (i ? 34 : -34), y - 10 * i); X.rotate(0.4 * (i ? 1 : -1)); X.beginPath(); for (let k = 0; k < 4; k++) { X.lineTo(k * 12 - 18, k % 2 ? -10 : 10); } X.lineWidth = 6; X.lineCap = 'round'; X.strokeStyle = css(CORAL, a); X.stroke(); X.restore(); } }
 
+  // ---- sitting, lying and costumes for the next set of places
+  // someone sitting on a seat, facing us: the body is drawn down to the seat, then the shins hang in front
+  function seated(L, x, seatY, s, t, o, kid) {
+    const yy = seatY + 262 * s;
+    X.save(); X.beginPath(); X.rect(0, 0, W, seatY + 4); X.clip();
+    const h = kid ? drawKid(L, x, yy, t, Object.assign({}, o, { s: (o && o.s) || 1 })) : person(x, yy, s, L, t, o || {});
+    X.restore();
+    const dress = L.outfit === 'dress', lc = dress ? L.skin : (L.pants || '#30406E'), sc = kid ? s : s;
+    [-1, 1].forEach(sd => { line([[x + sd * 30 * sc, seatY + 6], [x + sd * 34 * sc, seatY + 150 * sc]], (dress ? 26 : 44) * sc, lc); ell(x + sd * 38 * sc, seatY + 158 * sc, 30 * sc, 14 * sc); fill([0.13, 0.11, 0.1]); });
+    return h;
+  }
+  const seatKid = (k, x, seatY, t, o = {}) => seated(k, x, seatY, ks(k, o.s || 1), t, o, true);
+  function chair(x, seatY, w, col) { rr(x - w / 2, seatY - 220, w, 230, 22); fill(darken(C(col), 0.1)); rr(x - w / 2 - 6, seatY - 8, w + 12, 34, 14); fill(col); }
+  // a white coat, a hairdresser's apron
+  const coat = L => Object.assign({}, L, { outfit: 'jacket', top: '#F4F6F8', inner: L.outfit === 'dress' ? L.top : (L.inner || L.top), pants: L.outfit === 'dress' ? '#30406E' : L.pants });
+  const apron = L => Object.assign({}, L, { outfit: 'jacket', top: '#2B2B30', inner: L.outfit === 'dress' ? L.top : (L.inner || L.top), pants: L.outfit === 'dress' ? '#2B2B30' : L.pants });
+  function sticker(x, y, r = 22) { X.beginPath(); for (let j = 0; j < 10; j++) { const a = -PI / 2 + j * PI / 5, rr2 = j % 2 ? r * 0.45 : r; X.lineTo(x + Math.cos(a) * rr2, y + Math.sin(a) * rr2); } X.closePath(); fill(GOLD); X.lineWidth = 3; X.strokeStyle = css([1, 1, 1]); X.stroke(); }
+  // clinic: pale walls, a poster and a sink; the waiting room has a fish tank
+  function clinic(t, waiting) {
+    room(PARK, t, { wall: [0.88, 0.94, 0.92], floor: [0.8, 0.8, 0.82] }); HATS_OFF = false;
+    if (waiting) {
+      rr(640, 860, 380, 260, 18); fill([0.35, 0.36, 0.4]); rr(656, 876, 348, 228, 12); fill([0.55, 0.8, 0.9]);
+      for (let i = 0; i < 6; i++) { const yy = 1070 - i * 10, sw = 10 * Math.sin(t * 2 + i); line([[680 + i * 50, 1104], [676 + i * 50 + sw, yy - 30]], 6, [0.3, 0.6, 0.35]); }
+      [[0, 930, CORAL], [1, 990, GOLD], [2, 1040, [0.47, 0.62, 0.95]]].forEach(([i, y, c]) => { const fx = 690 + ((t * (40 + i * 15) + i * 120) % 290), dir = 1; ell(fx, y + 6 * Math.sin(t * 3 + i), 22, 13); fill(c); X.beginPath(); X.moveTo(fx - 18 * dir, y); X.lineTo(fx - 36 * dir, y - 12); X.lineTo(fx - 36 * dir, y + 12); X.closePath(); fill(c); circ(fx + 10, y - 3, 3); fill([0.1, 0.1, 0.1]); });
+      for (let i = 0; i < 4; i++) { const q = (t * 0.5 + i / 4) % 1; circ(980, 1090 - q * 200, 5 + i); X.lineWidth = 2; X.strokeStyle = css([1, 1, 1], 0.7 * (1 - q)); X.stroke(); }
+    } else {
+      rr(90, 600, 230, 300, 10); fill([1, 1, 1]); X.lineWidth = 6; X.strokeStyle = css([0.6, 0.6, 0.65]); X.strokeRect(90, 600, 230, 300);
+      ['E', 'F P', 'T O Z'].forEach((r, i) => { X.font = `700 ${70 - i * 18}px Poppins, sans-serif`; X.textAlign = 'center'; X.fillStyle = css(NAVY); X.fillText(r, 205, 690 + i * 80); });
+      rect(820, 1180, 200, 22, [0.95, 0.95, 0.96]); rr(840, 1200, 160, 120, 10); fill([0.9, 0.9, 0.92]); line([[920, 1180], [920, 1130], [960, 1130]], 8, [0.7, 0.7, 0.74]);
+    }
+  }
+  // an examination bed to sit on
+  function examBed(x, seatY) { rr(x - 230, seatY - 10, 460, 40, 14); fill([0.47, 0.62, 0.72]); rect(x - 200, seatY + 30, 400, 1700 - seatY - 30, [0.82, 0.84, 0.88]); rect(x - 230, seatY - 4, 460, 8, [1, 1, 1], 0.5); }
+  function salon(t) {
+    room(PARK, t, { wall: [0.95, 0.88, 0.86], floor: [0.3, 0.3, 0.34] }); HATS_OFF = false;
+    rr(330, 600, 420, 560, 30); fill([0.82, 0.68, 0.45]); rr(350, 620, 380, 520, 22); fill([0.78, 0.88, 0.94]); X.beginPath(); X.moveTo(400, 1050); X.lineTo(520, 700); X.lineTo(560, 700); X.lineTo(440, 1050); X.closePath(); fill([1, 1, 1], 0.35);
+    rect(0, 1440, W, 30, [0.85, 0.85, 0.88]);
+  }
+  function bathroom(t) {
+    room(PARK, t, { wall: [0.85, 0.92, 0.96], floor: [0.92, 0.92, 0.94] }); HATS_OFF = false;
+    for (let y = 700; y < 1460; y += 70) for (let x = 0; x < W; x += 70) { X.lineWidth = 2; X.strokeStyle = css([1, 1, 1], 0.6); X.strokeRect(x, y, 70, 70); }
+  }
+  function bike(x, y, t, col = CORAL, spin = 1) {
+    const a = t * 6 * spin;
+    [[x - 110, y - 70], [x + 110, y - 70]].forEach(([wx, wy]) => { circ(wx, wy, 70); X.lineWidth = 12; X.strokeStyle = css([0.18, 0.18, 0.2]); X.stroke(); for (let i = 0; i < 4; i++) { const aa = a + i * PI / 4; line([[wx - 60 * Math.cos(aa), wy - 60 * Math.sin(aa)], [wx + 60 * Math.cos(aa), wy + 60 * Math.sin(aa)]], 3, [0.7, 0.7, 0.72]); } circ(wx, wy, 8); fill([0.5, 0.5, 0.55]); });
+    line([[x - 110, y - 70], [x - 20, y - 70], [x + 60, y - 190], [x - 50, y - 180], [x - 20, y - 70]], 14, col); line([[x + 60, y - 190], [x + 110, y - 70]], 14, col);
+    line([[x - 50, y - 180], [x - 60, y - 200]], 10, [0.2, 0.2, 0.22]); rr(x - 96, y - 214, 76, 20, 10); fill([0.2, 0.2, 0.22]);
+    line([[x + 60, y - 190], [x + 64, y - 240]], 10, [0.2, 0.2, 0.22]); line([[x + 36, y - 246], [x + 96, y - 236]], 12, [0.2, 0.2, 0.22]);
+    const px = x - 20, py = y - 70; return { seat: [x - 58, y - 214], bars: [[x + 40, y - 244], [x + 92, y - 236]], pedals: [[px + 34 * Math.cos(a), py + 34 * Math.sin(a)], [px - 34 * Math.cos(a), py - 34 * Math.sin(a)]] };
+  }
+  // the child on a bike: body above the seat, legs to the pedals, hands on the bars
+  function rider(k, b, t, o = {}) {
+    const s = ks(k), [sx, sy] = b.seat, yy = sy + 262 * s;
+    X.save(); X.beginPath(); X.rect(0, 0, W, sy + 4); X.clip();
+    drawKid(k, sx, yy, t, Object.assign({ armL: reach(sx, yy, s, 1, -1, b.bars[0][0], b.bars[0][1], -1), armR: reach(sx, yy, s, 1, 1, b.bars[1][0], b.bars[1][1], -1) }, o));
+    X.restore();
+    b.pedals.forEach(([px, py], i) => { const hx = sx + (i ? -16 : 16) * s; line([[hx, sy], [(hx + px) / 2 + 14, (sy + py) / 2], [px, py]], 40 * s, k.outfit === 'dress' ? k.skin : (k.pants || '#30406E')); ell(px + 6, py, 26 * s, 13 * s); fill([0.13, 0.11, 0.1]); });
+    if (o.helmet !== false) { const [hx, hy, hw] = kidHeadAt(k, sx, yy); X.beginPath(); X.arc(hx, hy - hw * 0.15, hw * 1.18, PI, 2 * PI); X.closePath(); fill(o.helmetCol || [0.47, 0.62, 0.95]); rr(hx - hw * 1.2, hy - hw * 0.22, hw * 2.4, hw * 0.22, 6); fill(darken(C(o.helmetCol || [0.47, 0.62, 0.95]), 0.2)); }
+    return kidTop(k, sx, yy);
+  }
+
   // ---- the scenes a story step can use. Each returns where heads are, so a speech bubble can find its speaker.
   const SC = {
     title: { label: 'Setting off', fn(c, t, p) { outdoor(PARK, t, 'sunrise', 1080 - 140 * ease(p)); const q = clamp((p - 0.25) / 0.75); return pair(c, -420 + 1500 * q, 1680, t, q > 0 && q < 1 ? 1 : 0); } },
@@ -2240,6 +2301,177 @@ const KIDS = (() => {
       rr(hh.R[0] - 4, hh.R[1] - 34, 9, 34, 4); fill(k.skin); circ(hh.R[0], hh.R[1], 18 * sk); fill(k.skin);
       return { adult: [300, 1000], child: kidTop(k, kx, ky) };
     } },
+    // ---- the doctor and the dentist
+    waiting: { label: 'In the waiting room', fn(c, t) {
+      clinic(t, true); const k = KID(c), ad = AD(c);
+      [180, 420, 640].forEach(x => chair(x, 1500, 170, [0.47, 0.7, 0.83]));
+      seated(ad, 180, 1500, 1, t, { armR: [0.4, 0.9], armL: [0.2, 0.3] });
+      const sk = ks(k), [hx] = kidHeadAt(k, 420, 1500 + 262 * sk);
+      seatKid(k, 420, 1500, t, { armL: reach(420, 1500 + 262 * sk, sk, 1, -1, 400, 1440, -1), armR: reach(420, 1500 + 262 * sk, sk, 1, 1, 450, 1440, -1) });
+      rr(372, 1400, 96, 70, 6); fill(CORAL); rect(420, 1404, 3, 62, [1, 1, 1], 0.7);
+      return { adult: [180, 1500 - 330], child: kidTop(k, 420, 1500 + 262 * sk) };
+    } },
+    checkup: { label: 'The doctor checks them', helper: true, fn(c, t) {
+      clinic(t, false); const k = KID(c), dr = coat(HP(c)), sk = ks(k), kx = 520, seatY = 1440;
+      examBed(kx, seatY);
+      const ky = seatY + 262 * sk; seatKid(k, kx, seatY, t, { armL: [0.25, 0.15], armR: [0.25, 0.15] });
+      const ear = t % 5 > 2.5, [hx, hy, hw] = kidHeadAt(k, kx, ky), chest = [kx - 6, seatY - 120 * sk];
+      const target = ear ? [hx + hw + 26, hy] : chest, dx = 790;
+      const h = person(dx, 1720, 1, dr, t, { flip: -1, armR: reach(dx, 1720, 1, -1, 1, target[0] + 20, target[1] + 10, -1), armL: [0.2, 0.1] });
+      line([[dx - 20, 1290], [dx - 40, 1330], [dx, 1360], [dx + 30, 1330], [dx + 20, 1290]], 5, [0.3, 0.3, 0.34]);
+      if (ear) { rr(h.R[0] - 50, h.R[1] - 10, 50, 18, 8); fill([0.2, 0.2, 0.24]); circ(h.R[0] - 52, h.R[1] - 1, 8); fill(GOLD); }
+      else { line([[dx, 1360], [h.R[0], h.R[1]]], 5, [0.3, 0.3, 0.34]); circ(h.R[0] - 14, h.R[1], 14); fill([0.75, 0.76, 0.8]); }
+      return { adult: [300, 1000], child: kidTop(k, kx, ky), helper: adultTop(dx, 1720) };
+    } },
+    needle: { label: 'A quick needle', helper: true, fn(c, t) {
+      clinic(t, false); const k = KID(c), ad = AD(c), dr = coat(HP(c)), sk = ks(k), kx = 520, seatY = 1440, ky = seatY + 262 * sk;
+      examBed(kx, seatY);
+      const arm = [kx + 92 * sk, seatY - 150 * sk], done = t > 3.2, close = ease(clamp((t - 1.2) / 0.8)) * (1 - ease(clamp((t - 2.8) / 0.4)));
+      person(250, 1720, 1, ad, t, { armR: reach(250, 1720, 1, 1, 1, kx - 80 * sk, seatY - 100 * sk, -1), armL: [0.2, 0.1] });
+      seatKid(k, kx, seatY, t, { eyesClosed: t > 1.4 && t < 3, armL: reach(kx, ky, sk, 1, -1, kx - 80 * sk, seatY - 96 * sk, -1), armR: [0.3, 0.2] });
+      const dx = 800, nx = lerp(arm[0] + 120, arm[0] + 22, close), ny = arm[1] - 6;
+      person(dx, 1720, 1, dr, t, { flip: -1, armR: reach(dx, 1720, 1, -1, 1, nx + 70, ny + 6, -1), armL: [0.2, 0.1] });
+      if (!done) { X.save(); X.translate(nx, ny); rr(0, -9, 60, 18, 6); fill([0.95, 0.97, 1]); rect(8, -6, 34, 12, [0.6, 0.85, 0.95]); rect(58, -3, 24, 6, [0.6, 0.6, 0.65]); line([[-26, 0], [0, 0]], 3, [0.7, 0.7, 0.75]); X.restore(); }
+      else { X.save(); X.translate(arm[0], arm[1]); X.rotate(0.3); rr(-20, -9, 40, 18, 6); fill([0.95, 0.75, 0.6]); X.restore(); hearts(kx, 1180, t - 3.2, 1); }
+      for (let i = 0; i < 3; i++) if (t > 1.2 && t < 3) { const r = 60 + i * 40 + 30 * Math.sin(t * 1.6); const [hx, hy] = kidHeadAt(k, kx, ky); circ(hx, hy, r); X.lineWidth = 4; X.strokeStyle = css([0.47, 0.7, 0.83], 0.3 - i * 0.08); X.stroke(); }
+      return { adult: adultTop(250, 1720), child: kidTop(k, kx, ky), helper: adultTop(dx, 1720) };
+    } },
+    sticker: { label: 'All done, a sticker!', helper: true, fn(c, t) {
+      clinic(t, false); const k = KID(c), ad = AD(c), hp = HP(c), pro = c._pro === 'apron' ? apron(hp) : coat(hp), kx = 520, ky = 1720, sk = ks(k);
+      person(220, ky, 1, ad, t, clap(220, ky, 1, 1, t));
+      drawKid(k, kx, ky, t, { armL: wave(t), armR: [0.3, 0.2] });
+      sticker(kx + 4, ky - 330 * sk, 26 * sk / 0.46);
+      person(820, ky, 1, pro, t + 1, { flip: -1, armR: [2.4, 2.9 + 0.3 * Math.sin(t * 5)] });
+      if (t > 0.8) hearts(kx, 1200, t, 2);
+      return { adult: adultTop(220, ky), child: kidTop(k, kx, ky), helper: adultTop(820, ky) };
+    } },
+    dentist_chair: { label: 'In the big dentist chair', helper: true, fn(c, t) {
+      clinic(t, false); const k = KID(c), dn = coat(HP(c)), sk = ks(k), tilt = 0.25 + 0.95 * ease(clamp((t - 0.6) / 1.6));
+      line([[560, 700], [560, 820], [460, 900]], 14, [0.7, 0.7, 0.74]); X.beginPath(); X.ellipse(460, 920, 70, 34, -0.3, 0, 2 * PI); fill([0.35, 0.36, 0.4]); ell(460, 935, 54, 18); fill([1, 0.97, 0.8], 0.6 + 0.4 * ease(clamp((t - 2) / 0.4)));
+      // the chair leans back with the child in it
+      rect(560, 1500, 60, 200, [0.6, 0.6, 0.64]); ell(590, 1700, 140, 20); fill([0.5, 0.5, 0.54]);
+      X.save(); X.translate(600, 1500); X.rotate(-tilt); rr(-60, -400, 160, 420, 50); fill([0.3, 0.62, 0.66]); X.restore();
+      rr(560, 1460, 360, 70, 30); fill([0.3, 0.62, 0.66]);
+      X.save(); X.translate(640, 1480); X.rotate(-tilt); drawKid(k, 0, 0 + 262 * sk - 14, t, { smile: tilt < 1, armL: [0.2, 0.1], armR: [0.2, 0.1] }); X.restore();
+      [-1, 1].forEach(sd => { line([[700, 1500], [860, 1490 + sd * 8]], 40 * sk, k.outfit === 'dress' ? k.skin : (k.pants || '#30406E')); ell(870, 1490 + sd * 8, 28 * sk, 12 * sk); fill([0.13, 0.11, 0.1]); });
+      const dx = 300; person(dx, 1720, 1, dn, t, { armR: [0.9, 1.3], armL: [0.2, 0.1] }); rect(dx - 34, 1236, 68, 30, [0.7, 0.88, 0.95]);
+      return { adult: [300, 1000], child: [640, 1130], helper: adultTop(dx, 1720) };
+    } },
+    teeth_count: { label: 'Counting teeth with the mirror', helper: true, fn(c, t) {
+      clinic(t, false); const k = KID(c), dn = coat(HP(c)), sk = ks(k), tilt = 1.2;
+      line([[560, 700], [560, 820], [460, 900]], 14, [0.7, 0.7, 0.74]); X.beginPath(); X.ellipse(460, 920, 70, 34, -0.3, 0, 2 * PI); fill([0.35, 0.36, 0.4]); ell(460, 935, 54, 18); fill([1, 0.97, 0.8]);
+      X.save(); X.globalAlpha = 0.18; X.beginPath(); X.moveTo(420, 950); X.lineTo(500, 950); X.lineTo(700, 1350); X.lineTo(330, 1350); X.closePath(); fill([1, 0.97, 0.7]); X.restore();
+      rect(560, 1500, 60, 200, [0.6, 0.6, 0.64]); ell(590, 1700, 140, 20); fill([0.5, 0.5, 0.54]);
+      X.save(); X.translate(600, 1500); X.rotate(-tilt); rr(-60, -400, 160, 420, 50); fill([0.3, 0.62, 0.66]); X.restore(); rr(560, 1460, 360, 70, 30); fill([0.3, 0.62, 0.66]);
+      X.save(); X.translate(640, 1480); X.rotate(-tilt); drawKid(k, 0, 262 * sk - 14, t, { smile: false, armL: [0.2, 0.1], armR: [0.2, 0.1] }); X.restore();
+      [-1, 1].forEach(sd => { line([[700, 1500], [860, 1490 + sd * 8]], 40 * sk, k.outfit === 'dress' ? k.skin : (k.pants || '#30406E')); ell(870, 1490 + sd * 8, 28 * sk, 12 * sk); fill([0.13, 0.11, 0.1]); });
+      const dx = 330, wig = 8 * Math.sin(t * 4), mouth = [500, 1330];
+      const h = person(dx, 1720, 1, dn, t, { armR: reach(dx, 1720, 1, 1, 1, mouth[0] - 40, mouth[1] + 20 + wig, -1), armL: [0.2, 0.1] }); rect(dx - 34, 1236, 68, 30, [0.7, 0.88, 0.95]);
+      line([[h.R[0], h.R[1]], [mouth[0] - 6, mouth[1] + wig]], 6, [0.7, 0.72, 0.76]); circ(mouth[0], mouth[1] + wig, 12); fill([0.85, 0.9, 0.95]);
+      X.font = '700 46px Poppins, sans-serif'; X.textAlign = 'center'; const n = 1 + Math.floor(t * 1.2) % 10; X.fillStyle = css(NAVY, 0.85); X.fillText(String(n), 760, 1150 - 20 * ((t * 1.2) % 1));
+      return { adult: [300, 1000], child: [640, 1130], helper: adultTop(dx, 1720) };
+    } },
+    // ---- haircuts
+    haircut: { label: 'Snip snip at the hairdresser', helper: true, fn(c, t) {
+      salon(t); const k = KID(c), hd = apron(HP(c)), sk = ks(k), kx = 540, seatY = 1460, ky = seatY + 262 * sk;
+      chair(kx, seatY, 210, [0.2, 0.2, 0.24]); rect(kx - 20, seatY + 30, 40, 220, [0.6, 0.6, 0.64]); ell(kx, 1720, 120, 20); fill([0.5, 0.5, 0.54]);
+      seatKid(k, kx, seatY, t, { armL: [0.2, 0.1], armR: [0.2, 0.1] });
+      const [hx, hy, hw] = kidHeadAt(k, kx, ky); X.beginPath(); X.moveTo(hx - hw * 0.6, hy + hw * 1.05); X.lineTo(hx + hw * 0.6, hy + hw * 1.05); X.lineTo(kx + 170 * sk / 0.46 * 0.6, seatY + 40); X.lineTo(kx - 170 * sk / 0.46 * 0.6, seatY + 40); X.closePath(); fill([0.47, 0.62, 0.95]);
+      const snip = Math.abs(Math.sin(t * 8)), sxp = hx + hw + 30, syp = hy - hw * 0.4 + 10 * Math.sin(t * 1.3);
+      person(840, 1720, 1, hd, t, { flip: -1, armR: reach(840, 1720, 1, -1, 1, sxp + 30, syp + 10, -1), armL: [0.2, 0.1] });
+      X.save(); X.translate(sxp, syp); [-1, 1].forEach(sd => { X.save(); X.rotate(sd * 0.3 * snip); line([[0, 0], [-46, 0]], 6, [0.75, 0.76, 0.8]); X.restore(); }); circ(10, -8, 9); X.lineWidth = 4; X.strokeStyle = css(CORAL); X.stroke(); circ(10, 8, 9); X.stroke(); X.restore();
+      for (let i = 0; i < 6; i++) { const q = (t * 0.6 + i / 6) % 1; line([[hx + 20 + i * 8, hy + 40 + q * 300], [hx + 30 + i * 8, hy + 52 + q * 300]], 4, k.hairCol, 1 - q); }
+      X.font = '700 40px Poppins, sans-serif'; X.textAlign = 'center'; X.fillStyle = css(NAVY, 0.6 * snip); X.fillText('snip', sxp + 20, syp - 50);
+      return { adult: [300, 1000], child: kidTop(k, kx, ky), helper: adultTop(840, 1720) };
+    } },
+    clippers: { label: 'The buzzy clippers', helper: true, fn(c, t) {
+      salon(t); const k = KID(c), hd = apron(HP(c)), sk = ks(k), kx = 540, seatY = 1460, ky = seatY + 262 * sk;
+      chair(kx, seatY, 210, [0.2, 0.2, 0.24]); rect(kx - 20, seatY + 30, 40, 220, [0.6, 0.6, 0.64]); ell(kx, 1720, 120, 20); fill([0.5, 0.5, 0.54]);
+      const ad = AD(c); person(220, 1720, 1, ad, t, { armR: [0.3, 0.2], armL: [0.2, 0.1] });
+      seatKid(k, kx, seatY, t, { armL: [0.2, 0.1], armR: [0.2, 0.1] });
+      const [hx, hy, hw] = kidHeadAt(k, kx, ky); X.beginPath(); X.moveTo(hx - hw * 0.6, hy + hw * 1.05); X.lineTo(hx + hw * 0.6, hy + hw * 1.05); X.lineTo(kx + 100, seatY + 40); X.lineTo(kx - 100, seatY + 40); X.closePath(); fill([0.47, 0.62, 0.95]);
+      const bz = 3 * Math.sin(t * 60), cx = hx + hw + 18 + bz, cy = hy + 4;
+      person(840, 1720, 1, hd, t, { flip: -1, armR: reach(840, 1720, 1, -1, 1, cx + 40, cy + 20, -1), armL: [0.2, 0.1] });
+      rr(cx - 6, cy - 22, 50, 44, 10); fill([0.25, 0.25, 0.28]); rect(cx - 10, cy - 18, 6, 36, [0.8, 0.8, 0.84]);
+      for (let i = 0; i < 3; i++) { X.beginPath(); X.arc(cx + 60, cy, 20 + i * 14, -0.6, 0.6); X.lineWidth = 4; X.strokeStyle = css(NAVY, 0.4 - i * 0.1); X.stroke(); }
+      X.font = '700 40px Poppins, sans-serif'; X.textAlign = 'center'; X.fillStyle = css(NAVY, 0.5 + 0.3 * Math.sin(t * 10)); X.fillText('bzzz', cx + 80, cy - 50);
+      return { adult: adultTop(220, 1720), child: kidTop(k, kx, ky), helper: adultTop(840, 1720) };
+    } },
+    mirror: { label: 'All done, look in the mirror', helper: true, fn(c, t) {
+      salon(t); const k = KID(c), hd = apron(HP(c)), sk = ks(k), kx = 520, ky = 1720;
+      person(830, ky, 1, hd, t, { flip: -1, armR: [2.4, 2.9 + 0.3 * Math.sin(t * 5)] });
+      const hand = [kx + 110 * sk / 0.46 * 0.5, ky - 400 * sk];
+      drawKid(k, kx, ky, t, { armR: reach(kx, ky, sk, 1, 1, hand[0], hand[1], -1), armL: [0.3, 0.2] });
+      rr(hand[0] - 8, hand[1] - 70, 16, 70, 6); fill([0.82, 0.68, 0.45]); ell(hand[0], hand[1] - 100, 44, 54); fill([0.82, 0.68, 0.45]); ell(hand[0], hand[1] - 100, 34, 44); fill([0.78, 0.88, 0.94]);
+      if (t > 0.8) hearts(kx, 1180, t, 2);
+      return { adult: [300, 1000], child: kidTop(k, kx, ky), helper: adultTop(830, ky) };
+    } },
+    // ---- bedtime
+    bath: { label: 'Bath time', fn(c, t) {
+      bathroom(t); const k = KID(c), sk = ks(k), kx = 520, rim = 1450;
+      X.save(); X.beginPath(); X.rect(0, 0, W, rim); X.clip(); drawKid(k, kx, rim + 220 * sk, t, { armL: [2.2 + 0.3 * Math.sin(t * 3), 2.6], armR: [1.4, 1.6 + 0.4 * Math.sin(t * 4)] }); X.restore();
+      rr(180, rim - 20, 700, 260, 80); fill([1, 1, 1]); rect(180, rim - 20, 700, 40, [0.95, 0.96, 0.98]);
+      for (let i = 0; i < 14; i++) { const x = 230 + (i * 47) % 600, y = rim - 20 + 6 * Math.sin(t * 2 + i); circ(x, y, 26 + (i % 3) * 8); fill([1, 1, 1], 0.95); circ(x - 6, y - 6, 6); fill([0.8, 0.9, 1], 0.7); }
+      const dx = 760 + 20 * Math.sin(t * 1.2); ell(dx, rim - 50, 34, 24); fill(GOLD); circ(dx + 26, rim - 78, 18); fill(GOLD); X.beginPath(); X.moveTo(dx + 40, rim - 80); X.lineTo(dx + 62, rim - 74); X.lineTo(dx + 40, rim - 70); X.closePath(); fill([0.95, 0.55, 0.22]);
+      for (let i = 0; i < 4; i++) { const q = (t * 0.4 + i / 4) % 1; circ(300 + i * 140 + 20 * Math.sin(q * 6), rim - 60 - q * 400, 14 + 6 * i % 3); X.lineWidth = 3; X.strokeStyle = css([0.6, 0.8, 0.95], 0.8 * (1 - q)); X.stroke(); }
+      return { adult: [300, 1000], child: kidTop(k, kx, rim + 220 * sk) };
+    } },
+    brushteeth: { label: 'Brushing teeth', fn(c, t) {
+      bathroom(t); const k = KID(c), sk = ks(k), kx = 470, ky = 1720;
+      rr(330, 760, 300, 300, 20); fill([0.8, 0.68, 0.5]); rr(346, 776, 268, 268, 14); fill([0.78, 0.88, 0.94]);
+      rect(300, 1300, 360, 26, [0.97, 0.97, 0.98]); rr(320, 1326, 320, 300, 10); fill([0.9, 0.9, 0.92]); line([[480, 1300], [480, 1250], [520, 1250]], 10, [0.7, 0.7, 0.74]);
+      rr(560, 1700, 120, 40, 8); fill(CORAL);
+      const [hx, hy] = kidHeadAt(k, kx + 140, ky - 50), bx = hx + 30 + 12 * Math.sin(t * 14), by = hy + 22;
+      drawKid(k, kx + 140, ky - 50 + 50, t, { s: 1, armR: reach(kx + 140, ky, sk, 1, 1, bx + 20, by + 6, -1), armL: [0.2, 0.1] });
+      line([[bx - 10, by], [bx + 60, by + 6]], 10, [0.47, 0.62, 0.95]); rr(bx - 26, by - 10, 22, 16, 4); fill([1, 1, 1]);
+      for (let i = 0; i < 4; i++) { circ(bx - 30 + 14 * Math.sin(t * 5 + i), by - 10 - i * 10, 6); fill([1, 1, 1], 0.8); }
+      return { adult: [300, 1000], child: kidTop(k, kx + 140, ky) };
+    } },
+    sleep: { label: 'Goodnight, lights out', fn(c, t) {
+      ROOMSEL = 6; room(PARK, t, { window: 'dusk' }); ROOMSEL = null; HATS_OFF = false;
+      const k = KID(c), ad = AD(c), dim = ease(clamp((t - 2.2) / 1.2));
+      bed(160, 1470, 560, k, t);
+      teddy(270, 1460, 0.5, -0.4);
+      const q = ease(clamp((t - 0.6) / 1.8)), ax = lerp(820, 1000, q);
+      person(ax, 1720, 0.95, ad, t, { flip: -1, walk: q > 0 && q < 1 ? 1 : 0, armR: wave(t) });
+      rect(0, 0, W, H, [0.08, 0.08, 0.2], 0.45 * dim);
+      const g = X.createRadialGradient(900, 1560, 4, 900, 1560, 220); g.addColorStop(0, css([1, 0.85, 0.5], 0.5 * (0.4 + 0.6 * dim))); g.addColorStop(1, css([1, 0.85, 0.5], 0)); X.fillStyle = g; X.fillRect(680, 1340, 440, 440);
+      circ(900, 1560, 22); fill([1, 0.9, 0.6]); rr(880, 1580, 40, 30, 8); fill([0.9, 0.9, 0.92]);
+      return { adult: adultTop(ax, 1720, 0.95), child: [280, 1380] };
+    } },
+    // ---- learning to ride a bike
+    helmet: { label: 'Helmet on, click!', fn(c, t) {
+      outdoor(PARK, t, 'day'); const k = KID(c), ad = AD(c), sk = ks(k), kx = 470, ky = 1720;
+      bike(760, 1720, 0, CORAL, 0);
+      person(230, ky, 1, ad, t, { armR: [0.5, 1.0], armL: [0.2, 0.1] });
+      const [hx, hy, hw] = kidHeadAt(k, kx, ky), u = ease(clamp((t - 0.6) / 1.2)), lift = (1 - u) * 160;
+      drawKid(k, kx, ky, t, { armL: reach(kx, ky, sk, 1, -1, hx - hw * 1.1, hy - lift + 10, -1), armR: reach(kx, ky, sk, 1, 1, hx + hw * 1.1, hy - lift + 10, -1) });
+      X.beginPath(); X.arc(hx, hy - hw * 0.15 - lift, hw * 1.18, PI, 2 * PI); X.closePath(); fill([0.47, 0.62, 0.95]); rr(hx - hw * 1.2, hy - hw * 0.22 - lift, hw * 2.4, hw * 0.22, 6); fill([0.36, 0.48, 0.8]);
+      if (u >= 1) { line([[hx - hw * 0.9, hy - 4], [hx - hw * 0.5, hy + hw * 0.9], [hx + hw * 0.5, hy + hw * 0.9], [hx + hw * 0.9, hy - 4]], 4, [0.2, 0.2, 0.24]); X.font = '700 40px Poppins, sans-serif'; X.textAlign = 'center'; X.fillStyle = css(NAVY, clamp((t - 1.8) * 2) * (1 - clamp((t - 3) * 2))); X.fillText('click!', hx + 90, hy + 80); }
+      return { adult: adultTop(230, ky), child: kidTop(k, kx, ky) };
+    } },
+    bike_held: { label: 'Riding with a hand on the seat', fn(c, t, p) {
+      outdoor(PARK, t, 'day'); const k = KID(c), ad = AD(c), x = lerp(250, 650, ease(p)), wob = 0.03 * Math.sin(t * 3);
+      X.save(); X.translate(x, 1740); X.rotate(wob); X.translate(-x, -1740);
+      const b = bike(x, 1740, t, CORAL); const head = rider(k, b, t); X.restore();
+      const ax = x - 260; person(ax, 1720, 1, ad, t, { walk: 1, armR: reach(ax, 1720, 1, 1, 1, b.seat[0] - 30, b.seat[1] + 20, -1), armL: [0.3, 0.2] });
+      return { adult: adultTop(ax, 1720), child: head };
+    } },
+    bike_wobble: { label: 'Wobbly is OK', fn(c, t, p) {
+      outdoor(PARK, t, 'day'); const k = KID(c), x = lerp(300, 700, p), wob = 0.12 * Math.sin(t * 2.4);
+      X.save(); X.translate(x, 1740); X.rotate(wob); X.translate(-x, -1740);
+      const b = bike(x, 1740, t, CORAL); const head = rider(k, b, t, { smile: true }); X.restore();
+      for (let i = 0; i < 3; i++) { X.beginPath(); X.arc(x - 260 - i * 30, 1600, 30 + i * 18, -0.8, 0.8); X.lineWidth = 5; X.strokeStyle = css(NAVY, 0.25 - i * 0.06); X.stroke(); }
+      return { adult: [200, 1000], child: head };
+    } },
+    bike_ride: { label: 'Riding all by themselves!', fn(c, t, p) {
+      outdoor(PARK, t, 'day'); const k = KID(c), ad = AD(c), x = lerp(-150, 1250, p);
+      person(170, 1690, 0.95, ad, t, clap(170, 1690, 0.95, 1, t));
+      const b = bike(x, 1760, t, CORAL); const head = rider(k, b, t);
+      line([[x - 200, 1700], [x - 320, 1700]], 6, [1, 1, 1], 0.7); line([[x - 220, 1660], [x - 300, 1660]], 6, [1, 1, 1], 0.5);
+      if (p > 0.3) hearts(170, 1120, t, 2);
+      return { adult: adultTop(170, 1690, 0.95), child: head };
+    } },
     playball: { label: 'Playing with other kids', fn(c, t) {
       hall(t); const k = KID(c);
       person(150, 1520, 0.78, AD(c), t, { armR: [0.4 + 0.2 * Math.sin(t * 2.5), 1] });
@@ -2279,10 +2511,15 @@ const KIDS = (() => {
     ['Playgroup room', ['arrive', 'bounce', 'others', 'hello', 'busy', 'ears', 'mumplay', 'playball', 'leave']],
     ['Kinder or school', ['hook', 'goodbye', 'mattime', 'lunch', 'pickup']],
     ['Brothers, sisters and babies', ['share', 'tug', 'breathe', 'sorry', 'baby_gentle', 'baby_quiet']],
+    ['The doctor', ['waiting', 'checkup', 'needle', 'sticker']],
+    ['The dentist', ['waiting', 'dentist_chair', 'teeth_count', 'sticker']],
+    ['Haircut', ['haircut', 'clippers', 'mirror']],
+    ['Bedtime', ['bath', 'brushteeth', 'bedtime', 'sleep']],
+    ['Learning to ride a bike', ['helmet', 'bike_held', 'bike_wobble', 'bike_ride']],
     ['Cafe', ['cafe']],
-    ['At home', ['food_look', 'food_bite', 'food_ok', 'familydinner', 'bedtime']],
+    ['At home', ['food_look', 'food_bite', 'food_ok', 'familydinner']],
     ['Outside', ['parkday']]];
-  const PICK = PLACES.flatMap(p => p[1]);
+  const PICK = [...new Set(PLACES.flatMap(p => p[1]))];
 
   // ---- names in the words: {child} and {adult} become the cast's names
   function names(text, c) {
@@ -2305,7 +2542,7 @@ const KIDS = (() => {
     const items = [];
     items.push({ id: 'title', kind: 'title', scene: 'title', text: story.title || '', d: voices.title ? Math.max(5, 1.6 + voices.title + TAIL) : 5, voiceAt: 1.6 });
     (story.steps || []).forEach(st => { if (!(st.text || '').trim() && !st.say) return; items.push({ id: st.id, kind: 'step', scene: SC[st.scene] ? st.scene : 'goto', step: st, text: st.text || '', d: stepLen(st.text, voices[st.id]), voiceAt: LEAD }); });
-    items.push({ id: 'end', kind: 'end', scene: 'home', text: story.ending || '', d: voices.end ? Math.max(5.5, LEAD + voices.end + 2.6) : 6, voiceAt: LEAD });
+    items.push({ id: 'end', kind: 'end', scene: SC[story.endScene] ? story.endScene : 'home', text: story.ending || '', d: voices.end ? Math.max(5.5, LEAD + voices.end + 2.6) : 6, voiceAt: LEAD });
     let s = 0; items.forEach(i => { i.start = s; s += i.d; i.voice = voices[i.id] || 0; });
     return { items, total: s };
   }

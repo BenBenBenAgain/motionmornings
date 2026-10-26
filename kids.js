@@ -52,6 +52,44 @@
         { scene: 'baby_quiet', text: 'When {baby} is sleeping, {child} uses a quiet voice.', say: { who: 'child', words: 'Shhh!' } },
         { scene: 'breathe', text: 'Sometimes {baby} cries a lot. {child} can take a big breath and ask {adult} for a cuddle.' },
         { scene: 'baby_gentle', glimpse: true, text: '{child} is a great big {bigsib}.' }] } },
+    doctor: { label: 'The doctor', blurb: 'Waiting, a check-up, a quick needle, a sticker', story: {
+      title: '{child} Goes to the Doctor', ending: '{child} was so brave!', steps: [
+        { scene: 'goto', place: 'Doctor', text: 'Today {adult} and {child} are going to see the doctor.' },
+        { scene: 'waiting', text: 'First they wait in the waiting room. There might be fish to look at!' },
+        { scene: 'checkup', text: 'The doctor listens to {their} heart and looks in {their} ears.', say: { who: 'helper', words: 'Hello {child}!' } },
+        { scene: 'needle', text: 'Sometimes {child} needs a quick needle. {child} can hold {adult}\u2019s hand and take a big breath.' },
+        { scene: 'needle', glimpse: true, text: 'It\u2019s over very quickly.' },
+        { scene: 'sticker', text: 'Then it\u2019s all done! {child} might get a sticker.', say: { who: 'child', words: 'I did it!' } }] } },
+    dentist: { label: 'The dentist', blurb: 'The big chair, counting teeth, a sticker', story: {
+      title: '{child} Goes to the Dentist', ending: 'Strong, shiny teeth!', steps: [
+        { scene: 'goto', place: 'Dentist', text: 'Today {adult} and {child} are going to the dentist.' },
+        { scene: 'waiting', text: 'They wait in the waiting room until it\u2019s {child}\u2019s turn.' },
+        { scene: 'dentist_chair', text: '{child} sits in the big chair. It leans back slowly, like a ride!' },
+        { scene: 'teeth_count', text: 'The dentist counts {child}\u2019s teeth with a little mirror.' },
+        { scene: 'dentist_chair', glimpse: true, text: '{child} can put up a hand if {they} need{s} a break.' },
+        { scene: 'sticker', text: 'All done! {child} might get a sticker.', say: { who: 'child', words: 'I did it!' } }] } },
+    haircut: { label: 'A haircut', blurb: 'The cape, snip snip, buzzy clippers, the mirror', story: {
+      title: '{child} Gets a Haircut', ending: 'Looking good!', steps: [
+        { scene: 'goto', place: 'Hairdresser', text: '{adult} and {child} are going to get a haircut.' },
+        { scene: 'haircut', text: '{child} sits in the big chair and wears a cape.' },
+        { scene: 'haircut', text: 'The hairdresser snips with the scissors. Snip, snip!' },
+        { scene: 'clippers', text: 'Sometimes the clippers buzz. They tickle a little bit.' },
+        { scene: 'clippers', glimpse: true, text: '{child} can hold still, and it\u2019s over soon.' },
+        { scene: 'mirror', text: 'All done! {child} looks in the mirror.', say: { who: 'child', words: 'I look great!' } }] } },
+    bedtime: { label: 'Bedtime', blurb: 'Bath, teeth, a story, lights out', endScene: 'sleep', story: {
+      title: '{child}\u2019s Bedtime', ending: 'Sweet dreams, {child}.', endScene: 'sleep', steps: [
+        { scene: 'bath', text: 'At night, {child} has a bath.' },
+        { scene: 'brushteeth', text: 'Then {child} puts on pyjamas and brushes {their} teeth.' },
+        { scene: 'bedtime', text: '{adult} reads a story in bed.' },
+        { scene: 'sleep', text: '{adult} says goodnight. The little light stays on.', say: { who: 'adult', words: 'Goodnight!' } },
+        { scene: 'sleep', glimpse: true, text: '{child} stays in bed all night, and {adult} is close by.' }] } },
+    bike: { label: 'Riding a bike', blurb: 'Helmet, a hand on the seat, wobbles, riding', kind: 'skill', story: {
+      title: '{child} Learns to Ride', ending: 'A little bit of practice every day!', endScene: 'bike_ride', steps: [
+        { scene: 'helmet', text: 'First, helmet on. Click!' },
+        { scene: 'bike_held', text: '{adult} holds the seat while {child} pedals.' },
+        { scene: 'bike_wobble', text: 'Wobbling is OK. Everyone wobbles when they\u2019re learning.' },
+        { scene: 'bike_held', text: 'Pedal, pedal, and look ahead.' },
+        { scene: 'bike_ride', glimpse: true, text: 'One day {child} will ride all by {themself}!' }] } },
     food: { label: 'Trying a new food', blurb: 'Looking, one little bite, feeling proud', story: {
       title: '{child} Tries Something New', ending: 'Trying new things is brave!', steps: [
         { scene: 'food_look', text: 'Tonight {child} will try something new for dinner.' },
@@ -71,10 +109,10 @@
   function fromTemplate(key) {
     if (TEMPLATES[key].needs) S.cast[TEMPLATES[key].needs] = true;
     const t = TEMPLATES[key].story, c = castFor(), boy = sexOf(S.cast.child) === 'm', girl = sexOf(S.cast.child) === 'f';
-    const pro = s => s.replace(/\{their\}/g, boy ? 'his' : girl ? 'her' : 'their').replace(/\{they\}/g, boy ? 'he' : girl ? 'she' : 'they').replace(/\{s\}/g, boy || girl ? 's' : '').replace(/\{bigsib\}/g, boy ? 'brother' : girl ? 'sister' : 'helper');
+    const pro = s => s.replace(/\{their\}/g, boy ? 'his' : girl ? 'her' : 'their').replace(/\{they\}/g, boy ? 'he' : girl ? 'she' : 'they').replace(/\{s\}/g, boy || girl ? 's' : '').replace(/\{bigsib\}/g, boy ? 'brother' : girl ? 'sister' : 'helper').replace(/\{themself\}/g, boy ? 'himself' : girl ? 'herself' : 'themself');
     const n = s => s == null ? s : pro(K.names(s, c));
     const cap = x => x && x[0].toUpperCase() + x.slice(1);
-    return { title: cap(n(t.title)), ending: n(t.ending), steps: t.steps.map(st => ({ id: uid(), scene: st.scene, place: st.place || '', time: st.time || '', text: n(st.text), glimpse: !!st.glimpse, say: st.say ? { who: st.say.who, words: n(st.say.words) } : { who: 'child', words: '' } })) };
+    return { endScene: t.endScene || '', title: cap(n(t.title)), ending: n(t.ending), steps: t.steps.map(st => ({ id: uid(), scene: st.scene, place: st.place || '', time: st.time || '', text: n(st.text), glimpse: !!st.glimpse, say: st.say ? { who: st.say.who, words: n(st.say.words) } : { who: 'child', words: '' } })) };
   }
   // a shared link carries the cast and the story (never the recordings)
   function readShare() {
@@ -304,7 +342,10 @@
   $('#lookEd').addEventListener('click', e => { if (e.target.id === 'lookEd') closeLook(); });
 
   // ---------------------------------------------------------------- story
-  $('#templates').append(...Object.entries(TEMPLATES).map(([k, t]) => el('button', { class: 'tpl', type: 'button', onclick: () => ask(`Start from “${t.label}”?`, 'This replaces the steps you have now. Your people stay the same.', () => { S.story = fromTemplate(k); renderStory(); refresh(); }) }, el('b', {}, t.label), el('span', {}, t.blurb))));
+  const tplButton = ([k, t]) => el('button', { class: 'tpl', type: 'button', onclick: () => ask(`Start from “${t.label}”?`, 'This replaces the steps you have now. Your people stay the same.', () => { S.story = fromTemplate(k); renderStory(); refresh(); }) }, el('b', {}, t.label), el('span', {}, t.blurb));
+  const tplAll = Object.entries(TEMPLATES), tplEnd = tplAll.filter(([k]) => k === 'blank');
+  $('#templates').append(el('h4', {}, 'Getting ready for something'), ...tplAll.filter(([k, t]) => t.kind !== 'skill' && k !== 'blank').map(tplButton),
+    el('h4', {}, 'Learning to do something'), ...tplAll.filter(([, t]) => t.kind === 'skill').map(tplButton), el('h4', {}, 'Or start from scratch'), ...tplEnd.map(tplButton));
   $('#title').addEventListener('input', e => { S.story.title = e.target.value; refresh(); });
   $('#ending').addEventListener('input', e => { S.story.ending = e.target.value; refresh(); });
   // a plan for when it gets too much, for any story: it goes in before the last step
