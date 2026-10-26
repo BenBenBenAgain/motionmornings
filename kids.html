@@ -289,14 +289,26 @@ video.result{width:100%;max-width:280px;border-radius:14px;background:#000}
 :root{--k1:#E07B66;--k2:#F2BC6B;--k3:#8CC77F;--k4:#78B3D4}
 html,body{overflow-x:clip}
 .kidstop{position:relative;isolation:isolate}
-.bunting{position:absolute;top:0;left:calc(50% - 50vw);width:100vw;height:18px;display:block;pointer-events:none}
-.duowrap{position:relative}
-.duowrap::before{content:'';position:absolute;z-index:-1;inset:-12% -14% 10% -14%;background:
-  radial-gradient(closest-side,color-mix(in srgb,var(--k2) 80%,transparent),transparent) 2% 4%/42% 42% no-repeat,
-  radial-gradient(closest-side,color-mix(in srgb,var(--k3) 70%,transparent),transparent) 100% 22%/40% 40% no-repeat,
-  radial-gradient(closest-side,color-mix(in srgb,var(--k4) 70%,transparent),transparent) 0% 96%/40% 40% no-repeat,
-  radial-gradient(closest-side,color-mix(in srgb,var(--k1) 55%,transparent),transparent) 100% 100%/34% 34% no-repeat}
+.kidstop .lead{border-bottom:0;margin-bottom:0;padding-bottom:12px}
+.kidstop{margin-bottom:40px}
 .mini[data-demo=playgroup] .mlabel{color:#4E8F44}.mini[data-demo=doctor] .mlabel{color:#3F7FA3}
+.parade{display:flex;justify-content:center;align-items:flex-end;pointer-events:none}
+.parade canvas{display:block;height:auto;margin:0 -10px}
+.parade.big{margin:-6px auto 0;max-width:640px;position:relative}
+.parade.big::after{content:'';position:absolute;left:-12%;right:-12%;bottom:6px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--k3) 70%,var(--line)) 20%,color-mix(in srgb,var(--k2) 80%,var(--line)) 50%,color-mix(in srgb,var(--k4) 70%,var(--line)) 80%,transparent)}
+.parade.big canvas{width:13%}
+.parade.small{justify-content:flex-end}
+.parade.small canvas{width:62px}
+.parade.foot{margin-top:44px}
+.parade.foot canvas{width:72px}
+.buildhead.withpals{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;column-gap:20px}
+.buildhead.withpals > :not(.parade){grid-column:1}
+.buildhead.withpals .parade{grid-column:2;grid-row:1/span 3}
+@media (max-width:760px){
+  .parade.big{max-width:none;margin:-4px -6px 0}.parade.big canvas{width:17%;margin:0 -6px}
+  .buildhead.withpals{display:flex}.buildhead.withpals .parade{display:none}
+  .parade.foot canvas{width:56px}
+}
 .leadtag{color:var(--k1)}
 .steps button:nth-child(1) .n{background:color-mix(in srgb,var(--k1) 30%,var(--surface))}
 .steps button:nth-child(2) .n{background:color-mix(in srgb,var(--k2) 45%,var(--surface))}
@@ -312,7 +324,6 @@ html,body{overflow-x:clip}
 <body>
 <div class="wrap">
   <div class="kidstop">
-  <svg class="bunting" viewBox="0 0 1600 26" preserveAspectRatio="xMinYMin slice" aria-hidden="true"><path d="M0 2 H1600" stroke="#C9B8A0" stroke-width="1.5"/><path d="M0 2 L34 2 L17 24 Z" fill="#E07B66"/><path d="M40 2 L74 2 L57 24 Z" fill="#F2BC6B"/><path d="M80 2 L114 2 L97 24 Z" fill="#8CC77F"/><path d="M120 2 L154 2 L137 24 Z" fill="#78B3D4"/><path d="M160 2 L194 2 L177 24 Z" fill="#E07B66"/><path d="M200 2 L234 2 L217 24 Z" fill="#F2BC6B"/><path d="M240 2 L274 2 L257 24 Z" fill="#8CC77F"/><path d="M280 2 L314 2 L297 24 Z" fill="#78B3D4"/><path d="M320 2 L354 2 L337 24 Z" fill="#E07B66"/><path d="M360 2 L394 2 L377 24 Z" fill="#F2BC6B"/><path d="M400 2 L434 2 L417 24 Z" fill="#8CC77F"/><path d="M440 2 L474 2 L457 24 Z" fill="#78B3D4"/><path d="M480 2 L514 2 L497 24 Z" fill="#E07B66"/><path d="M520 2 L554 2 L537 24 Z" fill="#F2BC6B"/><path d="M560 2 L594 2 L577 24 Z" fill="#8CC77F"/><path d="M600 2 L634 2 L617 24 Z" fill="#78B3D4"/><path d="M640 2 L674 2 L657 24 Z" fill="#E07B66"/><path d="M680 2 L714 2 L697 24 Z" fill="#F2BC6B"/><path d="M720 2 L754 2 L737 24 Z" fill="#8CC77F"/><path d="M760 2 L794 2 L777 24 Z" fill="#78B3D4"/><path d="M800 2 L834 2 L817 24 Z" fill="#E07B66"/><path d="M840 2 L874 2 L857 24 Z" fill="#F2BC6B"/><path d="M880 2 L914 2 L897 24 Z" fill="#8CC77F"/><path d="M920 2 L954 2 L937 24 Z" fill="#78B3D4"/><path d="M960 2 L994 2 L977 24 Z" fill="#E07B66"/><path d="M1000 2 L1034 2 L1017 24 Z" fill="#F2BC6B"/><path d="M1040 2 L1074 2 L1057 24 Z" fill="#8CC77F"/><path d="M1080 2 L1114 2 L1097 24 Z" fill="#78B3D4"/><path d="M1120 2 L1154 2 L1137 24 Z" fill="#E07B66"/><path d="M1160 2 L1194 2 L1177 24 Z" fill="#F2BC6B"/><path d="M1200 2 L1234 2 L1217 24 Z" fill="#8CC77F"/><path d="M1240 2 L1274 2 L1257 24 Z" fill="#78B3D4"/><path d="M1280 2 L1314 2 L1297 24 Z" fill="#E07B66"/><path d="M1320 2 L1354 2 L1337 24 Z" fill="#F2BC6B"/><path d="M1360 2 L1394 2 L1377 24 Z" fill="#8CC77F"/><path d="M1400 2 L1434 2 L1417 24 Z" fill="#78B3D4"/><path d="M1440 2 L1474 2 L1457 24 Z" fill="#E07B66"/><path d="M1480 2 L1514 2 L1497 24 Z" fill="#F2BC6B"/><path d="M1520 2 L1554 2 L1537 24 Z" fill="#8CC77F"/><path d="M1560 2 L1594 2 L1577 24 Z" fill="#78B3D4"/></svg>
   <div class="top">
     <a class="brand" href="/" aria-label="Motion Mornings home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><path d="M16.5 51 Q21.5 41.5 30 52 Q38.5 41.5 43.5 51" fill="none" stroke="currentColor" stroke-width="3.6"/><path d="M37.5 35 Q41.5 27.2 47 35.5 Q52.5 27.2 56.5 35" fill="none" stroke="currentColor" stroke-width="3.2"/><path d="M40 78 A28 28 0 0 1 96 78 Z" fill="#E07B66"/><line x1="14" y1="78" x2="106" y2="78" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><line x1="54" y1="90" x2="84" y2="90" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/><line x1="61" y1="101" x2="77" y2="101" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/></svg><h1>Motion Mornings</h1><span class="kidsmark" aria-label="Kids"><span>K</span><span>I</span><span>D</span><span>S</span></span></a>
     <a class="backlink" href="/"><span aria-hidden="true">&larr;</span> Create for yourself</a>
@@ -332,10 +343,11 @@ html,body{overflow-x:clip}
     <p class="duomore">One film for each big step. Playgroup, the doctor, the dentist, haircuts, bedtime and more.</p></div>
     <div class="leadbtns"><a class="btn coral" href="#builder">Create for your child <span class="btnkids" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span></a><a class="btn ghost" href="/">Create for yourself</a></div>
   </section>
+  <div class="parade big" data-pals="hero" aria-hidden="true"></div>
   </div>
 
   <div id="builder" class="builder">
-  <header class="buildhead"><span class="pill">Build your own</span><h2>Make your film</h2><p class="lede">Add your child and their people, pick a story or write your own, then read it aloud. The preview updates as you go.</p></header>
+  <header class="buildhead withpals"><span class="pill">Build your own</span><h2>Make your film</h2><p class="lede">Add your child and their people, pick a story or write your own, then read it aloud. The preview updates as you go.</p><div class="parade small" data-pals="build" aria-hidden="true"></div></header>
 
   <nav class="steps" id="steps" aria-label="Steps"></nav>
 
@@ -413,6 +425,7 @@ html,body{overflow-x:clip}
 
   <div class="newfilm"><button class="linkbtn quiet" id="resetAll" type="button">Clear everything and start again</button></div>
 
+  <div class="parade foot" data-pals="foot" aria-hidden="true"></div>
   <footer class="foot">
     <p>Your people, story and recordings stay on your device. Nothing is uploaded.</p>
     <p><a href="/">Motion Mornings for grown-ups</a> · <a href="mailto:hello@motionmornings.com">hello@motionmornings.com</a></p>

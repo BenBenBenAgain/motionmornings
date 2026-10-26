@@ -230,6 +230,29 @@
     if (miniVis && $('#watch').hidden) miniStep(still ? 0 : dt);
     if (!still) requestAnimationFrame(miniLoop);
   }
+  // ---- characters from the kids films, standing around the page in the KIDS colours
+  const DC = DEMOS.playgroup.cast;
+  const PAL = {
+    mum: [DC.adult, 'adult'], ava: [DC.child, 'child'], leo: [DC.friends[0], 'friend'], dog: [DC.pets[0], 'pet'],
+    jo: [Object.assign({}, DC.helper, { top: '#8CC77F', inner: '#8CC77F', pants: '#8CC77F' }), 'helper'],
+    dad: [{ body: 'm', hair: 'short', hairCol: '#3B2A20', skin: '#C98E66', facial: 'stubble', facialCol: '#3B2A20', outfit: 'tee', top: '#E07B66', inner: '#E07B66', pants: '#30406E' }, 'adult'],
+    mia: [{ body: 'f', hair: 'bun', hairCol: '#C9A060', skin: '#F2D3BC', top: '#F2BC6B', pants: '#30406E', age: 'little' }, 'child'],
+    sam: [{ body: 'm', hair: 'short', hairCol: '#2E2622', skin: '#8A5434', top: '#78B3D4', pants: '#30406E', age: 'little' }, 'child'],
+    big: [{ top: '#E07B66', hairCol: '#2A211C', skin: '#E8BA99' }, 'sibling'],
+    baby: [{ blanket: '#F2BC6B', bow: '#E07B66' }, 'baby'] };
+  const PAL_SETS = { hero: ['jo', 'mia', 'sam', 'mum', 'ava', 'dog', 'leo'], build: ['ava', 'dog'], foot: ['dad', 'big', 'leo'] };
+  const PAL_H = { adult: 330, helper: 330, child: 230, friend: 230, sibling: 260, pet: 190, baby: 120 };
+  const pals = [];
+  $$('.parade[data-pals]').forEach(box => {
+    const row = { box, cvs: [], vis: false };
+    (PAL_SETS[box.dataset.pals] || []).forEach((key, i) => { const [look, kind] = PAL[key]; const cv = document.createElement('canvas'); cv.width = 200; cv.height = PAL_H[kind]; box.append(cv); row.cvs.push([cv, look, kind, i * 0.7]); });
+    try { new IntersectionObserver(es => { row.vis = es[0].isIntersecting; }).observe(box); } catch (e) { row.vis = true; }
+    pals.push(row);
+  });
+  function drawPals(t) { pals.forEach(r => { if (!r.vis && t > 0) return; r.cvs.forEach(([cv, L, kind, off]) => K.portraitOf(cv.getContext('2d'), cv.width, cv.height, L, kind, t + off, true)); }); }
+  drawPals(0);
+  (function palLoop(now) { if (!still) { drawPals(now / 1000); requestAnimationFrame(palLoop); } })(performance.now());
+
   // tapping a little phone opens it bigger, with music
   const dStage = $('#demoStage'), dctx = dStage.getContext('2d');
   let cur = DEMOS.playgroup, demoAt = 0, demoPlaying = false, demoDrag = false, demoLast = 0, demoMusic = null;

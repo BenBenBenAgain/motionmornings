@@ -1805,11 +1805,13 @@ function render(ctx, cfg, tl, T) {
 }
 function drawScene(ctx, cfg, key, t, p = 0.5, roomIx) { X = ctx; X.save(); X.fillStyle = css(CREAM); X.fillRect(0, 0, W, H); ROOMSEL = roomIx != null ? roomIx : roomHash(key); HATS_OFF = false; try { (SCENES[key] || SCENES.sunrise).fn(cfg, t, p); } finally { ROOMSEL = null; } X.restore(); }
 
+// BARE: draw a character on its own with no card behind it, for decorating pages
+let BARE = false;
 function portrait(ctx, L, t, w, hgt, kind) {
   X = ctx; HATS_OFF = false;
   X.save(); X.clearRect(0, 0, w, hgt);
-  const g = X.createRadialGradient(w / 2, hgt * 0.42, 10, w / 2, hgt * 0.5, w * 0.7);
-  g.addColorStop(0, '#F1F4F7'); g.addColorStop(1, '#D9E0E7'); X.fillStyle = g; X.fillRect(0, 0, w, hgt);
+  if (!BARE) { const g = X.createRadialGradient(w / 2, hgt * 0.42, 10, w / 2, hgt * 0.5, w * 0.7);
+  g.addColorStop(0, '#F1F4F7'); g.addColorStop(1, '#D9E0E7'); X.fillStyle = g; X.fillRect(0, 0, w, hgt); }
   ell(w / 2, hgt - 34, w * 0.28, 16); fill([0.25, 0.3, 0.38], 0.16);
   const s = (hgt - 70) / 640, wave = 0.25 * Math.sin(t * 3);
   if (kind === 'pet' && L) {
@@ -2622,9 +2624,9 @@ const KIDS = (() => {
     ROOMSEL = null; X.restore();
   }
   // a character on their own, for the look editor
-  function portraitOf(ctx, w, h, look, kind, t) {
-    X = ctx; X.save(); X.clearRect(0, 0, w, h);
-    const g = X.createRadialGradient(w / 2, h * 0.42, 10, w / 2, h * 0.5, w * 0.7); g.addColorStop(0, '#F1F4F7'); g.addColorStop(1, '#D9E0E7'); X.fillStyle = g; X.fillRect(0, 0, w, h);
+  function portraitOf(ctx, w, h, look, kind, t, bare) {
+    BARE = !!bare; X = ctx; X.save(); X.clearRect(0, 0, w, h);
+    if (!bare) { const g = X.createRadialGradient(w / 2, h * 0.42, 10, w / 2, h * 0.5, w * 0.7); g.addColorStop(0, '#F1F4F7'); g.addColorStop(1, '#D9E0E7'); X.fillStyle = g; X.fillRect(0, 0, w, h); }
     ell(w / 2, h - 34, w * 0.26, 14); fill([0.25, 0.3, 0.38], 0.16);
     const wv = { armR: [0.3 + 0.1 * Math.sin(t * 2), 0.25], armL: [0.2, 0.1] };
     if (kind === 'baby') { const b = Object.assign({}, BABY_DEF, look), sc = (h - 40) / 150; ell(w / 2, h * 0.62, 70 * sc, 30 * sc); fill(b.blanket); baby(w / 2, h * 0.6, sc, b, t); X.restore(); return; }
