@@ -250,6 +250,14 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
 .kidsword{font:700 .95rem var(--display);letter-spacing:0;margin-left:4px;transform:rotate(-10deg) translateY(-2px);display:inline-flex}
 .kidsband{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin:0 0 40px;padding:20px 22px;border-radius:var(--r);background:color-mix(in srgb,var(--gold) 16%,var(--surface));border:1px solid color-mix(in srgb,var(--gold) 45%,var(--line))}
 .kidsband .btn{text-decoration:none}
+.choose{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:4px 0 22px}
+.choice{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-radius:var(--r);border:1.5px solid var(--line);background:var(--surface);text-decoration:none;color:var(--ink);min-width:0;transition:border-color .15s,transform .15s}
+.choice:hover{border-color:var(--coral);transform:translateY(-1px)}
+.choice b{font:700 1.15rem var(--display)}
+.choice .ctag{font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sea);display:flex;align-items:center;gap:4px}
+.choice .cdesc{color:var(--muted);font-size:.9rem;line-height:1.35}
+.kidschoice{background:color-mix(in srgb,var(--gold) 16%,var(--surface));border-color:color-mix(in srgb,var(--gold) 50%,var(--line))}
+@media (max-width:520px){.choice{padding:12px}.choice b{font-size:1rem}.choice .cdesc{font-size:.82rem}}
 .kidscopy{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1 1 380px}.kidscopy h2{margin:0;font-size:1.35rem}
 .why{margin:-12px 0 40px;padding-bottom:36px;border-bottom:1px solid var(--line)}.why h2{margin:0 0 14px}.whygrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.whycard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:6px}.whycard h3{margin:0;font-family:var(--display);font-size:1rem}.whycard p{margin:0;color:var(--muted);line-height:1.5;font-size:.95rem}.whycard a{font-size:.82rem;color:var(--muted);margin-top:auto}
 @media (max-width:860px){.whygrid{grid-template-columns:1fr}.why{margin-top:-6px}}
@@ -338,6 +346,10 @@ input[type=range]{height:30px;touch-action:none}
     <div class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><path d="M16.5 51 Q21.5 41.5 30 52 Q38.5 41.5 43.5 51" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M37.5 35 Q41.5 27.2 47 35.5 Q52.5 27.2 56.5 35" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M40 78 A28 28 0 0 1 96 78 Z" fill="var(--coral)"/><line x1="14" y1="78" x2="106" y2="78" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><line x1="54" y1="90" x2="84" y2="90" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/><line x1="61" y1="101" x2="77" y2="101" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/></svg><h1>Motion Mornings</h1></div>
     <div class="row topright"><button class="streakchip" id="streakChip" hidden><span aria-hidden="true">🌅</span><b id="chipN">0</b></button><a class="kidslink" href="/kids.html" aria-label="Motion Mornings Kids"><span>K</span><span>I</span><span>D</span><span>S</span></a><a class="btn ghost small toplink" href="#builder">Make your film</a></div>
   </div>
+  <nav class="choose" aria-label="Who is the film for?">
+    <a class="choice" href="#builder" id="chooseMe"><span class="ctag">For you</span><b>Create for yourself</b><span class="cdesc">A film of the everyday steps toward the life you want</span></a>
+    <a class="choice kidschoice" href="/kids.html"><span class="ctag">For your child <span class="kidsword" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span></span><b>Create for your child</b><span class="cdesc">A film that shows them what's going to happen, starring them</span></a>
+  </nav>
   <section class="hero" aria-labelledby="heroTitle">
     <div class="herofilm">
       <p class="herokick mobonly">Create a 1-minute film of the everyday steps that build the life you want. Watch it every morning, then go live it.</p>
@@ -351,7 +363,7 @@ input[type=range]{height:30px;touch-action:none}
       <h2 id="heroTitle"><span class="hl">See it every morning.</span> <span class="hl">Live it every day.</span></h2>
       <p class="herolede">A short animated film of you doing the everyday things that build the life you've always wanted.</p>
       <p class="heroeg deskonly"><span>In this example</span> A job you enjoy, saving towards financial freedom, a morning dog walk, the gym, five quiet minutes of breathing, nights out on mineral water, visiting Mum and dinner cooked together. Each pair of actions ends with a glimpse of where it leads.</p>
-      <button class="btn coral" id="startBuild">Make your own film</button>
+      <div class="row"><button class="btn coral" id="startBuild">Create for yourself</button><a class="btn ghost" href="/kids.html" style="text-decoration:none">Create for your child</a></div>
     </div>
   </section>
 

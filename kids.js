@@ -13,6 +13,7 @@
   const uid = () => Math.random().toString(36).slice(2, 9);
   const fmt = s => { s = Math.max(0, Math.round(s)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
   const KEY = 'mmkids.v1';
+  const MAX_STEPS = 10, MAX_LINE = 8, MAX_FILM = 90;
   // boy, girl or neutral: neutral keeps the story to 'they'
   function sexOf(L) { return (L && L.sex) || (L && L.body === 'm' ? 'm' : 'f'); }
 
@@ -37,7 +38,7 @@
         { scene: 'mattime', text: 'There is story time on the mat with the other kids.' },
         { scene: 'lunch', text: 'Then everyone has lunch together.' },
         { scene: 'pickup', text: 'After lunch, {adult} comes back to pick {child} up!', say: { who: 'child', words: '{adult}!' } }] } },
-    siblings: { label: 'Brothers and sisters', blurb: 'Sharing, squabbles, a big breath, sorry', needs: 'siblingOn', story: {
+    siblings: { label: 'Brothers and sisters', blurb: 'Sharing, squabbles, a big breath, sorry', needs: 'sibling', story: {
       title: '{child} and {sibling}', ending: 'We\u2019re a good team!', steps: [
         { scene: 'share', text: '{child} and {sibling} like playing together.' },
         { scene: 'tug', text: 'Sometimes they both want the same toy, and they feel cross.' },
@@ -52,6 +53,14 @@
         { scene: 'baby_quiet', text: 'When {baby} is sleeping, {child} uses a quiet voice.', say: { who: 'child', words: 'Shhh!' } },
         { scene: 'breathe', text: 'Sometimes {baby} cries a lot. {child} can take a big breath and ask {adult} for a cuddle.' },
         { scene: 'baby_gentle', glimpse: true, text: '{child} is a great big {bigsib}.' }] } },
+    playdate: { label: 'A playdate', blurb: 'A friend\u2019s house, sharing, taking turns, a break', needs: 'friend', story: {
+      title: '{child}\u2019s Playdate', ending: 'Playdates are fun!', steps: [
+        { scene: 'goto', place: '{friend}\u2019s house', text: 'Today {child} is going to {friend}\u2019s house to play.' },
+        { scene: 'share', with: 'friend', text: '{child} and {friend} can play with the toys together.', say: { who: 'friend', words: 'Hi {child}!' } },
+        { scene: 'tug', with: 'friend', text: 'Sometimes they both want the same toy. That\u2019s OK.' },
+        { scene: 'share', with: 'friend', text: 'They can take turns. First {friend}, then {child}.', say: { who: 'child', words: 'Your turn!' } },
+        { scene: 'breathe', text: 'If {child} needs a break, {they} can find {adult} for a quiet minute.' },
+        { scene: 'sorry', with: 'friend', glimpse: true, text: 'Friends look after each other.' }] } },
     doctor: { label: 'The doctor', blurb: 'Waiting, a check-up, a quick needle, a sticker', story: {
       title: '{child} Goes to the Doctor', ending: '{child} was so brave!', steps: [
         { scene: 'goto', place: 'Doctor', text: 'Today {adult} and {child} are going to see the doctor.' },
@@ -98,28 +107,39 @@
         { scene: 'food_ok', text: 'Even one bite is brave. {adult} is so proud!', say: { who: 'child', words: 'I tried it!' } }] } },
     blank: { label: 'Something else', blurb: 'Start with an empty story', story: { title: '{child}’s Big Day', ending: 'We did it!', steps: [{ scene: 'goto', place: '', text: '' }] } }
   };
-  const blankCast = () => ({ child: Object.assign({}, K.KID_DEF), adult: Object.assign({}, K.ADULT_DEF), helper: Object.assign({}, K.HELPER_DEF), helperOn: true, sibling: Object.assign({}, K.SIB_DEF), siblingOn: false, baby: Object.assign({}, K.BABY_DEF), babyOn: false });
+  const blankCast = () => ({ child: Object.assign({}, K.KID_DEF), adult: Object.assign({}, K.ADULT_DEF), helper: Object.assign({}, K.HELPER_DEF), helperOn: true, baby: Object.assign({}, K.BABY_DEF), babyOn: false, siblings: [], friends: [], pets: [] });
   let S = load() || { cast: blankCast(), story: null, music: 'morning-mood', step: 0 };
-  if (!S.cast.sibling) Object.assign(S.cast, { sibling: Object.assign({}, K.SIB_DEF), siblingOn: false, baby: Object.assign({}, K.BABY_DEF), babyOn: false });
+  migrate();
   if (!S.story) S.story = fromTemplate('playgroup');
+  function migrate() {
+    const c = S.cast;
+    if (!c.baby) Object.assign(c, { baby: Object.assign({}, K.BABY_DEF), babyOn: false });
+    if (!Array.isArray(c.siblings)) c.siblings = c.siblingOn && c.sibling ? [c.sibling] : [];
+    if (!Array.isArray(c.friends)) c.friends = [];
+    if (!Array.isArray(c.pets)) c.pets = [];
+    delete c.sibling; delete c.siblingOn;
+  }
   function load() { try { const v = JSON.parse(localStorage.getItem(KEY) || 'null'); return v && v.cast && v.story ? v : null; } catch (e) { return null; } }
   let saveT = 0;
   function save() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }, 250); }
-  function castFor() { return { child: S.cast.child, adult: S.cast.adult, helper: S.cast.helperOn ? S.cast.helper : { name: '' }, sibling: S.cast.sibling || {}, baby: S.cast.baby || {} }; }
+  function castFor() { return { child: S.cast.child, adult: S.cast.adult, helper: S.cast.helperOn ? S.cast.helper : { name: '' }, siblings: S.cast.siblings || [], friends: S.cast.friends || [], pets: S.cast.pets || [], baby: S.cast.babyOn ? S.cast.baby : {} }; }
   function fromTemplate(key) {
-    if (TEMPLATES[key].needs) S.cast[TEMPLATES[key].needs] = true;
+    const need = TEMPLATES[key].needs;
+    if (need === 'sibling' && !S.cast.siblings.length) S.cast.siblings.push(Object.assign({}, K.SIB_DEF));
+    else if (need === 'friend' && !S.cast.friends.length) S.cast.friends.push(Object.assign({}, K.FRIEND_DEF));
+    else if (need) S.cast[need] = true;
     const t = TEMPLATES[key].story, c = castFor(), boy = sexOf(S.cast.child) === 'm', girl = sexOf(S.cast.child) === 'f';
     const pro = s => s.replace(/\{their\}/g, boy ? 'his' : girl ? 'her' : 'their').replace(/\{they\}/g, boy ? 'he' : girl ? 'she' : 'they').replace(/\{s\}/g, boy || girl ? 's' : '').replace(/\{bigsib\}/g, boy ? 'brother' : girl ? 'sister' : 'helper').replace(/\{themself\}/g, boy ? 'himself' : girl ? 'herself' : 'themself');
     const n = s => s == null ? s : pro(K.names(s, c));
     const cap = x => x && x[0].toUpperCase() + x.slice(1);
-    return { endScene: t.endScene || '', title: cap(n(t.title)), ending: n(t.ending), steps: t.steps.map(st => ({ id: uid(), scene: st.scene, place: st.place || '', time: st.time || '', text: n(st.text), glimpse: !!st.glimpse, say: st.say ? { who: st.say.who, words: n(st.say.words) } : { who: 'child', words: '' } })) };
+    return { kind: key, endScene: t.endScene || '', title: cap(n(t.title)), ending: n(t.ending), steps: t.steps.map(st => ({ id: uid(), scene: st.scene, with: st.with || '', place: n(st.place || ''), time: st.time || '', text: n(st.text), glimpse: !!st.glimpse, say: st.say ? { who: st.say.who, words: n(st.say.words) } : { who: 'child', words: '' } })) };
   }
   // a shared link carries the cast and the story (never the recordings)
   function readShare() {
     const m = location.hash.match(/^#s[.=]([A-Za-z0-9_-]+)/); if (!m) return;
     try {
       const json = decodeURIComponent(escape(atob(m[1].replace(/-/g, '+').replace(/_/g, '/'))));
-      const v = JSON.parse(json); if (v.cast && v.story) { S = Object.assign({ music: 'morning-mood', step: 0 }, v); save(); }
+      const v = JSON.parse(json); if (v.cast && v.story) { S = Object.assign({ music: 'morning-mood', step: 0 }, v); migrate(); save(); }
     } catch (e) {}
     try { history.replaceState(null, '', location.pathname); } catch (e) {}
   }
@@ -169,13 +189,14 @@
   }
   const decodeAB = ab => new Promise((res, rej) => { const p = ac().decodeAudioData(ab, res, rej); if (p && p.catch) p.catch(() => {}); });
   async function decode(blob) { return await decodeAB(await blob.arrayBuffer()); }
-  async function setVoice(id, buf) { voices[id] = buf; await idbPut(id, buf ? wavBlob(buf) : null); refresh(); renderVoice(); }
+  function capLine(buf) { if (!buf || buf.duration <= MAX_LINE + 0.3) return [buf, false]; return [slice(buf, 0, MAX_LINE), true]; }
+  async function setVoice(id, buf) { let cut; [buf, cut] = capLine(buf); if (cut) micErr(`That line was longer than ${MAX_LINE} seconds, so the end was cut off. Try saying it a bit shorter.`); voices[id] = buf; await idbPut(id, buf ? wavBlob(buf) : null); refresh(); renderVoice(); }
 
   // ---------------------------------------------------------------- the film
   const stage = $('#stage'), sctx = stage.getContext('2d');
   let TL = null;
   const voiceLens = () => Object.fromEntries(Object.entries(voices).filter(([, b]) => b).map(([k, b]) => [k, b.duration]));
-  function refresh() { TL = K.timeline(S.story, voiceLens()); $('#scrub').max = 1000; $('#lenMeta').textContent = `${fmt(TL.total)} long`; $('#storyMeta').textContent = `${S.story.steps.length} step${S.story.steps.length === 1 ? '' : 's'} · about ${fmt(TL.total)}`; if (!playing) draw(pos); save(); }
+  function refresh() { TL = K.timeline(S.story, voiceLens()); $('#scrub').max = 1000; $('#lenMeta').textContent = `${fmt(TL.total)} long`; $('#storyMeta').textContent = `${S.story.steps.length} of ${MAX_STEPS} steps \u00b7 about ${fmt(TL.total)}${TL.total > MAX_FILM ? ` (over the ${fmt(MAX_FILM)} limit)` : ''}`; $('#storyMeta').classList.toggle('over', TL.total > MAX_FILM); $('#addStep').disabled = S.story.steps.length >= MAX_STEPS; $('#addCalm').disabled = S.story.steps.length > MAX_STEPS - 3; if (!playing) draw(pos); save(); }
   function draw(T, ctx = sctx, w = stage.width) { ctx.setTransform(w / W, 0, 0, w / W, 0, 0); K.frame(ctx, castFor(), S.story, TL, T); ctx.setTransform(1, 0, 0, 1, 0, 0); }
 
   // music, ducked under the voice
@@ -236,39 +257,56 @@
   $$('[data-prev]').forEach(b => b.addEventListener('click', () => go(S.step - 1)));
 
   // ---------------------------------------------------------------- cast
-  const ROLES = [
-    ['child', 'Your child', 'Their name', 'e.g. Hunter'],
-    ['adult', 'Going with them', 'What your child calls them', 'e.g. Mumma or Dad'],
-    ['helper', 'Someone they’ll meet', 'Their name', 'e.g. Vicky'],
-    ['sibling', 'Brother or sister', 'Their name', 'e.g. Ruby'],
-    ['baby', 'A baby', 'Their name', 'e.g. Ollie']];
-  const OPTIONAL = { helper: 'helperOn', sibling: 'siblingOn', baby: 'babyOn' };
+  // fixed people (the child, who goes with them, someone they'll meet, a baby) and lists you can add to
+  const ONE = [
+    { key: 'child', kind: 'child', title: 'Your child', q: 'Their name', ph: 'e.g. Hunter' },
+    { key: 'adult', kind: 'adult', title: 'Going with them', q: 'What your child calls them', ph: 'e.g. Mumma or Dad' },
+    { key: 'helper', kind: 'helper', title: 'Someone they’ll meet', q: 'Their name', ph: 'e.g. Vicky, or Dr Lee', on: 'helperOn' },
+    { key: 'baby', kind: 'baby', title: 'A baby', q: 'Their name', ph: 'e.g. Ollie', on: 'babyOn' }];
+  const MANY = [
+    { list: 'siblings', kind: 'sibling', title: 'Brothers and sisters', one: 'Brother or sister', add: 'Add a brother or sister', ph: 'e.g. Ruby', max: 4, make: () => Object.assign({}, K.SIB_DEF) },
+    { list: 'friends', kind: 'friend', title: 'Friends', one: 'Friend', add: 'Add a friend', ph: 'e.g. Ava', max: 4, make: () => Object.assign({}, K.FRIEND_DEF, { hair: ['curly', 'short', 'ponytail', 'bun'][S.cast.friends.length % 4], top: ['#E9A23B', '#6FA8DC', '#9B6FB5', '#5FA88F'][S.cast.friends.length % 4] }) },
+    { list: 'pets', kind: 'pet', title: 'Pets', one: 'Pet', add: 'Add a pet', ph: 'e.g. Pawsha', max: 3, make: () => ({ type: 'dog', name: '', coat: '#A14F26', ears: 'floppy', size: 'm', muzzle: 'dark' }) }];
   // age in years: 2 to 5 are drawn little, 6 to 11 as a kid, 12 and up as a teenager
   const AGES = Array.from({ length: 15 }, (_, i) => i + 2);
   const sizeFor = y => y <= 5 ? 'little' : y <= 11 ? 'kid' : 'teen';
   const ageOf = L => L.years || ({ little: 4, kid: 8, teen: 13 }[L.age] || 4);
   function setAge(L, y) { L.years = y; L.age = sizeFor(y); }
   const portraits = [];
+  const isKid = kind => kind === 'child' || kind === 'sibling' || kind === 'friend';
+  // one card: a picture to tap, a name, an age for kids, the look editor, and remove or include
+  function personCard({ L, kind, title, q, ph, id, on, onRemove, roleKey }) {
+    const off = on && !S.cast[on], cv = el('canvas', { width: 192, height: 240, role: 'button', tabindex: '0', 'aria-label': `Change how ${(L.name || title).toLowerCase()} looks` });
+    const open = () => { if (!off) openLook(L, kind, title, roleKey); };
+    cv.addEventListener('click', open); cv.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+    const right = on ? el('label', { class: 'switch' }, el('input', { type: 'checkbox', id: on, checked: !!S.cast[on], onchange: e => { S.cast[on] = e.target.checked; renderCast(); refresh(); } }), 'Include')
+      : onRemove ? el('button', { class: 'iconbtn', type: 'button', onclick: onRemove, 'aria-label': `Remove ${L.name || title}` }, 'Remove') : null;
+    const card = el('div', { class: 'card' },
+      el('div', { class: 'subhead' }, el('h3', {}, title), right),
+      el('div', { class: 'who' }, cv, el('div', { class: 'fields' },
+        el('label', { class: 'q' }, q || 'Their name', el('input', { type: 'text', id: `name-${id}`, value: L.name || '', placeholder: ph, maxlength: '24', disabled: off, oninput: e => { if (roleKey) renameIn(roleKey, L.name, e.target.value); L.name = e.target.value; refresh(); } })),
+        isKid(kind) ? el('label', { class: 'q' }, 'Age', el('select', { id: `age-${id}`, disabled: off, onchange: e => { setAge(L, +e.target.value); refresh(); drawPortraits(0); } }, AGES.map(a => el('option', { value: a, selected: ageOf(L) === a }, a === 16 ? '16+' : String(a))))) : null,
+        kind === 'pet' ? el('label', { class: 'q' }, 'Type', el('select', { id: `type-${id}`, onchange: e => { L.type = e.target.value; refresh(); drawPortraits(0); } }, [['dog', 'Dog'], ['cat', 'Cat']].map(([v, n]) => el('option', { value: v, selected: L.type === v }, n)))) : null,
+        el('button', { class: 'linkbtn', type: 'button', onclick: open, disabled: off }, 'Change their look'))));
+    if (off) card.style.opacity = '0.55';
+    portraits.push([cv, L, kind]);
+    return card;
+  }
   function renderCast() {
     const box = $('#cast'); box.innerHTML = ''; portraits.length = 0;
-    ROLES.forEach(([role, title, q, ph]) => {
-      const L = S.cast[role], cv = el('canvas', { width: 192, height: 240, role: 'button', tabindex: '0', 'aria-label': `Change how ${title.toLowerCase()} looks` });
-      cv.addEventListener('click', () => openLook(role)); cv.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLook(role); } });
-      const on = OPTIONAL[role], off = on && !S.cast[on];
-      const card = el('div', { class: 'card' },
-        el('div', { class: 'subhead' }, el('h3', {}, title), on ? el('label', { class: 'switch' }, el('input', { type: 'checkbox', id: on, checked: !!S.cast[on], onchange: e => { S.cast[on] = e.target.checked; renderCast(); refresh(); } }), 'Include') : null),
-        el('div', { class: 'who' }, cv, el('div', { class: 'fields' },
-          el('label', { class: 'q' }, q, el('input', { type: 'text', id: `name-${role}`, value: L.name || '', placeholder: ph, maxlength: '24', disabled: off, oninput: e => { renameIn(role, L.name, e.target.value); L.name = e.target.value; refresh(); } })),
-          role === 'child' || role === 'sibling' ? el('label', { class: 'q' }, 'Age', el('select', { id: `age-${role}`, disabled: off, onchange: e => { setAge(L, +e.target.value); refresh(); drawPortraits(0); } }, AGES.map(a => el('option', { value: a, selected: ageOf(L) === a }, a === 16 ? '16+' : String(a))))) : null,
-          el('button', { class: 'linkbtn', type: 'button', onclick: () => openLook(role), disabled: off }, 'Change their look'))));
-      if (off) card.style.opacity = '0.55';
-      box.append(card); portraits.push([cv, role]);
+    ONE.forEach(o => box.append(personCard({ L: S.cast[o.key], kind: o.kind, title: o.title, q: o.q, ph: o.ph, id: o.key, on: o.on, roleKey: o.key })));
+    MANY.forEach(m => {
+      const arr = S.cast[m.list];
+      arr.forEach((L, i) => box.append(personCard({ L, kind: m.kind, title: arr.length > 1 ? `${m.one} ${i + 1}` : m.one, ph: m.ph, id: `${m.kind}${i}`, roleKey: m.kind === 'sibling' && i === 0 ? 'sibling' : null,
+        onRemove: () => { arr.splice(i, 1); renderCast(); refresh(); } })));
     });
+    box.append(el('div', { class: 'card addrow' }, el('h3', {}, 'Anyone else?'), el('p', { class: 'meta' }, 'Add the people and pets in your child’s life. Friends show up as the other kids in scenes like playgroup and kinder.'),
+      el('div', { class: 'row' }, MANY.map(m => el('button', { class: 'btn ghost small', type: 'button', id: `add-${m.kind}`, disabled: S.cast[m.list].length >= m.max, onclick: () => { S.cast[m.list].push(m.make()); renderCast(); refresh(); const ins = $$(`#cast input[id^="name-${m.kind}"]`); if (ins.length) ins[ins.length - 1].focus(); } }, m.add)))));
     drawPortraits(0);
   }
   // a new name flows through the story: the old name (or the stand-in) is swapped wherever it appears
   const STAND_IN = { child: 'your child', adult: 'Mum', helper: 'a friend', baby: 'the baby' };
-  const standIn = role => role === 'adult' ? ({ m: 'Dad', f: 'Mum', x: 'their grown-up' }[sexOf(S.cast.adult)]) : role === 'sibling' ? ({ m: 'their brother', f: 'their sister', x: 'their sibling' }[sexOf(S.cast.sibling)]) : STAND_IN[role];
+  const standIn = role => role === 'adult' ? ({ m: 'Dad', f: 'Mum', x: 'their grown-up' }[sexOf(S.cast.adult)]) : role === 'sibling' ? ({ m: 'their brother', f: 'their sister', x: 'their sibling' }[sexOf(S.cast.siblings[0] || {})]) : STAND_IN[role];
   function renameIn(role, oldName, newName) {
     const from = (oldName || '').trim() || standIn(role), to = newName.trim() || standIn(role);
     swapName(from, to);
@@ -278,32 +316,32 @@
     const re = new RegExp('\\b' + from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi');
     const sw = t => typeof t === 'string' ? t.replace(re, m => (m[0] === m[0].toUpperCase() && to[0] ? to[0].toUpperCase() + to.slice(1) : to)) : t;
     S.story.title = sw(S.story.title); S.story.ending = sw(S.story.ending);
-    S.story.steps.forEach(st => { st.text = sw(st.text); if (st.say) st.say.words = sw(st.say.words); });
+    S.story.steps.forEach(st => { st.text = sw(st.text); st.place = sw(st.place); if (st.say) st.say.words = sw(st.say.words); });
   }
-  function drawPortraits(t) { portraits.forEach(([cv, role]) => { const c = cv.getContext('2d'); K.portraitOf(c, cv.width, cv.height, S.cast[role], role, t); }); }
+  function drawPortraits(t) { portraits.forEach(([cv, L, kind]) => { const c = cv.getContext('2d'); K.portraitOf(c, cv.width, cv.height, L, kind, t); }); }
 
   // look editor
   const SKIN = ['#F6D7C3', '#F2CBAE', '#E8BA99', '#D6A27C', '#C98E66', '#A86F4C', '#8A5434', '#5E3A26'];
   const HAIRC = ['#1F1A17', '#3B2A20', '#6B4528', '#A47A55', '#C9A060', '#E2C27E', '#B5523A', '#9A9A9A'];
   const CLOTH = ['#D94B3F', '#E9A23B', '#F2C46F', '#5FA88F', '#4F86C6', '#30406E', '#9B6FB5', '#F7F3EC', '#2B2B30', '#4D6E9C'];
+  const COATS = ['#A14F26', '#1F1A17', '#F2E6D0', '#C9A060', '#7A6A5A', '#E2C27E', '#9A9A9A', '#5E3A26'];
   const HAIR_KID = [['mop', 'Ear length'], ['short', 'Short'], ['curly', 'Curly'], ['long', 'Long'], ['ponytail', 'Ponytail'], ['bun', 'Bun'], ['braids', 'Braids'], ['afro', 'Afro']];
   const HAIR_AD = [['long', 'Long'], ['wavy', 'Wavy'], ['curly', 'Curly'], ['ponytail', 'Ponytail'], ['bun', 'Bun'], ['braids', 'Braids'], ['short', 'Short'], ['fade', 'Fade'], ['afro', 'Afro'], ['buzz', 'Buzz cut'], ['bald', 'Bald']];
-  let lookRole = null, lookRaf = 0;
-  function openLook(role) {
-    if (OPTIONAL[role] && !S.cast[OPTIONAL[role]]) return;
-    lookRole = role; const L = S.cast[role], kid = role === 'child' || role === 'sibling', f = $('#lookFields');
-    $('#lookEdTitle').textContent = (L.name || ROLES.find(r => r[0] === role)[1]) + '\u2019s look';
-    const pressSet = (e, sel) => e.currentTarget.parentNode.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === e.currentTarget)));
+  let lookRaf = 0;
+  function openLook(L, kind, title, roleKey) {
+    const kid = isKid(kind), f = $('#lookFields');
+    $('#lookEdTitle').textContent = (L.name || title) + '’s look';
+    const pressSet = e => e.currentTarget.parentNode.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === e.currentTarget)));
     const seg = (label, key, opts, redraw) => el('div', { class: 'field' }, el('span', {}, label), el('div', { class: 'seg', role: 'group', 'aria-label': label }, opts.map(([v, n]) => el('button', { type: 'button', 'aria-pressed': String((key === 'sex' ? sexOf(L) : L[key] || false) === v), onclick: e => { pressSet(e); set(key, v); if (redraw) fields(); } }, n))));
     const sw = (label, key, cols) => el('div', { class: 'field' }, el('span', {}, label), el('div', { class: 'sw' }, cols.map(c => el('button', { type: 'button', 'aria-label': c, 'aria-pressed': String((L[key] || '').toLowerCase() === c.toLowerCase()), style: `background:${c}`, onclick: e => { pressSet(e); set(key, c); } })), el('input', { type: 'color', value: L[key] || '#888888', 'aria-label': `Other ${label.toLowerCase()} colour`, oninput: e => set(key, e.target.value) })));
     function set(key, v) {
       if (key === 'sex') {
-        const was = !(L.name || '').trim() && role !== 'child' ? standIn(role) : null;
+        const was = roleKey && roleKey !== 'child' && !(L.name || '').trim() ? standIn(roleKey) : null;
         L.sex = v; L.body = v === 'm' ? 'm' : 'f';
         if (v === 'm' && L.hair === 'long' && !kid) L.hair = 'short';
         if (v !== 'f' && L.outfit === 'dress') L.outfit = 'tee';
         if (v !== 'm') L.facial = 'none';
-        if (was) swapName(was, standIn(role));
+        if (was) swapName(was, standIn(roleKey));
       } else L[key] = v;
       if (key === 'hairCol') L.facialCol = v;
       if (key === 'facial') L.facialCol = L.hairCol;
@@ -312,7 +350,13 @@
     }
     function fields() {
       const box = f.closest('.box'), top = box ? box.scrollTop : 0; f.innerHTML = '';
-      if (role === 'baby') { f.append(sw('Skin tone', 'skin', SKIN), sw('Hair colour', 'hairCol', HAIRC), sw('Blanket', 'blanket', CLOTH)); return; }
+      if (kind === 'baby') { f.append(sw('Skin tone', 'skin', SKIN), sw('Hair colour', 'hairCol', HAIRC), sw('Blanket', 'blanket', CLOTH)); return; }
+      if (kind === 'pet') {
+        f.append(seg('Type', 'type', [['dog', 'Dog'], ['cat', 'Cat']], true), sw('Coat colour', 'coat', COATS));
+        if (L.type !== 'cat') f.append(seg('Size', 'size', [['s', 'Small'], ['m', 'Medium'], [false, 'Large']]), seg('Ears', 'ears', [['floppy', 'Floppy'], ['up', 'Pointy'], ['big', 'Big']]), seg('Fur', 'fur', [[false, 'Short'], ['fluffy', 'Fluffy'], ['curly', 'Curly']]), seg('Markings', 'marking', [[false, 'None'], ['chest', 'White chest'], ['socks', 'White socks'], ['patches', 'Patches'], ['spots', 'Spots']]));
+        else f.append(seg('Stripes', 'muzzle', [['dark', 'Stripes'], ['same', 'Plain']]));
+        if (box) box.scrollTop = top; return;
+      }
       f.append(seg('Look', 'sex', kid ? [['m', 'Boy'], ['f', 'Girl'], ['x', 'Neutral']] : [['f', 'Woman'], ['m', 'Man'], ['x', 'Neutral']], true));
       f.append(sw('Skin tone', 'skin', SKIN));
       f.append(seg('Headwear', 'hat', [[false, 'None'], ['cap', 'Cap'], ['beanie', 'Beanie'], ['scarf', 'Headscarf']], true));
@@ -335,7 +379,7 @@
     fields();
     $('#lookEd').hidden = false; const cv = $('#lookCanvas'), c = cv.getContext('2d'); const t0 = performance.now();
     cancelAnimationFrame(lookRaf);
-    const loop = now => { K.portraitOf(c, cv.width, cv.height, L, role, (now - t0) / 1000); lookRaf = requestAnimationFrame(loop); }; lookRaf = requestAnimationFrame(loop);
+    const loop = now => { K.portraitOf(c, cv.width, cv.height, L, kind, (now - t0) / 1000); lookRaf = requestAnimationFrame(loop); }; lookRaf = requestAnimationFrame(loop);
   }
   function closeLook() { cancelAnimationFrame(lookRaf); $('#lookEd').hidden = true; renderCast(); refresh(); }
   $('#lookDone').addEventListener('click', closeLook);
@@ -360,17 +404,18 @@
     const at = Math.max(0, S.story.steps.length - 1); S.story.steps.splice(at, 0, ...add); renderStory(); refresh(); seekTo(add[0].id);
   });
   $('#addStep').addEventListener('click', () => { const last = S.story.steps[S.story.steps.length - 1]; S.story.steps.push({ id: uid(), scene: last ? last.scene : 'goto', place: '', time: '', text: '', say: { who: 'child', words: '' } }); renderStory(); refresh(); const ta = $$('#stepList textarea').pop(); if (ta) ta.focus(); });
-  function sceneThumb(cv, key, place) { const c = cv.getContext('2d'); c.setTransform(cv.width / W, 0, 0, cv.width / W, 0, 0); K.still(c, castFor(), key, place); c.setTransform(1, 0, 0, 1, 0, 0); }
+  function sceneThumb(cv, key, place, st) { const c = cv.getContext('2d'); c.setTransform(cv.width / W, 0, 0, cv.width / W, 0, 0); K.still(c, castFor(), key, place, st && st.with); c.setTransform(1, 0, 0, 1, 0, 0); }
   function renderStory() {
     $('#title').value = S.story.title || ''; $('#ending').value = S.story.ending || '';
     const list = $('#stepList'); list.innerHTML = '';
-    const who = [['child', S.cast.child.name || 'Your child'], ['adult', S.cast.adult.name || 'The grown-up']].concat(S.cast.helperOn ? [['helper', S.cast.helper.name || 'Their helper']] : []).concat(S.cast.siblingOn ? [['sibling', S.cast.sibling.name || 'Brother or sister']] : []);
+    const who = [['child', S.cast.child.name || 'Your child'], ['adult', S.cast.adult.name || 'The grown-up']].concat(S.cast.helperOn ? [['helper', S.cast.helper.name || 'Their helper']] : []).concat(S.cast.siblings.length ? [['sibling', S.cast.siblings[0].name || 'Brother or sister']] : []).concat(S.cast.friends.length ? [['friend', S.cast.friends[0].name || 'Their friend']] : []);
     S.story.steps.forEach((st, i) => {
       const sc = K.SC[st.scene] || K.SC.goto, cv = el('canvas', { width: 168, height: 299 });
       const thumb = el('button', { class: 'thumb', type: 'button', 'aria-label': `Step ${i + 1} picture: ${sc.label}. Change it`, onclick: () => pickScene(st) }, cv, el('span', { class: 'chg' }, 'Change'));
       const extras = el('div', { class: 'extras' },
-        sc.place ? el('label', {}, 'Sign on the building', el('input', { type: 'text', id: `place-${st.id}`, value: st.place || '', maxlength: '20', placeholder: 'e.g. Play group', oninput: e => { st.place = e.target.value; sceneThumb(cv, st.scene, st.place); refresh(); seekTo(st.id); } })) : null,
+        sc.place ? el('label', {}, 'Sign on the building', el('input', { type: 'text', id: `place-${st.id}`, value: st.place || '', maxlength: '20', placeholder: 'e.g. Play group', oninput: e => { st.place = e.target.value; sceneThumb(cv, st.scene, st.place, st); refresh(); seekTo(st.id); } })) : null,
         el('label', {}, 'Clock shows a time', el('input', { type: 'text', id: `time-${st.id}`, value: st.time || '', maxlength: '8', placeholder: 'e.g. 9:00', inputmode: 'numeric', oninput: e => { st.time = e.target.value; refresh(); seekTo(st.id); } })),
+        sc.pair && S.cast.friends.length && S.cast.siblings.length ? el('label', {}, 'The other child', el('select', { id: `with-${st.id}`, onchange: e => { st.with = e.target.value; sceneThumb(cv, st.scene, st.place, st); refresh(); seekTo(st.id); } }, [['sibling', S.cast.siblings[0].name || 'Brother or sister'], ['friend', S.cast.friends[0].name || 'Friend']].map(([v, n]) => el('option', { value: v, selected: (st.with || (S.cast.siblings.length ? 'sibling' : 'friend')) === v }, n)))) : null,
         el('label', { class: 'switch glimpse' }, el('input', { type: 'checkbox', id: `glimpse-${st.id}`, checked: !!st.glimpse, onchange: e => { st.glimpse = e.target.checked; refresh(); seekTo(st.id); } }), 'Show as big calm words'));
       st.say = st.say || { who: 'child', words: '' };
       const say = el('div', { class: 'sayrow' },
@@ -384,24 +429,33 @@
         el('div', { class: 'row between' }, el('span', { class: 'stepnum' }, `Step ${i + 1} · ${sc.label}`), ctl),
         el('textarea', { id: `text-${st.id}`, rows: '2', maxlength: '140', placeholder: 'What happens, in a sentence', 'aria-label': `Step ${i + 1} words`, onfocus: () => seekTo(st.id), oninput: e => { st.text = e.target.value; refresh(); } }, st.text || ''),
         extras, say)));
-      sceneThumb(cv, st.scene, st.place);
+      sceneThumb(cv, st.scene, st.place, st);
     });
   }
   let pickFor = null;
-  function pickScene(st) {
+  // which place each story belongs to, so the picture picker opens on the right scenes
+  const STORY_PLACE = { playgroup: 'Playgroup room', kinder: 'Kinder or school', siblings: 'Brothers, sisters and babies', baby: 'Brothers, sisters and babies', playdate: 'Brothers, sisters and babies', doctor: 'The doctor', dentist: 'The dentist', haircut: 'Haircut', bedtime: 'Bedtime', bike: 'Learning to ride a bike', food: 'At home' };
+  function pickScene(st, all) {
     pickFor = st; const g = $('#sceneGrid'); g.innerHTML = '';
-    K.PLACES.forEach(([where, keys]) => {
+    // stories made before this remembered their kind: use the place most of their steps are in
+    const tally = {}; S.story.steps.forEach(x => K.PLACES.forEach(([w, keys]) => { if (w !== 'Getting there and home' && keys.includes(x.scene)) tally[w] = (tally[w] || 0) + 1; }));
+    const home = STORY_PLACE[S.story.kind] || Object.keys(tally).sort((a, b) => tally[b] - tally[a])[0], own = K.PLACES.filter(([w, keys]) => w === home || keys.includes(st.scene));
+    const shown = all || !own.length ? K.PLACES : own, seen = new Set();
+    shown.forEach(([where, keys]) => {
+      const list = keys.filter(k => !seen.has(k) && !(k === 'arrive' && !S.cast.helperOn)); if (!list.length) return;
       g.append(el('h4', {}, where));
-      keys.forEach(key => {
-        if (key === 'arrive' && !S.cast.helperOn) return;
+      list.forEach(key => {
+        seen.add(key);
         const cv = el('canvas', { width: 180, height: 320 });
         g.append(el('button', { type: 'button', 'aria-pressed': String(st.scene === key), onclick: () => { st.scene = key; if (K.SC[key].place && !st.place) st.place = key === 'cafe' ? 'Cafe' : ''; $('#scenePick').hidden = true; renderStory(); refresh(); seekTo(st.id); } }, cv, el('span', {}, K.SC[key].label)));
-        sceneThumb(cv, key, st.place || (key === 'cafe' ? 'Cafe' : key === 'goto' ? 'Play group' : ''));
+        sceneThumb(cv, key, st.place || (key === 'cafe' ? 'Cafe' : key === 'goto' ? 'Play group' : ''), st);
       });
     });
+    if (!all && shown !== K.PLACES) g.append(el('div', { class: 'more' }, el('button', { class: 'btn ghost', type: 'button', id: 'moreScenes', onclick: () => { pickScene(st, true); $('#scenePick .box').scrollTop = 0; } }, 'More scenes from other places')));
     g.append(el('div', { class: 'ask' }, el('p', {}, el('b', {}, 'Can\u2019t find the right picture?'), ' Ask for it and we\u2019ll draw it.'), el('button', { class: 'btn ghost small', type: 'button', onclick: () => openRequest(st) }, 'Request a new picture')));
     $('#scenePick').hidden = false;
   }
+
   // asking for a picture we haven't drawn yet: each new scene is created individually, so it isn't instant
   const REQ_TO = 'hello@motionmornings.com';
   function openRequest(st) {
@@ -434,9 +488,14 @@
   let rec = null, recId = null, recChunks = [], recStream = null;
   function renderVoice() {
     const list = $('#voiceList'); list.innerHTML = '';
+    // the easiest way: read along while the film plays, tapping Next at each new picture
+    list.append(el('div', { class: 'card guidecard' },
+      el('div', { class: 'subhead' }, el('h3', {}, 'Record along with the film')),
+      el('p', { class: 'meta' }, 'Each picture comes up with its words underneath. Read them, tap Next, and the next picture appears. Your voice is matched to each picture as you go.'),
+      el('div', { class: 'row' }, el('button', { class: 'btn coral', type: 'button', id: 'guideOpen', onclick: openGuide }, 'Record along with the film'))));
     // one recording of the whole story, split at the pauses
     list.append(el('div', { class: 'card' },
-      el('div', { class: 'subhead' }, el('h3', {}, 'Already recorded the whole thing?')),
+      el('div', { class: 'subhead' }, el('h3', {}, 'Already recorded it somewhere else?')),
       el('p', { class: 'meta' }, 'Upload one recording of you reading every line in order, with a short pause between lines. It gets split at the pauses. Check each line below and redo any that landed in the wrong place.'),
       el('div', { class: 'row' }, el('label', { class: 'btn ghost small', for: 'wholeFile', style: 'cursor:pointer' }, 'Upload one recording'), el('input', { type: 'file', id: 'wholeFile', accept: 'audio/*,video/*', hidden: true, onchange: e => e.target.files[0] && splitWhole(e.target.files[0]) }),
         el('label', { class: 'switch' }, el('input', { type: 'checkbox', id: 'titleRead', checked: !!S.titleRead, onchange: e => { S.titleRead = e.target.checked; save(); } }), 'I read the title too')),
@@ -465,8 +524,61 @@
     rec.ondataavailable = e => e.data.size && recChunks.push(e.data);
     rec.onstop = async () => { recStream.getTracks().forEach(t => t.stop()); const blob = new Blob(recChunks, { type: rec.mimeType }); const was = recId; recId = null; try { await setVoice(was, trim(await decode(blob))); } catch (e) { micErr('That recording couldn’t be read. Try again.'); renderVoice(); } };
     rec.start(); renderVoice();
+    setTimeout(() => { if (recId === id) stopRec(); }, (MAX_LINE + 0.5) * 1000);
   }
   function stopRec() { if (rec && rec.state !== 'inactive') rec.stop(); }
+  // ---- record along with the film: one recording, with a mark each time they tap Next
+  let G = null;
+  function openGuide() {
+    stop(); micErr('');
+    const ls = lines().filter(l => l.words && (l.id !== 'title' || S.titleRead));
+    if (!ls.length) return;
+    G = { ls, i: 0, marks: [], rec: null, chunks: [], t0: 0, shown: performance.now(), raf: 0, stream: null };
+    $('#guide').hidden = false; guideShow(); $('#guideGo').textContent = 'Start recording'; $('#guideGo').focus();
+    const cv = $('#guideStage'), c = cv.getContext('2d');
+    const loop = now => { if (!G) return; const it = TL.items.find(x => x.id === G.ls[G.i].id) || TL.items[0]; const T = it.start + Math.min(it.d - 0.05, ((now - G.shown) / 1000) % Math.max(1, it.d)); c.setTransform(cv.width / W, 0, 0, cv.width / W, 0, 0); K.frame(c, castFor(), S.story, TL, T); c.setTransform(1, 0, 0, 1, 0, 0); G.raf = requestAnimationFrame(loop); };
+    G.raf = requestAnimationFrame(loop);
+  }
+  function guideShow() {
+    const l = G.ls[G.i];
+    $('#guideCount').textContent = `Line ${G.i + 1} of ${G.ls.length} \u00b7 ${l.note}`;
+    $('#guideLine').textContent = l.words;
+    G.shown = performance.now();
+  }
+  function guideClose() { if (!G) return; cancelAnimationFrame(G.raf); if (G.rec && G.rec.state !== 'inactive') { G.cancel = true; G.rec.stop(); } if (G.stream) G.stream.getTracks().forEach(t => t.stop()); G = null; $('#guide').hidden = true; }
+  $('#guideCancel').addEventListener('click', guideClose);
+  $('#guideGo').addEventListener('click', async () => {
+    if (!G) return; const btn = $('#guideGo');
+    if (!G.rec) {
+      try { G.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
+      catch (e) { $('#guideStatus').textContent = 'The microphone isn\u2019t available. Allow microphone access for this site, or upload a recording instead.'; return; }
+      G.rec = new MediaRecorder(G.stream); G.rec.ondataavailable = e => e.data.size && G.chunks.push(e.data);
+      G.rec.onstop = guideDone; G.rec.start(); G.t0 = performance.now(); G.marks = [0];
+      $('#guideStatus').innerHTML = ''; $('#guideStatus').append(el('span', { class: 'recdot' }), ' Recording. Read the words, then tap Next.');
+      guideShow(); btn.textContent = G.ls.length > 1 ? 'Next' : 'Finish'; return;
+    }
+    G.marks.push((performance.now() - G.t0) / 1000);
+    if (G.i < G.ls.length - 1) { G.i++; guideShow(); btn.textContent = G.i === G.ls.length - 1 ? 'Finish' : 'Next'; }
+    else { btn.disabled = true; $('#guideStatus').textContent = 'Saving your recording\u2026'; G.rec.stop(); }
+  });
+  async function guideDone() {
+    const g = G; if (!g || g.cancel) return;
+    if (g.stream) g.stream.getTracks().forEach(t => t.stop());
+    let buf; try { buf = await decode(new Blob(g.chunks, { type: g.rec.mimeType })); } catch (e) { $('#guideStatus').textContent = 'That recording couldn\u2019t be read. Try again.'; $('#guideGo').disabled = false; return; }
+    // the recorder can start a moment late, so marks are measured from the end of the audio backwards
+    const shift = Math.max(0, g.marks[g.marks.length - 1] - buf.duration);
+    let cutAny = false;
+    for (let i = 0; i < g.ls.length; i++) {
+      const a = Math.max(0, g.marks[i] - shift), b = Math.min(buf.duration, g.marks[i + 1] - shift);
+      if (b - a < 0.2) continue;
+      let line = trim(slice(buf, a, b)), cut; [line, cut] = capLine(line); cutAny = cutAny || cut;
+      voices[g.ls[i].id] = line; await idbPut(g.ls[i].id, wavBlob(line));
+    }
+    cancelAnimationFrame(g.raf); G = null; $('#guide').hidden = true; $('#guideGo').disabled = false;
+    refresh(); renderVoice();
+    const st = $('#wholeStatus'); if (st) { st.className = 'status'; st.textContent = `Recorded ${g.ls.length} lines. Tap Listen on any line to check it, and redo it on its own if you need to.` + (cutAny ? ` Lines longer than ${MAX_LINE} seconds had their ends cut off.` : ''); }
+  }
+
   // split one long recording into its lines: the biggest pauses are the gaps between lines
   async function splitWhole(file) {
     const st = $('#wholeStatus'); st.className = 'status'; st.textContent = 'Listening for the pauses…';
@@ -478,13 +590,14 @@
     const gaps = spans.slice(1).map((s, i) => ({ i, g: s[0] - spans[i][1] })).sort((a, b) => b.g - a.g).slice(0, n - 1).map(x => x.i).sort((a, b) => a - b);
     let from = 0; const groups = [];
     gaps.forEach(gi => { groups.push([spans[from][0], spans[gi][1]]); from = gi + 1; }); groups.push([spans[from][0], spans[spans.length - 1][1]]);
-    for (let i = 0; i < n; i++) { const [a, b] = groups[i]; voices[ls[i].id] = slice(buf, Math.max(0, a - 0.12), Math.min(buf.duration, b + 0.25)); await idbPut(ls[i].id, wavBlob(voices[ls[i].id])); }
-    refresh(); renderVoice(); const s2 = $('#wholeStatus'); s2.textContent = `Split into ${n} lines. Tap Listen on each to check it.`;
+    let cutAny = false; for (let i = 0; i < n; i++) { const [a, b] = groups[i]; let cut; [voices[ls[i].id], cut] = capLine(slice(buf, Math.max(0, a - 0.12), Math.min(buf.duration, b + 0.25))); cutAny = cutAny || cut; await idbPut(ls[i].id, wavBlob(voices[ls[i].id])); }
+    refresh(); renderVoice(); const s2 = $('#wholeStatus'); s2.textContent = `Split into ${n} lines. Tap Listen on each to check it.` + (cutAny ? ` One or more lines were longer than ${MAX_LINE} seconds, so their ends were cut off.` : '');
   }
 
   // ---------------------------------------------------------------- save the film
   let resultBlob = null, resultExt = 'webm';
   $('#recBtn').addEventListener('click', async () => {
+    if (TL.total > MAX_FILM) { $('#recStatus').className = 'status err'; $('#recStatus').textContent = `Your film is ${fmt(TL.total)} long. Films can be up to ${fmt(MAX_FILM)}, so go back and remove a step or shorten a recording.`; return; }
     if (!window.MediaRecorder || !stage.captureStream) { $('#recStatus').className = 'status err'; $('#recStatus').textContent = 'This browser can’t save video. Try Safari on iPhone or Chrome.'; return; }
     const mime = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'].find(m => MediaRecorder.isTypeSupported(m)) || '';
     resultExt = /mp4/.test(mime) ? 'mp4' : 'webm';
@@ -512,6 +625,14 @@
     S.story = fromTemplate('blank'); go(1); refresh();
   }));
   $('#copyLink').addEventListener('click', async () => { const link = shareLink(), st = $('#copyStatus'); try { await navigator.clipboard.writeText(link); st.textContent = 'Copied.'; } catch (e) { st.textContent = link; } });
+
+  // clear everything: people, story, recordings
+  $('#resetAll').addEventListener('click', () => ask('Clear everything and start again?', 'This clears your people, your story and your recordings on this device. Videos you\u2019ve already saved aren\u2019t affected.', async () => {
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    try { const all = await idbAll(); for (const id of Object.keys(all)) await idbPut(id, null); } catch (e) {}
+    try { history.replaceState(null, '', location.pathname); } catch (e) {}
+    location.reload();
+  }));
 
   // ---------------------------------------------------------------- start
   readShare();
