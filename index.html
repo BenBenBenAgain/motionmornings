@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Motion Mornings: little films for big steps</title>
 <meta name="description" content="Custom animated films starring you, or anyone in your world. Build the life you want, or show your child what's going to happen before the big day. See it first, then live it.">
-<meta name="theme-color" content="#FBF3E6">
+<meta name="theme-color" content="#1C2747">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/manifest.webmanifest" id="manifestLink">
@@ -418,9 +418,28 @@ input[type=range]{height:30px;touch-action:none}
 /* front door */
 .lead{border-bottom:0;margin-bottom:0}
 .foot{align-items:center;text-align:center;max-width:none;margin-top:8px}
+/* the front door is a dawn sky: night blue at the top warming to sunrise at the bottom */
+html{background:#1C2747}
+body{min-height:100vh;background:linear-gradient(180deg,#1C2747 0%,#2C3561 34%,#5B4A78 60%,#B8707A 82%,#EBA27C 100%) no-repeat;color:#FBF3E6}
+.wrap{--ink:#FBF3E6;--muted:rgba(251,243,230,.78);--line:rgba(251,243,230,.22)}
+.brand h1,.leadcopy h2{color:#FBF3E6}
+.logo{color:#FBF3E6}
+.leadsub{color:rgba(251,243,230,.82)}
+.leadtag{color:#FFC9A3}
+.mlabel{color:#FFD9B8!important}
+.duohint{color:#FBF3E6!important}
+.leadbtns .btn.ghost{background:#FFFDF8;color:#1F2E4D;border-color:#FFFDF8}
+.mphone{box-shadow:0 0 0 7px #0F1730,0 26px 50px -16px rgba(0,0,0,.6)}
+@media (max-width:760px){.mphone{box-shadow:0 0 0 5px #0F1730,0 18px 34px -14px rgba(0,0,0,.55)}}
+.foot{color:rgba(251,243,230,.85);border-top-color:rgba(31,46,77,.18)}
+.foot a{color:#1F2E4D;font-weight:600}
+.foot p:first-child{color:#2A2440}
+.wrap{position:relative;z-index:1}
+.stars{position:absolute;top:0;left:0;right:0;height:420px;pointer-events:none;z-index:0;background-image:radial-gradient(1.5px 1.5px at 12% 18%,rgba(255,255,255,.7),transparent),radial-gradient(1px 1px at 28% 8%,rgba(255,255,255,.6),transparent),radial-gradient(1.5px 1.5px at 46% 22%,rgba(255,255,255,.5),transparent),radial-gradient(1px 1px at 63% 12%,rgba(255,255,255,.7),transparent),radial-gradient(1.5px 1.5px at 78% 26%,rgba(255,255,255,.5),transparent),radial-gradient(1px 1px at 90% 9%,rgba(255,255,255,.6),transparent),radial-gradient(1px 1px at 36% 34%,rgba(255,255,255,.4),transparent),radial-gradient(1px 1px at 8% 38%,rgba(255,255,255,.4),transparent)}
 </style>
 </head>
 <body>
+<div class="stars" aria-hidden="true"></div>
 <div class="wrap">
   <div class="top">
     <div class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><path d="M16.5 51 Q21.5 41.5 30 52 Q38.5 41.5 43.5 51" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M37.5 35 Q41.5 27.2 47 35.5 Q52.5 27.2 56.5 35" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M40 78 A28 28 0 0 1 96 78 Z" fill="var(--coral)"/><line x1="14" y1="78" x2="106" y2="78" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><line x1="54" y1="90" x2="84" y2="90" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/><line x1="61" y1="101" x2="77" y2="101" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/></svg><h1>Motion Mornings</h1></div>
