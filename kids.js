@@ -108,7 +108,8 @@
     blank: { label: 'Something else', blurb: 'Start with an empty story', story: { title: '{child}’s Big Day', ending: 'We did it!', steps: [{ scene: 'goto', place: '', text: '' }] } }
   };
   const blankCast = () => ({ child: Object.assign({}, K.KID_DEF), adult: Object.assign({}, K.ADULT_DEF), helper: Object.assign({}, K.HELPER_DEF), helperOn: true, baby: Object.assign({}, K.BABY_DEF), babyOn: false, siblings: [], friends: [], pets: [] });
-  let S = load() || { cast: blankCast(), story: null, music: 'morning-mood', step: 0 };
+  // a brand-new visitor starts with touched: false, and sees the demo film until they start making their own
+  let S = load() || { cast: blankCast(), story: null, music: 'morning-mood', step: 0, touched: false };
   migrate();
   if (!S.story) S.story = fromTemplate('playgroup');
   function migrate() {
@@ -196,7 +197,51 @@
   const stage = $('#stage'), sctx = stage.getContext('2d');
   let TL = null;
   const voiceLens = () => Object.fromEntries(Object.entries(voices).filter(([, b]) => b).map(([k, b]) => [k, b.duration]));
-  function refresh() { TL = K.timeline(S.story, voiceLens()); $('#scrub').max = 1000; $('#lenMeta').textContent = `${fmt(TL.total)} long`; $('#storyMeta').textContent = `${S.story.steps.length} of ${MAX_STEPS} steps \u00b7 about ${fmt(TL.total)}${TL.total > MAX_FILM ? ` (over the ${fmt(MAX_FILM)} limit)` : ''}`; $('#storyMeta').classList.toggle('over', TL.total > MAX_FILM); $('#addStep').disabled = S.story.steps.length >= MAX_STEPS; $('#addCalm').disabled = S.story.steps.length > MAX_STEPS - 3; if (!playing) draw(pos); save(); }
+  function refresh() { TL = K.timeline(S.story, voiceLens()); $('#scrub').max = 1000; $('#lenMeta').textContent = `${fmt(TL.total)} long`; $('#storyMeta').textContent = `${S.story.steps.length} of ${MAX_STEPS} steps \u00b7 about ${fmt(TL.total)}${TL.total > MAX_FILM ? ` (over the ${fmt(MAX_FILM)} limit)` : ''}`; $('#storyMeta').classList.toggle('over', TL.total > MAX_FILM); $('#addStep').disabled = S.story.steps.length >= MAX_STEPS; $('#addCalm').disabled = S.story.steps.length > MAX_STEPS - 3; if (!playing && !demo) draw(pos); save(); }
+  // ---- the demo film: a made-up family, shown to new visitors until they start their own
+  const DEMO_CAST = {
+    child: Object.assign({}, K.KID_DEF, { name: 'Ava', sex: 'f', body: 'f', hair: 'ponytail', hairCol: '#2E2622', skin: '#C98E66', top: '#5FA88F', pants: '#30406E', years: 4, age: 'little' }),
+    adult: Object.assign({}, K.ADULT_DEF, { name: 'Mum', sex: 'f', body: 'f', hair: 'curly', hairCol: '#1F1A17', skin: '#BD8057', outfit: 'tee', top: '#E9A23B', inner: '#E9A23B', pants: '#30406E', earrings: 'hoops' }),
+    helper: Object.assign({}, K.HELPER_DEF, { name: 'Miss Jo' }),
+    siblings: [], friends: [Object.assign({}, K.FRIEND_DEF, { name: 'Leo', sex: 'm', body: 'm', hair: 'short', hairCol: '#C9A060', skin: '#F2D3BC', top: '#6FA8DC' })],
+    pets: [{ type: 'dog', name: 'Biscuit', coat: '#C9A060', ears: 'floppy', size: 'm', muzzle: 'dark' }], baby: {} };
+  const DEMO_STORY = { title: 'Ava Goes to Playgroup', ending: 'Playgroup was fun!', steps: [
+    { id: 'd1', scene: 'goto', place: 'Play group', text: 'On Wednesday, Mum and Ava are going to playgroup.' },
+    { id: 'd2', scene: 'arrive', text: 'Miss Jo is there to say hello.', say: { who: 'child', words: 'Hi Miss Jo!' } },
+    { id: 'd3', scene: 'bounce', text: 'Ava can jump on the trampoline.' },
+    { id: 'd4', scene: 'others', text: 'Other kids come too. Leo is there!', say: { who: 'friend', words: 'Hi Ava!' } },
+    { id: 'd5', scene: 'busy', text: 'Sometimes it gets busy and loud. That\u2019s OK.' },
+    { id: 'd6', scene: 'ears', text: 'Ava can hold Mum\u2019s hand until she feels ready.' },
+    { id: 'd7', scene: 'playball', text: 'Then Ava and Leo play ball together.' }] };
+  const DTL = K.timeline(DEMO_STORY, {});
+  let demo = S.touched === false, demoRaf = 0, demoT0 = 0, demoAt = 0, demoPaused = false, demoMusic = null;
+  function demoFrame(T) { sctx.setTransform(stage.width / W, 0, 0, stage.width / W, 0, 0); K.frame(sctx, DEMO_CAST, DEMO_STORY, DTL, T); sctx.setTransform(1, 0, 0, 1, 0, 0); }
+  function demoLoop(now) {
+    if (!demo) return;
+    if (!demoPaused) demoAt = ((now - demoT0) / 1000) % DTL.total;
+    demoFrame(demoAt); $('#scrub').value = Math.round(1000 * demoAt / DTL.total); $('#timeLbl').textContent = fmt(demoAt);
+    demoRaf = requestAnimationFrame(demoLoop);
+  }
+  function demoStart() { demoT0 = performance.now() - demoAt * 1000; demoPaused = false; $('#playBtn').textContent = 'Pause'; cancelAnimationFrame(demoRaf); demoRaf = requestAnimationFrame(demoLoop); }
+  function demoSoundOff() { if (demoMusic) { try { demoMusic.stop(); } catch (e) {} demoMusic = null; } $('#demoSound').textContent = '\ud83d\udd0a Tap for sound'; }
+  async function demoSound() {
+    if (demoMusic) { demoSoundOff(); return; }
+    const ctx = ac(); await ctx.resume().catch(() => {}); const mb = await loadMusic('morning-mood'); if (!mb || !demo) return;
+    const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = mb; src.loop = true; g.gain.value = 0.45; src.connect(g); g.connect(ctx.destination); src.start(0, demoAt % mb.duration); demoMusic = src;
+    $('#demoSound').textContent = 'Sound off';
+  }
+  function showTag() { $('#stageTag').textContent = demo ? 'Demo film \u00b7 Ava goes to playgroup' : 'Your film'; $('#stageTag').classList.toggle('demo', demo); $('#demoSound').hidden = !demo; }
+  // the moment they start making their own, the phone switches to their film
+  function touched() {
+    if (!demo) return;
+    demo = false; S.touched = true; cancelAnimationFrame(demoRaf); demoSoundOff(); save(); showTag();
+    $('#playBtn').textContent = 'Play'; pos = Math.min(2.6, TL.total); draw(pos); showPos();
+  }
+  $('#demoSound').addEventListener('click', demoSound);
+  ['input', 'change'].forEach(ev => $('#panels').addEventListener(ev, touched, true));
+  $('#panels').addEventListener('click', e => { if (e.target.closest('button, .tpl, canvas, label')) touched(); }, true);
+  $('#steps').addEventListener('click', e => { const b = e.target.closest('button'); if (b && b !== $('#steps').firstElementChild) touched(); }, true);
+
   function draw(T, ctx = sctx, w = stage.width) { ctx.setTransform(w / W, 0, 0, w / W, 0, 0); K.frame(ctx, castFor(), S.story, TL, T); ctx.setTransform(1, 0, 0, 1, 0, 0); }
 
   // music, ducked under the voice
@@ -238,8 +283,8 @@
   async function play(from = pos, out = null) { if (from >= TL.total - 0.05) from = 0; stop(); playing = true; pos = from; $('#playBtn').textContent = 'Pause'; await startAudio(from, out); raf = requestAnimationFrame(tick); }
   function stop() { playing = false; cancelAnimationFrame(raf); stopAudio(); $('#playBtn').textContent = 'Play'; }
   function showPos() { $('#scrub').value = Math.round(1000 * pos / TL.total); $('#timeLbl').textContent = fmt(pos); }
-  $('#playBtn').addEventListener('click', () => playing ? (stop(), draw(pos)) : play());
-  $('#scrub').addEventListener('input', e => { const was = playing; stop(); pos = (e.target.value / 1000) * TL.total; draw(pos); showPos(); if (was) play(pos); });
+  $('#playBtn').addEventListener('click', () => { if (demo) { if (demoPaused) demoStart(); else { demoPaused = true; $('#playBtn').textContent = 'Play'; } return; } playing ? (stop(), draw(pos)) : play(); });
+  $('#scrub').addEventListener('input', e => { if (demo) { demoAt = (e.target.value / 1000) * DTL.total; demoT0 = performance.now() - demoAt * 1000; return; } const was = playing; stop(); pos = (e.target.value / 1000) * TL.total; draw(pos); showPos(); if (was) play(pos); });
   // jump the preview to a step while editing it
   function seekTo(id) { if (!TL) return; const it = TL.items.find(i => i.id === id); if (!it) return; stop(); pos = it.start + Math.min(2.4, it.d * 0.55); draw(pos); showPos(); }
 
@@ -640,7 +685,8 @@
     const saved = await idbAll();
     for (const [id, blob] of Object.entries(saved)) { try { voices[id] = await decode(blob); } catch (e) {} }
     if (document.fonts && document.fonts.load) { try { await Promise.race([Promise.all([document.fonts.load('700 50px Poppins'), document.fonts.load('italic 500 50px Poppins'), document.fonts.load('italic 400 50px Poppins')]), new Promise(r => setTimeout(r, 2500))]); } catch (e) {} }
-    refresh(); go(S.step || 0); pos = Math.min(2.6, TL.total); draw(pos); showPos();
+    refresh(); go(S.step || 0); showTag();
+    if (demo) demoStart(); else { pos = Math.min(2.6, TL.total); draw(pos); showPos(); }
     let t = 0; const idle = () => { t += 1 / 30; if (S.step === 0 && !$('#cast').hidden) drawPortraits(t); setTimeout(() => requestAnimationFrame(idle), 33); }; idle();
   })();
   window.MMKIDS = { state: () => S, refresh, shareLink, voices };
