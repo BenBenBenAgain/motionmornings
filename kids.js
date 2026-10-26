@@ -201,12 +201,12 @@
   // ---- the demo film: a made-up family, shown to new visitors until they start their own
   const DEMO_CAST = {
     child: Object.assign({}, K.KID_DEF, { name: 'Ava', sex: 'f', body: 'f', hair: 'ponytail', hairCol: '#2E2622', skin: '#C98E66', top: '#5FA88F', pants: '#30406E', years: 4, age: 'little' }),
-    adult: Object.assign({}, K.ADULT_DEF, { name: 'Mum' }),
+    adult: Object.assign({}, K.ADULT_DEF, { name: 'Mum', sex: 'f', body: 'f', hair: 'curly', hairCol: '#1F1A17', skin: '#BD8057', outfit: 'tee', top: '#E9A23B', inner: '#E9A23B', pants: '#30406E', earrings: 'hoops' }),
     helper: Object.assign({}, K.HELPER_DEF, { name: 'Miss Jo' }),
     siblings: [], friends: [Object.assign({}, K.FRIEND_DEF, { name: 'Leo', sex: 'm', body: 'm', hair: 'short', hairCol: '#C9A060', skin: '#F2D3BC', top: '#6FA8DC' })],
     pets: [{ type: 'dog', name: 'Biscuit', coat: '#C9A060', ears: 'floppy', size: 'm', muzzle: 'dark' }], baby: {} };
-  const DEMO_STORY = { title: 'Ava\u2019s First Playgroup', ending: 'Playgroup was fun!', steps: [
-    { id: 'd1', scene: 'goto', place: 'Play group', text: 'On Saturday, Mum and Ava are going to playgroup.' },
+  const DEMO_STORY = { title: 'Ava Goes to Playgroup', ending: 'Playgroup was fun!', steps: [
+    { id: 'd1', scene: 'goto', place: 'Play group', text: 'On Wednesday, Mum and Ava are going to playgroup.' },
     { id: 'd2', scene: 'arrive', text: 'Miss Jo is there to say hello.', say: { who: 'child', words: 'Hi Miss Jo!' } },
     { id: 'd3', scene: 'bounce', text: 'Ava can jump on the trampoline.' },
     { id: 'd4', scene: 'others', text: 'Other kids come too. Leo is there!', say: { who: 'friend', words: 'Hi Ava!' } },
@@ -230,7 +230,7 @@
     const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = mb; src.loop = true; g.gain.value = 0.45; src.connect(g); g.connect(ctx.destination); src.start(0, demoAt % mb.duration); demoMusic = src;
     $('#demoSound').textContent = 'Sound off';
   }
-  function showTag() { $('#stageTag').textContent = demo ? 'Demo film \u00b7 Ava\u2019s first playgroup' : 'Your film'; $('#stageTag').classList.toggle('demo', demo); $('#demoSound').hidden = !demo; }
+  function showTag() { $('#stageTag').textContent = demo ? 'Demo film \u00b7 Ava goes to playgroup' : 'Your film'; $('#stageTag').classList.toggle('demo', demo); $('#demoSound').hidden = !demo; }
   // the moment they start making their own, the phone switches to their film
   function touched() {
     if (!demo) return;
