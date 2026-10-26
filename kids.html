@@ -186,19 +186,69 @@ video.result{width:100%;max-width:280px;border-radius:14px;background:#000}
 .sw input[type=color]{width:34px;height:34px;border:0;background:none;padding:0;cursor:pointer}
 .foot{margin-top:40px;display:flex;flex-direction:column;gap:6px;color:var(--muted);font-size:.9rem;text-align:center}
 .foot a{color:var(--sea)}
+
+/* header and demo film, matching the grown-up page */
+.top{justify-content:center;position:relative}
+.topright{gap:10px}.toplink{text-decoration:none}
+@media (min-width:700px){.top .topright{position:absolute;right:0;top:50%;transform:translateY(-35%)}}
+@media (max-width:699px){.top .topright{display:none}}
+.hero{display:grid;grid-template-columns:320px minmax(0,1fr);gap:48px;align-items:center;padding-block:18px 56px;border-bottom:1px solid var(--line);margin-bottom:36px}
+.herofilm{display:flex;flex-direction:column;align-items:center;gap:10px}
+.herofilm canvas{cursor:pointer}
+.herobar{width:100%;max-width:320px;height:28px;cursor:pointer;touch-action:none;position:relative;display:flex;align-items:center}
+.herobar::before{content:'';position:absolute;left:0;right:0;top:50%;height:6px;margin-top:-3px;border-radius:99px;background:var(--sunk)}
+.herobar i{display:block;position:relative;height:6px;width:0;border-radius:99px;background:var(--coral)}
+.herobar i::after{content:'';position:absolute;right:-8px;top:50%;width:16px;height:16px;margin-top:-8px;border-radius:50%;background:var(--coral);box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.demotag{align-self:center;margin-bottom:2px;color:var(--coral)}
+.herokick{margin:0 0 2px;font-family:var(--display);font-weight:600;font-size:1.08rem;line-height:1.35;text-align:center;max-width:28ch}
+.herosong{margin:0;font-size:.95rem;font-style:italic;color:var(--muted);text-align:center;max-width:32ch}
+.herocopy{display:flex;flex-direction:column;gap:14px;align-items:flex-start}
+.herocopy h2{font-size:clamp(1.9rem,4.4vw,3rem);font-weight:700;letter-spacing:-.015em}
+.herocopy h2 .hl{display:block}
+.herolede{font-size:clamp(1.05rem,1.6vw,1.25rem);line-height:1.55;color:var(--ink);opacity:.86;max-width:46ch}
+.heroeg{font-size:.95rem;color:var(--muted);max-width:56ch;padding-left:14px;border-left:3px solid color-mix(in srgb,var(--gold) 70%,transparent)}
+.heroeg span{display:block;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--sea);margin-bottom:2px}
+.buildhead{display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
+.buildhead h2{font-size:1.7rem;font-weight:700}
+.builder{scroll-margin-top:8px}
+.mobonly{display:none}
+@media (max-width:860px){
+  .deskonly{display:none!important}p.mobonly{display:block}
+  .hero{grid-template-columns:minmax(0,1fr);gap:22px;padding-block:6px 36px;margin-bottom:26px}
+  .hero .phone{max-width:min(240px,62vw)}
+  .herocopy{align-items:stretch;gap:12px}
+  .herocopy .btn{justify-content:center}
+  .herocopy h2{font-size:clamp(1.55rem,7.6vw,2rem)}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="top">
     <a class="brand" href="/" aria-label="Motion Mornings home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><path d="M16.5 51 Q21.5 41.5 30 52 Q38.5 41.5 43.5 51" fill="none" stroke="currentColor" stroke-width="3.6"/><path d="M37.5 35 Q41.5 27.2 47 35.5 Q52.5 27.2 56.5 35" fill="none" stroke="currentColor" stroke-width="3.2"/><path d="M40 78 A28 28 0 0 1 96 78 Z" fill="var(--coral)"/><line x1="14" y1="78" x2="106" y2="78" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><line x1="54" y1="90" x2="84" y2="90" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/><line x1="61" y1="101" x2="77" y2="101" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/></svg><h1>Motion Mornings</h1><span class="kidsmark" aria-label="Kids"><span>K</span><span>I</span><span>D</span><span>S</span></span></a>
+    <div class="row topright"><a class="btn ghost small toplink" href="#builder">Make your film</a></div>
   </div>
 
-  <section class="intro">
-    <span class="pill">For the big moments</span>
-    <h2>Show them what's going to happen, before it happens.</h2>
-    <p class="lede">A short cartoon film of your child doing the new thing, step by step, in your voice. Playgroup, trying a new food, a busy room. Watch it together until it feels familiar.</p>
+  <section class="hero" aria-labelledby="heroTitle">
+    <div class="herofilm">
+      <p class="herokick mobonly">Make a short film of your child doing the new thing, step by step, in your voice. Watch it together before the big day.</p>
+      <span class="pill demotag">Demo film</span>
+      <div class="phone"><canvas id="demoStage" width="720" height="1280" aria-label="Example film: Ava goes to playgroup with Mum, says hi to Miss Jo, builds a tower, plays ball with Leo"></canvas></div>
+      <div class="herobar" id="demoSeek" role="slider" aria-label="Position in demo film" tabindex="0"><i id="demoBar"></i></div>
+      <div class="row" style="justify-content:center"><button class="btn ghost small" id="demoPlay">Pause</button><button class="btn small" id="demoSound">&#128266; Tap for sound</button></div>
+      <p class="herosong">Now imagine it&rsquo;s your child, in your voice.</p>
+    </div>
+    <div class="herocopy">
+      <span class="pill">For the big moments</span>
+      <h2 id="heroTitle"><span class="hl">Show them what&rsquo;s coming,</span> <span class="hl">before it happens.</span></h2>
+      <p class="herolede">A short cartoon film starring your child, showing the new thing step by step, in your voice. Watch it together until it feels familiar.</p>
+      <p class="heroeg deskonly"><span>In this example</span> Ava goes to playgroup with Mum on Wednesday. She says hi to Miss Jo, builds a tower, sees her friend Leo, holds Mum&rsquo;s hand when it gets busy and loud, then plays ball. Playgroup was fun!</p>
+      <div class="row"><a class="btn coral" href="#builder">Create for your child</a><a class="btn ghost" href="/">Create for yourself</a></div>
+    </div>
   </section>
+
+  <div id="builder" class="builder">
+  <header class="buildhead"><span class="pill">Build your own</span><h2>Make your film</h2><p class="lede">Add your child and their people, pick a story or write your own, then read it aloud. The preview updates as you go.</p></header>
 
   <nav class="steps" id="steps" aria-label="Steps"></nav>
 
@@ -264,11 +314,11 @@ video.result{width:100%;max-width:280px;border-radius:14px;background:#000}
     </main>
 
     <aside class="stagecol">
-      <p class="stagetag" id="stageTag">Your film</p>
+      <p class="stagetag">Your film</p>
       <div class="phone"><canvas id="stage" width="720" height="1280" aria-label="Film preview"></canvas></div>
       <div class="player"><button class="btn small" id="playBtn">Play</button><input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Position in film"><span class="time" id="timeLbl">0:00</span></div>
-      <button class="btn small" id="demoSound" hidden>&#128266; Tap for sound</button>
     </aside>
+  </div>
   </div>
 
   <div class="newfilm"><button class="linkbtn quiet" id="resetAll" type="button">Clear everything and start again</button></div>
