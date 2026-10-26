@@ -35,6 +35,21 @@
         { scene: 'mattime', text: 'There is story time on the mat with the other kids.' },
         { scene: 'lunch', text: 'Then everyone has lunch together.' },
         { scene: 'pickup', text: 'After lunch, {adult} comes back to pick {child} up!', say: { who: 'child', words: '{adult}!' } }] } },
+    siblings: { label: 'Brothers and sisters', blurb: 'Sharing, squabbles, a big breath, sorry', needs: 'siblingOn', story: {
+      title: '{child} and {sibling}', ending: 'We\u2019re a good team!', steps: [
+        { scene: 'share', text: '{child} and {sibling} like playing together.' },
+        { scene: 'tug', text: 'Sometimes they both want the same toy, and they feel cross.' },
+        { scene: 'breathe', text: 'When {child} feels cross, {they} can stop and take a big breath.' },
+        { scene: 'share', text: 'Then they can take turns. First {sibling}, then {child}.', say: { who: 'child', words: 'Your turn!' } },
+        { scene: 'sorry', text: 'If someone gets hurt or sad, they can say sorry and have a hug.', say: { who: 'child', words: 'Sorry!' } },
+        { scene: 'sorry', glimpse: true, text: 'Brothers and sisters look after each other.' }] } },
+    baby: { label: 'A new baby', blurb: 'Gentle hands, quiet time, helping', needs: 'babyOn', story: {
+      title: '{child} Is a Big Helper', ending: '{baby} loves {child}!', steps: [
+        { scene: 'baby_gentle', text: '{baby} is very little, so {child} uses gentle hands.' },
+        { scene: 'baby_gentle', text: '{child} can softly stroke {baby}\u2019s head.' },
+        { scene: 'baby_quiet', text: 'When {baby} is sleeping, {child} uses a quiet voice.', say: { who: 'child', words: 'Shhh!' } },
+        { scene: 'breathe', text: 'Sometimes {baby} cries a lot. {child} can take a big breath and ask {adult} for a cuddle.' },
+        { scene: 'baby_gentle', glimpse: true, text: '{child} is a great big {bigsib}.' }] } },
     food: { label: 'Trying a new food', blurb: 'Looking, one little bite, feeling proud', story: {
       title: '{child} Tries Something New', ending: 'Trying new things is brave!', steps: [
         { scene: 'food_look', text: 'Tonight {child} will try something new for dinner.' },
@@ -43,16 +58,18 @@
         { scene: 'food_ok', text: 'Even one bite is brave. {adult} is so proud!', say: { who: 'child', words: 'I tried it!' } }] } },
     blank: { label: 'Something else', blurb: 'Start with an empty story', story: { title: '{child}’s Big Day', ending: 'We did it!', steps: [{ scene: 'goto', place: '', text: '' }] } }
   };
-  const blankCast = () => ({ child: Object.assign({}, K.KID_DEF), adult: Object.assign({}, K.ADULT_DEF), helper: Object.assign({}, K.HELPER_DEF), helperOn: true });
+  const blankCast = () => ({ child: Object.assign({}, K.KID_DEF), adult: Object.assign({}, K.ADULT_DEF), helper: Object.assign({}, K.HELPER_DEF), helperOn: true, sibling: Object.assign({}, K.SIB_DEF), siblingOn: false, baby: Object.assign({}, K.BABY_DEF), babyOn: false });
   let S = load() || { cast: blankCast(), story: null, music: 'morning-mood', step: 0 };
+  if (!S.cast.sibling) Object.assign(S.cast, { sibling: Object.assign({}, K.SIB_DEF), siblingOn: false, baby: Object.assign({}, K.BABY_DEF), babyOn: false });
   if (!S.story) S.story = fromTemplate('playgroup');
   function load() { try { const v = JSON.parse(localStorage.getItem(KEY) || 'null'); return v && v.cast && v.story ? v : null; } catch (e) { return null; } }
   let saveT = 0;
   function save() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }, 250); }
-  function castFor() { return { child: S.cast.child, adult: S.cast.adult, helper: S.cast.helperOn ? S.cast.helper : { name: '' } }; }
+  function castFor() { return { child: S.cast.child, adult: S.cast.adult, helper: S.cast.helperOn ? S.cast.helper : { name: '' }, sibling: S.cast.sibling || {}, baby: S.cast.baby || {} }; }
   function fromTemplate(key) {
+    if (TEMPLATES[key].needs) S.cast[TEMPLATES[key].needs] = true;
     const t = TEMPLATES[key].story, c = castFor(), boy = S.cast.child.body === 'm', girl = S.cast.child.body === 'f';
-    const pro = s => s.replace(/\{their\}/g, boy ? 'his' : girl ? 'her' : 'their').replace(/\{they\}/g, boy ? 'he' : girl ? 'she' : 'they').replace(/\{s\}/g, boy || girl ? 's' : '');
+    const pro = s => s.replace(/\{their\}/g, boy ? 'his' : girl ? 'her' : 'their').replace(/\{they\}/g, boy ? 'he' : girl ? 'she' : 'they').replace(/\{s\}/g, boy || girl ? 's' : '').replace(/\{bigsib\}/g, boy ? 'brother' : girl ? 'sister' : 'helper');
     const n = s => s == null ? s : pro(K.names(s, c));
     const cap = x => x && x[0].toUpperCase() + x.slice(1);
     return { title: cap(n(t.title)), ending: n(t.ending), steps: t.steps.map(st => ({ id: uid(), scene: st.scene, place: st.place || '', time: st.time || '', text: n(st.text), glimpse: !!st.glimpse, say: st.say ? { who: st.say.who, words: n(st.say.words) } : { who: 'child', words: '' } })) };
@@ -182,16 +199,19 @@
   const ROLES = [
     ['child', 'Your child', 'Their name', 'e.g. Hunter'],
     ['adult', 'Going with them', 'What your child calls them', 'e.g. Mumma or Dad'],
-    ['helper', 'Someone they’ll meet', 'Their name', 'e.g. Vicky']];
+    ['helper', 'Someone they’ll meet', 'Their name', 'e.g. Vicky'],
+    ['sibling', 'Brother or sister', 'Their name', 'e.g. Ruby'],
+    ['baby', 'A baby', 'Their name', 'e.g. Ollie']];
+  const OPTIONAL = { helper: 'helperOn', sibling: 'siblingOn', baby: 'babyOn' };
   const portraits = [];
   function renderCast() {
     const box = $('#cast'); box.innerHTML = ''; portraits.length = 0;
     ROLES.forEach(([role, title, q, ph]) => {
       const L = S.cast[role], cv = el('canvas', { width: 192, height: 240, role: 'button', tabindex: '0', 'aria-label': `Change how ${title.toLowerCase()} looks` });
       cv.addEventListener('click', () => openLook(role)); cv.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLook(role); } });
-      const off = role === 'helper' && !S.cast.helperOn;
+      const on = OPTIONAL[role], off = on && !S.cast[on];
       const card = el('div', { class: 'card' },
-        el('div', { class: 'subhead' }, el('h3', {}, title), role === 'helper' ? el('label', { class: 'switch' }, el('input', { type: 'checkbox', id: 'helperOn', checked: S.cast.helperOn, onchange: e => { S.cast.helperOn = e.target.checked; renderCast(); refresh(); } }), 'Include') : null),
+        el('div', { class: 'subhead' }, el('h3', {}, title), on ? el('label', { class: 'switch' }, el('input', { type: 'checkbox', id: on, checked: !!S.cast[on], onchange: e => { S.cast[on] = e.target.checked; renderCast(); refresh(); } }), 'Include') : null),
         el('div', { class: 'who' }, cv, el('div', { class: 'fields' },
           el('label', { class: 'q' }, q, el('input', { type: 'text', id: `name-${role}`, value: L.name || '', placeholder: ph, maxlength: '24', disabled: off, oninput: e => { renameIn(role, L.name, e.target.value); L.name = e.target.value; refresh(); } })),
           el('button', { class: 'linkbtn', type: 'button', onclick: () => openLook(role), disabled: off }, 'Change their look'))));
@@ -201,8 +221,8 @@
     drawPortraits(0);
   }
   // a new name flows through the story: the old name (or the stand-in) is swapped wherever it appears
-  const STAND_IN = { child: 'your child', adult: 'Mum', helper: 'a friend' };
-  const standIn = role => role === 'adult' && S.cast.adult.body === 'm' ? 'Dad' : STAND_IN[role];
+  const STAND_IN = { child: 'your child', adult: 'Mum', helper: 'a friend', baby: 'the baby' };
+  const standIn = role => role === 'adult' && S.cast.adult.body === 'm' ? 'Dad' : role === 'sibling' ? (S.cast.sibling.body === 'm' ? 'their brother' : 'their sister') : STAND_IN[role];
   function renameIn(role, oldName, newName) {
     const from = (oldName || '').trim() || standIn(role), to = newName.trim() || standIn(role);
     swapName(from, to);
@@ -224,20 +244,22 @@
   const HAIR_AD = [['long', 'Long'], ['wavy', 'Wavy'], ['curly', 'Curly'], ['ponytail', 'Ponytail'], ['bun', 'Bun'], ['braids', 'Braids'], ['short', 'Short'], ['fade', 'Fade'], ['afro', 'Afro'], ['buzz', 'Buzz cut'], ['bald', 'Bald']];
   let lookRole = null, lookRaf = 0;
   function openLook(role) {
-    if (role === 'helper' && !S.cast.helperOn) return;
-    lookRole = role; const L = S.cast[role], kid = role === 'child', f = $('#lookFields'); f.innerHTML = '';
+    if (OPTIONAL[role] && !S.cast[OPTIONAL[role]]) return;
+    lookRole = role; const L = S.cast[role], kid = role === 'child' || role === 'sibling', f = $('#lookFields'); f.innerHTML = '';
     $('#lookEdTitle').textContent = (L.name || ROLES.find(r => r[0] === role)[1]) + '’s look';
-    const seg = (label, key, opts) => el('div', { class: 'field' }, el('span', {}, label), el('div', { class: 'seg', role: 'group', 'aria-label': label }, opts.map(([v, n]) => el('button', { type: 'button', 'aria-pressed': String(L[key] === v), onclick: e => { const was = role === 'adult' && key === 'body' && !(L.name || '').trim() ? standIn('adult') : null; L[key] = v; if (key === 'facial') L.facialCol = L.hairCol; if (key === 'body' && role !== 'child' && v === 'm' && L.hair === 'long') { L.hair = 'short'; if (L.outfit === 'dress') L.outfit = 'tee'; } if (was) swapName(was, standIn('adult')); e.target.parentNode.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === e.target))); after(); } }, n))));
+    const seg = (label, key, opts) => el('div', { class: 'field' }, el('span', {}, label), el('div', { class: 'seg', role: 'group', 'aria-label': label }, opts.map(([v, n]) => el('button', { type: 'button', 'aria-pressed': String(L[key] === v), onclick: e => { const was = (role === 'adult' || role === 'sibling') && key === 'body' && !(L.name || '').trim() ? standIn(role) : null; L[key] = v; if (key === 'facial') L.facialCol = L.hairCol; if (key === 'body' && role !== 'child' && v === 'm' && L.hair === 'long') { L.hair = 'short'; if (L.outfit === 'dress') L.outfit = 'tee'; } if (was) swapName(was, standIn(role)); e.target.parentNode.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === e.target))); after(); } }, n))));
     const sw = (label, key, cols) => el('div', { class: 'field' }, el('span', {}, label), el('div', { class: 'sw' }, cols.map(c => el('button', { type: 'button', 'aria-label': c, 'aria-pressed': String((L[key] || '').toLowerCase() === c.toLowerCase()), style: `background:${c}`, onclick: e => { L[key] = c; if (key === 'hairCol') L.facialCol = c; e.currentTarget.parentNode.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === e.currentTarget))); after(); } })), el('input', { type: 'color', value: L[key] || '#888888', 'aria-label': `Other ${label.toLowerCase()} colour`, oninput: e => { L[key] = e.target.value; if (key === 'hairCol') L.facialCol = e.target.value; after(); } })));
-    if (kid) f.append(seg('Age', 'age', [['little', 'Little (2 to 5)'], ['kid', 'Older (6 to 10)']]), seg('Boy or girl', 'body', [['m', 'Boy'], ['f', 'Girl']]));
+    if (role === 'baby') { f.append(sw('Skin', 'skin', SKIN), sw('Hair colour', 'hairCol', HAIRC), sw('Blanket', 'blanket', CLOTH)); start(); return; }
+    if (kid) f.append(seg('Age', 'age', [['little', 'Little (2 to 5)'], ['kid', 'Older (6 to 10)']].concat(role === 'sibling' ? [['teen', 'Teenager']] : [])), seg('Boy or girl', 'body', [['m', 'Boy'], ['f', 'Girl']]));
     else f.append(seg('Body', 'body', [['f', 'Woman'], ['m', 'Man']]));
     f.append(sw('Skin', 'skin', SKIN), seg('Hair', 'hair', kid ? HAIR_KID : HAIR_AD), sw('Hair colour', 'hairCol', HAIRC));
     if (!kid) f.append(seg('Face', 'facial', [['none', 'None'], ['stubble', 'Stubble'], ['beard', 'Beard'], ['moustache', 'Moustache']]), seg('Glasses', 'glasses', [[false, 'No'], [true, 'Yes']]));
     f.append(seg('Wearing', 'outfit', kid ? [['tee', 'T-shirt'], ['hoodie', 'Hoodie'], ['dress', 'Dress']] : [['tee', 'T-shirt'], ['shirt', 'Shirt'], ['hoodie', 'Hoodie'], ['jacket', 'Jacket'], ['dress', 'Dress']]), sw('Top colour', 'top', CLOTH), sw('Pants colour', 'pants', CLOTH));
     if (kid) f.append(el('div', { class: 'field' }, el('span', {}, 'On their top'), el('input', { type: 'text', id: 'printIn', maxlength: '4', placeholder: 'e.g. OK', value: L.print || '', oninput: e => { L.print = e.target.value.toUpperCase(); after(); } })));
+    start();
     function after() { if (L.outfit === 'dress' && !kid) L.inner = L.top; refresh(); }
-    $('#lookEd').hidden = false; const cv = $('#lookCanvas'), c = cv.getContext('2d'); const t0 = performance.now();
-    const loop = now => { K.portraitOf(c, cv.width, cv.height, L, role, (now - t0) / 1000); lookRaf = requestAnimationFrame(loop); }; lookRaf = requestAnimationFrame(loop);
+    function start() { $('#lookEd').hidden = false; const cv = $('#lookCanvas'), c = cv.getContext('2d'); const t0 = performance.now();
+    const loop = now => { K.portraitOf(c, cv.width, cv.height, L, role, (now - t0) / 1000); lookRaf = requestAnimationFrame(loop); }; lookRaf = requestAnimationFrame(loop); }
   }
   function closeLook() { cancelAnimationFrame(lookRaf); $('#lookEd').hidden = true; renderCast(); refresh(); }
   $('#lookDone').addEventListener('click', closeLook);
@@ -263,7 +285,7 @@
   function renderStory() {
     $('#title').value = S.story.title || ''; $('#ending').value = S.story.ending || '';
     const list = $('#stepList'); list.innerHTML = '';
-    const who = [['child', S.cast.child.name || 'Your child'], ['adult', S.cast.adult.name || 'The grown-up']].concat(S.cast.helperOn ? [['helper', S.cast.helper.name || 'Their helper']] : []);
+    const who = [['child', S.cast.child.name || 'Your child'], ['adult', S.cast.adult.name || 'The grown-up']].concat(S.cast.helperOn ? [['helper', S.cast.helper.name || 'Their helper']] : []).concat(S.cast.siblingOn ? [['sibling', S.cast.sibling.name || 'Brother or sister']] : []);
     S.story.steps.forEach((st, i) => {
       const sc = K.SC[st.scene] || K.SC.goto, cv = el('canvas', { width: 168, height: 299 });
       const thumb = el('button', { class: 'thumb', type: 'button', 'aria-label': `Step ${i + 1} picture: ${sc.label}. Change it`, onclick: () => pickScene(st) }, cv, el('span', { class: 'chg' }, 'Change'));
