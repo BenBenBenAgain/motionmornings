@@ -1,7 +1,8 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
+<meta name="color-scheme" content="light">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Motion Mornings: little films for big steps</title>
 <meta name="description" content="Custom animated films starring you, or anyone in your world. Build the life you want, or show your child what's going to happen before the big day. See it first, then live it.">
@@ -1957,14 +1958,17 @@ try { new IntersectionObserver(es => { heroVisible = es[0].isIntersecting; if (h
 // each phone still plays its own film in order, scene by scene with straight cuts that skip the fades
 function sceneWins(tl) { return tl.items.slice(1, -1).map(i => [i.start + Math.min(i.kind === 'g' ? 1.6 : 1.1, i.d * 0.3), i.start + i.d - Math.min(0.35, i.d * 0.1)]); }
 function makeDuo(phones) {
-  phones.forEach(p => { p.wins = sceneWins(p.tl); p.i = Math.min(p.from || 0, p.wins.length - 1); const w = p.wins[p.i]; p.hold = w[0] + Math.min(1.5, (w[1] - w[0]) * 0.4); });
-  let on = 0, tIn = 0;
+  phones.forEach(p => { p.wins = sceneWins(p.tl); p.i = Math.min(p.from || 0, p.wins.length - 1); const w = p.wins[p.i]; p.tIn = Math.min(1.5, (w[1] - w[0]) * 0.4); p.hold = w[0] + p.tIn; });
+  // every turn is the same length; a phone that hands over mid-scene picks up from the same spot next time
+  let on = 0, turn = 0; const TURN = 5.5;
   const mark = () => phones.forEach((p, k) => p.el.classList.toggle('on', k === on));
   mark();
   return function step(dt) {
-    const p = phones[on], w = p.wins[p.i];
-    tIn += dt; p.hold = Math.min(w[0] + tIn, w[1]);
-    if (w[0] + tIn >= w[1]) { p.i = (p.i + 1) % p.wins.length; on = (on + 1) % phones.length; tIn = 0; mark(); }
+    const p = phones[on]; let w = p.wins[p.i];
+    p.tIn += dt; turn += dt;
+    if (w[0] + p.tIn >= w[1]) { p.i = (p.i + 1) % p.wins.length; p.tIn = 0; w = p.wins[p.i]; }
+    p.hold = Math.min(w[0] + p.tIn, w[1]);
+    if (turn >= TURN) { on = (on + 1) % phones.length; turn = 0; mark(); }
     phones.forEach(q => q.draw(q.hold));
   };
 }
@@ -1993,28 +1997,29 @@ const kidLabel = () => { $('#kidPlay').textContent = kidPlaying ? 'Pause' : 'Pla
 function kidLoop(now) {
   if ($('#watch').hidden || $('.wkid').hidden) return;
   const dt = kidLast ? Math.min(0.1, (now - kidLast) / 1000) : 0; kidLast = now;
-  if (kidPlaying && !kidDrag) { kidT += dt; if (kidT >= KTL.total) kidT = 0; }
+  if (kidPlaying && !kidDrag) { kidT += dt; if (kidT >= KTL.total) { kidT = 0; kidSync(); } }
   kidx.setTransform(kidCv.width / LSN.W, 0, 0, kidCv.width / LSN.W, 0, 0); LSN.KIDS.frame(kidx, KD.cast, KD.story, KTL, Math.min(kidT, KTL.total - 0.01));
   $('#kidBar').style.width = (100 * Math.min(1, kidT / KTL.total)).toFixed(2) + '%';
   requestAnimationFrame(kidLoop);
 }
+function kidSync() { try { kidAudio.currentTime = kidT; } catch (e) {} }
 function kidSoundSet(on) { kidSound = on; if (on && kidPlaying) kidAudio.play().catch(() => { kidSound = false; kidLabel(); }); else kidAudio.pause(); kidLabel(); }
-$('#kidPlay').onclick = () => { kidPlaying = !kidPlaying; if (kidSound) kidSoundSet(true); if (!kidPlaying) kidAudio.pause(); kidLabel(); };
+$('#kidPlay').onclick = () => { kidPlaying = !kidPlaying; if (kidPlaying) kidSync(); if (kidSound) kidSoundSet(true); if (!kidPlaying) kidAudio.pause(); kidLabel(); };
 $('#kidSound').onclick = () => { if (!kidSound) kidPlaying = true; kidSoundSet(!kidSound); };
 kidCv.addEventListener('click', () => $('#kidPlay').onclick());
 function kidSeekAt(e) { const r = $('#kidSeek').getBoundingClientRect(); kidT = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * KTL.total * 0.999; }
 $('#kidSeek').addEventListener('pointerdown', e => { kidDrag = true; $('#kidSeek').setPointerCapture(e.pointerId); kidSeekAt(e); });
 $('#kidSeek').addEventListener('pointermove', e => { if (kidDrag) kidSeekAt(e); });
-['pointerup', 'pointercancel'].forEach(ev => $('#kidSeek').addEventListener(ev, () => { kidDrag = false; }));
+['pointerup', 'pointercancel'].forEach(ev => $('#kidSeek').addEventListener(ev, () => { if (kidDrag) kidSync(); kidDrag = false; }));
 function openWatch(which) {
   if (playing) stopMovie();
   const kid = which === 'kid';
   $('.wyou').hidden = kid; $('.wkid').hidden = !kid;
-  $('#watchTitle').textContent = kid ? 'Demo film \u00b7 Ava goes to playgroup' : 'Demo film';
+  $('#watchTitle').textContent = 'Demo film \u00b7 ' + (kid ? 'Ava goes to playgroup' : 'My new life');
   $('#watchNote').textContent = kid ? 'A short film that shows a child what\u2019s going to happen, starring them and in your voice.' : 'Now imagine it\u2019s you, your life, your favourite song.';
   const cta = $('#watchCta'); cta.textContent = kid ? 'Create for your child' : 'Create for yourself'; cta.href = kid ? '/kids.html' : '#builder';
   $('#watch').hidden = false;
-  if (kid) { kidT = 0; kidLast = 0; kidPlaying = true; kidSoundSet(true); requestAnimationFrame(kidLoop); }
+  if (kid) { kidT = 0; kidLast = 0; kidPlaying = true; kidSync(); kidSoundSet(true); requestAnimationFrame(kidLoop); }
   else { heroT = 0; heroPlaying = true; heroLabel(); if (!heroSound) soundBtn.onclick(); else { try { heroAudio.currentTime = 0; } catch (e) {} } }
 }
 function closeWatch() {

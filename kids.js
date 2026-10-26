@@ -208,14 +208,17 @@
   // each phone still plays its own film in order, scene by scene with straight cuts that skip the fades
   function sceneWins(tl) { return tl.items.slice(1, -1).map(i => [i.start + Math.min(i.kind === 'g' ? 1.6 : 1.1, i.d * 0.3), i.start + i.d - Math.min(0.35, i.d * 0.1)]); }
   function makeDuo(phones) {
-    phones.forEach(p => { p.wins = sceneWins(p.tl); p.i = Math.min(p.from || 0, p.wins.length - 1); const w = p.wins[p.i]; p.hold = w[0] + Math.min(1.5, (w[1] - w[0]) * 0.4); });
-    let on = 0, tIn = 0;
+    phones.forEach(p => { p.wins = sceneWins(p.tl); p.i = Math.min(p.from || 0, p.wins.length - 1); const w = p.wins[p.i]; p.tIn = Math.min(1.5, (w[1] - w[0]) * 0.4); p.hold = w[0] + p.tIn; });
+    // every turn is the same length; a phone that hands over mid-scene picks up from the same spot next time
+    let on = 0, turn = 0; const TURN = 5.5;
     const mark = () => phones.forEach((p, k) => p.el.classList.toggle('on', k === on));
     mark();
     return function step(dt) {
-      const p = phones[on], w = p.wins[p.i];
-      tIn += dt; p.hold = Math.min(w[0] + tIn, w[1]);
-      if (w[0] + tIn >= w[1]) { p.i = (p.i + 1) % p.wins.length; on = (on + 1) % phones.length; tIn = 0; mark(); }
+      const p = phones[on]; let w = p.wins[p.i];
+      p.tIn += dt; turn += dt;
+      if (w[0] + p.tIn >= w[1]) { p.i = (p.i + 1) % p.wins.length; p.tIn = 0; w = p.wins[p.i]; }
+      p.hold = Math.min(w[0] + p.tIn, w[1]);
+      if (turn >= TURN) { on = (on + 1) % phones.length; turn = 0; mark(); }
       phones.forEach(q => q.draw(q.hold));
     };
   }
@@ -243,14 +246,14 @@
   function watchLoop(now) {
     if ($('#watch').hidden) return;
     const dt = demoLast ? Math.min(0.1, (now - demoLast) / 1000) : 0; demoLast = now;
-    if (demoPlaying && !demoDrag) { demoAt += dt; if (demoAt >= cur.tl.total) demoAt = 0; }
+    if (demoPlaying && !demoDrag) { demoAt += dt; if (demoAt >= cur.tl.total) { demoAt = 0; if (demoMusic) demoSoundOn(); } }
     drawDemo(dctx, dStage, cur, demoAt);
     $('#demoBar').style.width = (100 * Math.min(1, demoAt / cur.tl.total)).toFixed(2) + '%';
     requestAnimationFrame(watchLoop);
   }
   function openWatch(key) {
     cur = DEMOS[key]; demoAt = 0; demoPlaying = true; demoLast = 0;
-    $('#watchTitle').textContent = 'Demo film \u00b7 ' + cur.story.title; $('#watch').hidden = false;
+    $('#watchTitle').textContent = 'Demo film \u00b7 ' + ({ playgroup: 'Ava goes to playgroup', doctor: 'Ava goes to the doctor' }[key] || cur.story.title); $('#watch').hidden = false;
     demoLabel(); requestAnimationFrame(watchLoop); demoSoundOn();
   }
   function closeWatch() { $('#watch').hidden = true; demoPlaying = false; demoSoundOff(); }
@@ -264,7 +267,7 @@
   function demoSeek(e) { const r = $('#demoSeek').getBoundingClientRect(); demoAt = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * cur.tl.total * 0.999; }
   $('#demoSeek').addEventListener('pointerdown', e => { demoDrag = true; $('#demoSeek').setPointerCapture(e.pointerId); demoSeek(e); });
   $('#demoSeek').addEventListener('pointermove', e => { if (demoDrag) demoSeek(e); });
-  ['pointerup', 'pointercancel'].forEach(ev => $('#demoSeek').addEventListener(ev, () => { demoDrag = false; }));
+  ['pointerup', 'pointercancel'].forEach(ev => $('#demoSeek').addEventListener(ev, () => { if (demoDrag && demoMusic) demoSoundOn(); demoDrag = false; }));
   $('#demoSeek').addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { demoAt = Math.max(0, Math.min(cur.tl.total - 0.1, demoAt + (e.key === 'ArrowRight' ? 3 : -3))); e.preventDefault(); } });
 
   function draw(T, ctx = sctx, w = stage.width) { ctx.setTransform(w / W, 0, 0, w / W, 0, 0); K.frame(ctx, castFor(), S.story, TL, T); ctx.setTransform(1, 0, 0, 1, 0, 0); }
