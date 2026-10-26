@@ -17,28 +17,15 @@
   // ---------------------------------------------------------------- state
   const MUSIC = [['none', 'No music'], ['morning-mood', 'Morning Mood'], ['italian-andante', 'Italian Andante'], ['vltava', 'Vltava'], ['figaro', 'Figaro']];
   const TEMPLATES = {
-    playgroup: { label: 'Playgroup', blurb: 'Arriving early, toys, meeting new kids', story: {
-      title: '{child}’s Play Group', ending: 'It was fun at the play group!', steps: [
-        { scene: 'goto', place: 'Play group', text: 'On Monday, {adult} and {child} will go to a play group!' },
-        { scene: 'arrive', time: '9:00', text: 'They will arrive one hour early, and only {helper} will be there.' },
-        { scene: 'bounce', text: 'They can play with all the toys together for one hour.' },
-        { scene: 'others', text: 'When {child} feels comfy and happy, some other mummies and kids will arrive.', say: { who: 'child', words: 'Hi! My name is {child}!' } },
-        { scene: 'hello', time: '10:00', text: '{adult} says hello too.', say: { who: 'adult', words: 'Hi, nice to meet you!' } },
-        { scene: 'playball', text: 'They play a little bit with the kids…' },
-        { scene: 'cafe', place: 'Cafe', text: '…and then they go to a cafe.' }] } },
-    playgroup2: { label: 'Playgroup, next time', blurb: 'When it gets busy, and a way out', story: {
-      title: '{child} Goes Back to Play Group', ending: '{child} is getting braver every week!', steps: [
-        { scene: 'goto', place: 'Play group', text: 'On Monday, {adult} and {child} will go back to play group.' },
-        { scene: 'arrive', time: '9:00', text: 'They will arrive early, and {helper} will be there.', say: { who: 'child', words: 'Hi {helper}!' } },
-        { scene: 'bounce', text: '{child} can jump on the trampoline, and {adult} will clap.' },
-        { scene: 'others', time: '10:00', text: 'Other kids usually come at about 10. Sometimes they come early, and that\u2019s OK.' },
-        { scene: 'busy', text: 'Sometimes lots of people come in at once, and it gets loud.' },
-        { scene: 'ears', text: 'If it\u2019s too loud, {child} can cover {their} ears and hold {adult}\u2019s hand.' },
-        { scene: 'mumplay', text: '{child} can play with {adult}, just the two of them.' },
-        { scene: 'mumplay', glimpse: true, text: '{child} can always stay with {adult}.' },
-        { scene: 'playball', text: '{child} can join in with the other kids if {they} want{s} to.' },
-        { scene: 'leave', text: 'When {child} is ready, they say bye and go to Rex.', say: { who: 'child', words: 'Bye!' } },
-        { scene: 'cafe', place: 'Rex', glimpse: true, text: 'Rex is always there after play group.' }] } },
+    playgroup: { label: 'Playgroup', blurb: 'Arriving, toys, other kids, going home', story: {
+      title: '{child} Goes to Play Group', ending: 'Play group was fun!', steps: [
+        { scene: 'goto', place: 'Play group', text: 'Today {adult} and {child} are going to play group.' },
+        { scene: 'arrive', text: 'When they get there, {helper} will say hello.', say: { who: 'child', words: 'Hi {helper}!' } },
+        { scene: 'bounce', text: '{child} can play with all the toys.' },
+        { scene: 'others', text: 'Other kids and grown-ups will come too.' },
+        { scene: 'hello', text: '{child} can say hi if {they} want{s} to.', say: { who: 'child', words: 'Hi, my name is {child}!' } },
+        { scene: 'playball', text: '{child} can play with the other kids, or with {adult}.' },
+        { scene: 'leave', text: 'When {child} is ready, they say bye and go home.', say: { who: 'child', words: 'Bye!' } }] } },
     food: { label: 'Trying a new food', blurb: 'Looking, one little bite, feeling proud', story: {
       title: '{child} Tries Something New', ending: 'Trying new things is brave!', steps: [
         { scene: 'food_look', text: 'Tonight {child} will try something new for dinner.' },
@@ -247,6 +234,17 @@
   $('#templates').append(...Object.entries(TEMPLATES).map(([k, t]) => el('button', { class: 'tpl', type: 'button', onclick: () => ask(`Start from “${t.label}”?`, 'This replaces the steps you have now. Your people stay the same.', () => { S.story = fromTemplate(k); renderStory(); refresh(); }) }, el('b', {}, t.label), el('span', {}, t.blurb))));
   $('#title').addEventListener('input', e => { S.story.title = e.target.value; refresh(); });
   $('#ending').addEventListener('input', e => { S.story.ending = e.target.value; refresh(); });
+  // a plan for when it gets too much, for any story: it goes in before the last step
+  const CALM = [
+    { scene: 'busy', text: 'Sometimes it gets busy and loud. That\u2019s OK.' },
+    { scene: 'ears', text: 'If it\u2019s too loud, {child} can cover {their} ears and hold {adult}\u2019s hand.' },
+    { scene: 'mumplay', glimpse: true, text: '{child} can always stay with {adult}.' }];
+  $('#addCalm').addEventListener('click', () => {
+    const c = castFor(), boy = S.cast.child.body === 'm', girl = S.cast.child.body === 'f';
+    const n = t => K.names(t, c).replace(/\{their\}/g, boy ? 'his' : girl ? 'her' : 'their');
+    const add = CALM.map(st => ({ id: uid(), scene: st.scene, place: '', time: '', glimpse: !!st.glimpse, text: n(st.text), say: { who: 'child', words: '' } }));
+    const at = Math.max(0, S.story.steps.length - 1); S.story.steps.splice(at, 0, ...add); renderStory(); refresh(); seekTo(add[0].id);
+  });
   $('#addStep').addEventListener('click', () => { const last = S.story.steps[S.story.steps.length - 1]; S.story.steps.push({ id: uid(), scene: last ? last.scene : 'goto', place: '', time: '', text: '', say: { who: 'child', words: '' } }); renderStory(); refresh(); const ta = $$('#stepList textarea').pop(); if (ta) ta.focus(); });
   function sceneThumb(cv, key, place) { const c = cv.getContext('2d'); c.setTransform(cv.width / W, 0, 0, cv.width / W, 0, 0); K.still(c, castFor(), key, place); c.setTransform(1, 0, 0, 1, 0, 0); }
   function renderStory() {
