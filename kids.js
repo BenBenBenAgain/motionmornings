@@ -243,14 +243,14 @@
   function watchLoop(now) {
     if ($('#watch').hidden) return;
     const dt = demoLast ? Math.min(0.1, (now - demoLast) / 1000) : 0; demoLast = now;
-    if (demoPlaying && !demoDrag) { demoAt += dt; if (demoAt >= cur.tl.total) demoAt = 0; }
+    if (demoPlaying && !demoDrag) { demoAt += dt; if (demoAt >= cur.tl.total) { demoAt = 0; if (demoMusic) demoSoundOn(); } }
     drawDemo(dctx, dStage, cur, demoAt);
     $('#demoBar').style.width = (100 * Math.min(1, demoAt / cur.tl.total)).toFixed(2) + '%';
     requestAnimationFrame(watchLoop);
   }
   function openWatch(key) {
     cur = DEMOS[key]; demoAt = 0; demoPlaying = true; demoLast = 0;
-    $('#watchTitle').textContent = 'Demo film \u00b7 ' + cur.story.title; $('#watch').hidden = false;
+    $('#watchTitle').textContent = 'Demo film \u00b7 ' + ({ playgroup: 'Ava goes to playgroup', doctor: 'Ava goes to the doctor' }[key] || cur.story.title); $('#watch').hidden = false;
     demoLabel(); requestAnimationFrame(watchLoop); demoSoundOn();
   }
   function closeWatch() { $('#watch').hidden = true; demoPlaying = false; demoSoundOff(); }
@@ -264,7 +264,7 @@
   function demoSeek(e) { const r = $('#demoSeek').getBoundingClientRect(); demoAt = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * cur.tl.total * 0.999; }
   $('#demoSeek').addEventListener('pointerdown', e => { demoDrag = true; $('#demoSeek').setPointerCapture(e.pointerId); demoSeek(e); });
   $('#demoSeek').addEventListener('pointermove', e => { if (demoDrag) demoSeek(e); });
-  ['pointerup', 'pointercancel'].forEach(ev => $('#demoSeek').addEventListener(ev, () => { demoDrag = false; }));
+  ['pointerup', 'pointercancel'].forEach(ev => $('#demoSeek').addEventListener(ev, () => { if (demoDrag && demoMusic) demoSoundOn(); demoDrag = false; }));
   $('#demoSeek').addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { demoAt = Math.max(0, Math.min(cur.tl.total - 0.1, demoAt + (e.key === 'ArrowRight' ? 3 : -3))); e.preventDefault(); } });
 
   function draw(T, ctx = sctx, w = stage.width) { ctx.setTransform(w / W, 0, 0, w / W, 0, 0); K.frame(ctx, castFor(), S.story, TL, T); ctx.setTransform(1, 0, 0, 1, 0, 0); }
