@@ -257,6 +257,8 @@ video.result{width:100%;max-width:260px;border-radius:14px;background:#000}
 .choice{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-radius:var(--r);border:1.5px solid var(--line);background:var(--surface);text-decoration:none;color:var(--ink);min-width:0;transition:border-color .15s,transform .15s}
 .choice:hover{border-color:var(--coral);transform:translateY(-1px)}
 .choice b{font:700 1.15rem var(--display)}
+.choice .cimg{width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;border-radius:10px;margin-bottom:6px;display:block}
+@media (min-width:700px){.choice{display:grid;grid-template-columns:168px minmax(0,1fr);column-gap:16px;row-gap:2px;align-content:center}.choice .cimg{grid-row:1/span 3;grid-column:1;margin:0}.choice>:not(.cimg){grid-column:2}}
 .choice .ctag{font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sea);display:flex;align-items:center;gap:4px}
 .choice .cdesc{color:var(--muted);font-size:.9rem;line-height:1.35}
 .kidschoice{background:color-mix(in srgb,var(--gold) 16%,var(--surface));border-color:color-mix(in srgb,var(--gold) 50%,var(--line))}
@@ -351,8 +353,8 @@ input[type=range]{height:30px;touch-action:none}
   </div>
   <header class="umbrella"><h2>Little films for big steps.</h2><p>Custom animated films starring you, or anyone in your world. See it first, then live it.</p></header>
   <nav class="choose" aria-label="Who is the film for?">
-    <a class="choice" href="#builder" id="chooseMe"><span class="ctag">For you</span><b>Create for yourself</b><span class="cdesc">A film of the everyday steps toward the life you want</span></a>
-    <a class="choice kidschoice" href="/kids.html"><span class="ctag">For your child <span class="kidsword" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span></span><b>Create for your child</b><span class="cdesc">A film that shows them what's going to happen, starring them</span></a>
+    <a class="choice" href="#builder" id="chooseMe"><img class="cimg" src="/card-you.jpg" alt="" width="600" height="400"><span class="ctag">For you</span><b>Create for yourself</b><span class="cdesc">A film of the everyday steps toward the life you want</span></a>
+    <a class="choice kidschoice" href="/kids.html"><img class="cimg" src="/card-kids.jpg" alt="" width="600" height="400"><span class="ctag">For your child <span class="kidsword" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span></span><b>Create for your child</b><span class="cdesc">A film that shows them what's going to happen, starring them</span></a>
   </nav>
   <section class="hero" aria-labelledby="heroTitle">
     <div class="herofilm">
