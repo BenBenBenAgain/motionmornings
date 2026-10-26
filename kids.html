@@ -289,8 +289,6 @@ video.result{width:100%;max-width:280px;border-radius:14px;background:#000}
 :root{--k1:#E07B66;--k2:#F2BC6B;--k3:#8CC77F;--k4:#78B3D4}
 html,body{overflow-x:clip}
 .kidstop{position:relative;isolation:isolate}
-.kidstop .lead{border-bottom:0;margin-bottom:0;padding-bottom:12px}
-.kidstop{margin-bottom:40px}
 .mini[data-demo=playgroup] .mlabel{color:#4E8F44}.mini[data-demo=doctor] .mlabel{color:#3F7FA3}
 .snaps{display:flex;justify-content:center;align-items:flex-start;gap:18px;padding:6px 0 10px;pointer-events:none}
 .snap{margin:0;background:#FFFDF8;padding:8px 8px 0;border-radius:6px;box-shadow:0 10px 24px -12px rgba(20,25,40,.45),0 0 0 1px rgba(20,25,40,.06);width:150px;flex:none}
@@ -304,6 +302,12 @@ html,body{overflow-x:clip}
   .snaps{gap:10px;justify-content:flex-start;overflow:hidden;margin:0 -16px;padding:6px 16px 12px}
   .snap{width:118px;padding:6px 6px 0}.snap figcaption{font-size:.8rem;padding:5px 2px 7px}
 }
+.kword{white-space:nowrap}
+.kword span{display:inline-block}
+.kword span:nth-child(4n+1){color:#E07B66;transform:rotate(-5deg)}
+.kword span:nth-child(4n+2){color:#E8A93E;transform:rotate(4deg) translateY(-2px)}
+.kword span:nth-child(4n+3){color:#6FAE62;transform:rotate(-3deg)}
+.kword span:nth-child(4n){color:#5B9CC7;transform:rotate(5deg) translateY(-1px)}
 .leadtag{color:var(--k1)}
 .steps button:nth-child(1) .n{background:color-mix(in srgb,var(--k1) 30%,var(--surface))}
 .steps button:nth-child(2) .n{background:color-mix(in srgb,var(--k2) 45%,var(--surface))}
@@ -326,7 +330,7 @@ html,body{overflow-x:clip}
 
   <section class="lead" aria-labelledby="leadTitle">
     <div class="leadcopy">
-      <h2 id="leadTitle">Show them what&rsquo;s going to happen.</h2>
+      <h2 id="leadTitle">Show them what&rsquo;s going to <span class="kword"><span>h</span><span>a</span><span>p</span><span>p</span><span>e</span><span>n</span></span>.</h2>
       <p class="leadsub">A short film starring your child, in your voice. Watch it together before the big day.</p>
       <p class="leadtag">Little films for big steps.</p>
     </div>
@@ -338,9 +342,7 @@ html,body{overflow-x:clip}
     <p class="duomore">One film for each big step. Playgroup, the doctor, the dentist, haircuts, bedtime and more.</p></div>
     <div class="leadbtns"><a class="btn coral" href="#builder">Create for your child <span class="btnkids" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span></a><a class="btn ghost" href="/">Create for yourself</a></div>
   </section>
-  <div class="snaps" data-snaps="hero" aria-hidden="true"></div>
-  <p class="snapsnote">Bikes, baths, haircuts, the dentist, bedtime. Whatever&rsquo;s coming up next.</p>
-  </div>
+    </div>
 
   <div id="builder" class="builder">
   <header class="buildhead"><span class="pill">Build your own</span><h2>Make your film</h2><p class="lede">Add your child and their people, pick a story or write your own, then read it aloud. The preview updates as you go.</p></header>
@@ -421,7 +423,6 @@ html,body{overflow-x:clip}
 
   <div class="newfilm"><button class="linkbtn quiet" id="resetAll" type="button">Clear everything and start again</button></div>
 
-  <div class="snaps snapsend" data-snaps="foot" aria-hidden="true"></div>
   <footer class="foot">
     <p>Your people, story and recordings stay on your device. Nothing is uploaded.</p>
     <p><a href="/">Motion Mornings for grown-ups</a> · <a href="mailto:hello@motionmornings.com">hello@motionmornings.com</a></p>
