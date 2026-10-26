@@ -223,7 +223,14 @@ video.result{width:100%;max-width:280px;border-radius:14px;background:#000}
   .herocopy{align-items:stretch;gap:12px}
   .herocopy .btn{justify-content:center}
   .herocopy h2{font-size:clamp(1.55rem,7.6vw,2rem)}
+  /* the builder preview stays pinned while scrolling, like the grown-up page */
+  .stagecol{position:sticky;top:0;z-index:20;flex-direction:row;align-items:center;gap:14px;background:var(--bg);margin-inline:-16px;padding:10px 16px;border-bottom:1px solid var(--line)}
+  .stagecol .phone{max-width:96px;border-radius:12px;box-shadow:0 0 0 4px #1F2430}
+  .stageside{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
+  .stagecol .player{max-width:none}
 }
+.stageside{display:contents}
+@media (max-width:860px){.stagecol .stageside{display:flex}}
 </style>
 </head>
 <body>
@@ -319,9 +326,12 @@ video.result{width:100%;max-width:280px;border-radius:14px;background:#000}
     </main>
 
     <aside class="stagecol">
-      <p class="stagetag">Your film</p>
+      <p class="stagetag deskonly">Your film</p>
       <div class="phone"><canvas id="stage" width="720" height="1280" aria-label="Film preview"></canvas></div>
-      <div class="player"><button class="btn small" id="playBtn">Play</button><input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Position in film"><span class="time" id="timeLbl">0:00</span></div>
+      <div class="stageside">
+        <p class="stagetag mobonly">Your film</p>
+        <div class="player"><button class="btn small" id="playBtn">Play</button><input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Position in film"><span class="time" id="timeLbl">0:00</span></div>
+      </div>
     </aside>
   </div>
   </div>
