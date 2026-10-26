@@ -39,6 +39,9 @@
 .navpanel hr{border:0;border-top:1px solid #E6D8C2;margin:6px 8px}
 .brand h1{white-space:nowrap}
 @media (max-width:520px){.top{padding-right:44px}.mmnav{top:30px}.navbtn{width:36px;height:36px}.brand{gap:9px}}
+.crosslink{flex-basis:100%;margin:6px 0 0;font-size:.95rem;color:var(--muted)}
+.crosslink a{color:var(--ink);font-weight:600;text-underline-offset:3px}
+@media (max-width:760px){.crosslink{text-align:center;margin-top:8px}}
 </style>
 </head>
 <body>
@@ -424,7 +427,7 @@ input[type=range]{height:30px;touch-action:none}
 <div class="wrap">
   <div class="top">
     <a class="brand" href="/?home=1" aria-label="Motion Mornings home" style="text-decoration:none;color:inherit"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><path d="M16.5 51 Q21.5 41.5 30 52 Q38.5 41.5 43.5 51" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M37.5 35 Q41.5 27.2 47 35.5 Q52.5 27.2 56.5 35" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M40 78 A28 28 0 0 1 96 78 Z" fill="var(--coral)"/><line x1="14" y1="78" x2="106" y2="78" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><line x1="54" y1="90" x2="84" y2="90" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/><line x1="61" y1="101" x2="77" y2="101" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/></svg><h1>Motion Mornings</h1></a>
-    <div class="row topright"><button class="streakchip" id="streakChip" hidden><span aria-hidden="true">🌅</span><b id="chipN">0</b></button><a class="btn ghost small toplink" href="#builder">Make your film</a></div>
+    <div class="row topright"><button class="streakchip" id="streakChip" hidden><span aria-hidden="true">🌅</span><b id="chipN">0</b></button><a class="btn ghost small toplink" href="#builder">Create my film</a></div>
     <nav class="mmnav" aria-label="Menu"><button class="navbtn" id="navBtn" type="button" aria-expanded="false" aria-controls="navPanel" aria-label="Menu"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div class="navpanel" id="navPanel" hidden><a href="/?home=1">Home</a><a href="/you.html" aria-current="page">My film</a><a href="/kids.html">Kids films</a><hr><a href="/you.html#why">Why it works</a><a href="/you.html#privacy">Privacy</a><a href="#contact" data-contact>Contact us</a></div></nav>
   </div>
   <section class="lead" aria-labelledby="leadTitle">
@@ -439,7 +442,7 @@ input[type=range]{height:30px;touch-action:none}
     </div>
     <p class="duohint">Tap a film to watch with sound</p>
     <p class="duomore">One film of your whole life, watched every morning. Update it as you grow.</p></div>
-    <div class="leadbtns"><a class="btn coral" href="#builder">Create for yourself</a><a class="btn ghost" href="/kids.html">Create for your child <span class="btnkids" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span></a></div>
+    <div class="leadbtns"><a class="btn coral" href="#builder">Create my film</a><p class="crosslink">Making one for a child? <a href="/kids.html">See kids films &rarr;</a></p></div>
   </section>
   <section class="why" id="why" aria-labelledby="whyTitle" style="scroll-margin-top:16px">
     <h2 id="whyTitle">Why it works</h2>
@@ -2059,7 +2062,7 @@ function openWatch(which) {
   $('.wyou').hidden = kid; $('.wkid').hidden = !kid;
   $('#watchTitle').textContent = 'Demo film \u00b7 ' + (kid ? 'Ava goes to playgroup' : which === 'you2' ? 'Priya\u2019s film' : 'Jack\u2019s film');
   $('#watchNote').textContent = kid ? 'A short film that shows a child what\u2019s going to happen, starring them and in your voice.' : 'Now imagine it\u2019s you, your life, your favourite song.';
-  const cta = $('#watchCta'); cta.textContent = kid ? 'Create for your child' : 'Create for yourself'; cta.href = kid ? '/kids.html' : '#builder';
+  const cta = $('#watchCta'); cta.textContent = kid ? 'Create KIDS film' : 'Create my film'; cta.href = kid ? '/kids.html' : '#builder';
   $('#watch').hidden = false;
   if (kid) { kidT = 0; kidLast = 0; kidPlaying = true; kidSync(); kidSoundSet(true); requestAnimationFrame(kidLoop); }
   else { heroCfg = which === 'you2' ? DEMO2_CFG : DEMO_CFG; heroTLm = heroTLfor(heroCfg); heroT = 0; heroPlaying = true; heroLabel(); if (!heroSound) soundBtn.onclick(); else { try { heroAudio.currentTime = 0; } catch (e) {} } }

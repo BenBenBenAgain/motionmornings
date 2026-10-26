@@ -194,6 +194,8 @@ video.result{width:100%;max-width:280px;border-radius:14px;background:#000}
 .backlink{font-weight:600;font-size:.92rem;color:var(--sea);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:7px 14px;background:var(--surface)}
 .backlink:hover{border-color:var(--sea)}
 @media (max-width:600px){.top .backlink{display:none}}
+.kidtop{background:var(--surface);border:1px solid var(--line);color:var(--ink)}.kidtop .btnkids{font-size:.72rem;padding:1px 6px 2px;margin:0 1px}
+@media (max-width:600px){.top .kidtop{display:none}}
 
 .hero{display:grid;grid-template-columns:320px minmax(0,1fr);gap:48px;align-items:center;padding-block:18px 56px;border-bottom:1px solid var(--line);margin-bottom:36px}
 .herofilm{display:flex;flex-direction:column;align-items:center;gap:10px}
@@ -332,6 +334,9 @@ html,body{overflow-x:clip}
 .navpanel hr{border:0;border-top:1px solid #E6D8C2;margin:6px 8px}
 .brand h1{white-space:nowrap}
 @media (max-width:520px){.top{padding-right:44px}.mmnav{top:30px}.navbtn{width:36px;height:36px}.brand{gap:9px}}
+.crosslink{flex-basis:100%;margin:6px 0 0;font-size:.95rem;color:var(--muted)}
+.crosslink a{color:var(--ink);font-weight:600;text-underline-offset:3px}
+@media (max-width:760px){.crosslink{text-align:center;margin-top:8px}}
 </style>
 </head>
 <body>
@@ -339,7 +344,7 @@ html,body{overflow-x:clip}
   <div class="kidstop">
   <div class="top">
     <a class="brand" href="/?home=1" aria-label="Motion Mornings home"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><path d="M16.5 51 Q21.5 41.5 30 52 Q38.5 41.5 43.5 51" fill="none" stroke="currentColor" stroke-width="3.6"/><path d="M37.5 35 Q41.5 27.2 47 35.5 Q52.5 27.2 56.5 35" fill="none" stroke="currentColor" stroke-width="3.2"/><path d="M40 78 A28 28 0 0 1 96 78 Z" fill="#E07B66"/><line x1="14" y1="78" x2="106" y2="78" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><line x1="54" y1="90" x2="84" y2="90" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/><line x1="61" y1="101" x2="77" y2="101" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/></svg><h1>Motion Mornings</h1><span class="kidsmark" aria-label="Kids"><span>K</span><span>I</span><span>D</span><span>S</span></span></a>
-    <a class="backlink" href="/you.html"><span aria-hidden="true">&larr;</span> Create for yourself</a>
+    <a class="btn ghost small toplink kidtop" href="#builder">Create <span class="btnkids" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span> film</a>
     <nav class="mmnav" aria-label="Menu"><button class="navbtn" id="navBtn" type="button" aria-expanded="false" aria-controls="navPanel" aria-label="Menu"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div class="navpanel" id="navPanel" hidden><a href="/?home=1">Home</a><a href="/you.html">My film</a><a href="/kids.html" aria-current="page">Kids films</a><hr><a href="/you.html#why">Why it works</a><a href="/you.html#privacy">Privacy</a><a href="#contact" data-contact>Contact us</a></div></nav>
   </div>
 
@@ -355,7 +360,7 @@ html,body{overflow-x:clip}
     </div>
     <p class="duohint">Tap a film to watch with sound</p>
     <p class="duomore">One film for each big step. Playgroup, the doctor, the dentist, haircuts, bedtime and more.</p></div>
-    <div class="leadbtns"><a class="btn coral" href="#builder">Create for your child <span class="btnkids" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span></a><a class="btn ghost" href="/you.html">Create for yourself</a></div>
+    <div class="leadbtns"><a class="btn coral" href="#builder">Create <span class="btnkids" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span> film</a><p class="crosslink">Want one for yourself? <a href="/you.html">See Motion Mornings &rarr;</a></p></div>
   </section>
     </div>
 
