@@ -20,6 +20,7 @@
 (function () {
   try {
     var q = location.search, h = location.hash, go = false;
+    if (/[?&]home=1/.test(q)) return;
     if (/[?&](app|r)=/.test(q) || /^#(r=|builder|privacy)/.test(h)) go = true;
     if ((window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true) go = true;
     if (!go) { var d = JSON.parse(localStorage.getItem('lsn-draft-v2') || 'null'); if ((d && d.reached > 0) || localStorage.getItem('mm-streak-v1')) go = true; }
@@ -436,6 +437,19 @@ body{min-height:100vh;background:linear-gradient(180deg,#1C2747 0%,#2C3561 34%,#
 .foot p:first-child{color:#2A2440}
 .wrap{position:relative;z-index:1}
 .stars{position:absolute;top:0;left:0;right:0;height:420px;pointer-events:none;z-index:0;background-image:radial-gradient(1.5px 1.5px at 12% 18%,rgba(255,255,255,.7),transparent),radial-gradient(1px 1px at 28% 8%,rgba(255,255,255,.6),transparent),radial-gradient(1.5px 1.5px at 46% 22%,rgba(255,255,255,.5),transparent),radial-gradient(1px 1px at 63% 12%,rgba(255,255,255,.7),transparent),radial-gradient(1.5px 1.5px at 78% 26%,rgba(255,255,255,.5),transparent),radial-gradient(1px 1px at 90% 9%,rgba(255,255,255,.6),transparent),radial-gradient(1px 1px at 36% 34%,rgba(255,255,255,.4),transparent),radial-gradient(1px 1px at 8% 38%,rgba(255,255,255,.4),transparent)}
+
+/* menu: the same on every page */
+.top{position:relative;padding-right:56px}
+.mmnav{position:absolute;right:0;top:28px}
+.navbtn{width:42px;height:42px;border-radius:50%;border:1px solid rgba(31,46,77,.18);background:#FFFDF8;color:#1F2E4D;display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 12px -6px rgba(20,25,40,.35);padding:0}
+.navbtn svg{display:block}
+.navpanel{position:absolute;right:0;top:50px;z-index:80;min-width:210px;background:#FFFDF8;border-radius:16px;padding:8px;box-shadow:0 18px 40px -14px rgba(20,25,40,.45),0 0 0 1px rgba(31,46,77,.08);display:flex;flex-direction:column}
+.navpanel a{display:block;padding:11px 14px;border-radius:10px;color:#1F2E4D;text-decoration:none;font:600 1rem var(--body)}
+.navpanel a:hover,.navpanel a:focus-visible{background:#F4E9D7}
+.navpanel a[aria-current="page"]{color:#E07B66}
+.navpanel hr{border:0;border-top:1px solid #E6D8C2;margin:6px 8px}
+.brand h1{white-space:nowrap}
+@media (max-width:520px){.top{padding-right:44px}.mmnav{top:30px}.navbtn{width:36px;height:36px}.brand{gap:9px}}
 </style>
 </head>
 <body>
@@ -444,6 +458,7 @@ body{min-height:100vh;background:linear-gradient(180deg,#1C2747 0%,#2C3561 34%,#
   <div class="top">
     <div class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><path d="M16.5 51 Q21.5 41.5 30 52 Q38.5 41.5 43.5 51" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M37.5 35 Q41.5 27.2 47 35.5 Q52.5 27.2 56.5 35" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M40 78 A28 28 0 0 1 96 78 Z" fill="var(--coral)"/><line x1="14" y1="78" x2="106" y2="78" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><line x1="54" y1="90" x2="84" y2="90" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/><line x1="61" y1="101" x2="77" y2="101" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/></svg><h1>Motion Mornings</h1></div>
     
+    <nav class="mmnav" aria-label="Menu"><button class="navbtn" id="navBtn" type="button" aria-expanded="false" aria-controls="navPanel" aria-label="Menu"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div class="navpanel" id="navPanel" hidden><a href="/?home=1" aria-current="page">Home</a><a href="/you.html">My film</a><a href="/kids.html">Kids films</a><hr><a href="/you.html#why">Why it works</a><a href="/you.html#privacy">Privacy</a><a href="#contact" data-contact>Contact us</a></div></nav>
   </div>
   <section class="lead" aria-labelledby="leadTitle">
     <div class="leadcopy">
@@ -460,7 +475,7 @@ body{min-height:100vh;background:linear-gradient(180deg,#1C2747 0%,#2C3561 34%,#
   </section>
   <footer class="foot">
     <p>Your films are made and kept on your device. Nothing is uploaded.</p>
-    <p><a href="/you.html">Create for yourself</a> · <a href="/kids.html">Create for your child</a> · <a href="mailto:hello@motionmornings.com">hello@motionmornings.com</a></p>
+    <p><a href="/you.html">Create for yourself</a> · <a href="/kids.html">Create for your child</a> · <a href="/you.html#privacy">Privacy</a> · <a href="#contact" data-contact>Contact us</a></p>
   </footer>
 </div>
 
@@ -644,5 +659,17 @@ let lastFrame = performance.now();
 (function heroLoop(now) { if (!$('#watch').hidden && !$('.wyou').hidden) heroFrame(Math.min(0.1, (now - lastFrame) / 1000)); lastFrame = now; requestAnimationFrame(heroLoop); })(performance.now());
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
 </script>
+<script>
+// the menu: open and close, and close on a tap elsewhere or Escape
+(function () {
+  var b = document.getElementById('navBtn'), p = document.getElementById('navPanel'); if (!b || !p) return;
+  function set(open) { p.hidden = !open; b.setAttribute('aria-expanded', open ? 'true' : 'false'); }
+  b.addEventListener('click', function (e) { e.stopPropagation(); set(p.hidden); });
+  document.addEventListener('click', function (e) { if (!p.hidden && !p.contains(e.target)) set(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !p.hidden) { set(false); b.focus(); } });
+  p.addEventListener('click', function (e) { if (e.target.closest('a')) set(false); });
+})();
+</script>
+<script src="contact.js"></script>
 </body>
 </html>

@@ -556,11 +556,15 @@
   $('#reqCancel').addEventListener('click', () => $('#reqBox').hidden = true);
   $('#reqTop').addEventListener('click', () => openRequest(pickFor));
   $('#reqSend').addEventListener('click', () => {
-    const what = $('#reqWhat').value.trim(), from = $('#reqEmail').value.trim();
-    if (what.length < 12) { $('#reqStatus').className = 'status err'; $('#reqStatus').textContent = 'Tell us a little about the picture you need.'; return; }
-    const body = `${what}\n\nWho's in it: ${[S.cast.child.name, S.cast.adult.name].filter(Boolean).join(', ') || 'not named yet'}\nReply to: ${from || '(no email given)'}`;
-    location.href = `mailto:${REQ_TO}?subject=${encodeURIComponent('New picture request (Kids)')}&body=${encodeURIComponent(body)}`;
-    $('#reqStatus').className = 'status'; $('#reqStatus').textContent = `Your email app should open with the request ready to send. If it doesn\u2019t, copy what you wrote and email it to ${REQ_TO}.`;
+    const what = $('#reqWhat').value.trim(), from = $('#reqEmail').value.trim(), st = $('#reqStatus');
+    if (what.length < 12) { st.className = 'status err'; st.textContent = 'Tell us a little about the picture you need.'; return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(from)) { st.className = 'status err'; st.textContent = 'Add your email so we can tell you when it\u2019s ready.'; return; }
+    const who = [S.cast.child.name, S.cast.adult.name].filter(Boolean).join(', ') || 'not named yet';
+    if (!window.MMContact) { st.className = 'status err'; st.textContent = `That didn\u2019t send. Please email ${REQ_TO}.`; return; }
+    $('#reqSend').disabled = true; st.className = 'status'; st.textContent = 'Sending...';
+    window.MMContact.send({ subject: 'New picture request (Kids)', email: from, message: what, extra: { who: who } }).then(() => {
+      st.className = 'status'; st.textContent = 'Thanks, your request is in. We\u2019ll email you when the picture is ready.'; $('#reqWhat').value = ''; $('#reqSend').disabled = false;
+    }).catch(() => { $('#reqSend').disabled = false; st.className = 'status err'; st.textContent = `That didn\u2019t send. Check your connection and try again, or email ${REQ_TO}.`; });
   });
   $('#scenePickClose').addEventListener('click', () => $('#scenePick').hidden = true);
   $('#scenePick').addEventListener('click', e => { if (e.target.id === 'scenePick') $('#scenePick').hidden = true; });
