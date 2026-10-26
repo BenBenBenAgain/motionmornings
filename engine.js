@@ -1843,7 +1843,16 @@ const KIDS = (() => {
   const SIB_DEF = { name: '', age: 'kid', body: 'f', hair: 'ponytail', hairCol: '#6B4528', skin: '#F2CBAE', outfit: 'tee', top: '#5FA88F', pants: '#30406E', print: '' };
   const BABY_DEF = { name: '', age: 'baby', hairCol: '#6B4528', skin: '#F2CBAE', top: '#F7D9C4', blanket: '#BFD9EA' };
   const KID = c => Object.assign({}, KID_DEF, c.child || {}), AD = c => Object.assign({}, ADULT_DEF, c.adult || {}), HP = c => Object.assign({}, HELPER_DEF, c.helper || {});
-  const SB = c => Object.assign({}, SIB_DEF, c.sibling || {}), BB = c => Object.assign({}, BABY_DEF, c.baby || {});
+  const SB = c => Object.assign({}, SIB_DEF, (c.siblings && c.siblings[0]) || c.sibling || {}), BB = c => Object.assign({}, BABY_DEF, c.baby || {});
+  const FRIEND_DEF = { name: '', age: 'little', body: 'f', hair: 'curly', hairCol: '#3B2A20', skin: '#E8BA99', outfit: 'tee', top: '#E9A23B', pants: '#30406E', print: '' };
+  const GENERIC = () => [KIDA, KIDB, KIDC, KIDD];
+  const EX = (c, i) => { const fr = (c && c.friends) || []; return i < fr.length ? Object.assign({}, FRIEND_DEF, fr[i]) : GENERIC()[(i - fr.length) % 4]; };
+  const FR = c => EX(c, 0);
+  // the other child in a two-kid scene: a friend if the step says so, otherwise a brother or sister
+  const PAL = (c, st) => st && st.with === 'friend' ? FR(c) : SB(c);
+  // the family's pets, walking or resting nearby
+  const PETS = c => ({ pets: ((c && c.pets) || []).filter(q => q && (q.type === 'dog' || q.type === 'cat')) });
+  const hasPet = c => PETS(c).pets.length > 0;
   const ks = (k, s = 1) => kidScale(k) * s;
   // the top of someone's head, for placing what they say
   const adultTop = (x, y, s = 1) => [x, y - 590 * s];
@@ -2009,10 +2018,10 @@ const KIDS = (() => {
   // the head's centre and half-width for a kid drawn at (x, y), so hands can find their ears
   function kidHeadAt(k, x, y, s = 1) { const sc = ks(k, s), hs = kidHead(k); return [x, y + sc * (-470 - 32 * hs), 50 * hs * sc]; }
   // a crowd that streams in from the right and fills the back of the room
-  function crowd(t, arrive, scale = 0.86, y0 = 1560) {
+  function crowd(c, t, arrive, scale = 0.86, y0 = 1560) {
     const q = ease(clamp(t / arrive)), m = q < 0.98 ? 1 : 0;
     [[MUM2, 900, 0], [DAD1, 1010, 0.3], [MUM3, 690, 0.6], [DAD2, 800, 0.2], [MUM4, 590, 0.5]].forEach(([L, x, d], i) => person(lerp(x + 700 + i * 60, x, q), y0, scale, L, t + d, { flip: -1, walk: m, armR: !m && i % 2 ? [0.5 + 0.2 * Math.sin(t * 3 + i), 1.1] : [0.2, 0.1] }));
-    [[KIDA, 650], [KIDC, 760], [KIDB, 880], [KIDD, 980]].forEach(([k, x], i) => drawKid(k, lerp(x + 800 + i * 50, x, q), y0 + 60, t + i * 0.4, { flip: -1, walk: m, speed: 11, s: 0.95, armL: !m ? [2.3 + 0.4 * Math.sin(t * 5 + i), 2.7] : [0.2, 0.1], armR: !m && i % 2 ? [2.4, 2.9 + 0.3 * Math.sin(t * 6 + i)] : [0.2, 0.1] }));
+    [[EX(c, 0), 650], [EX(c, 2), 760], [EX(c, 1), 880], [EX(c, 3), 980]].forEach(([k, x], i) => drawKid(k, lerp(x + 800 + i * 50, x, q), y0 + 60, t + i * 0.4, { flip: -1, walk: m, speed: 11, s: 0.95, armL: !m ? [2.3 + 0.4 * Math.sin(t * 5 + i), 2.7] : [0.2, 0.1], armR: !m && i % 2 ? [2.4, 2.9 + 0.3 * Math.sin(t * 6 + i)] : [0.2, 0.1] }));
     return q;
   }
 
@@ -2043,11 +2052,12 @@ const KIDS = (() => {
   }
 
   // ---- home with the family: a living room with a sofa, and toys to share
-  function lounge(t) {
+  function lounge(t, c) {
     ROOMSEL = 0; room(PARK, t, { window: 'day' }); ROOMSEL = null; HATS_OFF = false;
     rr(560, 1230, 470, 120, 40); fill([0.47, 0.62, 0.72]); rr(540, 1320, 510, 150, 34); fill([0.42, 0.57, 0.67]); rr(520, 1290, 70, 180, 30); fill([0.38, 0.52, 0.62]); rr(990, 1290, 70, 180, 30); fill([0.38, 0.52, 0.62]);
     rr(640, 1258, 110, 80, 22); fill(GOLD); rr(820, 1262, 110, 76, 22); fill(CORAL);
     ell(500, 1760, 470, 110); fill([0.85, 0.55, 0.45]); ell(500, 1760, 400, 86); fill([0.93, 0.7, 0.58]);
+    if (c && hasPet(c)) pet(PETS(c), 860, 1620, 0.55, t, { flip: -1 });
   }
   function teddy(x, y, sc = 1, rot = 0) {
     X.save(); X.translate(x, y); X.rotate(rot); X.scale(sc, sc); const b = [0.72, 0.5, 0.3], d = [0.6, 0.4, 0.24];
@@ -2149,29 +2159,29 @@ const KIDS = (() => {
       const q = ease(clamp(t / 2.4)), m = q < 0.98 ? 1 : 0;
       person(lerp(1350, 760, q), 1690, 0.97, MUM2, t, { flip: -1, walk: m, armR: !m ? wave(t, 1) : [0.2, 0.1] });
       person(lerp(1550, 980, q), 1690, 0.99, MUM3, t + 0.4, { flip: -1, walk: m });
-      drawKid(KIDA, lerp(1250, 620, q), 1700, t + 0.2, { flip: -1, walk: m, speed: 11 });
-      drawKid(KIDB, lerp(1450, 870, q), 1705, t + 0.6, { flip: -1, walk: m, speed: 11 });
+      drawKid(EX(c, 0), lerp(1250, 620, q), 1700, t + 0.2, { flip: -1, walk: m, speed: 11 });
+      drawKid(EX(c, 1), lerp(1450, 870, q), 1705, t + 0.6, { flip: -1, walk: m, speed: 11 });
       drawKid(k, 300, 1700, t, { armR: t > 2.2 ? wave(t) : [0.2, 0.1] });
-      return { adult: adultTop(110, 1690), child: kidTop(k, 300, 1700) };
+      return { adult: adultTop(110, 1690), child: kidTop(k, 300, 1700), friend: kidTop(EX(c, 0), lerp(1250, 620, q), 1700) };
     } },
     hello: { label: 'Saying hello', fn(c, t) {
       hall(t); const k = KID(c);
       person(780, 1690, 0.97, MUM2, t, { flip: -1, armR: [0.5 + 0.15 * Math.sin(t * 2), 1.0] });
-      drawKid(KIDA, 640, 1705, t, { flip: -1 });
+      drawKid(EX(c, 0), 640, 1705, t, { flip: -1 });
       const mx = 330, kx = 170, y = 1690, hx = 245, hy = y - 228;
       person(mx, y, 1, AD(c), t, { armL: reach(mx, y, 1, 1, -1, hx, hy), armR: t > 1 ? wave(t) : [0.2, 0.1] });
       drawKid(k, kx, y + 6, t, { armR: reach(kx, y + 6, ks(k), 1, 1, hx, hy, -1) });
-      return { adult: adultTop(mx, y), child: kidTop(k, kx, y + 6) };
+      return { adult: adultTop(mx, y), child: kidTop(k, kx, y + 6), friend: kidTop(EX(c, 0), 640, 1705) };
     } },
     busy: { label: 'Lots of people come in', fn(c, t) {
-      hall(t); const k = KID(c), q = crowd(t, 1.6);
+      hall(t); const k = KID(c), q = crowd(c, t, 1.6);
       if (q > 0.5) { noise(760, 1180, t, ease((q - 0.5) / 0.5)); noise(900, 1280, t + 0.4, ease((q - 0.5) / 0.5)); }
       person(110, 1700, 1, AD(c), t, { armR: reach(110, 1700, 1, 1, 1, 220, 1478) });
       drawKid(k, 260, 1710, t, { smile: false, armL: reach(260, 1710, ks(k), 1, -1, 220, 1478, -1) });
       return { adult: adultTop(110, 1700), child: kidTop(k, 260, 1710) };
     } },
     ears: { label: 'Too loud: covering ears', fn(c, t) {
-      hall(t); crowd(99, 1, 0.72, 1500); noise(780, 1150, t, 0.7);
+      hall(t); crowd(c, 99, 1, 0.72, 1500); noise(780, 1150, t, 0.7);
       const k = KID(c), kx = 400, ky = 1720, [hx, hy, hw] = kidHeadAt(k, kx, ky), s = ks(k);
       // Mumma stands close with a hand on his shoulder
       person(230, 1710, 1, AD(c), t, { armR: reach(230, 1710, 1, 1, 1, kx - 30, ky - 420 * s + 6 * Math.sin(t * 2)), armL: [0.2, 0.1] });
@@ -2184,7 +2194,7 @@ const KIDS = (() => {
       hall(t);
       // the busy part of the room stays small and far away
       person(760, 1470, 0.62, MUM2, t, { flip: -1, armR: [0.4, 1 + 0.2 * Math.sin(t * 3)] }); person(900, 1470, 0.62, DAD1, t + 1, { flip: -1 }); person(1010, 1475, 0.62, MUM3, t + 2, { flip: -1 });
-      drawKid(KIDA, 800, 1520, t, { s: 0.75, armL: [2.4, 2.8], armR: [2.4, 2.8 + 0.3 * Math.sin(t * 6)] }); drawKid(KIDC, 930, 1525, t + 1, { s: 0.75, flip: -1 }); ball(860, 1430 - 120 * Math.abs(Math.sin(t * 2.2)), 18, GOLD);
+      drawKid(EX(c, 0), 800, 1520, t, { s: 0.75, armL: [2.4, 2.8], armR: [2.4, 2.8 + 0.3 * Math.sin(t * 6)] }); drawKid(EX(c, 2), 930, 1525, t + 1, { s: 0.75, flip: -1 }); ball(860, 1430 - 120 * Math.abs(Math.sin(t * 2.2)), 18, GOLD);
       // up close: Mumma and the child rolling a ball between them
       // up close: Mumma and the child gently tossing a ball between them
       const k = KID(c), mx = 200, kx = 520, y = 1740, sk = ks(k), A = [318, 1450], B = [458, 1588];
@@ -2200,7 +2210,7 @@ const KIDS = (() => {
       return { adult: adultTop(mx, y), child: kidTop(k, kx, y + 6) };
     } },
     leave: { label: 'Leaving early, waving bye', fn(c, t, p) {
-      hall(t); crowd(99, 1, 0.72, 1500);
+      hall(t); crowd(c, 99, 1, 0.72, 1500);
       const q = ease(clamp((p - 0.15) / 0.85));
       return pair(c, lerp(260, 1250, q), 1720, t, q > 0 && q < 1 ? 1 : 0, { kidWave: true });
     } },
@@ -2227,13 +2237,13 @@ const KIDS = (() => {
       const tx = 900, ty = 1720, bx = 800, by = 1380 + 4 * Math.sin(t * 1.4);
       person(tx, ty, 1, hp, t, { flip: -1, armR: reach(tx, ty, 1, -1, 1, bx - 40, by + 30, -1), armL: reach(tx, ty, 1, -1, -1, bx + 40, by + 30, -1) });
       X.save(); X.translate(bx, by); X.rotate(-0.08); rr(-90, -60, 180, 120, 8); fill(CORAL); rect(-82, -52, 80, 104, [1, 1, 1]); rect(2, -52, 80, 104, [1, 1, 1]); circ(-42, -12, 18); fill(GOLD); line([[20, -20], [62, -20]], 5, [0.6, 0.6, 0.65]); line([[20, 0], [62, 0]], 5, [0.6, 0.6, 0.65]); X.restore();
-      sitKid(KIDA, 200, 1700, t + 0.4, { armL: [0.5, 1.2], armR: [0.5, 1.2] }); sitKid(KIDC, 600, 1700, t + 0.9, { armL: [0.5, 1.2], armR: [0.5, 1.2] });
-      sitKid(KIDB, 290, 1790, t, { armL: [0.5, 1.2], armR: [0.5, 1.2] }); sitKid(k, 470, 1790, t, { armL: [0.5, 1.2], armR: t % 4 > 2 ? [2.6, 3] : [0.5, 1.2] });
+      sitKid(EX(c, 0), 200, 1700, t + 0.4, { armL: [0.5, 1.2], armR: [0.5, 1.2] }); sitKid(EX(c, 2), 600, 1700, t + 0.9, { armL: [0.5, 1.2], armR: [0.5, 1.2] });
+      sitKid(EX(c, 1), 290, 1790, t, { armL: [0.5, 1.2], armR: [0.5, 1.2] }); sitKid(k, 470, 1790, t, { armL: [0.5, 1.2], armR: t % 4 > 2 ? [2.6, 3] : [0.5, 1.2] });
       return { adult: [380, 1100], child: [470, 1470], helper: adultTop(tx, ty) };
     } },
     lunch: { label: 'Lunch with the other kids', fn(c, t) {
       classroom(t); const k = KID(c);
-      [[260, KIDA], [440, k], [620, KIDB], [800, KIDC]].forEach(([x, kk], i) => { const s = ks(kk); const bite = kk === k && t % 3 > 1.5; drawKid(kk, x, 1580, t + i * 0.3, { armL: reach(x, 1580, s, 1, -1, x - 40, 1450, -1), armR: bite ? reach(x, 1580, s, 1, 1, x + 20, 1580 - s * 520, -1) : reach(x, 1580, s, 1, 1, x + 40, 1450, -1) }); });
+      [[260, EX(c, 0)], [440, k], [620, EX(c, 1)], [800, EX(c, 2)]].forEach(([x, kk], i) => { const s = ks(kk); const bite = kk === k && t % 3 > 1.5; drawKid(kk, x, 1580, t + i * 0.3, { armL: reach(x, 1580, s, 1, -1, x - 40, 1450, -1), armR: bite ? reach(x, 1580, s, 1, 1, x + 20, 1580 - s * 520, -1) : reach(x, 1580, s, 1, 1, x + 40, 1450, -1) }); });
       clothTable(150, 920, 1450, 1720);
       [[260, CORAL], [440, [0.47, 0.7, 0.83]], [620, GOLD], [800, [0.55, 0.78, 0.5]]].forEach(([x, col]) => { rr(x - 50, 1420, 100, 40, 8); fill(col); circ(x - 20, 1418, 12); fill([0.95, 0.55, 0.22]); rr(x + 2, 1406, 30, 16, 6); fill([0.93, 0.85, 0.6]); });
       return { adult: [300, 1000], child: kidTop(k, 440, 1580) };
@@ -2246,38 +2256,38 @@ const KIDS = (() => {
       if (hug) hearts((ax + kx) / 2, 1150, t - 2.1, 2);
       return { adult: adultTop(ax, y), child: kidTop(k, kx, y + 4) };
     } },
-    share: { label: 'Sharing a toy', fn(c, t) {
-      lounge(t); const k = KID(c), sb = SB(c), kx = 330, sx = 700, y = 1760, sk = ks(k), ss = ks(sb);
+    share: { label: 'Sharing a toy', pair: true, fn(c, t, p, st) {
+      lounge(t, c); const k = KID(c), sb = PAL(c, st), kx = 330, sx = 700, y = 1760, sk = ks(k), ss = ks(sb);
       const u = ease(clamp((t - 1) / 1.4)), ty = 1500 - 40 * Math.sin(u * PI), tx = lerp(sx - 110, kx + 100, u);
       drawKid(sb, sx, y, t + 0.5, { flip: -1, armR: reach(sx, y, ss, -1, 1, tx + 20, ty + 30, -1), armL: [0.2, 0.1] });
       drawKid(k, kx, y + 6, t, { armR: u > 0.4 ? reach(kx, y + 6, sk, 1, 1, tx - 20, ty + 34, -1) : [0.6, 0.6], armL: [0.2, 0.1] });
       teddy(tx, ty + 40, 0.9, 0.15 * Math.sin(t * 2));
       if (t > 2.6) hearts(520, 1250, t - 2.6, 1);
-      return { adult: [300, 1000], child: kidTop(k, kx, y + 6), sibling: kidTop(sb, sx, y) };
+      return { adult: [300, 1000], child: kidTop(k, kx, y + 6), sibling: kidTop(sb, sx, y), friend: kidTop(sb, sx, y) };
     } },
-    tug: { label: 'Both want the same toy', fn(c, t) {
-      lounge(t); const k = KID(c), sb = SB(c), kx = 330, sx = 720, y = 1760, sk = ks(k), ss = ks(sb), pull = 26 * Math.sin(t * 4), mx = 525 + pull, my = 1540;
+    tug: { label: 'Both want the same toy', pair: true, fn(c, t, p, st) {
+      lounge(t, c); const k = KID(c), sb = PAL(c, st), kx = 330, sx = 720, y = 1760, sk = ks(k), ss = ks(sb), pull = 26 * Math.sin(t * 4), mx = 525 + pull, my = 1540;
       drawKid(sb, sx, y, t, { flip: -1, smile: false, armR: reach(sx, y, ss, -1, 1, mx + 50, my, -1), armL: reach(sx, y, ss, -1, -1, mx + 70, my + 6, -1) });
       drawKid(k, kx, y + 6, t, { smile: false, armR: reach(kx, y + 6, sk, 1, 1, mx - 50, my, -1), armL: reach(kx, y + 6, sk, 1, -1, mx - 70, my + 6, -1) });
       truck(mx, my + 34, 0.9);
       const [hx1, hy1] = kidTop(k, kx, y + 6), [hx2, hy2] = kidTop(sb, sx, y); cross(hx1, hy1 - 30, t); cross(hx2, hy2 - 30, t + 1);
-      return { adult: [300, 1000], child: [hx1, hy1], sibling: [hx2, hy2] };
+      return { adult: [300, 1000], child: [hx1, hy1], sibling: [hx2, hy2], friend: [hx2, hy2] };
     } },
     breathe: { label: 'Taking a big breath', fn(c, t) {
-      lounge(t); const k = KID(c), kx = 520, y = 1760, sk = ks(k), br = 0.5 - 0.5 * Math.cos(t * 1.6), [hx, hy] = kidHeadAt(k, kx, y);
+      lounge(t, c); const k = KID(c), kx = 520, y = 1760, sk = ks(k), br = 0.5 - 0.5 * Math.cos(t * 1.6), [hx, hy] = kidHeadAt(k, kx, y);
       person(260, y - 10, 1, AD(c), t, { armR: reach(260, y - 10, 1, 1, 1, kx - 40, y - 420 * sk), armL: [0.2, 0.1] });
       drawKid(k, kx, y, t, { eyesClosed: br > 0.5, bob: 6 * br, armL: [0.3 + 1.2 * br, 0.4 + 1.6 * br], armR: [0.3 + 1.2 * br, 0.4 + 1.6 * br] });
       for (let i = 0; i < 3; i++) { const r = 60 + i * 50 + 50 * br; circ(hx, hy - 10, r); X.lineWidth = 5; X.strokeStyle = css([0.47, 0.7, 0.83], 0.35 - i * 0.1); X.stroke(); }
       return { adult: adultTop(260, y - 10), child: kidTop(k, kx, y) };
     } },
-    sorry: { label: 'Saying sorry, a hug', fn(c, t) {
-      lounge(t); const k = KID(c), sb = SB(c), sk = ks(k), ss = ks(sb), y = 1760, kx = 450, sx = 620;
+    sorry: { label: 'Saying sorry, a hug', pair: true, fn(c, t, p, st) {
+      lounge(t, c); const k = KID(c), sb = PAL(c, st), sk = ks(k), ss = ks(sb), y = 1760, kx = 450, sx = 620;
       const ksh = [kx + 30, y - 420 * sk], ssh = [sx - 30, y - 420 * ss];
       drawKid(sb, sx, y, t + 0.3, { flip: -1, armR: reach(sx, y, ss, -1, 1, ksh[0] - 10, ksh[1] + 10), armL: reach(sx, y, ss, -1, -1, ksh[0] + 20, ksh[1] + 30, -1) });
       drawKid(k, kx, y + 6, t, { armR: reach(kx, y + 6, sk, 1, 1, ssh[0] + 10, ssh[1] + 14), armL: reach(kx, y + 6, sk, 1, -1, ssh[0] - 20, ssh[1] + 30, -1) });
       teddy(240, 1780, 0.8);
       hearts(535, 1250, t, 2);
-      return { adult: [300, 1000], child: kidTop(k, kx, y + 6), sibling: kidTop(sb, sx, y) };
+      return { adult: [300, 1000], child: kidTop(k, kx, y + 6), sibling: kidTop(sb, sx, y), friend: kidTop(sb, sx, y) };
     } },
     baby_gentle: { label: 'Gentle with the baby', fn(c, t) {
       ROOMSEL = 0; room(PARK, t, { window: 'day' }); ROOMSEL = null; HATS_OFF = false;
@@ -2431,6 +2441,7 @@ const KIDS = (() => {
       ROOMSEL = 6; room(PARK, t, { window: 'dusk' }); ROOMSEL = null; HATS_OFF = false;
       const k = KID(c), ad = AD(c), dim = ease(clamp((t - 2.2) / 1.2));
       bed(160, 1470, 560, k, t);
+      if (hasPet(c)) pet(PETS(c), 560, 1760, 0.55, t * 0.3, { flip: -1, tongue: false });
       teddy(270, 1460, 0.5, -0.4);
       const q = ease(clamp((t - 0.6) / 1.8)), ax = lerp(820, 1000, q);
       person(ax, 1720, 0.95, ad, t, { flip: -1, walk: q > 0 && q < 1 ? 1 : 0, armR: wave(t) });
@@ -2467,6 +2478,7 @@ const KIDS = (() => {
     bike_ride: { label: 'Riding all by themselves!', fn(c, t, p) {
       outdoor(PARK, t, 'day'); const k = KID(c), ad = AD(c), x = lerp(-150, 1250, p);
       person(170, 1690, 0.95, ad, t, clap(170, 1690, 0.95, 1, t));
+      if (hasPet(c)) pet(PETS(c), x - 330, 1770, 0.6, t, { walk: 1, speed: 14 });
       const b = bike(x, 1760, t, CORAL); const head = rider(k, b, t);
       line([[x - 200, 1700], [x - 320, 1700]], 6, [1, 1, 1], 0.7); line([[x - 220, 1660], [x - 300, 1660]], 6, [1, 1, 1], 0.5);
       if (p > 0.3) hearts(170, 1120, t, 2);
@@ -2480,10 +2492,10 @@ const KIDS = (() => {
       planet(1000, 1600, 26); blocks(820, 1560);
       const q = (t * 0.55) % 1, dir = Math.floor(t * 0.55) % 2, x0 = 380, x1 = 790, bx = dir ? lerp(x1, x0, q) : lerp(x0, x1, q), by = 1560 - 260 * Math.sin(q * PI);
       drawKid(k, 300, 1770, t, { armL: [1.3, 1.1], armR: [1.4, 1.2] });
-      drawKid(KIDA, 560, 1780, t, { armL: [2.5, 2.9], armR: [2.5, 2.9] });
-      drawKid(KIDB, 860, 1770, t, { flip: -1, armL: [1.3, 1.1], armR: [1.4, 1.2] });
+      drawKid(EX(c, 0), 560, 1780, t, { armL: [2.5, 2.9], armR: [2.5, 2.9] });
+      drawKid(EX(c, 1), 860, 1770, t, { flip: -1, armL: [1.3, 1.1], armR: [1.4, 1.2] });
       ball(bx, by, 36, CORAL);
-      return { adult: adultTop(150, 1520, 0.78), child: kidTop(k, 300, 1770) };
+      return { adult: adultTop(150, 1520, 0.78), child: kidTop(k, 300, 1770), friend: kidTop(EX(c, 0), 560, 1780) };
     } },
     cafe: { label: 'At a cafe', place: true, fn(c, t, p, st) {
       shopFront(t, st.place); chairBack(330); chairBack(730);
@@ -2499,7 +2511,7 @@ const KIDS = (() => {
     food_look: { label: 'Looking at a new food', fn(c, t) { return foodScene(c, t, 'look'); } },
     food_bite: { label: 'Taking a little bite', fn(c, t) { return foodScene(c, t, 'bite'); } },
     food_ok: { label: 'Proud after trying', fn(c, t) { return foodScene(c, t, 'ok'); } },
-    home: { label: 'Walking home', fn(c, t, p) { outdoor(PARK, t, 'sunset', 960 + 60 * p); const q = ease(clamp((p - 0.2) / 0.8)); return pair(c, lerp(200, 1300, q), 1690, t, q > 0 && q < 1 ? 1 : 0); } },
+    home: { label: 'Walking home', fn(c, t, p) { outdoor(PARK, t, 'sunset', 960 + 60 * p); const q = ease(clamp((p - 0.2) / 0.8)), m = q > 0 && q < 1 ? 1 : 0, h = pair(c, lerp(200, 1300, q), 1690, t, m); if (hasPet(c)) pet(PETS(c), lerp(200, 1300, q) + 330, 1730, 0.7, t, { walk: m }); return h; } },
   };
   // everyday family scenes from the main film builder that also suit kids' stories
   const BORROW = { parkday: 'At the park', familydinner: 'Dinner together', bedtime: 'Bedtime story', schoolrun: 'Walking to school' };
@@ -2524,7 +2536,8 @@ const KIDS = (() => {
   // ---- names in the words: {child} and {adult} become the cast's names
   function names(text, c) {
     const sx = c2 => c2.sex || (c2.body === 'm' ? 'm' : 'f'), sn = (SB(c).name || '').trim() || ({ m: 'their brother', f: 'their sister', x: 'their sibling' }[sx(SB(c))]), bn = (BB(c).name || '').trim() || 'the baby';
-    text = String(text || '').replace(/\{sibling\}/g, sn).replace(/\{baby\}/g, bn);
+    const fn0 = ((c.friends && c.friends[0] && c.friends[0].name) || '').trim() || 'their friend';
+    text = String(text || '').replace(/\{sibling\}/g, sn).replace(/\{baby\}/g, bn).replace(/\{friend\}/g, fn0);
     const kn = (KID(c).name || '').trim() || 'your child', an = (AD(c).name || '').trim() || ({ m: 'Dad', f: 'Mum', x: 'their grown-up' }[sx(AD(c))]), hn = (HP(c).name || '').trim() || 'a friend';
     return String(text || '').replace(/\{child\}/g, kn).replace(/\{adult\}/g, an).replace(/\{helper\}/g, hn);
   }
@@ -2573,7 +2586,7 @@ const KIDS = (() => {
     const it = tl.items[i], t = T - it.start, p = clamp(t / it.d), st = it.step || {};
     X.save(); X.fillStyle = css(CREAM); X.fillRect(0, 0, W, H); HATS_OFF = false; ROOMSEL = null;
     let heads = null;
-    try { heads = SC[it.scene].fn(cast, t, p, { place: names(st.place || '', cast) }); } catch (e) { console.error(e); }
+    try { heads = SC[it.scene].fn(cast, t, p, { place: names(st.place || '', cast), with: st.with }); } catch (e) { console.error(e); }
     ROOMSEL = null; X.restore();
     X.save();
     const tm = parseTime(st.time);
@@ -2589,9 +2602,9 @@ const KIDS = (() => {
     const out = clamp((T - (tl.total - 0.9)) / 0.9); if (out > 0) rect(0, 0, W, H, CREAM, ease(out));
   }
   // one still of a scene, for the scene picker
-  function still(ctx, cast, key, place) {
+  function still(ctx, cast, key, place, withWho) {
     X = ctx; X.save(); X.fillStyle = css(CREAM); X.fillRect(0, 0, W, H); HATS_OFF = false;
-    try { SC[key].fn(cast, 2.4, 0.55, { place: names(place || '', cast) }); } catch (e) { console.error(e); }
+    try { SC[key].fn(cast, 2.4, 0.55, { place: names(place || '', cast), with: withWho }); } catch (e) { console.error(e); }
     ROOMSEL = null; X.restore();
   }
   // a character on their own, for the look editor
@@ -2602,11 +2615,13 @@ const KIDS = (() => {
     const wv = { armR: [0.3 + 0.1 * Math.sin(t * 2), 0.25], armL: [0.2, 0.1] };
     if (kind === 'baby') { const b = Object.assign({}, BABY_DEF, look), sc = (h - 40) / 150; ell(w / 2, h * 0.62, 70 * sc, 30 * sc); fill(b.blanket); baby(w / 2, h * 0.6, sc, b, t); X.restore(); return; }
     if (kind === 'sibling') look = Object.assign({}, SIB_DEF, look), kind = 'child';
+    if (kind === 'friend') look = Object.assign({}, FRIEND_DEF, look), kind = 'child';
+    if (kind === 'pet') { X.restore(); portrait(ctx, Object.assign({ type: 'dog', coat: '#A14F26', ears: 'floppy' }, look), t, w, h, 'pet'); return; }
     if (kind === 'child') { const k = Object.assign({}, KID_DEF, look), s = (h - 60) / (ks(k) * (470 + 118 * kidHead(k))) * ks(k); drawKid(k, w / 2, h - 34, t, Object.assign({ s: s / ks(k) }, wv)); }
     else { const L = Object.assign({}, kind === 'helper' ? HELPER_DEF : ADULT_DEF, look); person(w / 2, h - 34, (h - 60) / 600, L, t, wv); }
     X.restore();
   }
-  return { SC, PICK, PLACES, SIB_DEF, BABY_DEF, timeline, frame, still, portraitOf, names, parseTime, KID_DEF, ADULT_DEF, HELPER_DEF, stepLen };
+  return { SC, PICK, PLACES, SIB_DEF, BABY_DEF, FRIEND_DEF, timeline, frame, still, portraitOf, names, parseTime, KID_DEF, ADULT_DEF, HELPER_DEF, stepLen };
 })();
 return { W, H, SCENES, portrait, homeWorld, openingText, closingText, DEFAULT_KID, petsOf, PICKABLE, WORLDS: Object.keys(WORLDS), DEFAULT_ME, DEFAULT_PARTNER, timeline, render, drawScene, fillText, petName, KIDS };
 })();
