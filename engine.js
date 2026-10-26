@@ -2700,7 +2700,7 @@ const KIDS = (() => {
       { id: 'd6', scene: 'ears', text: 'Ava can hold Mum\u2019s hand until she feels ready.' },
       { id: 'd7', scene: 'playball', text: 'Then Ava and Leo play ball together.' }] } },
     // a different family for the second demo: Dad and his son, with their own song
-    doctor: { label: 'The doctor', music: 'italian-andante', cast: Object.assign({}, DEMO_CAST, {
+    doctor: { label: 'The doctor', music: 'figaro', cast: Object.assign({}, DEMO_CAST, {
       child: Object.assign({}, KID_DEF, { name: 'Theo', sex: 'm', body: 'm', hair: 'short', hairCol: '#1F1A17', skin: '#D6A27C', outfit: 'hoodie', top: '#F2BC6B', pants: '#30406E', years: 5, age: 'little' }),
       adult: Object.assign({}, ADULT_DEF, { name: 'Dad', sex: 'm', body: 'm', hair: 'fade', hairCol: '#1F1A17', skin: '#C98E66', facial: 'beard', facialCol: '#1F1A17', glasses: 'square', outfit: 'shirt', top: '#3F7FA3', inner: '#EFE8DC', pants: '#2F3A4F' }),
       helper: Object.assign({}, HELPER_DEF, { name: 'Dr Lee' }), friends: [], pets: [] }), story: { title: 'Theo Goes to the Doctor', ending: 'Theo was so brave!', steps: [
