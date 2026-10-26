@@ -247,6 +247,11 @@ video.result{width:100%;max-width:280px;border-radius:14px;background:#000}
 .mphone canvas{width:100%;height:100%;display:block}
 .mlabel{font:700 .78rem var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--sea);display:inline-flex;align-items:center;gap:8px}
 .mlabel .kidsword,.mlabel .kidsmark{font-size:.9rem;letter-spacing:0;transform:none;margin:0}
+.mini .mphone{transition:transform .45s ease,filter .45s ease,opacity .45s ease}
+.mini:not(.on) .mphone{filter:saturate(.55) brightness(.96);opacity:.8;transform:scale(.97)}
+.mini.on .mphone{transform:scale(1.03)}
+.mini .mlabel{transition:opacity .45s ease}.mini:not(.on) .mlabel{opacity:.55}
+@media (prefers-reduced-motion: reduce){.mini .mphone{transition:none}}
 .duohint{margin:0;font-size:.88rem;color:var(--muted)}
 @media (max-width:760px){
   .lead{grid-template-columns:minmax(0,1fr);grid-template-areas:"copy" "duo" "btns";padding-block:10px 36px;row-gap:0}

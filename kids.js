@@ -204,16 +204,27 @@
   let miniVis = true, still = false, miniT0 = performance.now();
   try { still = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
   try { new IntersectionObserver(es => { miniVis = es[0].isIntersecting; }).observe($('.duo')); } catch (e) {}
-  // the little phones play scene by scene with straight cuts, skipping the fades, so every moment shows a clear picture
-  function cutTime(tl, t) {
-    const wins = tl.items.slice(1, -1).map(i => [i.start + Math.min(0.8, i.d * 0.2), i.start + i.d - Math.min(0.8, i.d * 0.2)]);
-    const total = wins.reduce((a, w) => a + w[1] - w[0], 0); let r = ((t % total) + total) % total;
-    for (const w of wins) { if (r < w[1] - w[0]) return w[0] + r; r -= w[1] - w[0]; }
-    return wins[0][0];
+  // the two little phones take turns: one plays a scene while the other holds its last frame, then they swap.
+  // each phone still plays its own film in order, scene by scene with straight cuts that skip the fades
+  function sceneWins(tl) { return tl.items.slice(1, -1).map(i => [i.start + Math.min(i.kind === 'g' ? 1.6 : 1.1, i.d * 0.3), i.start + i.d - Math.min(0.35, i.d * 0.1)]); }
+  function makeDuo(phones) {
+    phones.forEach(p => { p.wins = sceneWins(p.tl); p.i = 0; p.hold = p.wins[0][0] + Math.min(1.5, (p.wins[0][1] - p.wins[0][0]) * 0.4); });
+    let on = 0, tIn = 0;
+    const mark = () => phones.forEach((p, k) => p.el.classList.toggle('on', k === on));
+    mark();
+    return function step(dt) {
+      const p = phones[on], w = p.wins[p.i];
+      tIn += dt; p.hold = Math.min(w[0] + tIn, w[1]);
+      if (w[0] + tIn >= w[1]) { p.i = (p.i + 1) % p.wins.length; on = (on + 1) % phones.length; tIn = 0; mark(); }
+      phones.forEach(q => q.draw(q.hold));
+    };
   }
   function drawDemo(ctx, cv, d, T) { ctx.setTransform(cv.width / W, 0, 0, cv.width / W, 0, 0); K.frame(ctx, d.cast, d.story, d.tl, Math.min(T, d.tl.total - 0.01)); ctx.setTransform(1, 0, 0, 1, 0, 0); }
+  let miniStep = null, miniLast = 0;
   function miniLoop(now) {
-    if (miniVis && $('#watch').hidden) { const t = still ? 0 : (now - miniT0) / 1000; minis.forEach((m, i) => drawDemo(m.cv.getContext('2d'), m.cv, m.d, cutTime(m.d.tl, t + 2 + i * 5))); }
+    if (!miniStep) miniStep = makeDuo(minis.map(m => ({ el: m.b, tl: m.d.tl, draw: T => drawDemo(m.cv.getContext('2d'), m.cv, m.d, T) })));
+    const dt = miniLast ? Math.min(0.1, (now - miniLast) / 1000) : 0; miniLast = now;
+    if (miniVis && $('#watch').hidden) miniStep(still ? 0 : dt);
     if (!still) requestAnimationFrame(miniLoop);
   }
   // tapping a little phone opens it bigger, with music

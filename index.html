@@ -363,6 +363,11 @@ input[type=range]{height:30px;touch-action:none}
 .mphone canvas{width:100%;height:100%;display:block}
 .mlabel{font:700 .78rem var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--sea);display:inline-flex;align-items:center;gap:8px}
 .mlabel .kidsword,.mlabel .kidsmark{font-size:.9rem;letter-spacing:0;transform:none;margin:0}
+.mini .mphone{transition:transform .45s ease,filter .45s ease,opacity .45s ease}
+.mini:not(.on) .mphone{filter:saturate(.55) brightness(.96);opacity:.8;transform:scale(.97)}
+.mini.on .mphone{transform:scale(1.03)}
+.mini .mlabel{transition:opacity .45s ease}.mini:not(.on) .mlabel{opacity:.55}
+@media (prefers-reduced-motion: reduce){.mini .mphone{transition:none}}
 .duohint{margin:0;font-size:.88rem;color:var(--muted)}
 @media (max-width:760px){
   .lead{grid-template-columns:minmax(0,1fr);grid-template-areas:"copy" "duo" "btns";padding-block:10px 36px;row-gap:0}
@@ -1937,26 +1942,34 @@ heroCv.addEventListener('click', () => { if (!heroSound) soundBtn.onclick(); els
 try { new IntersectionObserver(es => { heroVisible = es[0].isIntersecting; if (heroSound) { if (heroVisible && heroPlaying) heroAudio.play().catch(() => {}); else heroAudio.pause(); } }).observe(heroCv); } catch (e) {}
 
 // ------------------------------------------------ the two little phones at the top
-// they play each film scene by scene with straight cuts, skipping the fades, so every moment shows a clear picture
-function cutTime(tl, t) {
-  const wins = tl.items.slice(1, -1).map(i => [i.start + Math.min(0.8, i.d * 0.2), i.start + i.d - Math.min(0.8, i.d * 0.2)]);
-  const total = wins.reduce((a, w) => a + w[1] - w[0], 0); let r = ((t % total) + total) % total;
-  for (const w of wins) { if (r < w[1] - w[0]) return w[0] + r; r -= w[1] - w[0]; }
-  return wins[0][0];
+// the two little phones take turns: one plays a scene while the other holds its last frame, then they swap.
+// each phone still plays its own film in order, scene by scene with straight cuts that skip the fades
+function sceneWins(tl) { return tl.items.slice(1, -1).map(i => [i.start + Math.min(i.kind === 'g' ? 1.6 : 1.1, i.d * 0.3), i.start + i.d - Math.min(0.35, i.d * 0.1)]); }
+function makeDuo(phones) {
+  phones.forEach(p => { p.wins = sceneWins(p.tl); p.i = 0; p.hold = p.wins[0][0] + Math.min(1.5, (p.wins[0][1] - p.wins[0][0]) * 0.4); });
+  let on = 0, tIn = 0;
+  const mark = () => phones.forEach((p, k) => p.el.classList.toggle('on', k === on));
+  mark();
+  return function step(dt) {
+    const p = phones[on], w = p.wins[p.i];
+    tIn += dt; p.hold = Math.min(w[0] + tIn, w[1]);
+    if (w[0] + tIn >= w[1]) { p.i = (p.i + 1) % p.wins.length; on = (on + 1) % phones.length; tIn = 0; mark(); }
+    phones.forEach(q => q.draw(q.hold));
+  };
 }
 const KD = LSN.KIDS.DEMOS.playgroup, KTL = LSN.KIDS.timeline(KD.story, {});
 (() => {
   const you = $('#miniYou'), kid = $('#miniKid'); if (!you) return;
   const yx = you.getContext('2d'), kx = kid.getContext('2d');
-  let t0 = performance.now(), vis = true, still = false;
+  let vis = true, still = false, last = 0;
   try { still = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
   try { new IntersectionObserver(es => { vis = es[0].isIntersecting; }).observe(you); } catch (e) {}
+  const step = makeDuo([
+    { el: you.closest('.mini'), tl: heroTL, draw: T => { yx.setTransform(you.width / 1080, 0, 0, you.width / 1080, 0, 0); LSN.render(yx, DEMO_CFG, heroTL, T); } },
+    { el: kid.closest('.mini'), tl: KTL, draw: T => { kx.setTransform(kid.width / LSN.W, 0, 0, kid.width / LSN.W, 0, 0); LSN.KIDS.frame(kx, KD.cast, KD.story, KTL, T); } }]);
   function loop(now) {
-    if (vis && $('#watch').hidden) {
-      const t = still ? 0 : (now - t0) / 1000;
-      yx.setTransform(you.width / 1080, 0, 0, you.width / 1080, 0, 0); LSN.render(yx, DEMO_CFG, heroTL, cutTime(heroTL, t + 12));
-      kx.setTransform(kid.width / LSN.W, 0, 0, kid.width / LSN.W, 0, 0); LSN.KIDS.frame(kx, KD.cast, KD.story, KTL, cutTime(KTL, t + 4));
-    }
+    const dt = last ? Math.min(0.1, (now - last) / 1000) : 0; last = now;
+    if (vis && $('#watch').hidden) step(still ? 0 : dt);
     if (!still) requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
