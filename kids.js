@@ -349,8 +349,8 @@
   // ---------------------------------------------------------------- cast
   // fixed people (the child, who goes with them, someone they'll meet, a baby) and lists you can add to
   const ONE = [
-    { key: 'child', kind: 'child', title: 'Your child', q: 'Their name', ph: 'e.g. Hunter' },
-    { key: 'adult', kind: 'adult', title: 'Going with them', q: 'What your child calls them', ph: 'e.g. Mumma or Dad' },
+    { key: 'child', kind: 'child', title: 'The child', q: 'Their name', ph: 'e.g. Noah' },
+    { key: 'adult', kind: 'adult', title: 'Going with them', q: 'What the child calls them', ph: 'e.g. Mumma or Dad' },
     { key: 'helper', kind: 'helper', title: 'Someone they’ll meet', q: 'Their name', ph: 'e.g. Vicky, or Dr Lee', on: 'helperOn' },
     { key: 'baby', kind: 'baby', title: 'A baby', q: 'Their name', ph: 'e.g. Ollie', on: 'babyOn' }];
   const MANY = [
@@ -390,12 +390,12 @@
       arr.forEach((L, i) => box.append(personCard({ L, kind: m.kind, title: arr.length > 1 ? `${m.one} ${i + 1}` : m.one, ph: m.ph, id: `${m.kind}${i}`, roleKey: m.kind === 'sibling' && i === 0 ? 'sibling' : null,
         onRemove: () => { arr.splice(i, 1); renderCast(); refresh(); } })));
     });
-    box.append(el('div', { class: 'card addrow' }, el('h3', {}, 'Anyone else?'), el('p', { class: 'meta' }, 'Add the people and pets in your child’s life. Friends show up as the other kids in scenes like playgroup and kinder.'),
+    box.append(el('div', { class: 'card addrow' }, el('h3', {}, 'Anyone else?'), el('p', { class: 'meta' }, 'Add the people and pets in the child’s life. Friends show up as the other kids in scenes like playgroup and kinder.'),
       el('div', { class: 'row' }, MANY.map(m => el('button', { class: 'btn ghost small', type: 'button', id: `add-${m.kind}`, disabled: S.cast[m.list].length >= m.max, onclick: () => { S.cast[m.list].push(m.make()); renderCast(); refresh(); const ins = $$(`#cast input[id^="name-${m.kind}"]`); if (ins.length) ins[ins.length - 1].focus(); } }, m.add)))));
     drawPortraits(0);
   }
   // a new name flows through the story: the old name (or the stand-in) is swapped wherever it appears
-  const STAND_IN = { child: 'your child', adult: 'Mum', helper: 'a friend', baby: 'the baby' };
+  const STAND_IN = { child: 'the child', adult: 'Mum', helper: 'a friend', baby: 'the baby' };
   const standIn = role => role === 'adult' ? ({ m: 'Dad', f: 'Mum', x: 'their grown-up' }[sexOf(S.cast.adult)]) : role === 'sibling' ? ({ m: 'their brother', f: 'their sister', x: 'their sibling' }[sexOf(S.cast.siblings[0] || {})]) : STAND_IN[role];
   function renameIn(role, oldName, newName) {
     const from = (oldName || '').trim() || standIn(role), to = newName.trim() || standIn(role);
@@ -498,7 +498,7 @@
   function renderStory() {
     $('#title').value = S.story.title || ''; $('#ending').value = S.story.ending || '';
     const list = $('#stepList'); list.innerHTML = '';
-    const who = [['child', S.cast.child.name || 'Your child'], ['adult', S.cast.adult.name || 'The grown-up']].concat(S.cast.helperOn ? [['helper', S.cast.helper.name || 'Their helper']] : []).concat(S.cast.siblings.length ? [['sibling', S.cast.siblings[0].name || 'Brother or sister']] : []).concat(S.cast.friends.length ? [['friend', S.cast.friends[0].name || 'Their friend']] : []);
+    const who = [['child', S.cast.child.name || 'The child'], ['adult', S.cast.adult.name || 'The grown-up']].concat(S.cast.helperOn ? [['helper', S.cast.helper.name || 'Their helper']] : []).concat(S.cast.siblings.length ? [['sibling', S.cast.siblings[0].name || 'Brother or sister']] : []).concat(S.cast.friends.length ? [['friend', S.cast.friends[0].name || 'Their friend']] : []);
     S.story.steps.forEach((st, i) => {
       const sc = K.SC[st.scene] || K.SC.goto, cv = el('canvas', { width: 168, height: 299 });
       const thumb = el('button', { class: 'thumb', type: 'button', 'aria-label': `Step ${i + 1} picture: ${sc.label}. Change it`, onclick: () => pickScene(st) }, cv, el('span', { class: 'chg' }, 'Change'));
