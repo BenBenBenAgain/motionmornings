@@ -199,7 +199,7 @@
   function refresh() { TL = K.timeline(S.story, voiceLens()); $('#scrub').max = 1000; $('#lenMeta').textContent = `${fmt(TL.total)} long`; $('#storyMeta').textContent = `${S.story.steps.length} of ${MAX_STEPS} steps \u00b7 about ${fmt(TL.total)}${TL.total > MAX_FILM ? ` (over the ${fmt(MAX_FILM)} limit)` : ''}`; $('#storyMeta').classList.toggle('over', TL.total > MAX_FILM); $('#addStep').disabled = S.story.steps.length >= MAX_STEPS; $('#addCalm').disabled = S.story.steps.length > MAX_STEPS - 3; if (!playing) draw(pos); save(); }
   // ---- the demo films: a made-up mum and daughter, on the little phones at the top
   const DEMOS = K.DEMOS;
-  for (const d of Object.values(DEMOS)) d.tl = K.timeline(d.story, {});
+  for (const d of Object.values(DEMOS)) d.tl = K.timeline(d.story, d.voice ? Object.fromEntries(Object.entries(d.voice).map(([k, v]) => [k, v[1]])) : {});
   const minis = $$('.mini[data-demo]').map(b => ({ b, d: DEMOS[b.dataset.demo], cv: b.querySelector('canvas') }));
   let miniVis = true, still = false, miniT0 = performance.now();
   try { still = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
@@ -247,23 +247,48 @@
 
   // tapping a little phone opens it bigger, with music
   const dStage = $('#demoStage'), dctx = dStage.getContext('2d');
-  let cur = DEMOS.playgroup, demoAt = 0, demoPlaying = false, demoDrag = false, demoLast = 0, demoMusic = null;
+  let cur = DEMOS.playgroup, demoAt = 0, demoPlaying = false, demoDrag = false, demoLast = 0, demoMusic = null, demoT0 = 0, demoNodes = [];
+  const demoVoiceBufs = {};
+  async function loadDemoVoices(d) {
+    if (!d.voice) return {}; const out = {};
+    await Promise.all(Object.entries(d.voice).map(async ([id, [url]]) => {
+      if (!demoVoiceBufs[url]) { try { const r = await fetch(url); demoVoiceBufs[url] = await decodeAB(await r.arrayBuffer()); } catch (e) { demoVoiceBufs[url] = null; } }
+      out[id] = demoVoiceBufs[url];
+    }));
+    return out;
+  }
   function demoLabel() { $('#demoPlay').textContent = demoPlaying ? 'Pause' : 'Play'; $('#demoSound').textContent = demoMusic ? 'Sound off' : '\ud83d\udd0a Sound on'; }
-  function demoSoundOff() { if (demoMusic) { try { demoMusic.stop(); } catch (e) {} demoMusic = null; } demoLabel(); }
+  function demoSoundOff() { demoNodes.forEach(n => { try { n.stop(); } catch (e) {} try { n.disconnect(); } catch (e) {} }); demoNodes = []; demoMusic = null; demoLabel(); }
+  // music plus any recorded voice, with the music dropping down while someone is talking; the film follows the audio clock
   async function demoSoundOn() {
     if (playing) stop();
     const ctx = ac(); await ctx.resume().catch(() => {});
-    const mb = await loadMusic(cur.music || 'morning-mood'); if (!mb || $('#watch').hidden) { demoLabel(); return; }
+    const d = cur, [mb, vb] = await Promise.all([loadMusic(d.music || 'morning-mood'), loadDemoVoices(d)]);
+    if ($('#watch').hidden || d !== cur) { demoLabel(); return; }
     demoSoundOff();
-    const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = mb; src.loop = true; g.gain.value = 0.45; src.connect(g); g.connect(ctx.destination); src.start(0, demoAt % mb.duration); demoMusic = src;
-    demoLabel();
+    const from = demoAt, now = ctx.currentTime + 0.05; demoT0 = now - from;
+    const tl = d.tl, voiced = Object.keys(vb).length > 0, base = voiced ? 0.42 : 0.45, duck = 0.12;
+    if (mb) {
+      const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = mb; src.loop = true; src.connect(g); g.connect(ctx.destination);
+      const gp = g.gain; gp.setValueAtTime(base, now);
+      tl.items.forEach(it => { const b = vb[it.id]; if (!b) return; const a = demoT0 + it.start + it.voiceAt, e = a + b.duration; if (e < now) return; gp.setTargetAtTime(duck, Math.max(now, a - 0.35), 0.12); gp.setTargetAtTime(base, Math.max(now, e + 0.1), 0.35); });
+      src.start(now, from % mb.duration); demoNodes.push(src, g);
+    }
+    tl.items.forEach(it => {
+      const b = vb[it.id]; if (!b) return; const at = it.start + it.voiceAt, off = from - at; if (off >= b.duration) return;
+      const src = ctx.createBufferSource(); src.buffer = b; src.connect(ctx.destination); off > 0 ? src.start(now, off) : src.start(demoT0 + at); demoNodes.push(src);
+    });
+    demoMusic = true; demoPlaying = true; demoLabel();
   }
   function watchLoop(now) {
     if ($('#watch').hidden) return;
     const dt = demoLast ? Math.min(0.1, (now - demoLast) / 1000) : 0; demoLast = now;
-    if (demoPlaying && !demoDrag) { demoAt += dt; if (demoAt >= cur.tl.total) { demoAt = 0; if (demoMusic) demoSoundOn(); } }
-    drawDemo(dctx, dStage, cur, demoAt);
-    $('#demoBar').style.width = (100 * Math.min(1, demoAt / cur.tl.total)).toFixed(2) + '%';
+    if (demoPlaying && !demoDrag) {
+      if (demoMusic) demoAt = ac().currentTime - demoT0; else demoAt += dt;
+      if (demoAt >= cur.tl.total) { demoAt = 0; if (demoMusic) demoSoundOn(); }
+    }
+    drawDemo(dctx, dStage, cur, Math.max(0, demoAt));
+    $('#demoBar').style.width = (100 * Math.min(1, Math.max(0, demoAt) / cur.tl.total)).toFixed(2) + '%';
     requestAnimationFrame(watchLoop);
   }
   function openWatch(key) {
@@ -276,7 +301,7 @@
   $('#watchClose').addEventListener('click', closeWatch);
   $('#watch').addEventListener('click', e => { if (e.target.id === 'watch') closeWatch(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#watch').hidden) closeWatch(); });
-  $('#demoPlay').addEventListener('click', () => { demoPlaying = !demoPlaying; if (!demoPlaying) demoSoundOff(); demoLabel(); });
+  $('#demoPlay').addEventListener('click', () => { if (demoPlaying) { demoPlaying = false; demoSoundOff(); } else { demoPlaying = true; demoSoundOn(); } demoLabel(); });
   $('#demoSound').addEventListener('click', () => { demoMusic ? demoSoundOff() : (demoPlaying = true, demoSoundOn()); });
   dStage.addEventListener('click', () => $('#demoPlay').click());
   function demoSeek(e) { const r = $('#demoSeek').getBoundingClientRect(); demoAt = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * cur.tl.total * 0.999; }
