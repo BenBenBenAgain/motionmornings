@@ -453,26 +453,35 @@ body{min-height:100vh;background:#22325A;color:#FBF3E6;position:relative}
 .xclose{position:absolute;top:10px;right:10px;width:40px;height:40px;border-radius:50%;border:0;background:#F4E9D7;color:#1F2E4D;display:grid;place-items:center;cursor:pointer;padding:0;z-index:2}
 .xclose:hover{background:#EBDCC4}
 .watchbox .demotag{padding:0 44px;text-align:center}
-.dawn{position:absolute;left:0;right:0;bottom:0;width:100%;height:300px;display:block;pointer-events:none;z-index:0}
-.wrap{padding-bottom:230px}
+.duo{position:relative}
+.duo .mini{position:relative;z-index:1}
+/* a landscape: sky above the horizon, hills across the page, flat green ground below */
+body{background:linear-gradient(#22325A 0 var(--hz,640px),#5E8B6C var(--hz,640px)) no-repeat}
+html{background:#5E8B6C}
+.mmscene{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.land{position:absolute;left:0;right:0;top:calc(var(--hz,640px) - 158px);height:160px;pointer-events:none;z-index:0}
+.land svg{display:block;width:100%;height:160px}
+.land .birds{position:absolute;width:70px;height:35px;left:var(--bx,60%);top:var(--by,-120px)}
+@media (max-width:760px){.land .birds{display:none}}
+.wrap{position:relative;z-index:1}
+.sun{position:absolute;left:var(--sx,70%);top:var(--sy,300px);width:var(--sd,560px);height:var(--sd,560px);transform:translateX(-50%);border-radius:50%;background:#E07B66;box-shadow:0 0 0 30px #F2BC6B;z-index:0;pointer-events:none;clip-path:inset(-40px -40px 50% -40px)}
+html,body{overflow-x:clip}
+.mlabel{text-shadow:0 1px 2px rgba(20,30,40,.45)}
 .foot{position:relative;z-index:1}
 .foot,.foot p:first-child{color:#FBF3E6}
 .foot a{color:#FBF3E6;font-weight:600}
 .foot{border-top-color:rgba(251,243,230,.2)}
 .mini:not(.on) .mphone{filter:saturate(.85);opacity:.94}
-@media (max-width:760px){.dawn{height:200px}.wrap{padding-bottom:150px}}
+
 </style>
 </head>
 <body>
-<svg class="dawn" viewBox="0 0 1440 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-  <circle cx="800" cy="232" r="118" fill="#F2BC6B"/>
-  <circle cx="800" cy="232" r="92" fill="#E07B66"/>
-  <path d="M622 92 Q636 72 650 92 Q664 72 678 92" fill="none" stroke="#FBF3E6" stroke-width="5"/>
-  <path d="M680 60 Q691 44 702 60 Q713 44 724 60" fill="none" stroke="#FBF3E6" stroke-width="4"/>
-  <path d="M0 210 Q240 150 520 190 T1040 186 T1440 168 V300 H0 Z" fill="#3E5B78"/>
-  <path d="M0 246 Q300 196 640 232 T1240 222 T1440 214 V300 H0 Z" fill="#5E8B6C"/>
-  <path d="M0 276 Q360 244 760 268 T1440 256 V300 H0 Z" fill="#8DB173"/>
-</svg>
+<div class="mmscene" aria-hidden="true"><div class="sun"></div>
+<div class="land"><svg viewBox="0 0 1440 160" preserveAspectRatio="none">
+  <path d="M0 70 Q220 20 480 56 T980 50 T1440 34 V160 H0 Z" fill="#3E5B78"/>
+  <path d="M0 110 Q300 66 660 98 T1440 84 V160 H0 Z" fill="#4F7A61"/>
+  <path d="M0 150 Q360 118 760 140 T1440 128 V160 H0 Z" fill="#5E8B6C"/>
+</svg><svg class="birds" viewBox="0 0 100 50"><path d="M4 34 Q14 18 24 34 Q34 18 44 34" fill="none" stroke="#FBF3E6" stroke-width="4"/><path d="M52 16 Q60 4 68 16 Q76 4 84 16" fill="none" stroke="#FBF3E6" stroke-width="3.4"/></svg></div></div>
 <div class="wrap">
   <div class="top">
     <div class="brand"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><path d="M16.5 51 Q21.5 41.5 30 52 Q38.5 41.5 43.5 51" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M37.5 35 Q41.5 27.2 47 35.5 Q52.5 27.2 56.5 35" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M40 78 A28 28 0 0 1 96 78 Z" fill="var(--coral)"/><line x1="14" y1="78" x2="106" y2="78" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><line x1="54" y1="90" x2="84" y2="90" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/><line x1="61" y1="101" x2="77" y2="101" stroke="var(--sea)" stroke-width="6" stroke-linecap="round"/></svg><h1>Motion Mornings</h1></div>
@@ -486,6 +495,7 @@ body{min-height:100vh;background:#22325A;color:#FBF3E6;position:relative}
       <p class="leadtag">Watch it daily. Live it each day.</p>
     </div>
     <div class="duowrap"><div class="duo">
+      
       <button class="mini" type="button" data-watch="you" aria-label="Watch the demo film for you, with sound"><span class="mphone"><canvas id="miniYou" width="360" height="640" aria-hidden="true"></canvas><span class="mplay" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span></span><span class="mlabel">For you</span></button>
       <button class="mini" type="button" data-watch="kid" aria-label="Watch the demo film for kids, with sound"><span class="mphone"><canvas id="miniKid" width="360" height="640" aria-hidden="true"></canvas><span class="mplay" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span></span><span class="mlabel">For a child</span><span class="kidbadge kidsword" aria-hidden="true"><span>K</span><span>I</span><span>D</span><span>S</span></span></button>
     </div>
@@ -691,5 +701,25 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').cat
 })();
 </script>
 <script src="contact.js"></script>
+<script>
+// the horizon sits a little below the middle of the two phones; on wide screens it drops below the words so the hills never run through them
+(function () {
+  function place() {
+    var d = document.querySelector('.duo'), btn = document.querySelector('.leadbtns'); if (!d) return;
+    var r = d.getBoundingClientRect(), sy = window.scrollY, hz = sy + r.top + r.height * 0.62;
+    var wide = btn && btn.getBoundingClientRect().right < r.left;
+    if (wide) hz = Math.max(hz, sy + btn.getBoundingClientRect().bottom + 150);
+    var copy = document.querySelector('.leadcopy'), cb = copy ? sy + copy.getBoundingClientRect().bottom : 0;
+    var sd = Math.round(Math.min(r.width * 1.15, Math.max(r.width * 1.05, (hz - (sy + r.top)) * 1.5))), cx = r.left + r.width / 2;
+    if (!wide) sd = Math.min(sd, Math.max(160, 2 * (hz - 70 - cb - 46)));
+    var b = document.body.style;
+    b.setProperty('--hz', Math.round(hz) + 'px'); b.setProperty('--sx', Math.round(cx) + 'px');
+    b.setProperty('--sd', sd + 'px'); b.setProperty('--sy', Math.round(hz - 70 - sd / 2) + 'px');
+    b.setProperty('--bx', Math.round(cx - sd / 2 - 40) + 'px'); b.setProperty('--by', Math.round(-(hz - 70 - sd / 2 - (hz - 158)) * 0 - 60 - (hz - 158 - (hz - 70 - sd / 2)) ) + 'px');
+  }
+  place(); window.addEventListener('resize', place); window.addEventListener('load', place);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+})();
+</script>
 </body>
 </html>
