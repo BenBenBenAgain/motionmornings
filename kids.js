@@ -267,11 +267,12 @@
     if ($('#watch').hidden || d !== cur) { demoLabel(); return; }
     demoSoundOff();
     const from = demoAt, now = ctx.currentTime + 0.05; demoT0 = now - from;
-    const tl = d.tl, voiced = Object.keys(vb).length > 0, base = voiced ? 0.42 : 0.45, duck = 0.12;
+    const tl = d.tl, voiced = Object.keys(vb).length > 0, base = 0.45;
     if (mb) {
-      const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = mb; src.loop = true; src.connect(g); g.connect(ctx.destination);
-      const gp = g.gain; gp.setValueAtTime(base, now);
-      tl.items.forEach(it => { const b = vb[it.id]; if (!b) return; const a = demoT0 + it.start + it.voiceAt, e = a + b.duration; if (e < now) return; gp.setTargetAtTime(duck, Math.max(now, a - 0.35), 0.12); gp.setTargetAtTime(base, Math.max(now, e + 0.1), 0.35); });
+      // with a voice, the music sits at one steady low level (evened out so it never swells over the voice) instead of dipping in and out
+      const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = mb; src.loop = true;
+      if (voiced) { const c = ctx.createDynamicsCompressor(); c.threshold.value = -30; c.knee.value = 10; c.ratio.value = 6; c.attack.value = 0.05; c.release.value = 0.4; src.connect(c); c.connect(g); demoNodes.push(c); } else src.connect(g);
+      g.connect(ctx.destination); g.gain.setValueAtTime(voiced ? 0.32 : base, now);
       src.start(now, from % mb.duration); demoNodes.push(src, g);
     }
     tl.items.forEach(it => {
