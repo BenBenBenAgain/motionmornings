@@ -462,7 +462,8 @@ html{background:#5E8B6C}
 .land{position:absolute;left:0;right:0;top:calc(var(--hz,640px) - 158px);height:160px;pointer-events:none;z-index:0}
 .land svg{display:block;width:100%;height:160px}
 .land .birds{position:absolute;width:70px;height:35px;left:var(--bx,60%);top:var(--by,-120px)}
-@media (max-width:760px){.land .birds{display:none}.leadbtns{margin-top:150px}}
+@media (max-width:760px){.land .birds{display:none}}
+.nosun .sun{display:none}
 .wrap{position:relative;z-index:1}
 .sun{position:absolute;left:var(--sx,70%);top:var(--sy,300px);width:var(--sd,560px);height:var(--sd,560px);transform:translateX(-50%);border-radius:50%;background:#E07B66;box-shadow:0 0 0 30px #F2BC6B;z-index:0;pointer-events:none;clip-path:inset(-40px -40px 50% -40px)}
 html,body{overflow-x:clip}
@@ -702,18 +703,20 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').cat
 </script>
 <script src="contact.js"></script>
 <script>
-// the sun rises in clear space just above the main buttons, with the hills in front and the buttons on the ground
+// computers: the horizon sits below the words and the sun rises behind the two films.
+// phones: no room for a sun, so just the hills and ground under the films
 (function () {
   function place() {
     var d = document.querySelector('.duo'), btn = document.querySelector('.leadbtns'); if (!d || !btn) return;
     var sy = window.scrollY, br = btn.getBoundingClientRect(), r = d.getBoundingClientRect();
-    var wide = br.right < r.left;
-    var hz = sy + (wide ? br.bottom + 130 : br.top - 6);
-    var sd = wide ? 240 : 210, cx = wide ? (br.right + r.left) / 2 + 30 : window.innerWidth / 2;
-    var b = document.body.style;
+    var wide = br.right < r.left, b = document.body.style;
+    var hz = sy + r.top + r.height * (wide ? 0.62 : 0.8);
+    if (wide) hz = Math.max(hz, sy + br.bottom + 150);
+    var sd = Math.round(Math.min(r.width * 1.15, Math.max(r.width * 1.05, (hz - (sy + r.top)) * 1.5))), cx = r.left + r.width / 2;
+    document.body.classList.toggle('nosun', !wide);
     b.setProperty('--hz', Math.round(hz) + 'px'); b.setProperty('--sx', Math.round(cx) + 'px');
-    b.setProperty('--sd', sd + 'px'); b.setProperty('--sy', Math.round(hz - 52 - sd / 2) + 'px');
-    b.setProperty('--bx', Math.round(cx - 40) + 'px'); b.setProperty('--by', Math.round(sy + r.top + 30 - (hz - 158)) + 'px');
+    b.setProperty('--sd', sd + 'px'); b.setProperty('--sy', Math.round(hz - 70 - sd / 2) + 'px');
+    b.setProperty('--bx', Math.round(cx - sd / 2 - 40) + 'px'); b.setProperty('--by', '-60px');
   }
   place(); window.addEventListener('resize', place); window.addEventListener('load', place);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
