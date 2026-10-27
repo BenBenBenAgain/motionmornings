@@ -272,7 +272,7 @@
       // with a voice, the music sits at one steady low level (evened out so it never swells over the voice) instead of dipping in and out
       const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = mb; src.loop = true;
       if (voiced) { const c = ctx.createDynamicsCompressor(); c.threshold.value = -30; c.knee.value = 10; c.ratio.value = 6; c.attack.value = 0.05; c.release.value = 0.4; src.connect(c); c.connect(g); demoNodes.push(c); } else src.connect(g);
-      g.connect(ctx.destination); g.gain.setValueAtTime(voiced ? 0.32 : base, now);
+      g.connect(ctx.destination); g.gain.setValueAtTime(voiced ? 0.22 : base, now);
       src.start(now, from % mb.duration); demoNodes.push(src, g);
     }
     tl.items.forEach(it => {
