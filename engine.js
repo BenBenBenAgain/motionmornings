@@ -675,7 +675,7 @@ function cradle(c, h, s, k, t, L) {
   const cx = lex + 6 * s - s * hxl, cy = ley - 26 * s - s * hyl;
   const at = (px, py) => [cx + s * (px * Math.cos(tilt) - py * Math.sin(tilt)), cy + s * (px * Math.sin(tilt) + py * Math.cos(tilt))];
   // the left forearm runs underneath the baby from the elbow, and that hand holds the bottom
-  const [bhx, bhy] = at(46, 50);
+  const [bhx, bhy] = at(-18, 52);
   line([[lex, ley], [bhx, bhy]], 32 * s, sleeve);
   X.save(); X.translate(cx, cy); X.rotate(tilt); X.scale(s, s);
   const wrap = (k && k.blanket) || '#BFD9EA';
