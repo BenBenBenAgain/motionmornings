@@ -669,12 +669,11 @@ function baby(x, y, s, k, t) {
 // a swaddled baby lying across the forearms, with one arm drawn over the top so they're properly held
 function cradle(c, h, s, k, t, L) {
   const B = kidLook(k || {}), skin = C(L.skin), rock = 0.05 * Math.sin(t * 1.6), tilt = 0.34 + rock;
-  const cx = (h.L[0] + h.R[0]) / 2, cy = (h.L[1] + h.R[1]) / 2 - 34 * s;
   const sleeve = L.outfit === 'tee' || L.outfit === 'dress' ? skin : C(L.top);
-  // the head end is raised toward the parent, and their other hand cups under the baby's head
+  // the baby's head rests in the crook of the left elbow, head end raised toward the parent, the forearm underneath
+  const lex = h.L[0] - 104 * s, ley = h.L[1] - 7 * s, hxl = -82 * Math.cos(tilt) + 10 * Math.sin(tilt), hyl = -82 * Math.sin(tilt) - 10 * Math.cos(tilt);
+  const cx = lex + 6 * s - s * hxl, cy = ley - 26 * s - s * hyl;
   const at = (px, py) => [cx + s * (px * Math.cos(tilt) - py * Math.sin(tilt)), cy + s * (px * Math.sin(tilt) + py * Math.cos(tilt))];
-  const [lhx, lhy] = at(-100, 42), lex = h.L[0] - 104 * s, ley = h.L[1] - 7 * s;
-  line([[lex, ley], [lhx, lhy]], 32 * s, sleeve);
   X.save(); X.translate(cx, cy); X.rotate(tilt); X.scale(s, s);
   const wrap = (k && k.blanket) || '#BFD9EA';
   ell(10, 6, 104, 50); fill(wrap);
@@ -683,10 +682,8 @@ function cradle(c, h, s, k, t, L) {
   ell(-74, -8, 48, 44); fill(darken(C(wrap), 0.06)); circ(-80, -10, 40); fill(mix(C(wrap), [1, 1, 1], 0.35));
   // the face turns about 45 degrees anticlockwise, toward the parent
   X.save(); X.translate(-82, -10); X.rotate(-PI / 4); babyFace(B, 0, 0, 33, t, k); X.restore();
-  circ(-40, -26, 11); fill(B.skin);
   if (k && k.bow) { const bx = -64, by = -46; X.save(); X.translate(bx, by); X.rotate(0.5); X.scale(1.6, 1.6); [-1, 1].forEach(sd => { X.beginPath(); X.moveTo(0, 0); X.quadraticCurveTo(sd * 22, -18, sd * 26, 0); X.quadraticCurveTo(sd * 22, 18, 0, 0); X.closePath(); fill(k.bow); }); circ(0, 0, 7); fill(darken(C(k.bow), 0.15)); X.restore(); }
   X.restore();
-  circ(lhx, lhy, 20 * s); fill(skin);
   // the right forearm comes back over the blanket and the hand rests on it
   const ex = h.R[0] + 104 * s, ey = h.R[1] - 7 * s, [hx, hy] = at(10, 18);
   line([[ex, ey], [hx, hy]], 32 * s, sleeve); circ(hx, hy, 20 * s); fill(skin);
