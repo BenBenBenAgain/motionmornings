@@ -351,8 +351,13 @@ function person(x, y, s, L, t, o = {}) {
   const scarf = L.hat === 'scarf', hatC = C(L.hatCol || '#2E4A62'), capOn = !HATS_OFF && (L.hat === 'cap' || L.hat === 'beanie');
   const hs = o.head || 1; const headOn = () => { X.save(); if (hs !== 1) { X.translate(0, -470); X.scale(hs, hs); X.translate(0, 470); } };
   headOn();
+  // hair under headwear: a headscarf covers it all, and a cap or beanie hides anything that would poke out above it
+  const hatLine = L.hat === 'beanie' ? -538 : -526;
+  const hatClip = () => { if (capOn) { X.save(); X.beginPath(); X.rect(-400, hatLine, 800, 1200); X.ellipse(0, hatLine + 4, 74, 26, 0, PI, 2 * PI); X.clip(); } }, hatUnclip = () => { if (capOn) X.restore(); };
+  hatClip();
   // back hair
-  if (L.hair === 'wavy') {
+  if (scarf) {}
+  else if (L.hair === 'wavy') {
     [[0, -535, 66], [-70, -500, 44], [70, -500, 44], [-82, -460, 40], [82, -460, 40], [-80, -420, 34], [80, -420, 34], [-66, -396, 26], [66, -396, 26]].forEach(([dx, dy, r]) => { circ(dx, dy, r); fill(hc); });
     if (L.grey) [[-84, -470, 16], [78, -440, 14], [-74, -415, 12], [60, -510, 14]].forEach(([dx, dy, r]) => { circ(dx, dy, r); fill([0.62, 0.6, 0.57], 0.6); });
   } else if (L.hair === 'long') { rr(-64, -565, 128, 205, 50); fill(hc); }
@@ -362,6 +367,7 @@ function person(x, y, s, L, t, o = {}) {
   else if (L.hair === 'curly') {
     for (let i = 0; i <= 12; i++) { const a = PI * (0.92 + 1.16 * i / 12); circ(Math.cos(a) * 60, -505 + Math.sin(a) * 66, 30); fill(hc); }
   }
+  hatUnclip();
   if (scarf) { ell(0, -505, 70, 80); fill(hatC); X.beginPath(); X.moveTo(-60, -470); X.lineTo(60, -470); X.lineTo(86, -420); X.lineTo(-86, -420); X.closePath(); fill(hatC); }
   X.restore();
   X.save(); X.scale(bw, 1);
@@ -422,6 +428,7 @@ function person(x, y, s, L, t, o = {}) {
     X.bezierCurveTo(40, -470, 20, -466, 0, -466); X.bezierCurveTo(-20, -466, -40, -470, -50, -505); X.closePath(); fill(fc);
   }
   // hair top
+  hatClip();
   if (scarf) {
     X.save(); X.beginPath(); X.ellipse(0, -508, 66, 76, 0, 0, 2 * PI); X.ellipse(0, -500, 45, 51, 0, 0, 2 * PI); X.fillStyle = css(hatC); X.fill('evenodd'); X.restore();
     X.beginPath(); X.ellipse(0, -500, 45, 51, 0, PI * 1.08, PI * 1.92); X.lineWidth = 3; X.strokeStyle = css(darken(hatC, 0.18)); X.stroke();
@@ -447,6 +454,7 @@ function person(x, y, s, L, t, o = {}) {
     if (L.hair === 'braids' || L.hair === 'ponytail') line([[0, -566], [0, -546]], 3, darken(hc, 0.25));
     if (L.hair === 'curly') for (let i = 0; i < 5; i++) { circ(-44 + i * 22, -552 + Math.abs(i - 2) * 6, 22); fill(hc); }
   } else { ell(-20, -540, 14, 7); fill([1, 1, 1], 0.25); }
+  hatUnclip();
   if (capOn && L.hat === 'cap') { X.beginPath(); X.arc(0, -520, 57, PI, 2 * PI); X.closePath(); fill(hatC); ell(18, -520, 62, 11); fill(darken(hatC, 0.22)); circ(0, -577, 6); fill(darken(hatC, 0.22)); }
   if (capOn && L.hat === 'beanie') { rr(-57, -592, 114, 72, 34); fill(hatC); rr(-60, -540, 120, 24, 9); fill(darken(hatC, 0.15)); }
   // face
@@ -601,9 +609,11 @@ const babiesOf = cfg => (cfg.kids || []).filter(k => k.age === 'baby');
 const kidLook = k => Object.assign({ body: 'f', facial: 'none', inner: '#FFFFFF', grey: false }, DEFAULT_KID, k);
 const kidScale = k => k.age === 'teen' ? 0.8 : k.age === 'little' ? 0.46 : 0.6, kidHead = k => k.age === 'teen' ? 1.1 : k.age === 'little' ? 1.45 : 1.35;
 // an ear-length kid's cut: a soft fringe and pieces over the ears, drawn over the basic crop
-function kidMop(x, y, s, flip, hs, hairCol) {
+function kidMop(x, y, s, flip, hs, hairCol, hat) {
+  if (hat === 'scarf') return;
   const hc = C(hairCol);
   X.save(); X.translate(x, y); X.scale(s * flip, s); X.translate(0, -470); X.scale(hs, hs); X.translate(0, 470);
+  if (hat === 'cap' || hat === 'beanie') { const hl = hat === 'beanie' ? -516 : -509; X.beginPath(); X.rect(-400, hl, 800, 1200); X.clip(); }
   [-1, 1].forEach(sd => { X.beginPath(); X.moveTo(sd * 40, -548); X.bezierCurveTo(sd * 66, -540, sd * 66, -500, sd * 62, -470); X.bezierCurveTo(sd * 58, -462, sd * 52, -462, sd * 48, -468); X.bezierCurveTo(sd * 50, -490, sd * 46, -515, sd * 34, -530); X.closePath(); fill(hc); });
   X.beginPath(); X.moveTo(-50, -520); X.bezierCurveTo(-40, -560, 30, -572, 54, -526); X.bezierCurveTo(40, -532, 30, -530, 18, -524); X.bezierCurveTo(8, -534, -6, -530, -16, -524); X.bezierCurveTo(-26, -530, -40, -528, -50, -520); X.closePath(); fill(hc);
   X.beginPath(); X.moveTo(-20, -556); X.bezierCurveTo(0, -566, 22, -562, 38, -548); X.lineWidth = 4; X.strokeStyle = css(mix(hc, [1, 1, 1], 0.25), 0.6); X.stroke();
@@ -618,7 +628,7 @@ function topPrint(x, y, s, text, col) {
 function drawKid(k, x, y, t, o = {}) {
   const s = kidScale(k) * (o.s || 1), L = kidLook(k), mop = L.hair === 'mop';
   const h = person(x, y, s, mop ? Object.assign({}, L, { hair: 'shaggy' }) : L, t, Object.assign({ head: kidHead(k) }, o));
-  if (mop) kidMop(x, y - (o.bob || 0), s, o.flip || 1, kidHead(k), L.hairCol);
+  if (mop) kidMop(x, y - (o.bob || 0), s, o.flip || 1, kidHead(k), L.hairCol, HATS_OFF ? false : L.hat);
   if (L.print) topPrint(x, y - (o.bob || 0), s, L.print, L.printCol);
   return h;
 }
