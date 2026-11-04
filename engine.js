@@ -668,20 +668,28 @@ function baby(x, y, s, k, t) {
 }
 // a swaddled baby lying across the forearms, with one arm drawn over the top so they're properly held
 function cradle(c, h, s, k, t, L) {
-  const B = kidLook(k || {}), skin = C(L.skin), rock = 0.05 * Math.sin(t * 1.6);
-  const cx = (h.L[0] + h.R[0]) / 2, cy = (h.L[1] + h.R[1]) / 2 - 34 * s;
-  X.save(); X.translate(cx, cy); X.rotate(rock); X.scale(s, s);
+  const B = kidLook(k || {}), skin = C(L.skin), rock = 0.05 * Math.sin(t * 1.6), tilt = 0.34 + rock;
+  const sleeve = L.outfit === 'tee' || L.outfit === 'dress' ? skin : C(L.top);
+  // the baby's head rests in the crook of the left elbow, head end raised toward the parent, the forearm underneath
+  const lex = h.L[0] - 104 * s, ley = h.L[1] - 7 * s, hxl = -82 * Math.cos(tilt) + 10 * Math.sin(tilt), hyl = -82 * Math.sin(tilt) - 10 * Math.cos(tilt);
+  const cx = lex + 6 * s - s * hxl, cy = ley - 26 * s - s * hyl;
+  const at = (px, py) => [cx + s * (px * Math.cos(tilt) - py * Math.sin(tilt)), cy + s * (px * Math.sin(tilt) + py * Math.cos(tilt))];
+  // the left forearm runs underneath the baby from the elbow, and that hand holds the bottom
+  const [bhx, bhy] = at(-18, 52);
+  line([[lex, ley], [bhx, bhy]], 32 * s, sleeve);
+  X.save(); X.translate(cx, cy); X.rotate(tilt); X.scale(s, s);
   const wrap = (k && k.blanket) || '#BFD9EA';
   ell(10, 6, 104, 50); fill(wrap);
   X.lineWidth = 4; X.strokeStyle = css(darken(C(wrap), 0.14));
   [[-10, 30], [30, 50], [70, 34]].forEach(([x, r]) => { X.beginPath(); X.arc(x, 6, r, -0.6, 0.6); X.stroke(); });
   ell(-74, -8, 48, 44); fill(darken(C(wrap), 0.06)); circ(-80, -10, 40); fill(mix(C(wrap), [1, 1, 1], 0.35));
-  babyFace(B, -82, -10, 33, t, k);
-  circ(-40, -26, 11); fill(B.skin);
+  // the face turns about 45 degrees anticlockwise, toward the parent
+  X.save(); X.translate(-82, -10); X.rotate(-PI / 4); babyFace(B, 0, 0, 33, t, k); X.restore();
   if (k && k.bow) { const bx = -64, by = -46; X.save(); X.translate(bx, by); X.rotate(0.5); X.scale(1.6, 1.6); [-1, 1].forEach(sd => { X.beginPath(); X.moveTo(0, 0); X.quadraticCurveTo(sd * 22, -18, sd * 26, 0); X.quadraticCurveTo(sd * 22, 18, 0, 0); X.closePath(); fill(k.bow); }); circ(0, 0, 7); fill(darken(C(k.bow), 0.15)); X.restore(); }
   X.restore();
+  circ(bhx, bhy, 20 * s); fill(skin);
   // the right forearm comes back over the blanket and the hand rests on it
-  const ex = h.R[0] + 104 * s, ey = h.R[1] - 7 * s, hx = cx - 10 * s, hy = cy + 16 * s, sleeve = L.outfit === 'tee' || L.outfit === 'dress' ? skin : C(L.top);
+  const ex = h.R[0] + 104 * s, ey = h.R[1] - 7 * s, [hx, hy] = at(10, 18);
   line([[ex, ey], [hx, hy]], 32 * s, sleeve); circ(hx, hy, 20 * s); fill(skin);
 }
 function pram(x, y, t, k) {
@@ -720,12 +728,14 @@ function familyRow(c, x, y, t, o = {}) {
   // draws me, partner, kids, carried babies; returns rightmost x
   const walk = o.walk || 0, s = o.s || 1, kids = kidsOf(c), babies = babiesOf(c);
   let cx = x;
-  const hm = person(cx, y, 1.02 * s, ME(c), t, { walk, armL: [0.12, 0.05], armR: babies.length && !hasPartner(c) ? [0.5, 1.5] : [0.3, 0.2] });
-  if (babies.length && !hasPartner(c)) baby(hm.R[0] - 10, hm.R[1] - 20, 0.9 * s, babies[0], t);
+  // a baby is always cradled in both arms, never dangled from one hand
+  const meHolds = babies.length && !hasPartner(c), CRADLE = [0.25, -1.5];
+  const hm = person(cx, y, 1.02 * s, ME(c), t, { walk, armL: meHolds ? CRADLE : [0.12, 0.05], armR: meHolds ? CRADLE : [0.3, 0.2] });
+  if (meHolds) cradle(c, hm, 1.02 * s, babies[0], t, ME(c));
   cx += 170 * s;
   if (hasPartner(c)) {
-    const hp = person(cx, y, 0.95 * s, PT(c), t, { walk, armL: [0.4, 0.3], armR: babies.length ? [0.5, 1.5] : [0.12, 0.05] });
-    if (babies.length) baby(hp.R[0] - 10, hp.R[1] - 20, 0.9 * s, babies[0], t);
+    const hp = person(cx, y, 0.95 * s, PT(c), t, { walk, armL: babies.length ? CRADLE : [0.4, 0.3], armR: babies.length ? CRADLE : [0.12, 0.05] });
+    if (babies.length) cradle(c, hp, 0.95 * s, babies[0], t, PT(c));
     cx += 160 * s;
   }
   kids.slice(0, 4).forEach((k, i) => { drawKid(k, cx, y + 6, t + i * 0.3, { walk, s, armL: [0.3, 0.2], armR: [0.3, 0.2] }); cx += (k.age === 'teen' ? 140 : 115) * s; });
