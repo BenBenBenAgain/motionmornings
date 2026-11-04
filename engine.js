@@ -720,12 +720,14 @@ function familyRow(c, x, y, t, o = {}) {
   // draws me, partner, kids, carried babies; returns rightmost x
   const walk = o.walk || 0, s = o.s || 1, kids = kidsOf(c), babies = babiesOf(c);
   let cx = x;
-  const hm = person(cx, y, 1.02 * s, ME(c), t, { walk, armL: [0.12, 0.05], armR: babies.length && !hasPartner(c) ? [0.5, 1.5] : [0.3, 0.2] });
-  if (babies.length && !hasPartner(c)) baby(hm.R[0] - 10, hm.R[1] - 20, 0.9 * s, babies[0], t);
+  // a baby is always cradled in both arms, never dangled from one hand
+  const meHolds = babies.length && !hasPartner(c), CRADLE = [0.25, -1.5];
+  const hm = person(cx, y, 1.02 * s, ME(c), t, { walk, armL: meHolds ? CRADLE : [0.12, 0.05], armR: meHolds ? CRADLE : [0.3, 0.2] });
+  if (meHolds) cradle(c, hm, 1.02 * s, babies[0], t, ME(c));
   cx += 170 * s;
   if (hasPartner(c)) {
-    const hp = person(cx, y, 0.95 * s, PT(c), t, { walk, armL: [0.4, 0.3], armR: babies.length ? [0.5, 1.5] : [0.12, 0.05] });
-    if (babies.length) baby(hp.R[0] - 10, hp.R[1] - 20, 0.9 * s, babies[0], t);
+    const hp = person(cx, y, 0.95 * s, PT(c), t, { walk, armL: babies.length ? CRADLE : [0.4, 0.3], armR: babies.length ? CRADLE : [0.12, 0.05] });
+    if (babies.length) cradle(c, hp, 0.95 * s, babies[0], t, PT(c));
     cx += 160 * s;
   }
   kids.slice(0, 4).forEach((k, i) => { drawKid(k, cx, y + 6, t + i * 0.3, { walk, s, armL: [0.3, 0.2], armR: [0.3, 0.2] }); cx += (k.age === 'teen' ? 140 : 115) * s; });
