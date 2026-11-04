@@ -674,6 +674,9 @@ function cradle(c, h, s, k, t, L) {
   const lex = h.L[0] - 104 * s, ley = h.L[1] - 7 * s, hxl = -82 * Math.cos(tilt) + 10 * Math.sin(tilt), hyl = -82 * Math.sin(tilt) - 10 * Math.cos(tilt);
   const cx = lex + 6 * s - s * hxl, cy = ley - 26 * s - s * hyl;
   const at = (px, py) => [cx + s * (px * Math.cos(tilt) - py * Math.sin(tilt)), cy + s * (px * Math.sin(tilt) + py * Math.cos(tilt))];
+  // the left forearm runs underneath the baby from the elbow, and that hand holds the bottom
+  const [bhx, bhy] = at(96, 44);
+  line([[lex, ley], [bhx, bhy]], 32 * s, sleeve);
   X.save(); X.translate(cx, cy); X.rotate(tilt); X.scale(s, s);
   const wrap = (k && k.blanket) || '#BFD9EA';
   ell(10, 6, 104, 50); fill(wrap);
@@ -684,6 +687,7 @@ function cradle(c, h, s, k, t, L) {
   X.save(); X.translate(-82, -10); X.rotate(-PI / 4); babyFace(B, 0, 0, 33, t, k); X.restore();
   if (k && k.bow) { const bx = -64, by = -46; X.save(); X.translate(bx, by); X.rotate(0.5); X.scale(1.6, 1.6); [-1, 1].forEach(sd => { X.beginPath(); X.moveTo(0, 0); X.quadraticCurveTo(sd * 22, -18, sd * 26, 0); X.quadraticCurveTo(sd * 22, 18, 0, 0); X.closePath(); fill(k.bow); }); circ(0, 0, 7); fill(darken(C(k.bow), 0.15)); X.restore(); }
   X.restore();
+  circ(bhx, bhy, 20 * s); fill(skin);
   // the right forearm comes back over the blanket and the hand rests on it
   const ex = h.R[0] + 104 * s, ey = h.R[1] - 7 * s, [hx, hy] = at(10, 18);
   line([[ex, ey], [hx, hy]], 32 * s, sleeve); circ(hx, hy, 20 * s); fill(skin);
