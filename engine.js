@@ -632,14 +632,38 @@ function drawKid(k, x, y, t, o = {}) {
   if (L.print) topPrint(x, y - (o.bob || 0), s, L.print, L.printCol);
   return h;
 }
+// a little swaddled baby: wrapped snugly in their blanket with a hood, a tuft of hair, rosy cheeks and a tiny hand peeking out
+function babyFace(L, cx, cy, r, t, k) {
+  const skin = C(L.skin), hc = C(L.hairCol), ink = [0.2, 0.15, 0.15];
+  circ(cx, cy, r); fill(skin);
+  // a tuft of hair with a little curl on top
+  X.beginPath(); X.moveTo(cx - r * 0.45, cy - r * 0.78); X.quadraticCurveTo(cx - r * 0.1, cy - r * 1.12, cx + r * 0.32, cy - r * 0.86);
+  X.quadraticCurveTo(cx + r * 0.05, cy - r * 0.86, cx - r * 0.45, cy - r * 0.78); X.closePath(); fill(hc);
+  X.beginPath(); X.arc(cx + r * 0.06, cy - r * 0.98, r * 0.16, PI * 0.2, PI * 1.6); X.lineWidth = r * 0.1; X.lineCap = 'round'; X.strokeStyle = css(hc); X.stroke();
+  // sleepy eyes, rosy cheeks, a tiny smile
+  const blink = (k && k.awake) ? 0 : 1;
+  [-1, 1].forEach(sd => {
+    if (blink) { X.beginPath(); X.arc(cx + sd * r * 0.36, cy - r * 0.02, r * 0.17, 0.12 * PI, 0.88 * PI); X.lineWidth = r * 0.1; X.strokeStyle = css(ink); X.stroke(); }
+    else { circ(cx + sd * r * 0.36, cy - r * 0.04, r * 0.09); fill(ink); }
+    circ(cx + sd * r * 0.56, cy + r * 0.28, r * 0.17); fill([0.95, 0.55, 0.55], 0.35);
+  });
+  X.beginPath(); X.arc(cx, cy + r * 0.3, r * 0.16, 0.18 * PI, 0.82 * PI); X.lineWidth = r * 0.09; X.strokeStyle = css([0.62, 0.32, 0.32]); X.stroke();
+}
 function baby(x, y, s, k, t) {
-  const L = kidLook(k || {});
-  X.save(); X.translate(x, y); X.scale(s, s);
-  ell(0, 14, 36, 50); fill(L.top || '#F7D9C4'); ell(0, 20, 26, 36); fill([1, 1, 1], 0.25);
-  circ(0, -40, 27); fill(L.skin);
-  X.beginPath(); X.arc(0, -46, 27, PI * 1.05, PI * 1.95); X.lineWidth = 7; X.strokeStyle = css(C(L.hairCol)); X.stroke();
-  [-1, 1].forEach(sd => { X.beginPath(); X.arc(sd * 10, -40, 5, 0.1 * PI, 0.9 * PI); X.lineWidth = 3; X.strokeStyle = css([0.2, 0.15, 0.15]); X.stroke(); });
-  X.beginPath(); X.arc(0, -30, 6, 0.15 * PI, 0.85 * PI); X.lineWidth = 3; X.strokeStyle = css([0.6, 0.3, 0.3]); X.stroke();
+  const L = kidLook(k || {}), wrap = C((k && k.blanket) || L.blanket || '#BFD9EA'), fold = darken(wrap, 0.12), inner = mix(wrap, [1, 1, 1], 0.35);
+  const sway = 0.04 * Math.sin((t || 0) * 1.4);
+  X.save(); X.translate(x, y); X.rotate(sway); X.scale(s, s);
+  // the swaddle: a soft bundle, rounder at the bottom
+  X.beginPath(); X.moveTo(-34, -30); X.bezierCurveTo(-48, 10, -42, 58, 0, 66); X.bezierCurveTo(42, 58, 48, 10, 34, -30); X.closePath(); fill(wrap);
+  // the hood around the head
+  circ(0, -40, 35); fill(wrap); circ(0, -40, 30); fill(inner);
+  // the wrap folds across the front
+  X.beginPath(); X.moveTo(-36, -12); X.quadraticCurveTo(4, 8, 40, 30); X.lineTo(36, 46); X.quadraticCurveTo(0, 20, -42, 4); X.closePath(); fill(fold);
+  X.beginPath(); X.moveTo(36, -14); X.quadraticCurveTo(10, 4, -26, 44); X.lineWidth = 3.5; X.strokeStyle = css(darken(wrap, 0.2)); X.stroke();
+  // a tiny hand peeking over the wrap
+  circ(15, -8, 7.5); fill(C(L.skin)); circ(15, -8, 7.5); X.lineWidth = 1.5; X.strokeStyle = css(darken(C(L.skin), 0.12)); X.stroke();
+  babyFace(L, 0, -40, 25, t, k);
+  if (k && k.bow) { X.save(); X.translate(-18, -64); X.rotate(-0.4); const bc = C(k.bow); [-1, 1].forEach(sd => { X.beginPath(); X.moveTo(0, 0); X.quadraticCurveTo(sd * 13, -11, sd * 15, 0); X.quadraticCurveTo(sd * 13, 11, 0, 0); X.closePath(); fill(bc); }); circ(0, 0, 4); fill(darken(bc, 0.15)); X.restore(); }
   X.restore();
 }
 // a swaddled baby lying across the forearms, with one arm drawn over the top so they're properly held
@@ -651,10 +675,8 @@ function cradle(c, h, s, k, t, L) {
   ell(10, 6, 104, 50); fill(wrap);
   X.lineWidth = 4; X.strokeStyle = css(darken(C(wrap), 0.14));
   [[-10, 30], [30, 50], [70, 34]].forEach(([x, r]) => { X.beginPath(); X.arc(x, 6, r, -0.6, 0.6); X.stroke(); });
-  ell(-74, -8, 48, 44); fill(darken(C(wrap), 0.06)); circ(-82, -10, 34); fill(B.skin);
-  X.beginPath(); X.arc(-82, -16, 34, PI * 1.05, PI * 1.85); X.lineWidth = 8; X.strokeStyle = css(C(B.hairCol)); X.stroke();
-  [-1, 1].forEach(sd => { X.beginPath(); X.arc(-82 + sd * 12, -10, 6, 0.1 * PI, 0.9 * PI); X.lineWidth = 3; X.strokeStyle = css([0.2, 0.15, 0.15]); X.stroke(); });
-  X.beginPath(); X.arc(-82, 2, 6, 0.15 * PI, 0.85 * PI); X.lineWidth = 3; X.strokeStyle = css([0.6, 0.3, 0.3]); X.stroke();
+  ell(-74, -8, 48, 44); fill(darken(C(wrap), 0.06)); circ(-80, -10, 40); fill(mix(C(wrap), [1, 1, 1], 0.35));
+  babyFace(B, -82, -10, 33, t, k);
   circ(-40, -26, 11); fill(B.skin);
   if (k && k.bow) { const bx = -64, by = -46; X.save(); X.translate(bx, by); X.rotate(0.5); X.scale(1.6, 1.6); [-1, 1].forEach(sd => { X.beginPath(); X.moveTo(0, 0); X.quadraticCurveTo(sd * 22, -18, sd * 26, 0); X.quadraticCurveTo(sd * 22, 18, 0, 0); X.closePath(); fill(k.bow); }); circ(0, 0, 7); fill(darken(C(k.bow), 0.15)); X.restore(); }
   X.restore();
@@ -2685,7 +2707,7 @@ const KIDS = (() => {
     if (!bare) { const g = X.createRadialGradient(w / 2, h * 0.42, 10, w / 2, h * 0.5, w * 0.7); g.addColorStop(0, '#F1F4F7'); g.addColorStop(1, '#D9E0E7'); X.fillStyle = g; X.fillRect(0, 0, w, h); }
     ell(w / 2, h - 34, w * 0.26, 14); fill([0.25, 0.3, 0.38], 0.16);
     const wv = { armR: [0.3 + 0.1 * Math.sin(t * 2), 0.25], armL: [0.2, 0.1] };
-    if (kind === 'baby') { const b = Object.assign({}, BABY_DEF, look), sc = (h - 40) / 150; ell(w / 2, h * 0.62, 70 * sc, 30 * sc); fill(b.blanket); baby(w / 2, h * 0.6, sc, b, t); X.restore(); return; }
+    if (kind === 'baby') { const b = Object.assign({}, BABY_DEF, look), sc = (h - 30) / 160; baby(w / 2, h * 0.5 + 6 * sc, sc, b, t); X.restore(); return; }
     if (kind === 'sibling') look = Object.assign({}, SIB_DEF, look), kind = 'child';
     if (kind === 'friend') look = Object.assign({}, FRIEND_DEF, look), kind = 'child';
     if (kind === 'pet') { X.restore(); portrait(ctx, Object.assign({ type: 'dog', coat: '#A14F26', ears: 'floppy' }, look), t, w, h, 'pet'); return; }
