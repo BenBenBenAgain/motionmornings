@@ -668,9 +668,14 @@ function baby(x, y, s, k, t) {
 }
 // a swaddled baby lying across the forearms, with one arm drawn over the top so they're properly held
 function cradle(c, h, s, k, t, L) {
-  const B = kidLook(k || {}), skin = C(L.skin), rock = 0.05 * Math.sin(t * 1.6);
+  const B = kidLook(k || {}), skin = C(L.skin), rock = 0.05 * Math.sin(t * 1.6), tilt = 0.34 + rock;
   const cx = (h.L[0] + h.R[0]) / 2, cy = (h.L[1] + h.R[1]) / 2 - 34 * s;
-  X.save(); X.translate(cx, cy); X.rotate(rock); X.scale(s, s);
+  const sleeve = L.outfit === 'tee' || L.outfit === 'dress' ? skin : C(L.top);
+  // the head end is raised toward the parent, and their other hand cups under the baby's head
+  const at = (px, py) => [cx + s * (px * Math.cos(tilt) - py * Math.sin(tilt)), cy + s * (px * Math.sin(tilt) + py * Math.cos(tilt))];
+  const [lhx, lhy] = at(-70, 30), lex = h.L[0] - 104 * s, ley = h.L[1] - 7 * s;
+  line([[lex, ley], [lhx, lhy]], 32 * s, sleeve);
+  X.save(); X.translate(cx, cy); X.rotate(tilt); X.scale(s, s);
   const wrap = (k && k.blanket) || '#BFD9EA';
   ell(10, 6, 104, 50); fill(wrap);
   X.lineWidth = 4; X.strokeStyle = css(darken(C(wrap), 0.14));
@@ -680,8 +685,9 @@ function cradle(c, h, s, k, t, L) {
   circ(-40, -26, 11); fill(B.skin);
   if (k && k.bow) { const bx = -64, by = -46; X.save(); X.translate(bx, by); X.rotate(0.5); X.scale(1.6, 1.6); [-1, 1].forEach(sd => { X.beginPath(); X.moveTo(0, 0); X.quadraticCurveTo(sd * 22, -18, sd * 26, 0); X.quadraticCurveTo(sd * 22, 18, 0, 0); X.closePath(); fill(k.bow); }); circ(0, 0, 7); fill(darken(C(k.bow), 0.15)); X.restore(); }
   X.restore();
+  circ(lhx, lhy, 20 * s); fill(skin);
   // the right forearm comes back over the blanket and the hand rests on it
-  const ex = h.R[0] + 104 * s, ey = h.R[1] - 7 * s, hx = cx - 10 * s, hy = cy + 16 * s, sleeve = L.outfit === 'tee' || L.outfit === 'dress' ? skin : C(L.top);
+  const ex = h.R[0] + 104 * s, ey = h.R[1] - 7 * s, [hx, hy] = at(10, 18);
   line([[ex, ey], [hx, hy]], 32 * s, sleeve); circ(hx, hy, 20 * s); fill(skin);
 }
 function pram(x, y, t, k) {
