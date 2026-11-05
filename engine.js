@@ -425,15 +425,15 @@ function person(x, y, s, L, t, o = {}) {
       X.save(); X.translate(g.fx + (bare ? 6 : 8), g.fy + (bare ? 0 : 4)); X.rotate(walk ? g.fa : 0); ell(0, 0, bare ? 26 : 34, bare ? 12 : 16); fill(shoe); X.restore();
     });
     if (shorts) {
-      // shorts: a seat across the hips and a leg tube down each thigh, angled out a little,
-      // so there's an upside-down V between the legs and each leg swings on its own
-      const pc = C(L.pants);
-      rr(-78, -278, 156, 44, 12); fill(pc);
-      legs.forEach(g => {
-        const sd = g.hx < 0 ? -1 : 1, ang = Math.atan2(g.kx - g.hx, g.ky - legHip) + sd * 0.2, ux = Math.sin(ang), uy = Math.cos(ang), len = 96;
-        const top = [g.hx, legHip], hem = [g.hx + ux * len, legHip + uy * len], tw = 40, hw = 31;
-        X.beginPath(); X.moveTo(top[0] - uy * tw, top[1] + ux * tw); X.lineTo(top[0] + uy * tw, top[1] - ux * tw); X.lineTo(hem[0] + uy * hw, hem[1] - ux * hw); X.lineTo(hem[0] - uy * hw, hem[1] + ux * hw); X.closePath(); fill(pc);
+      // shorts: one solid boxy shape from the waist to mid-thigh, a bit wider than the hips,
+      // with just a small slit at the bottom between the legs. The hem corners follow each thigh as they walk.
+      const hem = legs.map(g => {
+        const sd = g.hx < 0 ? -1 : 1, ang = Math.atan2(g.kx - g.hx, g.ky - legHip), ux = Math.sin(ang), uy = Math.cos(ang), len = 100;
+        const cx = g.hx + ux * len, cy = legHip + uy * len, px = uy, py = -ux;
+        return { sd, out: [cx + sd * px * 54, cy + sd * py * 54], inn: [cx - sd * px * 18, cy - sd * py * 18] };
       });
+      const [Lh, Rh] = hem[0].sd < 0 ? hem : [hem[1], hem[0]], apex = [(Lh.inn[0] + Rh.inn[0]) / 2, Math.min(Lh.inn[1], Rh.inn[1]) - 40];
+      X.beginPath(); X.moveTo(-80, -280); X.lineTo(80, -280); X.lineTo(Rh.out[0], Rh.out[1]); X.lineTo(Rh.inn[0], Rh.inn[1]); X.lineTo(apex[0], apex[1]); X.lineTo(Lh.inn[0], Lh.inn[1]); X.lineTo(Lh.out[0], Lh.out[1]); X.closePath(); fill(C(L.pants));
     }
     // a skirt sits at the waist and flares a little to just above the knee, swinging with the stride
     if (skirt) { const sw = 10 * walk * Math.sin(w); X.beginPath(); X.moveTo(-76, -262); X.lineTo(76, -262); X.lineTo(106 + sw, -138); X.quadraticCurveTo(0, -128, -106 + sw, -138); X.closePath(); fill(L.pants); line([[-60, -250], [60, -250]], 4, darken(C(L.pants), 0.15)); }
