@@ -2642,8 +2642,14 @@ const KIDS = (() => {
     const sx = c2 => c2.sex || (c2.body === 'm' ? 'm' : 'f'), sn = (SB(c).name || '').trim() || ({ m: 'their brother', f: 'their sister', x: 'their sibling' }[sx(SB(c))]), bn = (BB(c).name || '').trim() || 'the baby';
     const fn0 = ((c.friends && c.friends[0] && c.friends[0].name) || '').trim() || 'their friend';
     text = String(text || '').replace(/\{sibling\}/g, sn).replace(/\{baby\}/g, bn).replace(/\{friend\}/g, fn0);
-    const kn = (KID(c).name || '').trim() || 'the child', an = (AD(c).name || '').trim() || ({ m: 'Dad', f: 'Mum', x: 'their grown-up' }[sx(AD(c))]), hn = (HP(c).name || '').trim() || 'a friend';
-    return String(text || '').replace(/\{child\}/g, kn).replace(/\{adult\}/g, an).replace(/\{helper\}/g, hn);
+    // before names are typed in, stand-ins that still read naturally: "your little one", or "Little One" in a title
+    const raw = String(text || ''), isTitle = !/[.!?]\s*$/.test(raw.trim()) && /\{child\}/.test(raw) && /\b[A-Z][a-z]+\b.*\b[A-Z][a-z]+\b/.test(raw.replace(/\{[a-z]+\}/g, ''));
+    const kn = (KID(c).name || '').trim() || (isTitle ? 'Little One' : 'your little one'), an = (AD(c).name || '').trim() || ({ m: 'Dad', f: 'Mum', x: 'their grown-up' }[sx(AD(c))]), hn = (HP(c).name || '').trim() || 'a friend';
+    let out = raw.replace(/\{child\}/g, kn).replace(/\{adult\}/g, an).replace(/\{helper\}/g, hn);
+    out = out.replace(/\b(Hi|Hello|Bye|Goodbye),? (a friend|their friend|their brother|their sister|their sibling|the baby|your little one)!/gi, '$1!');
+    out = out.replace(/,? my name is (your little one|Little One)!/gi, '!');
+    // sentences start with a capital
+    return out.replace(/(^\s*|[.!?]\s+)([a-z])/g, (m, a, b) => a + b.toUpperCase());
   }
 
   // ---- timing: every step is long enough for its words, or for the voice recorded for it
@@ -2734,7 +2740,7 @@ const KIDS = (() => {
     pets: [{ type: 'dog', name: 'Biscuit', coat: '#C9A060', ears: 'floppy', size: 'm', muzzle: 'dark' }], baby: {} };
   const DEMOS = {
     playgroup: { label: 'Playgroup', music: 'morning-mood', cast: DEMO_CAST, story: { title: 'Ava Goes to Playgroup', ending: 'Playgroup was fun!', steps: [
-      { id: 'd1', scene: 'goto', place: 'Play group', text: 'On Wednesday, Mum and Ava are going to playgroup.' },
+      { id: 'd1', scene: 'goto', place: 'Playgroup', text: 'On Wednesday, Mum and Ava are going to playgroup.' },
       { id: 'd2', scene: 'arrive', text: 'Miss Jo is there to say hello.', say: { who: 'child', words: 'Hi Miss Jo!' } },
       { id: 'd3', scene: 'blocks', text: 'Ava can build a big tower with the blocks.' },
       { id: 'd4', scene: 'others', text: 'Other kids come too. Leo is there!', say: { who: 'friend', words: 'Hi Ava!' } },
