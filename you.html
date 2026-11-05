@@ -1407,7 +1407,8 @@ const LOOK_FIELDS = [
   ['bottoms', 'Bottoms', 'seg', [[false, 'Pants'], ['shorts', 'Shorts'], ['skirt', 'Skirt']], L => L.outfit !== 'dress'],
   ['pants', BOTTOM_LABEL, 'color', CLOTH, L => L.outfit !== 'dress'],
   ['tattoo', 'Tattoos', 'seg', [[false, 'None'], ['forearm', 'Forearm'], ['sleeve', 'One arm'], ['both', 'Both arms'], ['hand', 'Hand']]],
-  ['ink', 'Tattoo ink', 'seg', [[false, 'Black'], ['colour', 'Colour']], L => !!L.tattoo],
+  ['legTat', 'Leg tattoo', 'seg', [[false, 'No'], [true, 'Yes']]],
+  ['ink', 'Tattoo ink', 'seg', [[false, 'Black'], ['colour', 'Colour']], L => !!(L.tattoo || L.legTat)],
 ];
 function applySex(o, v, kid) {
   o.body = v === 'm' ? 'm' : 'f';
@@ -1525,7 +1526,7 @@ const possessive = n => n + (/s$/i.test(n) ? '’' : '’s');
 function filmTitle() { const n = (S.cfg.me.name || '').trim(); return n ? possessive(n) + ' Motion Mornings' : 'Make your film'; }
 function namesChanged() { const h = $('#buildTitle'); if (h) h.textContent = filmTitle(); liveLines(); }
 // a Bitmoji-style editor: the character big at the top, options in tabs underneath
-const LOOK_TABS = [['Body', ['sex', 'agegrp', 'height', 'build', 'skin', 'chair']], ['Hair', ['hair', 'hairCol', 'grey', 'facial', 'facialCol']], ['Clothes', ['outfit', 'top', 'inner', 'bottoms', 'pants']], ['Extras', ['hat', 'hatCol', 'glasses', 'earrings', 'freckles', 'tattoo', 'ink']]];
+const LOOK_TABS = [['Body', ['sex', 'agegrp', 'height', 'build', 'skin', 'chair']], ['Hair', ['hair', 'hairCol', 'grey', 'facial', 'facialCol']], ['Clothes', ['outfit', 'top', 'inner', 'bottoms', 'pants']], ['Extras', ['hat', 'hatCol', 'glasses', 'earrings', 'freckles', 'tattoo', 'legTat', 'ink']]];
 const PET_TABS = [['Breed', ['type', 'breed']], ['Shape', ['size', 'build', 'snout', 'ears', 'tail']], ['Coat', ['fur', 'coat', 'muzzle', 'marking', 'markCol']]];
 let lookObj = null, lookTab = 0, lookKey = 'me', lookRAF = 0, lookKind = 'person';
 function lookFieldsFor(keys) { const all = lookKind === 'pet' ? [...PET_FIELDS, ...PET_MORE] : [PARTNER_SEX, ...LOOK_FIELDS]; return keys.map(k => all.find(f => f[0] === k)).filter(Boolean); }

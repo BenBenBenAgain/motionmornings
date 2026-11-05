@@ -489,7 +489,7 @@
         sw('Top colour', 'top', CLOTH));
       if (L.outfit === 'jacket') f.append(sw('Shirt under jacket', 'inner', CLOTH));
       if (L.outfit !== 'dress') f.append(seg('Bottoms', 'bottoms', [[false, 'Pants'], ['shorts', 'Shorts'], ['skirt', 'Skirt']], true), sw({ shorts: 'Shorts colour', skirt: 'Skirt colour' }[L.bottoms] || 'Pants colour', 'pants', CLOTH));
-      if (!kid) { f.append(seg('Tattoos', 'tattoo', [[false, 'None'], ['forearm', 'Forearm'], ['sleeve', 'One arm'], ['both', 'Both arms'], ['hand', 'Hand']], true)); if (L.tattoo) f.append(seg('Tattoo ink', 'ink', [[false, 'Black'], ['colour', 'Colour']])); }
+      if (!kid) { f.append(seg('Tattoos', 'tattoo', [[false, 'None'], ['forearm', 'Forearm'], ['sleeve', 'One arm'], ['both', 'Both arms'], ['hand', 'Hand']], true)); f.append(seg('Leg tattoo', 'legTat', [[false, 'No'], [true, 'Yes']], true)); if (L.tattoo || L.legTat) f.append(seg('Tattoo ink', 'ink', [[false, 'Black'], ['colour', 'Colour']])); }
       if (kid) f.append(el('div', { class: 'field' }, el('span', {}, 'On their top'), el('input', { type: 'text', id: 'printIn', maxlength: '4', placeholder: 'e.g. OK', value: L.print || '', oninput: e => { L.print = e.target.value.toUpperCase(); refresh(); } })));
       if (box) box.scrollTop = top;
     }

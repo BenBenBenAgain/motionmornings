@@ -410,22 +410,26 @@ function person(x, y, s, L, t, o = {}) {
     const kw = bare ? 34 : 54;
     [-1, 1].forEach(sd => {
       line([[sd * 32, -232], [sd * 36, G - 52]], bare ? 28 : shorts ? 36 : 46, lc);
+      if (L.legTat && (bare || shorts) && sd > 0) tattoo([sd * 32, -214], [sd * 36, G - 52], bare ? 28 : 36, 'small', L.ink);
       ell(sd * 42, G - 50, 32, 15); fill(bare ? [0.55, 0.3, 0.25] : [0.13, 0.11, 0.10]);
     });
     if (skirt) { X.beginPath(); X.moveTo(-84, -276); X.lineTo(84, -276); X.quadraticCurveTo(100, -236, 74, -212); X.lineTo(-74, -212); X.quadraticCurveTo(-100, -236, -84, -276); X.closePath(); fill(lap); }
     else [-1, 1].forEach(sd => { rr(sd * 32 - kw / 2 - 4, -268, kw + 8, 46, 20); fill(dress ? lap : darken(lap, 0.06)); circ(sd * 32, -230, kw / 2 + 4); fill(dress ? skin : lap); });
   } else {
     const lw = bare ? 26 : 48, shoe = bare ? [0.55, 0.3, 0.25] : [0.13, 0.11, 0.10], lc = bare ? skin : C(L.pants);
-    legs.forEach(g => {
+    const legInk = L.legTat && (bare || shorts);
+    legs.forEach((g, gi) => {
       if (shorts) {
-        // shorts end just above the knee, then bare shins
-        const mx = g.hx + (g.kx - g.hx) * 0.7, my = legHip + (g.ky - legHip) * 0.7;
-        line([[mx, my], [g.kx, g.ky], [g.fx, g.fy]], 34, skin);
-        line([[g.hx, legHip], [mx, my]], 56, lc); line([[mx - 4, my - 4], [mx + 4, my + 4]], 0.1, lc);
+        // bare legs from just below the hip, then the shorts over the top with a straight hem across each thigh
+        line([[g.hx, legHip + 40], [g.kx, g.ky], [g.fx, g.fy]], 38, skin);
+        const hm = 0.55, mx = g.hx + (g.kx - g.hx) * hm, my = legHip + (g.ky - legHip) * hm, ang = Math.atan2(g.kx - g.hx, g.ky - legHip), px = Math.cos(ang) * 32, py = -Math.sin(ang) * 32;
+        X.beginPath(); X.moveTo(g.hx - 30, legHip - 14); X.lineTo(g.hx + 30, legHip - 14); X.lineTo(mx + px, my + py); X.lineTo(mx - px, my - py); X.closePath(); fill(lc);
+        line([[mx - px * 0.9, my - py * 0.9], [mx + px * 0.9, my + py * 0.9]], 4, darken(C(L.pants), 0.15));
       } else line([[g.hx, legHip], [g.kx, g.ky], [g.fx, g.fy]], lw, lc);
+      if (legInk && gi === 1) tattoo([g.kx, g.ky], [g.fx, g.fy], shorts ? 38 : lw, 'small', L.ink);
       X.save(); X.translate(g.fx + (bare ? 6 : 8), g.fy + (bare ? 0 : 4)); X.rotate(walk ? g.fa : 0); ell(0, 0, bare ? 26 : 34, bare ? 12 : 16); fill(shoe); X.restore();
     });
-    if (shorts) { rr(-72, -276, 144, 52, 14); fill(lc); line([[0, -262], [0, -236]], 4, darken(lc, 0.18)); }
+    if (shorts) { rr(-72, -278, 144, 44, 10); fill(lc); }
     // a skirt sits at the waist and flares a little to just above the knee, swinging with the stride
     if (skirt) { const sw = 10 * walk * Math.sin(w); X.beginPath(); X.moveTo(-76, -262); X.lineTo(76, -262); X.lineTo(106 + sw, -138); X.quadraticCurveTo(0, -128, -106 + sw, -138); X.closePath(); fill(L.pants); line([[-60, -250], [60, -250]], 4, darken(C(L.pants), 0.15)); }
   }
