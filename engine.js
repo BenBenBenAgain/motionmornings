@@ -443,6 +443,12 @@ function person(x, y, s, L, t, o = {}) {
   // torso
   if (dress && chair) { X.beginPath(); X.moveTo(-62, -448); X.lineTo(62, -448); X.lineTo(84, -270); X.quadraticCurveTo(96, -236, 70, -214); X.lineTo(-70, -214); X.quadraticCurveTo(-96, -236, -84, -270); X.closePath(); fill(L.top); }
   else if (dress) { X.beginPath(); X.moveTo(-62, -448); X.lineTo(62, -448); X.lineTo(98, -165); X.lineTo(-98, -165); X.closePath(); fill(L.top); }
+  else if (L.outfit === 'singlet') {
+    // a singlet: bare shoulders, two straps, a scoop at the neck and deep armholes
+    X.beginPath(); X.moveTo(-70, -450); X.lineTo(70, -450); X.bezierCurveTo(86, -420, 84, -390, 80, -370); X.lineTo(-80, -370); X.bezierCurveTo(-84, -390, -86, -420, -70, -450); X.closePath(); fill(skin);
+    X.beginPath(); X.moveTo(-50, -448); X.lineTo(-30, -448); X.quadraticCurveTo(0, -396, 30, -448); X.lineTo(50, -448);
+    X.quadraticCurveTo(56, -392, 82, -372); X.bezierCurveTo(82, -320, 76, -280, 72, -250); X.lineTo(-72, -250); X.bezierCurveTo(-76, -280, -82, -320, -82, -372); X.quadraticCurveTo(-56, -392, -50, -448); X.closePath(); fill(L.top);
+  }
   else {
     X.beginPath(); X.moveTo(-82, -446); X.bezierCurveTo(-88, -380, -78, -300, -72, -250); X.lineTo(72, -250); X.bezierCurveTo(78, -300, 88, -380, 82, -446); X.closePath(); fill(L.top);
     if (L.outfit === 'hoodie') { const hd = darken(C(L.top), 0.14); ell(0, -440, 66, 20); fill(hd); line([[-14, -432], [-16, -385]], 4, [0.95, 0.95, 0.95]); line([[14, -432], [16, -385]], 4, [0.95, 0.95, 0.95]); rr(-46, -330, 92, 54, 14); fill(hd); }
@@ -463,7 +469,7 @@ function person(x, y, s, L, t, o = {}) {
     } else if (chair && !walk && u < 0.3 && f < 0.3) [u, f] = reachArm(side, side * 46, -246, false);
     else if (swing) { const k = clamp((0.5 - u) / 0.3); u += side * swing * k; f += 0.12 * k * Math.min(walk, 1); }
     const sx = side * 72, sy = -426, ex = sx + side * 112 * Math.sin(u), ey = sy + 112 * Math.cos(u), hx = ex + side * fl * Math.sin(f), hy = ey + fl * Math.cos(f);
-    const upper = dress ? skin : L.top, fore = (dress || L.outfit === 'tee') ? skin : L.top, wd = dress ? 30 : 38;
+    const singlet = L.outfit === 'singlet', upper = (dress || singlet) ? skin : L.top, fore = (dress || singlet || L.outfit === 'tee') ? skin : L.top, wd = dress ? 30 : singlet ? 34 : 38;
     line([[sx, sy], [ex, ey]], wd, upper); line([[ex, ey], [hx, hy]], wd * (L.outfit === 'tee' ? 0.8 : 1), fore);
     if (L.outfit === 'tee') { circ(ex, ey, wd / 2); fill(upper); }
     // tattoos show only on bare skin: the forearm in a tee or dress, the whole arm in a dress
@@ -742,7 +748,7 @@ function baby(x, y, s, k, t) {
 // a swaddled baby lying across the forearms, with one arm drawn over the top so they're properly held
 function cradle(c, h, s, k, t, L) {
   const B = kidLook(k || {}), skin = C(L.skin), rock = 0.05 * Math.sin(t * 1.6), tilt = 0.34 + rock;
-  const sleeve = L.outfit === 'tee' || L.outfit === 'dress' ? skin : C(L.top);
+  const sleeve = L.outfit === 'tee' || L.outfit === 'dress' || L.outfit === 'singlet' ? skin : C(L.top);
   // the baby's head rests in the crook of the left elbow, head end raised toward the parent, the forearm underneath
   const lex = h.L[0] - 104 * s, ley = h.L[1] - 7 * s, hxl = -82 * Math.cos(tilt) + 10 * Math.sin(tilt), hyl = -82 * Math.sin(tilt) - 10 * Math.cos(tilt);
   const cx = lex + 6 * s - s * hxl, cy = ley - 26 * s - s * hyl;
@@ -1065,7 +1071,7 @@ function playGuitar(c, t, px, py, s, gx, gy) {
   const aR = armsTo(px, py, s, L, neck[0], neck[1], true), aL = armsTo(px, py, s, L, strum[0], strum[1]);
   person(px, py, s, L, t, { armL: aL.armL, armR: aR.armR });
   guitar(gx, gy, a);
-  const dress = L.outfit === 'dress', tee = L.outfit === 'tee', sk = C(L.skin), up = dress ? sk : C(L.top), fore = (tee || dress) ? sk : C(L.top);
+  const dress = L.outfit === 'dress', tee = L.outfit === 'tee', sk = C(L.skin), up = (dress || L.outfit === 'singlet') ? sk : C(L.top), fore = (tee || dress || L.outfit === 'singlet') ? sk : C(L.top);
   // the strumming arm is redrawn whole, shoulder to hand, in front of the guitar, so the elbow joins up
   const k = aL.ss, bw = aL.bw, [u] = aL.armL, D = L.chair ? 92 : 0;
   const sh = [px - 72 * k * bw, py + (-426 + D) * k], el = [px + (-72 - 112 * Math.sin(u)) * k * bw, py + (-426 + D + 112 * Math.cos(u)) * k];
@@ -1555,10 +1561,10 @@ function brandHead(cx, cy, s, L, t, rot) {
 function posed(x, y, s, L, J, t) {
   const P = k => [x + J[k][0] * s, y + J[k][1] * s];
   const top = C(L.top), skin = C(L.skin), dress = L.outfit === 'dress', legC = dress ? skin : C(L.pants || '#30406E');
-  const shoe = [0.13, 0.11, 0.10], longSleeve = !dress && L.outfit !== 'tee';
+  const shoe = [0.13, 0.11, 0.10], longSleeve = !dress && L.outfit !== 'tee' && L.outfit !== 'singlet', bareUp = dress || L.outfit === 'singlet';
   const hipAt = sd => { const [hx0, hy0] = P('hip'); return [hx0 + sd * (J.hipW || 0) * s, hy0]; };
   const leg = (kn, ft, col, sd) => { line([hipAt(sd), P(kn), P(ft)], (dress ? 26 : 48) * s, col); const [fx, fy] = P(ft); ell(fx + 10 * s, fy - 8 * s, 34 * s, 16 * s); fill(dress ? [0.55, 0.3, 0.25] : shoe); };
-  const arm = (el2, hd, dark) => { const up = dress ? skin : top, fore = longSleeve ? top : skin; line([P('shoulder'), P(el2)], 38 * s, dark ? darken(up, 0.1) : up); line([P(el2), P(hd)], 34 * s, dark ? darken(fore, 0.1) : fore); circ(...P(hd), 20 * s); fill(dark ? darken(skin, 0.08) : skin); };
+  const arm = (el2, hd, dark) => { const up = bareUp ? skin : top, fore = longSleeve ? top : skin; line([P('shoulder'), P(el2)], 38 * s, dark ? darken(up, 0.1) : up); line([P(el2), P(hd)], 34 * s, dark ? darken(fore, 0.1) : fore); circ(...P(hd), 20 * s); fill(dark ? darken(skin, 0.08) : skin); };
   leg('kneeB', 'footB', darken(legC, 0.1), -1);
   leg('kneeF', 'footF', legC, 1);
   arm('elbowB', 'handB', true);
@@ -1736,7 +1742,7 @@ const SCENES = {
     const sk = C(L.skin), pw = 78, ph2 = 140, px = hand[0] - pw / 2, py = hand[1] - ph2 + 40;
     rr(px, py, pw, ph2, 14); fill([0.2, 0.21, 0.26]); rr(px + 10, py + 10, 26, 34, 8); fill([0.12, 0.12, 0.15]); circ(px + 18, py + 19, 5); fill([0.3, 0.32, 0.4]); circ(px + 28, py + 34, 5); fill([0.3, 0.32, 0.4]);
     // the hand holds the bottom third only: palm under the base, three fingers across the back, one finger reaching up the far edge, thumb on the near edge
-    const fore = (L.outfit === 'tee' || L.outfit === 'dress') ? sk : C(L.top), gy = py + ph2 - 46;
+    const fore = (L.outfit === 'tee' || L.outfit === 'dress' || L.outfit === 'singlet') ? sk : C(L.top), gy = py + ph2 - 46;
     line([[hand[0], hand[1] + 80], [hand[0] + 2, py + ph2 + 6]], 30 * s, sk);
     rr(px - 4, py + ph2 - 22, pw + 6, 34, 16); fill(sk);
     rr(px + pw - 10, gy - 34, 15, 44, 7.5); fill(darken(sk, 0.04));
