@@ -445,9 +445,11 @@ function person(x, y, s, L, t, o = {}) {
   else if (dress) { X.beginPath(); X.moveTo(-62, -448); X.lineTo(62, -448); X.lineTo(98, -165); X.lineTo(-98, -165); X.closePath(); fill(L.top); }
   else if (L.outfit === 'singlet') {
     // a singlet: bare shoulders, two straps, a scoop at the neck and deep armholes
-    X.beginPath(); X.moveTo(-70, -450); X.lineTo(70, -450); X.bezierCurveTo(86, -420, 84, -390, 80, -370); X.lineTo(-80, -370); X.bezierCurveTo(-84, -390, -86, -420, -70, -450); X.closePath(); fill(skin);
-    X.beginPath(); X.moveTo(-50, -448); X.lineTo(-30, -448); X.quadraticCurveTo(0, -396, 30, -448); X.lineTo(50, -448);
-    X.quadraticCurveTo(56, -392, 82, -372); X.bezierCurveTo(82, -320, 76, -280, 72, -250); X.lineTo(-72, -250); X.bezierCurveTo(-76, -280, -82, -320, -82, -372); X.quadraticCurveTo(-56, -392, -50, -448); X.closePath(); fill(L.top);
+    // bare shoulders that slope down from the neck and round off into the arms
+    X.beginPath(); X.moveTo(-20, -466); X.quadraticCurveTo(-58, -462, -78, -440); X.quadraticCurveTo(-90, -424, -84, -400); X.lineTo(-80, -370); X.lineTo(80, -370); X.lineTo(84, -400); X.quadraticCurveTo(90, -424, 78, -440); X.quadraticCurveTo(58, -462, 20, -466); X.closePath(); fill(skin);
+    // the singlet: straps that sit on the slope of the shoulders, a scoop neck and deep armholes
+    X.beginPath(); X.moveTo(-54, -455); X.lineTo(-32, -462); X.quadraticCurveTo(0, -400, 32, -462); X.lineTo(54, -455);
+    X.quadraticCurveTo(58, -396, 82, -374); X.bezierCurveTo(82, -320, 76, -280, 72, -250); X.lineTo(-72, -250); X.bezierCurveTo(-76, -280, -82, -320, -82, -374); X.quadraticCurveTo(-58, -396, -54, -455); X.closePath(); fill(L.top);
   }
   else {
     X.beginPath(); X.moveTo(-82, -446); X.bezierCurveTo(-88, -380, -78, -300, -72, -250); X.lineTo(72, -250); X.bezierCurveTo(78, -300, 88, -380, 82, -446); X.closePath(); fill(L.top);
@@ -482,7 +484,7 @@ function person(x, y, s, L, t, o = {}) {
   });
   X.restore();
   // head
-  rect(-18, -472, 36, 32, skinD);
+  rect(-18, -472, 36, L.outfit === 'singlet' ? 12 : 32, skinD);
   headOn();
   if (scarf) { X.beginPath(); X.moveTo(-48, -480); X.lineTo(48, -480); X.lineTo(74, -428); X.lineTo(-74, -428); X.closePath(); fill(hatC); }
   ell(0, -502, 50, 58); fill(skin);
