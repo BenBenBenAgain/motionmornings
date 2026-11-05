@@ -337,17 +337,30 @@ function person(x, y, s, L, t, o = {}) {
   const walk = o.walk || 0, speed = o.speed || 7, armL = o.armL || [0.15, 0.1], armR = o.armR || [0.15, 0.1];
   const smile = o.smile !== false, flip = o.flip || 1;
   // a wheelchair: the body sits lower, the legs bend at the seat, and the wheels turn when moving
-  const chair = !!L.chair, D = chair ? 92 : 0, bob = chair ? Math.min(o.bob || 0, 10) : (o.bob || 0);
-  const hands = {};
+  const chair = !!L.chair, D = chair ? 92 : 0, dress = L.outfit === 'dress', w = t * speed;
+  // walking legs bend at the knee: the thigh swings, the shin trails behind it on the way forward and the foot lifts clear.
+  // The body rides up and down a little with each step, so a foot is always on the ground.
+  const legHip = dress ? -170 : -262, legT = dress ? 82 : 124, legS = dress ? 83 : 124, legSw = dress ? 0.34 : 0.4;
+  const legs = [[-1, 0], [1, PI]].map(([side, ph]) => {
+    const q = w + ph, a = walk * legSw * Math.sin(q), b = Math.min(walk, 1.3) * 0.55 * Math.pow(Math.max(0, Math.cos(q - 0.5)), 2);
+    const hx = side * (dress ? 22 : 26), kx = hx + legT * Math.sin(a), ky = legHip + legT * Math.cos(a);
+    return { hx, kx, ky, fx: kx + legS * Math.sin(a - b), fy: ky + legS * Math.cos(a - b), fa: 0.6 * (a - b) };
+  });
+  const lift = chair || !walk ? 0 : (legHip + legT + legS) - Math.max(legs[0].fy, legs[1].fy);
+  const bob = (chair ? Math.min(o.bob || 0, 10) : (o.bob || 0)) - lift;
+  const hands = { bob };
   X.save(); X.translate(x, y - bob); X.scale(s * flip, s);
+  const chairBw = ({ slim: 0.86, big: 1.26 }[L.build] || 1);
   if (chair) {
-    const fr = [0.24, 0.26, 0.3];
-    rr(-98, -440, 196, 290, 20); fill(fr);
-    line([[-92, -436], [-122, -452]], 12, fr); line([[92, -436], [122, -452]], 12, fr);
+    // behind the person: the backrest and the two push handles either side of it
+    const fr = [0.2, 0.22, 0.26], cb = 96 * chairBw;
+    X.save(); X.translate(0, D);
+    rr(-cb, -410, cb * 2, 170, 16); fill([0.16, 0.17, 0.2]);
+    [-1, 1].forEach(sd => { line([[sd * cb, -236], [sd * cb, -452]], 13, fr); rr(sd * cb - 10, -478, 20, 34, 9); fill([0.1, 0.1, 0.11]); });
+    X.restore();
     X.translate(0, D);
   }
-  const w = t * speed, hc = mix(C(L.hairCol), [0.8, 0.79, 0.77], ageK), skin = C(L.skin), skinD = darken(skin, 0.15);
-  const dress = L.outfit === 'dress';
+  const hc = mix(C(L.hairCol), [0.8, 0.79, 0.77], ageK), skin = C(L.skin), skinD = darken(skin, 0.15);
   const scarf = L.hat === 'scarf', hatC = C(L.hatCol || '#2E4A62'), capOn = !HATS_OFF && (L.hat === 'cap' || L.hat === 'beanie');
   const hs = o.head || 1; const headOn = () => { X.save(); if (hs !== 1) { X.translate(0, -470); X.scale(hs, hs); X.translate(0, 470); } };
   headOn();
@@ -373,33 +386,42 @@ function person(x, y, s, L, t, o = {}) {
   X.save(); X.scale(bw, 1);
   // legs
   if (chair) {
-    const lc = dress ? skin : C(L.pants), wd = dress ? 26 : 48;
-    rr(-110, -262, 220, 36, 12); fill([0.24, 0.26, 0.3]);
-    [-1, 1].forEach(sd => { line([[sd * 28, -250], [sd * 34, -200]], wd + 6, lc); line([[sd * 34, -200], [sd * 36, -122]], wd, lc); ell(sd * 40, -114, 30, 15); fill([0.13, 0.11, 0.10]); });
-    rr(-82, -104, 164, 14, 6); fill([0.4, 0.42, 0.46]);
-    [-1, 1].forEach(sd => { circ(sd * 64, -104, 14); fill([0.15, 0.15, 0.17]); });
-    const spin = walk ? t * speed * 0.9 : 0;
+    const lc = dress ? skin : C(L.pants), tyre = [0.13, 0.13, 0.15], metal = [0.74, 0.76, 0.8], fr = [0.2, 0.22, 0.26];
+    const spin = walk ? -t * speed * 0.9 : 0, G = -D;
+    // the big back wheels, seen almost side on, leaning in a little at the top, each with a hand rim on the outside
     [-1, 1].forEach(sd => {
-      const cx = sd * 130, cy = -212;
-      ell(cx, cy, 42, 120); X.lineWidth = 18; X.strokeStyle = css([0.15, 0.15, 0.17]); X.stroke();
-      ell(cx, cy, 30, 104); X.lineWidth = 5; X.strokeStyle = css([0.72, 0.74, 0.78]); X.stroke();
-      for (let i = 0; i < 4; i++) { const a = spin + i * PI / 4; line([[cx - 30 * Math.cos(a), cy - 104 * Math.sin(a)], [cx + 30 * Math.cos(a), cy + 104 * Math.sin(a)]], 3, [0.72, 0.74, 0.78]); }
-      circ(cx, cy, 9); fill([0.5, 0.52, 0.55]);
+      const cx = sd * 142, cy = G - 118;
+      X.save(); X.translate(cx, cy); X.rotate(-sd * 0.06);
+      ell(0, 0, 40, 112); X.lineWidth = 20; X.strokeStyle = css(tyre); X.stroke();
+      ell(0, 0, 30, 98); X.lineWidth = 4; X.strokeStyle = css(metal); X.stroke();
+      for (let i = 0; i < 6; i++) { const a = spin + i * PI / 6; line([[-30 * Math.cos(a), -98 * Math.sin(a)], [30 * Math.cos(a), 98 * Math.sin(a)]], 2.5, metal, 0.85); }
+      circ(0, 0, 11); fill([0.5, 0.52, 0.56]);
+      ell(sd * 18, 0, 30, 96); X.lineWidth = 6; X.strokeStyle = css([0.84, 0.86, 0.9]); X.stroke();
+      X.restore();
     });
-  } else if (dress) {
-    [[-1, 0], [1, PI]].forEach(([side, ph]) => {
-      const a = walk * 0.34 * Math.sin(w + ph), hx = side * 22, hy = -170, fx = hx + 165 * Math.sin(a), fy = hy + 165 * Math.cos(a);
-      line([[hx, hy], [fx, fy]], 26, skin); ell(fx + 6, fy, 26, 12); fill([0.55, 0.3, 0.25]);
+    // the seat, the front frame down to the footplate, and the little front castor wheels
+    [-1, 1].forEach(sd => { line([[sd * 92, -250], [sd * 78, G - 34]], 10, fr); line([[sd * 92, -262], [sd * 142, G - 118]], 10, fr); });
+    [-1, 1].forEach(sd => { line([[sd * 78, G - 34], [sd * 84, G - 18]], 7, metal); circ(sd * 84, G - 18, 18); fill(tyre); circ(sd * 84, G - 18, 6); fill(metal); });
+    rr(-108, -274, 216, 30, 12); fill([0.16, 0.17, 0.2]);
+    rr(-88, G - 44, 176, 14, 6); fill(metal);
+    // sitting: thighs come toward us across the seat, knees forward, shins down to the footplate
+    const kw = dress ? 34 : 54;
+    [-1, 1].forEach(sd => {
+      line([[sd * 32, -232], [sd * 36, G - 52]], dress ? 28 : 46, lc);
+      ell(sd * 42, G - 50, 32, 15); fill(dress ? [0.55, 0.3, 0.25] : [0.13, 0.11, 0.10]);
     });
+    [-1, 1].forEach(sd => { rr(sd * 32 - kw / 2 - 4, -268, kw + 8, 46, 20); fill(dress ? C(L.top) : darken(lc, 0.06)); circ(sd * 32, -230, kw / 2 + 4); fill(dress ? skin : lc); });
   } else {
-    [[-1, 0], [1, PI]].forEach(([side, ph]) => {
-      const a = walk * 0.38 * Math.sin(w + ph), hx = side * 26, hy = -262, fx = hx + 248 * Math.sin(a), fy = hy + 248 * Math.cos(a);
-      line([[hx, hy], [fx, fy]], 48, L.pants); ell(fx + 8, fy + 4, 34, 16); fill([0.13, 0.11, 0.10]);
+    const lw = dress ? 26 : 48, shoe = dress ? [0.55, 0.3, 0.25] : [0.13, 0.11, 0.10], lc = dress ? skin : C(L.pants);
+    legs.forEach(g => {
+      line([[g.hx, legHip], [g.kx, g.ky], [g.fx, g.fy]], lw, lc);
+      X.save(); X.translate(g.fx + (dress ? 6 : 8), g.fy + (dress ? 0 : 4)); X.rotate(walk ? g.fa : 0); ell(0, 0, dress ? 26 : 34, dress ? 12 : 16); fill(shoe); X.restore();
     });
   }
   if (o.backpack) { rr(-118, -440, 56, 170, 16); fill(o.backpack); }
   // torso
-  if (dress) { X.beginPath(); X.moveTo(-62, -448); X.lineTo(62, -448); X.lineTo(98, -165); X.lineTo(-98, -165); X.closePath(); fill(L.top); }
+  if (dress && chair) { X.beginPath(); X.moveTo(-62, -448); X.lineTo(62, -448); X.lineTo(84, -270); X.quadraticCurveTo(96, -236, 70, -214); X.lineTo(-70, -214); X.quadraticCurveTo(-96, -236, -84, -270); X.closePath(); fill(L.top); }
+  else if (dress) { X.beginPath(); X.moveTo(-62, -448); X.lineTo(62, -448); X.lineTo(98, -165); X.lineTo(-98, -165); X.closePath(); fill(L.top); }
   else {
     X.beginPath(); X.moveTo(-82, -446); X.bezierCurveTo(-88, -380, -78, -300, -72, -250); X.lineTo(72, -250); X.bezierCurveTo(78, -300, 88, -380, 82, -446); X.closePath(); fill(L.top);
     if (L.outfit === 'hoodie') { const hd = darken(C(L.top), 0.14); ell(0, -440, 66, 20); fill(hd); line([[-14, -432], [-16, -385]], 4, [0.95, 0.95, 0.95]); line([[14, -432], [16, -385]], 4, [0.95, 0.95, 0.95]); rr(-46, -330, 92, 54, 14); fill(hd); }
@@ -407,8 +429,19 @@ function person(x, y, s, L, t, o = {}) {
     if (L.outfit === 'jacket') { X.beginPath(); X.moveTo(-26, -444); X.lineTo(26, -444); X.lineTo(22, -252); X.lineTo(-22, -252); X.closePath(); fill(L.inner || '#17171C'); }
   }
   // arms
+  const swing = chair ? 0 : 0.26 * Math.min(walk, 1) * Math.sin(w), pushQ = (t * speed * 0.16) % 1;
   [[-1, armL], [1, armR]].forEach(([side, [u, f]]) => {
-    const sx = side * 72, sy = -426, ex = sx + side * 112 * Math.sin(u), ey = sy + 112 * Math.cos(u), hx = ex + side * 104 * Math.sin(f), hy = ey + 104 * Math.cos(f);
+    let fl = 104;
+    if (chair && walk && u < 0.7) {
+      // a push: the hand grips the rim high and drives it forward and down, then lifts off and comes back.
+      // We're looking at the forearm end on, so it's drawn shorter while it reaches forward to the rim.
+      const dn = pushQ < 0.6 ? ease(pushQ / 0.6) : 1 - ease((pushQ - 0.6) / 0.4), out = pushQ < 0.6 ? 0 : 18 * Math.sin(PI * (pushQ - 0.6) / 0.4);
+      const tx = 160 + out, ty = -306 + 88 * dn;
+      u = 0.36 - 0.14 * dn; const ex = 72 + 112 * Math.sin(u), ey = -426 + 112 * Math.cos(u);
+      f = Math.atan2(tx - ex, ty - ey); fl = Math.hypot(tx - ex, ty - ey);
+    } else if (chair && !walk && u < 0.3 && f < 0.3) [u, f] = reachArm(side, side * 46, -246, false);
+    else if (swing) { const k = clamp((0.5 - u) / 0.3); u += side * swing * k; f += 0.12 * k * Math.min(walk, 1); }
+    const sx = side * 72, sy = -426, ex = sx + side * 112 * Math.sin(u), ey = sy + 112 * Math.cos(u), hx = ex + side * fl * Math.sin(f), hy = ey + fl * Math.cos(f);
     const upper = dress ? skin : L.top, fore = (dress || L.outfit === 'tee') ? skin : L.top, wd = dress ? 30 : 38;
     line([[sx, sy], [ex, ey]], wd, upper); line([[ex, ey], [hx, hy]], wd * (L.outfit === 'tee' ? 0.8 : 1), fore);
     if (L.outfit === 'tee') { circ(ex, ey, wd / 2); fill(upper); }
@@ -628,8 +661,8 @@ function topPrint(x, y, s, text, col) {
 function drawKid(k, x, y, t, o = {}) {
   const s = kidScale(k) * (o.s || 1), L = kidLook(k), mop = L.hair === 'mop';
   const h = person(x, y, s, mop ? Object.assign({}, L, { hair: 'shaggy' }) : L, t, Object.assign({ head: kidHead(k) }, o));
-  if (mop) kidMop(x, y - (o.bob || 0), s, o.flip || 1, kidHead(k), L.hairCol, HATS_OFF ? false : L.hat);
-  if (L.print) topPrint(x, y - (o.bob || 0), s, L.print, L.printCol);
+  if (mop) kidMop(x, y - h.bob, s, o.flip || 1, kidHead(k), L.hairCol, HATS_OFF ? false : L.hat);
+  if (L.print) topPrint(x, y - h.bob, s, L.print, L.printCol);
   return h;
 }
 // a little swaddled baby: wrapped snugly in their blanket with a hood, a tuft of hair, rosy cheeks and a tiny hand peeking out
