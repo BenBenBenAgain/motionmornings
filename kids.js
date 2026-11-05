@@ -485,7 +485,7 @@
         seg('Height', 'height', [['short', kid ? 'Smaller' : 'Shorter'], [false, 'Average'], ['tall', 'Taller']]),
         seg('Build', 'build', [['slim', 'Slim'], [false, 'Average'], ['big', 'Bigger']]),
         seg('Uses a wheelchair', 'chair', [[false, 'No'], [true, 'Yes']]),
-        seg('Wearing', 'outfit', kid ? [['tee', 'T-shirt'], ['hoodie', 'Hoodie'], ['dress', 'Dress']] : [['tee', 'T-shirt'], ['shirt', 'Shirt'], ['hoodie', 'Hoodie'], ['jacket', 'Jacket'], ['dress', 'Dress']], true),
+        seg('Wearing', 'outfit', kid ? [['tee', 'T-shirt'], ['singlet', 'Singlet'], ['hoodie', 'Hoodie'], ['dress', 'Dress']] : [['tee', 'T-shirt'], ['singlet', 'Singlet'], ['shirt', 'Shirt'], ['hoodie', 'Hoodie'], ['jacket', 'Jacket'], ['dress', 'Dress']], true),
         sw('Top colour', 'top', CLOTH));
       if (L.outfit === 'jacket') f.append(sw('Shirt under jacket', 'inner', CLOTH));
       if (L.outfit !== 'dress') f.append(seg('Bottoms', 'bottoms', [[false, 'Pants'], ['shorts', 'Shorts'], ['skirt', 'Skirt']], true), sw({ shorts: 'Shorts colour', skirt: 'Skirt colour' }[L.bottoms] || 'Pants colour', 'pants', CLOTH));

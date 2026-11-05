@@ -1,6 +1,6 @@
 // Motion Mornings offline support: the page always tries the network first so updates arrive,
 // and falls back to the saved copy when there's no reception. Music, icons and fonts are kept once fetched.
-const CACHE = 'mm-v6';
+const CACHE = 'mm-v7';
 const CORE = ['/', '/index.html', '/you.html', '/engine.js', '/kids.html', '/kids.js', '/contact.js', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png', '/favicon.svg', '/music/morning-mood.mp3'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).catch(() => {}).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
