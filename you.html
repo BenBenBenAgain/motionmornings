@@ -1384,6 +1384,7 @@ $('#picker').onclick = e => { if (e.target.id === 'picker') closePicker(); };
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#picker').hidden) closePicker(); });
 
 // ------------------------------------------------ step 3: people
+const BOTTOM_LABEL = L => ({ shorts: 'Shorts colour', skirt: 'Skirt colour' }[L.bottoms] || 'Pants colour');
 const LOOK_FIELDS = [
   ['agegrp', 'Age', 'seg', [['20s', '20s'], ['30s', '30s'], ['40s', '40s'], ['50s', '50s'], ['60s', '60s+']]],
   ['height', 'Height', 'seg', [['short', 'Shorter'], ['avg', 'Average'], ['tall', 'Taller']]],
@@ -1403,7 +1404,10 @@ const LOOK_FIELDS = [
   ['outfit', 'Outfit', 'seg', [['tee', 'T-shirt'], ['shirt', 'Shirt'], ['hoodie', 'Hoodie'], ['jacket', 'Jacket'], ['dress', 'Dress']]],
   ['top', 'Top colour', 'color', CLOTH],
   ['inner', 'Shirt under jacket', 'color', CLOTH, L => L.outfit === 'jacket'],
-  ['pants', 'Pants colour', 'color', CLOTH, L => L.outfit !== 'dress'],
+  ['bottoms', 'Bottoms', 'seg', [[false, 'Pants'], ['shorts', 'Shorts'], ['skirt', 'Skirt']], L => L.outfit !== 'dress'],
+  ['pants', BOTTOM_LABEL, 'color', CLOTH, L => L.outfit !== 'dress'],
+  ['tattoo', 'Tattoos', 'seg', [[false, 'None'], ['forearm', 'Forearm'], ['sleeve', 'One arm'], ['both', 'Both arms'], ['hand', 'Hand']]],
+  ['ink', 'Tattoo ink', 'seg', [[false, 'Black'], ['colour', 'Colour']], L => !!L.tattoo],
 ];
 function applySex(o, v, kid) {
   o.body = v === 'm' ? 'm' : 'f';
@@ -1438,7 +1442,8 @@ const KID_FIELDS = [
   ['chair', 'Uses a wheelchair', 'seg', [[false, 'No'], [true, 'Yes']], K => K.age !== 'baby'],
   ['outfit', 'Outfit', 'seg', [['tee', 'T-shirt'], ['dress', 'Dress']], K => K.age !== 'baby'],
   ['top', 'Top colour', 'color', CLOTH],
-  ['pants', 'Pants colour', 'color', CLOTH, K => K.age !== 'baby' && K.outfit !== 'dress'],
+  ['bottoms', 'Bottoms', 'seg', [[false, 'Pants'], ['shorts', 'Shorts'], ['skirt', 'Skirt']], K => K.age !== 'baby' && K.outfit !== 'dress'],
+  ['pants', BOTTOM_LABEL, 'color', CLOTH, K => K.age !== 'baby' && K.outfit !== 'dress'],
 ];
 // one tap sets a breed's shape, face, coat and colours; everything stays tweakable after
 const BREEDS = {
@@ -1494,6 +1499,7 @@ function fieldUI(obj, fields, box, prefix, onChange, pkey) {
   box.innerHTML = '';
   fields.forEach(([k, label, type, opts, show, onPick]) => {
     if (show && !show(obj)) return;
+    if (typeof label === 'function') label = label(obj);
     let ctl;
     if (type === 'seg') ctl = el('div', { class: 'seg', role: 'group', 'aria-label': label }, opts.map(([v, l]) => el('button', { 'aria-pressed': obj[k] === v || (v === false && obj[k] == null) ? 'true' : 'false', onclick: () => { obj[k] = v; if (onPick) onPick(obj, v); onChange(); } }, l)));
     else if (type === 'color') {
@@ -1519,7 +1525,7 @@ const possessive = n => n + (/s$/i.test(n) ? '’' : '’s');
 function filmTitle() { const n = (S.cfg.me.name || '').trim(); return n ? possessive(n) + ' Motion Mornings' : 'Make your film'; }
 function namesChanged() { const h = $('#buildTitle'); if (h) h.textContent = filmTitle(); liveLines(); }
 // a Bitmoji-style editor: the character big at the top, options in tabs underneath
-const LOOK_TABS = [['Body', ['sex', 'agegrp', 'height', 'build', 'skin', 'chair']], ['Hair', ['hair', 'hairCol', 'grey', 'facial', 'facialCol']], ['Clothes', ['outfit', 'top', 'inner', 'pants']], ['Extras', ['hat', 'hatCol', 'glasses', 'earrings', 'freckles']]];
+const LOOK_TABS = [['Body', ['sex', 'agegrp', 'height', 'build', 'skin', 'chair']], ['Hair', ['hair', 'hairCol', 'grey', 'facial', 'facialCol']], ['Clothes', ['outfit', 'top', 'inner', 'bottoms', 'pants']], ['Extras', ['hat', 'hatCol', 'glasses', 'earrings', 'freckles', 'tattoo', 'ink']]];
 const PET_TABS = [['Breed', ['type', 'breed']], ['Shape', ['size', 'build', 'snout', 'ears', 'tail']], ['Coat', ['fur', 'coat', 'muzzle', 'marking', 'markCol']]];
 let lookObj = null, lookTab = 0, lookKey = 'me', lookRAF = 0, lookKind = 'person';
 function lookFieldsFor(keys) { const all = lookKind === 'pet' ? [...PET_FIELDS, ...PET_MORE] : [PARTNER_SEX, ...LOOK_FIELDS]; return keys.map(k => all.find(f => f[0] === k)).filter(Boolean); }
