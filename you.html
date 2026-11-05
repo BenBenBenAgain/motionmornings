@@ -46,6 +46,7 @@
 .xclose{position:absolute;top:10px;right:10px;width:40px;height:40px;border-radius:50%;border:0;background:#F4E9D7;color:#1F2E4D;display:grid;place-items:center;cursor:pointer;padding:0;z-index:2}
 .xclose:hover{background:#EBDCC4}
 .watchbox .demotag{padding:0 44px;text-align:center}
+.tile.moregoals{border-style:dashed;align-items:center;text-align:center;background:transparent}.tile.moregoals b{color:var(--coral)}
 </style>
 </head>
 <body>
@@ -852,68 +853,67 @@ const rand = a => a[Math.floor(Math.random() * a.length)];
 
 // ------------------------------------------------ themes
 // {key|fallback} is filled from the theme's answers. Scenes starting with @ are picked from answers.
+let showAllGoals = false; const TOP_GOALS = 8;
 const THEMES = [
-  { id: 'move', title: 'Moving my body', hint: 'Training you enjoy', qs: [['activity', 'What kind of movement?', 'gym, running, yoga'], ['freq', 'How often?', '3 times a week']],
+  // ordered from most to least common, based on Finder’s 2026 survey of Australians’ New Year’s resolutions
+  { id: 'move', title: 'Moving my body', hint: 'Exercise I actually enjoy', qs: [['activity', 'What kind of movement?', 'gym, running, yoga'], ['freq', 'How often?', '3 times a week']],
     a: [['I show up for {activity|training} {freq|most mornings}', '@move'], ['I lace up and go, even for ten minutes', 'jog'], ['I lift a little heavier each week', 'gym'], ['I walk {pet} before breakfast', 'walk']],
     g: [['Fit, strong and full of energy', 'strong'], ['Stronger every month', 'celebrate']] },
-  { id: 'food', title: 'Eating well', hint: 'Good food, more energy', qs: [['meal', 'A healthy meal you love?', 'salmon and greens']],
-    a: [['I cook {meal|a real dinner} at home', 'cook'], ['I fill the fridge with good food on Sunday', 'fridge'], ['I sit down and enjoy every meal', 'eat'], ['I prep my lunches for the week', 'cook']],
-    g: [['More energy every afternoon', 'celebrate'], ['Light, strong, full of energy', 'strong']] },
-  { id: 'money', title: 'Money', hint: 'Saving, steady, growing', qs: [['saving', 'What are you saving for?', 'a house deposit, a holiday']],
+  { id: 'money', title: 'Smarter with money', hint: 'Saving and getting ahead', qs: [['saving', 'What are you saving for?', 'a house deposit, a holiday']],
     a: [['I check my numbers every Sunday', 'money'], ['Every payday, some goes to {saving|savings}', 'jar'], ['I learn a skill that pays', 'laptop']],
     g: [['{saving|The savings goal}, done', 'progress'], ['Calm about money, with room to spare', 'steady']] },
-  { id: 'people', title: 'People I love', hint: 'Friends and family', qs: [['who', 'Who do you want more time with?', 'Mum, Auntie June, old mates']],
-    a: [['I visit {who|family} and stay for dinner', 'hug'], ['I call {who|the people I love} every week', 'call'], ['I host the barbecue this time', 'bbq'], ['I say yes when friends make plans', 'friends']],
-    g: [['Surrounded by people I love', 'campfire'], ['A full table and a lot of laughs', 'bbq']] },
-  { id: 'sport', title: 'Sport', hint: 'Playing the game', qs: [['sport', 'What sport?', 'footy, tennis, surfing']],
-    a: [['I get out for {sport|sport} every week', '@sport'], ['I train between sessions to stay sharp', 'jog'], ['I stretch and recover after every session', 'calm']],
-    g: [['Fitter, faster, loving it', '@sport'], ['Better every season', '@sport']] },
-  { id: 'calm', title: 'A calm mind', hint: 'Rest, sleep, peace', qs: [['unwind', 'What helps you switch off?', 'a walk at the beach, a bath, music']],
+  { id: 'food', title: 'Eating well', hint: 'Food that fuels me', qs: [['meal', 'A healthy meal you love?', 'salmon and greens']],
+    a: [['I cook {meal|a real dinner} at home', 'cook'], ['I fill the fridge with good food on Sunday', 'fridge'], ['I sit down and enjoy every meal', 'eat'], ['I prep my lunches for the week', 'cook']],
+    g: [['More energy every afternoon', 'celebrate'], ['Light, strong, full of energy', 'strong']] },
+  { id: 'habit', title: 'Healthier habits', hint: 'Leaving old vices behind', qs: [['better', 'What\u2019s the better habit?', 'sparkling water at the pub, a walk when a craving hits']],
+    a: [['My new habit: {better|a walk when a craving hits}', '@better'], ['I wake up clear and ready for the day', 'wake'], ['When a craving comes, I breathe slowly and let it pass', 'calm'], ['I keep my water bottle full all day', 'soda']],
+    g: [['Clear, strong and proud of myself', 'sunrise'], ['This is just who I am now', 'celebrate']] },
+  { id: 'calm', title: 'A calm mind', hint: 'Rest, sleep and less stress', qs: [['unwind', 'What helps you switch off?', 'a walk at the beach, a bath, music']],
     a: [['I switch off with {unwind|five slow minutes of breathing}', '@unwind'], ['I breathe slowly for five minutes', 'calm'], ['I’m in bed early and up rested', 'wake'], ['I walk without my phone and look around', 'walk'], ['I stretch on the mat each morning', 'calm']],
     g: [['Calm, clear and present', 'sunrise'], ['Rested and easy in myself', 'steady']] },
-  { id: 'screen', title: 'Less screen time', hint: 'Phone down, life up', qs: [['instead', 'What will you do instead?', 'read, go for a surf, play with the kids']],
-    a: [['I {instead|read a book} instead of scrolling', '@instead'], ['My phone stays in the drawer at dinner', 'familydinner'], ['I head outside when I want to scroll', 'walk'], ['I wake up and look at the sky first', 'wake']],
-    g: [['More time, and I’m present for it', 'sunrise'], ['Here for the good stuff', 'together']] },
-  { id: 'drink', title: 'Better drinks', hint: 'Less or none, clear mornings', qs: [['swap', 'What does a better drink look like for you?', 'soda water, kombucha, one beer and done']],
-    a: [['I reach for a {swap|soda water} and enjoy it', '@drink'], ['I dance all night with a {nightdrink|soda water} in hand', 'party'], ['I wake up on Sunday clear and ready', 'wake'], ['I swap the after-work drink for a walk', 'unwind']],
-    g: [['Sharp, rested and proud of myself', 'sunrise'], ['Clear head, big mornings', 'celebrate']] },
-  { id: 'brave', title: 'Confidence', hint: 'Saying yes, speaking up', qs: [['yes', 'Something you’d love to say yes to?', 'a dance class, speaking up at work']],
-    a: [['I say yes to {yes|the thing that scares me}', 'excited'], ['I speak up in the meeting', 'talk'], ['I walk in and say hello first', 'friends'], ['I stand tall and take up space', 'strong']],
-    g: [['Proud of who I’m becoming', 'selflove'], ['Brave, and it feels good', 'celebrate']] },
-  { id: 'love', title: 'Finding love', hint: 'Open to the right person', qs: [],
-    a: [['I say yes to the invite and go', 'friends'], ['I ask them out for a coffee', 'date'], ['I dress up and head out', 'excited'], ['I’m kind and curious with new people', 'talk']],
-    g: [['Falling for each other. Easy and real.', 'couple']] },
-  { id: 'partner', title: 'My relationship', hint: 'Closer with my partner', qs: [['pname', 'Partner’s name?', 'Sam']],
-    a: [['Friday is date night with {pname|my partner}', 'date'], ['We cook together with a record on', 'cook_together'], ['I tell {pname|my partner} what I love about them', 'cuddle'], ['We walk and plan our future', 'couple']],
-    g: [['Closer every year', 'together']] },
-  { id: 'family', title: 'Being a present parent', hint: 'Time with my kids', qs: [['kids', 'Kids’ names?', 'Mia and Jack']],
-    a: [['Phone away, I play with {kids|my kids}', 'parkday'], ['I read to {kids|my kids} every night', 'bedtime'], ['I walk {kids|the kids} to school', 'schoolrun'], ['We eat dinner together at the table', 'familydinner']],
-    g: [['A home full of laughter', 'family']] },
-  { id: 'grow', title: 'Growing our family', hint: 'Getting ready for kids', qs: [],
-    a: [['We cook healthy meals together', 'cook_together'], ['I get fit for the family I’m building', 'jog'], ['I save for our family every payday', 'jar'], ['We talk about the parents we’ll be', 'couple']],
-    g: [['Our family, growing', 'pram'], ['A little one in my arms', 'holdbaby']] },
+  { id: 'travel', title: 'Adventure and travel', hint: 'Somewhere I want to go', qs: [['place', 'Where to?', 'Vietnam']],
+    a: [['I save for {place|my next trip} every payday', 'jar'], ['I map out {place|the trip}, step by step', 'travel'], ['I book the weekend away', 'travel']],
+    g: [['{place|Adventure}, here I come', 'start']] },
   { id: 'work', title: 'Work I care about', hint: 'A job, business or project', qs: [['work', 'What are you building or working toward?', 'my own business, a new app']],
     a: [['I do two focused hours on {work|my work}', 'cafe'], ['I do the hard part first', 'hardfirst'], ['I finish it and send it out', 'ship'], ['I ask for advice and really listen', 'talk']],
     g: [['{work|My work}, really taking off', 'progress'], ['Excited to start the day', 'excited']] },
-  { id: 'start', title: 'A fresh start', hint: 'A new chapter, a reset', qs: [['chapter', 'What\u2019s the new chapter?', 'a new job, moving to the coast']],
-    a: [['I’m up with the sun and ready to go', 'wake'], ['I tick off one small win before nine', 'checklist'], ['I write down three things for tomorrow', 'idea'], ['I step out the door with a plan', 'start']],
-    g: [['{chapter|My new chapter}, well underway', 'start'], ['{chapter|My new chapter}, and I\u2019m loving it', 'sunrise']] },
-  { id: 'create', title: 'Making things', hint: 'Music, art, writing', qs: [['craft', 'What do you create?', 'music, painting, writing']],
-    a: [['I make {craft|something} most days, rough is fine', '@craft'], ['I finish it and call it done', '@craftdone'], ['I share my {craft|work} with friends', '@craftshare']],
-    g: [['{craft|Work} I’m proud of', '@craftshare']] },
-  { id: 'learn', title: 'Learning something new', hint: 'A skill, a language', qs: [['learn', 'What are you learning?', 'Spanish, coding, guitar']],
-    a: [['I practise {learn|something new} with my morning coffee', '@learn'], ['I do a lesson on my lunch break', 'laptop'], ['I try it out loud, mistakes and all', 'talk']],
-    g: [['{learn|It}, finally clicking', 'celebrate']] },
-  { id: 'travel', title: 'Adventure', hint: 'A trip to plan for', qs: [['place', 'Where to?', 'Vietnam']],
-    a: [['I save for {place|my next trip} every payday', 'jar'], ['I map out {place|the trip}, step by step', 'travel'], ['I book the weekend away', 'travel']],
-    g: [['{place|Adventure}, here I come', 'start']] },
-  { id: 'home', title: 'Home', hint: 'A place I love', qs: [['home', 'Your dream home or place?', 'a house by the beach']],
+  { id: 'people', title: 'People I love', hint: 'More time with friends and family', qs: [['who', 'Who do you want more time with?', 'Mum, Auntie June, old mates']],
+    a: [['I visit {who|family} and stay for dinner', 'hug'], ['I call {who|the people I love} every week', 'call'], ['I host the barbecue this time', 'bbq'], ['I say yes when friends make plans', 'friends']],
+    g: [['Surrounded by people I love', 'campfire'], ['A full table and a lot of laughs', 'bbq']] },
+  { id: 'screen', title: 'Phone down, life up', hint: 'More time for real life', qs: [['instead', 'What will you do instead?', 'read, go for a surf, play with the kids']],
+    a: [['I {instead|read a book} instead of scrolling', '@instead'], ['My phone stays in the drawer at dinner', 'familydinner'], ['I head outside when I want to scroll', 'walk'], ['I wake up and look at the sky first', 'wake']],
+    g: [['More time, and I’m present for it', 'sunrise'], ['Here for the good stuff', 'together']] },
+  { id: 'love', title: 'Finding love', hint: 'Open to the right person', qs: [],
+    a: [['I say yes to the invite and go', 'friends'], ['I ask them out for a coffee', 'date'], ['I dress up and head out', 'excited'], ['I’m kind and curious with new people', 'talk']],
+    g: [['Falling for each other. Easy and real.', 'couple']] },
+  { id: 'home', title: 'A home I love', hint: 'The place I want to live', qs: [['home', 'Your dream home or place?', 'a house by the beach']],
     a: [['I walk {pet} and take in where I live', 'walk'], ['I clear one drawer every Sunday', 'clean'], ['I save for {home|the home I want}', 'money']],
     g: [['Home, just how I want it', 'cook_together']] },
+  { id: 'brave', title: 'More confidence', hint: 'Saying yes, speaking up', qs: [['yes', 'Something you’d love to say yes to?', 'a dance class, speaking up at work']],
+    a: [['I say yes to {yes|the thing that scares me}', 'excited'], ['I speak up in the meeting', 'talk'], ['I walk in and say hello first', 'friends'], ['I stand tall and take up space', 'strong']],
+    g: [['Proud of who I’m becoming', 'selflove'], ['Brave, and it feels good', 'celebrate']] },
+  { id: 'learn', title: 'Learning something new', hint: 'A skill, a language, a craft', qs: [['learn', 'What are you learning?', 'Spanish, coding, guitar']],
+    a: [['I practise {learn|something new} with my morning coffee', '@learn'], ['I do a lesson on my lunch break', 'laptop'], ['I try it out loud, mistakes and all', 'talk']],
+    g: [['{learn|It}, finally clicking', 'celebrate']] },
+  { id: 'partner', title: 'A closer relationship', hint: 'More time with my partner', qs: [['pname', 'Partner’s name?', 'Sam']],
+    a: [['Friday is date night with {pname|my partner}', 'date'], ['We cook together with a record on', 'cook_together'], ['I tell {pname|my partner} what I love about them', 'cuddle'], ['We walk and plan our future', 'couple']],
+    g: [['Closer every year', 'together']] },
+  { id: 'family', title: 'Being a present parent', hint: 'Really there for my kids', qs: [['kids', 'Kids’ names?', 'Mia and Jack']],
+    a: [['Phone away, I play with {kids|my kids}', 'parkday'], ['I read to {kids|my kids} every night', 'bedtime'], ['I walk {kids|the kids} to school', 'schoolrun'], ['We eat dinner together at the table', 'familydinner']],
+    g: [['A home full of laughter', 'family']] },
+  { id: 'sport', title: 'Playing sport', hint: 'A team, a club, game day', qs: [['sport', 'What sport?', 'footy, tennis, surfing']],
+    a: [['I get out for {sport|sport} every week', '@sport'], ['I train between sessions to stay sharp', 'jog'], ['I stretch and recover after every session', 'calm']],
+    g: [['Fitter, faster, loving it', '@sport'], ['Better every season', '@sport']] },
+  { id: 'create', title: 'Creating things', hint: 'Music, art, writing, making', qs: [['craft', 'What do you create?', 'music, painting, writing']],
+    a: [['I make {craft|something} most days, rough is fine', '@craft'], ['I finish it and call it done', '@craftdone'], ['I share my {craft|work} with friends', '@craftshare']],
+    g: [['{craft|Work} I’m proud of', '@craftshare']] },
+  { id: 'grow', title: 'Growing our family', hint: 'Getting ready for kids', qs: [],
+    a: [['We cook healthy meals together', 'cook_together'], ['I get fit for the family I’m building', 'jog'], ['I save for our family every payday', 'jar'], ['We talk about the parents we’ll be', 'couple']],
+    g: [['Our family, growing', 'pram'], ['A little one in my arms', 'holdbaby']] }
 ];
 const TH = id => THEMES.find(t => t.id === id);
 // "In your own words": an example of a real thing someone does, per goal
-const MINE_EX = { move: 'I walk the dog every morning before breakfast', food: 'I cook a proper dinner most nights', money: 'I check my bank app every Sunday', people: 'I ring Mum on the drive home', sport: 'I train Tuesday and Thursday nights', calm: 'I sit outside with a cuppa before work', screen: 'My phone charges in the kitchen overnight', drink: 'I go out with friends and one beer is enough', brave: 'I say hello first', love: 'I say yes when friends invite me out', partner: 'I bring her a coffee in bed on Sunday', family: 'I put my phone away when the kids get home', grow: 'We cook healthy dinners together', work: 'I do one hour on my project before work', start: 'I lay out my clothes the night before', create: 'I play guitar for twenty minutes after dinner', learn: 'I do a lesson on the train', travel: 'I put twenty dollars aside every payday', home: 'I clear one drawer every Sunday' };
+const MINE_EX = { habit: 'I order sparkling water when I\u2019m out with friends', move: 'I walk the dog every morning before breakfast', food: 'I cook a proper dinner most nights', money: 'I check my bank app every Sunday', people: 'I ring Mum on the drive home', sport: 'I train Tuesday and Thursday nights', calm: 'I sit outside with a cuppa before work', screen: 'My phone charges in the kitchen overnight', drink: 'I go out with friends and one beer is enough', brave: 'I say hello first', love: 'I say yes when friends invite me out', partner: 'I bring her a coffee in bed on Sunday', family: 'I put my phone away when the kids get home', grow: 'We cook healthy dinners together', work: 'I do one hour on my project before work', start: 'I lay out my clothes the night before', create: 'I play guitar for twenty minutes after dinner', learn: 'I do a lesson on the train', travel: 'I put twenty dollars aside every payday', home: 'I clear one drawer every Sunday' };
 const MINE_KEYS = ['mine1', 'mine2'];
 const drinkWords = f => { f = f || {}; return String(f.swap || '').trim() || MINE_KEYS.map(k => f[k] || '').filter(v => ALC.test(v) || /\b(tea|coffee|soda|kombucha|juice|mocktail|water)\b/i.test(v)).join(' '); };
 // their own line, tidied: spelling, a capital at the start, no full stop at the end
@@ -941,6 +941,11 @@ function sceneFor(sc, fills) {
   if (sc === '@move') return MOVE_SCENE(act);
   if (sc === '@sport') return SPORT_SCENE((fills.sport || '').toLowerCase());
   if (sc === '@drink') { const k = drinkKind(drinkWords(fills)); return k === 'tea' || k === 'coffee' ? 'cuppa' : 'soda'; }
+  if (sc === '@better') {
+    const v = (fills.better || '').toLowerCase();
+    if (/water|soda|sparkling|kombucha|mocktail|tea|coffee|juice|drink|beer|wine/.test(v)) { const k = drinkKind(v); return k === 'tea' || k === 'coffee' ? 'cuppa' : 'soda'; }
+    return sceneFor('@instead', { instead: v });
+  }
   if (sc === '@instead' || sc === '@unwind') {
     const a = ((sc === '@instead' ? fills.instead : fills.unwind) || '').toLowerCase();
     if (!a.trim()) return sc === '@instead' ? 'read' : 'calm';
@@ -1110,6 +1115,7 @@ try { const raw = localStorage.getItem('lsn-draft-v2'); if (raw) { const d = JSO
   S = Object.assign(fresh(), d);
 } } } catch (e) {}
 if (S.isExample) { S.isExample = false; S.linesTouched = false; }
+S.themes = (S.themes || []).filter(id => THEMES.some(t => t.id === id));
 // the furthest step someone has reached; steps beyond it stay locked so the film is built in order
 if (typeof S.reached !== 'number') S.reached = S.step;
 liveLines();
@@ -1182,11 +1188,14 @@ function goalNote(bump) {
 }
 function renderThemes() {
   const box = $('#tiles'); box.innerHTML = ''; goalNote();
-  THEMES.forEach(th => {
+  const few = window.matchMedia && matchMedia('(max-width:700px)').matches && !showAllGoals, hiddenN = THEMES.filter((t, i) => i >= TOP_GOALS && !S.themes.includes(t.id)).length;
+  THEMES.forEach((th, i) => {
+    if (few && i >= TOP_GOALS && !S.themes.includes(th.id)) return;
     const on = S.themes.includes(th.id);
     const full = !on && S.themes.length >= MAX_GOALS;
     box.append(el('button', { class: 'tile' + (full ? ' full' : ''), 'aria-pressed': on ? 'true' : 'false', onclick: () => { if (full) { goalNote(true); return; } S.themes = on ? S.themes.filter(x => x !== th.id) : [...S.themes, th.id]; step0Ok(); liveLines(); save(); renderThemes(); if (!on) { const sec = S.cfg.sections.find(s => s.theme === th.id); const a = sec && sec.actions.find(x => x.text && x.text.trim()); if (a) { preview('action', a); $('#stageNote').textContent = 'Added to your film: ' + th.title; } } else { $('#stageNote').textContent = 'Taken out of your film: ' + th.title; } } }, el('b', {}, th.title), el('small', {}, th.hint), on ? el('small', { class: 'tileedit' }, '✎ Make it yours below') : ''));
   });
+  if (few && hiddenN) box.append(el('button', { class: 'tile moregoals', type: 'button', onclick: () => { showAllGoals = true; renderThemes(); } }, el('b', {}, `Show ${hiddenN} more goals`), el('small', {}, 'Phone time, love, home, confidence, learning and more')));
   const fills = $('#fills'); fills.innerHTML = '';
   const withQs = THEMES.filter(t => S.themes.includes(t.id));
   $('#fillsCard').hidden = !withQs.length;
@@ -2364,6 +2373,7 @@ const NOTES = {
   people: ['Who would love to hear from you today? Send them a message.', "The people you love don't need a big gesture. Ten minutes of your full attention is plenty.", 'Make a plan with someone today, even a small one.', 'Good friendships are kept alive by little check-ins.'],
   sport: ['Every training session makes game day easier.', 'Play for the love of it today. The results follow.', "Get a few reps in today, even if it's just in the backyard.", 'Your team is better with you at your best. Look after your body.'],
   calm: ['Take five slow breaths before you check your phone today.', "You don't have to do everything today. Pick what matters and let the rest wait.", 'A calm mind is trained like a muscle. A few quiet minutes counts.', 'Give yourself a proper wind-down tonight. Tomorrow you will thank you.'],
+  habit: ['Every time you choose the better habit, it gets a little easier.', 'When a craving comes, give it ten slow breaths. It passes.', 'You\u2019re not giving anything up. You\u2019re choosing how you want to feel.'],
   screen: ['Leave your phone in another room for a while today.', 'When you go to scroll, take one breath and decide if you really want to.', "Swap ten minutes of scrolling for something you'll actually remember.", "The best parts of today won't happen on a screen."],
   drink: ["Clear mornings feel good. You've earned every one of them.", 'If tonight gets tempting, order your swap first and settle in.', "You're not missing out. You're choosing how you feel tomorrow.", 'Every clear night makes the next one easier.'],
   brave: ["Say yes to one thing today you'd normally talk yourself out of.", 'Confidence comes after you act, not before. Go first.', 'Your voice is worth hearing. Speak up once today.', 'Feeling nervous just means it matters. Do it anyway.'],
