@@ -21,8 +21,8 @@
   const MUSIC = [['none', 'No music'], ['morning-mood', 'Morning Mood'], ['italian-andante', 'Italian Andante'], ['vltava', 'Vltava'], ['figaro', 'Figaro']];
   const TEMPLATES = {
     playgroup: { label: 'Playgroup', blurb: 'Arriving, toys, other kids, going home', story: {
-      title: '{child} Goes to Play Group', ending: 'Play group was fun!', steps: [
-        { scene: 'goto', place: 'Play group', text: 'Today {adult} and {child} are going to play group.' },
+      title: '{child} Goes to Playgroup', ending: 'Playgroup was fun!', steps: [
+        { scene: 'goto', place: 'Playgroup', text: 'Today {adult} and {child} are going to playgroup.' },
         { scene: 'arrive', text: 'When they get there, {helper} will say hello.', say: { who: 'child', words: 'Hi {helper}!' } },
         { scene: 'blocks', text: '{child} can play with all the toys.' },
         { scene: 'others', text: 'Other kids and grown-ups will come too.' },
@@ -421,7 +421,7 @@
     drawPortraits(0);
   }
   // a new name flows through the story: the old name (or the stand-in) is swapped wherever it appears
-  const STAND_IN = { child: 'the child', adult: 'Mum', helper: 'a friend', baby: 'the baby' };
+  const STAND_IN = { child: 'your little one', adult: 'Mum', helper: 'a friend', baby: 'the baby' };
   const standIn = role => role === 'adult' ? ({ m: 'Dad', f: 'Mum', x: 'their grown-up' }[sexOf(S.cast.adult)]) : role === 'sibling' ? ({ m: 'their brother', f: 'their sister', x: 'their sibling' }[sexOf(S.cast.siblings[0] || {})]) : STAND_IN[role];
   function renameIn(role, oldName, newName) {
     const from = (oldName || '').trim() || standIn(role), to = newName.trim() || standIn(role);
@@ -529,7 +529,7 @@
       const sc = K.SC[st.scene] || K.SC.goto, cv = el('canvas', { width: 168, height: 299 });
       const thumb = el('button', { class: 'thumb', type: 'button', 'aria-label': `Step ${i + 1} picture: ${sc.label}. Change it`, onclick: () => pickScene(st) }, cv, el('span', { class: 'chg' }, 'Change'));
       const extras = el('div', { class: 'extras' },
-        sc.place ? el('label', {}, 'Sign on the building', el('input', { type: 'text', id: `place-${st.id}`, value: st.place || '', maxlength: '20', placeholder: 'e.g. Play group', oninput: e => { st.place = e.target.value; sceneThumb(cv, st.scene, st.place, st); refresh(); seekTo(st.id); } })) : null,
+        sc.place ? el('label', {}, 'Sign on the building', el('input', { type: 'text', id: `place-${st.id}`, value: st.place || '', maxlength: '20', placeholder: 'e.g. Playgroup', oninput: e => { st.place = e.target.value; sceneThumb(cv, st.scene, st.place, st); refresh(); seekTo(st.id); } })) : null,
         el('label', {}, 'Clock shows a time', el('input', { type: 'text', id: `time-${st.id}`, value: st.time || '', maxlength: '8', placeholder: 'e.g. 9:00', inputmode: 'numeric', oninput: e => { st.time = e.target.value; refresh(); seekTo(st.id); } })),
         sc.pair && S.cast.friends.length && S.cast.siblings.length ? el('label', {}, 'The other child', el('select', { id: `with-${st.id}`, onchange: e => { st.with = e.target.value; sceneThumb(cv, st.scene, st.place, st); refresh(); seekTo(st.id); } }, [['sibling', S.cast.siblings[0].name || 'Brother or sister'], ['friend', S.cast.friends[0].name || 'Friend']].map(([v, n]) => el('option', { value: v, selected: (st.with || (S.cast.siblings.length ? 'sibling' : 'friend')) === v }, n)))) : null,
         el('label', { class: 'switch glimpse' }, el('input', { type: 'checkbox', id: `glimpse-${st.id}`, checked: !!st.glimpse, onchange: e => { st.glimpse = e.target.checked; refresh(); seekTo(st.id); } }), 'Show as big calm words'));
@@ -564,7 +564,7 @@
         seen.add(key);
         const cv = el('canvas', { width: 180, height: 320 });
         g.append(el('button', { type: 'button', 'aria-pressed': String(st.scene === key), onclick: () => { st.scene = key; if (K.SC[key].place && !st.place) st.place = key === 'cafe' ? 'Cafe' : ''; $('#scenePick').hidden = true; renderStory(); refresh(); seekTo(st.id); } }, cv, el('span', {}, K.SC[key].label)));
-        sceneThumb(cv, key, st.place || (key === 'cafe' ? 'Cafe' : key === 'goto' ? 'Play group' : ''), st);
+        sceneThumb(cv, key, st.place || (key === 'cafe' ? 'Cafe' : key === 'goto' ? 'Playgroup' : ''), st);
       });
     });
     if (!all && shown !== K.PLACES) g.append(el('div', { class: 'more' }, el('button', { class: 'btn ghost', type: 'button', id: 'moreScenes', onclick: () => { pickScene(st, true); $('#scenePick .box').scrollTop = 0; } }, 'More scenes from other places')));
