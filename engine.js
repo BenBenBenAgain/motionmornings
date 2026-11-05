@@ -419,7 +419,8 @@ function person(x, y, s, L, t, o = {}) {
     const lw = bare ? 26 : 48, shoe = bare ? [0.55, 0.3, 0.25] : [0.13, 0.11, 0.10], lc = bare ? skin : C(L.pants);
     const legInk = L.legTat && (bare || shorts);
     legs.forEach((g, gi) => {
-      if (shorts) { line([[g.hx * 0.8, legHip], [g.kx, g.ky]], 50, skin); line([[g.kx, g.ky], [g.fx, g.fy]], 40, skin); }
+      // with shorts the legs start just inside the hem, so nothing shows through the slit between the legs
+      if (shorts) line([[g.hx + (g.kx - g.hx) * 0.72, legHip + (g.ky - legHip) * 0.72], [g.kx, g.ky], [g.fx, g.fy]], 36, skin);
       else line([[g.hx, legHip], [g.kx, g.ky], [g.fx, g.fy]], lw, lc);
       if (legInk && gi === 1) tattoo([g.kx, g.ky], [g.fx, g.fy], shorts ? 38 : lw, 'small', L.ink);
       X.save(); X.translate(g.fx + (bare ? 6 : 8), g.fy + (bare ? 0 : 4)); X.rotate(walk ? g.fa : 0); ell(0, 0, bare ? 26 : 34, bare ? 12 : 16); fill(shoe); X.restore();
@@ -433,7 +434,7 @@ function person(x, y, s, L, t, o = {}) {
         return { sd, out: [cx + sd * px * 54, cy + sd * py * 54], inn: [cx - sd * px * 18, cy - sd * py * 18] };
       });
       const [Lh, Rh] = hem[0].sd < 0 ? hem : [hem[1], hem[0]], apex = [(Lh.inn[0] + Rh.inn[0]) / 2, Math.min(Lh.inn[1], Rh.inn[1]) - 40];
-      X.beginPath(); X.moveTo(-80, -280); X.lineTo(80, -280); X.lineTo(Rh.out[0], Rh.out[1]); X.lineTo(Rh.inn[0], Rh.inn[1]); X.lineTo(apex[0], apex[1]); X.lineTo(Lh.inn[0], Lh.inn[1]); X.lineTo(Lh.out[0], Lh.out[1]); X.closePath(); fill(C(L.pants));
+      X.beginPath(); X.moveTo(-70, -280); X.lineTo(70, -280); X.lineTo(Rh.out[0], Rh.out[1]); X.lineTo(Rh.inn[0], Rh.inn[1]); X.lineTo(apex[0], apex[1]); X.lineTo(Lh.inn[0], Lh.inn[1]); X.lineTo(Lh.out[0], Lh.out[1]); X.closePath(); fill(C(L.pants));
     }
     // a skirt sits at the waist and flares a little to just above the knee, swinging with the stride
     if (skirt) { const sw = 10 * walk * Math.sin(w); X.beginPath(); X.moveTo(-76, -262); X.lineTo(76, -262); X.lineTo(106 + sw, -138); X.quadraticCurveTo(0, -128, -106 + sw, -138); X.closePath(); fill(L.pants); line([[-60, -250], [60, -250]], 4, darken(C(L.pants), 0.15)); }
