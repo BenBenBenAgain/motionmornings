@@ -446,7 +446,7 @@ input[type=range]{height:30px;touch-action:none}
       <button class="mini" type="button" data-watch="you2" aria-label="Watch Priya's demo film, with sound"><span class="mphone"><canvas id="miniYou2" width="360" height="640" aria-hidden="true"></canvas><span class="mplay" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span></span><span class="mlabel">Priya&rsquo;s film</span></button>
     </div>
     <p class="duohint">Tap a film to watch with sound</p>
-    <p class="duomore">One film of your whole life, watched every morning. Update it as you grow.</p></div>
+    <p class="duomore">One film of the life you&rsquo;re building. Watch it every morning, and update it as you grow.</p></div>
     <div class="leadbtns"><a class="btn coral" href="#builder">Create my film</a><p class="crosslink">Making one for a child? <a href="/kids.html">See kids films &rarr;</a></p></div>
   </section>
   <section class="why" id="why" aria-labelledby="whyTitle" style="scroll-margin-top:16px">
@@ -1417,7 +1417,7 @@ const PARTNER_SEX = ['sex', 'Look', 'seg', [['m', 'Man'], ['f', 'Woman'], ['x', 
 // starting looks for each choice, deliberately unlike the man in the demo film so it feels like yours from the first tap
 const STARTER = {
   m: { hair: 'short', hairCol: '#A0703F', facial: 'beard', facialCol: '#8A5A30', outfit: 'jacket', top: '#B5452B', inner: '#EFE8DC', pants: '#30406E' },
-  f: { hair: 'bun', hairCol: '#383130', facial: 'none', outfit: 'jacket', top: '#2F8F8A', inner: '#EFE8DC', pants: '#30406E' },
+  f: { hair: 'long', hairCol: '#383130', facial: 'none', outfit: 'dress', top: '#2F8F8A', inner: '#2F8F8A', pants: '#30406E' },
   x: { hair: 'buzz', hairCol: '#1F1A18', facial: 'none', outfit: 'tee', top: '#2F5D8A', pants: '#17171C' }
 };
 const pickLook = (o, v) => { applySex(o, v, false); Object.assign(o, STARTER[v] || {}); };
