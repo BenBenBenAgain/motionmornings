@@ -446,10 +446,10 @@ function person(x, y, s, L, t, o = {}) {
   else if (L.outfit === 'singlet') {
     // a singlet: bare shoulders, two straps, a scoop at the neck and deep armholes
     // bare shoulders that slope down from the neck and round off into the arms
-    X.beginPath(); X.moveTo(-20, -466); X.quadraticCurveTo(-58, -462, -78, -440); X.quadraticCurveTo(-90, -424, -84, -400); X.lineTo(-80, -370); X.lineTo(80, -370); X.lineTo(84, -400); X.quadraticCurveTo(90, -424, 78, -440); X.quadraticCurveTo(58, -462, 20, -466); X.closePath(); fill(skin);
+    X.beginPath(); X.moveTo(-18, -458); X.quadraticCurveTo(-56, -456, -72, -444); X.quadraticCurveTo(-82, -434, -80, -412); X.lineTo(-78, -380); X.lineTo(78, -380); X.lineTo(80, -412); X.quadraticCurveTo(82, -434, 72, -444); X.quadraticCurveTo(56, -456, 18, -458); X.closePath(); fill(skin);
     // the singlet: straps that sit on the slope of the shoulders, a scoop neck and deep armholes
-    X.beginPath(); X.moveTo(-54, -455); X.lineTo(-32, -462); X.quadraticCurveTo(0, -400, 32, -462); X.lineTo(54, -455);
-    X.quadraticCurveTo(58, -396, 82, -374); X.bezierCurveTo(82, -320, 76, -280, 72, -250); X.lineTo(-72, -250); X.bezierCurveTo(-76, -280, -82, -320, -82, -374); X.quadraticCurveTo(-58, -396, -54, -455); X.closePath(); fill(L.top);
+    X.beginPath(); X.moveTo(-58, -452); X.lineTo(-30, -457); X.quadraticCurveTo(0, -410, 30, -457); X.lineTo(58, -452);
+    X.quadraticCurveTo(60, -404, 82, -388); X.bezierCurveTo(84, -330, 78, -290, 72, -250); X.lineTo(-72, -250); X.bezierCurveTo(-78, -290, -84, -330, -82, -388); X.quadraticCurveTo(-60, -404, -58, -452); X.closePath(); fill(L.top);
   }
   else {
     X.beginPath(); X.moveTo(-82, -446); X.bezierCurveTo(-88, -380, -78, -300, -72, -250); X.lineTo(72, -250); X.bezierCurveTo(78, -300, 88, -380, 82, -446); X.closePath(); fill(L.top);
