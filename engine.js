@@ -338,12 +338,14 @@ function person(x, y, s, L, t, o = {}) {
   const smile = o.smile !== false, flip = o.flip || 1;
   // a wheelchair: the body sits lower, the legs bend at the seat, and the wheels turn when moving
   const chair = !!L.chair, D = chair ? 92 : 0, dress = L.outfit === 'dress', w = t * speed;
+  // what's below the top: a skirt shows the legs like a dress does, shorts show the shins
+  const skirt = !dress && L.bottoms === 'skirt', shorts = !dress && L.bottoms === 'shorts', bare = dress || skirt;
   // walking legs bend at the knee: the thigh swings, the shin trails behind it on the way forward and the foot lifts clear.
   // The body rides up and down a little with each step, so a foot is always on the ground.
-  const legHip = dress ? -170 : -262, legT = dress ? 82 : 124, legS = dress ? 83 : 124, legSw = dress ? 0.34 : 0.4;
+  const legHip = bare ? -170 : -262, legT = bare ? 82 : 124, legS = bare ? 83 : 124, legSw = bare ? 0.34 : 0.4;
   const legs = [[-1, 0], [1, PI]].map(([side, ph]) => {
     const q = w + ph, a = walk * legSw * Math.sin(q), b = Math.min(walk, 1.3) * 0.55 * Math.pow(Math.max(0, Math.cos(q - 0.5)), 2);
-    const hx = side * (dress ? 22 : 26), kx = hx + legT * Math.sin(a), ky = legHip + legT * Math.cos(a);
+    const hx = side * (bare ? 22 : 26), kx = hx + legT * Math.sin(a), ky = legHip + legT * Math.cos(a);
     return { hx, kx, ky, fx: kx + legS * Math.sin(a - b), fy: ky + legS * Math.cos(a - b), fa: 0.6 * (a - b) };
   });
   const lift = chair || !walk ? 0 : (legHip + legT + legS) - Math.max(legs[0].fy, legs[1].fy);
@@ -386,7 +388,7 @@ function person(x, y, s, L, t, o = {}) {
   X.save(); X.scale(bw, 1);
   // legs
   if (chair) {
-    const lc = dress ? skin : C(L.pants), tyre = [0.13, 0.13, 0.15], metal = [0.74, 0.76, 0.8], fr = [0.2, 0.22, 0.26];
+    const lc = (bare || shorts) ? skin : C(L.pants), lap = dress ? C(L.top) : C(L.pants), tyre = [0.13, 0.13, 0.15], metal = [0.74, 0.76, 0.8], fr = [0.2, 0.22, 0.26];
     const spin = walk ? -t * speed * 0.9 : 0, G = -D;
     // the big back wheels, seen almost side on, leaning in a little at the top, each with a hand rim on the outside
     [-1, 1].forEach(sd => {
@@ -405,18 +407,37 @@ function person(x, y, s, L, t, o = {}) {
     rr(-108, -274, 216, 30, 12); fill([0.16, 0.17, 0.2]);
     rr(-88, G - 44, 176, 14, 6); fill(metal);
     // sitting: thighs come toward us across the seat, knees forward, shins down to the footplate
-    const kw = dress ? 34 : 54;
+    const kw = bare ? 34 : 54;
     [-1, 1].forEach(sd => {
-      line([[sd * 32, -232], [sd * 36, G - 52]], dress ? 28 : 46, lc);
-      ell(sd * 42, G - 50, 32, 15); fill(dress ? [0.55, 0.3, 0.25] : [0.13, 0.11, 0.10]);
+      line([[sd * 32, -232], [sd * 36, G - 52]], bare ? 28 : shorts ? 36 : 46, lc);
+      if (L.legTat && (bare || shorts) && sd > 0) tattoo([sd * 32, -214], [sd * 36, G - 52], bare ? 28 : 36, 'small', L.ink);
+      ell(sd * 42, G - 50, 32, 15); fill(bare ? [0.55, 0.3, 0.25] : [0.13, 0.11, 0.10]);
     });
-    [-1, 1].forEach(sd => { rr(sd * 32 - kw / 2 - 4, -268, kw + 8, 46, 20); fill(dress ? C(L.top) : darken(lc, 0.06)); circ(sd * 32, -230, kw / 2 + 4); fill(dress ? skin : lc); });
+    if (skirt) { X.beginPath(); X.moveTo(-84, -276); X.lineTo(84, -276); X.quadraticCurveTo(100, -236, 74, -212); X.lineTo(-74, -212); X.quadraticCurveTo(-100, -236, -84, -276); X.closePath(); fill(lap); }
+    else [-1, 1].forEach(sd => { rr(sd * 32 - kw / 2 - 4, -268, kw + 8, 46, 20); fill(dress ? lap : darken(lap, 0.06)); circ(sd * 32, -230, kw / 2 + 4); fill(dress ? skin : lap); });
   } else {
-    const lw = dress ? 26 : 48, shoe = dress ? [0.55, 0.3, 0.25] : [0.13, 0.11, 0.10], lc = dress ? skin : C(L.pants);
-    legs.forEach(g => {
-      line([[g.hx, legHip], [g.kx, g.ky], [g.fx, g.fy]], lw, lc);
-      X.save(); X.translate(g.fx + (dress ? 6 : 8), g.fy + (dress ? 0 : 4)); X.rotate(walk ? g.fa : 0); ell(0, 0, dress ? 26 : 34, dress ? 12 : 16); fill(shoe); X.restore();
+    const lw = bare ? 26 : 48, shoe = bare ? [0.55, 0.3, 0.25] : [0.13, 0.11, 0.10], lc = bare ? skin : C(L.pants);
+    const legInk = L.legTat && (bare || shorts);
+    legs.forEach((g, gi) => {
+      // with shorts the legs start just inside the hem, so nothing shows through the slit between the legs
+      if (shorts) line([[g.hx + (g.kx - g.hx) * 0.72, legHip + (g.ky - legHip) * 0.72], [g.kx, g.ky], [g.fx, g.fy]], 36, skin);
+      else line([[g.hx, legHip], [g.kx, g.ky], [g.fx, g.fy]], lw, lc);
+      if (legInk && gi === 1) tattoo([g.kx, g.ky], [g.fx, g.fy], shorts ? 38 : lw, 'small', L.ink);
+      X.save(); X.translate(g.fx + (bare ? 6 : 8), g.fy + (bare ? 0 : 4)); X.rotate(walk ? g.fa : 0); ell(0, 0, bare ? 26 : 34, bare ? 12 : 16); fill(shoe); X.restore();
     });
+    if (shorts) {
+      // shorts: one solid boxy shape from the waist to mid-thigh, a bit wider than the hips,
+      // with just a small slit at the bottom between the legs. The hem corners follow each thigh as they walk.
+      const hem = legs.map(g => {
+        const sd = g.hx < 0 ? -1 : 1, ang = Math.atan2(g.kx - g.hx, g.ky - legHip), ux = Math.sin(ang), uy = Math.cos(ang), len = 100;
+        const cx = g.hx + ux * len, cy = legHip + uy * len, px = uy, py = -ux;
+        return { sd, out: [cx + sd * px * 54, cy + sd * py * 54], inn: [cx - sd * px * 18, cy - sd * py * 18] };
+      });
+      const [Lh, Rh] = hem[0].sd < 0 ? hem : [hem[1], hem[0]], apex = [(Lh.inn[0] + Rh.inn[0]) / 2, Math.min(Lh.inn[1], Rh.inn[1]) - 40];
+      X.beginPath(); X.moveTo(-70, -280); X.lineTo(70, -280); X.lineTo(Rh.out[0], Rh.out[1]); X.lineTo(Rh.inn[0], Rh.inn[1]); X.lineTo(apex[0], apex[1]); X.lineTo(Lh.inn[0], Lh.inn[1]); X.lineTo(Lh.out[0], Lh.out[1]); X.closePath(); fill(C(L.pants));
+    }
+    // a skirt sits at the waist and flares a little to just above the knee, swinging with the stride
+    if (skirt) { const sw = 10 * walk * Math.sin(w); X.beginPath(); X.moveTo(-76, -262); X.lineTo(76, -262); X.lineTo(106 + sw, -138); X.quadraticCurveTo(0, -128, -106 + sw, -138); X.closePath(); fill(L.pants); line([[-60, -250], [60, -250]], 4, darken(C(L.pants), 0.15)); }
   }
   if (o.backpack) { rr(-118, -440, 56, 170, 16); fill(o.backpack); }
   // torso
@@ -445,7 +466,12 @@ function person(x, y, s, L, t, o = {}) {
     const upper = dress ? skin : L.top, fore = (dress || L.outfit === 'tee') ? skin : L.top, wd = dress ? 30 : 38;
     line([[sx, sy], [ex, ey]], wd, upper); line([[ex, ey], [hx, hy]], wd * (L.outfit === 'tee' ? 0.8 : 1), fore);
     if (L.outfit === 'tee') { circ(ex, ey, wd / 2); fill(upper); }
+    // tattoos show only on bare skin: the forearm in a tee or dress, the whole arm in a dress
+    const tat = L.tattoo, onArm = tat === 'both' || ((tat === 'sleeve' || tat === 'forearm') && side > 0);
+    if (onArm && fore === skin) tattoo([ex, ey], [hx, hy], wd * (L.outfit === 'tee' ? 0.8 : 1), tat === 'forearm' ? 'small' : 'full', L.ink);
+    if (onArm && tat !== 'forearm' && upper === skin) tattoo([sx, sy], [ex, ey], wd, 'full', L.ink, 1);
     circ(hx, hy, 20); fill(skin);
+    if (L.tattoo === 'hand' && side > 0) star(hx, hy, 10, inkCols(L.ink)[0]);
     hands[side < 0 ? 'L' : 'R'] = [x + flip * s * bw * hx, y - bob + s * (hy + D)];
   });
   X.restore();
@@ -657,6 +683,20 @@ function topPrint(x, y, s, text, col) {
   if (!text) return;
   X.save(); X.font = `700 ${Math.round((text.length > 2 ? 60 : 78) * s)}px Poppins, sans-serif`; X.textAlign = 'center';
   X.fillStyle = css(C(col || '#8CDB80')); X.fillText(String(text).slice(0, 4), x, y - 318 * s); X.restore();
+}
+// simple tattoo shapes that still read at film size: a wave line, dots, a little flower or star
+const inkCols = ink => ink === 'colour' ? [[0.15, 0.5, 0.52], [0.86, 0.42, 0.36], [0.93, 0.68, 0.26]] : [[0.17, 0.19, 0.27], [0.17, 0.19, 0.27], [0.17, 0.19, 0.27]];
+function star(cx, cy, r, col) { X.beginPath(); for (let i = 0; i < 10; i++) { const a = -PI / 2 + i * PI / 5, rr2 = i % 2 ? r * 0.45 : r; X.lineTo(cx + rr2 * Math.cos(a), cy + rr2 * Math.sin(a)); } X.closePath(); fill(col, 0.88); }
+function tattoo(a, b, w, size, ink, alt) {
+  const [c0, c1, c2] = inkCols(ink), dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy);
+  if (len < 30) return;
+  const ux = dx / len, uy = dy / len, nx = -uy, ny = ux, at = (k, o = 0) => [a[0] + dx * k + nx * o, a[1] + dy * k + ny * o];
+  const band = k => { line([at(k, -w * 0.48), at(k, w * 0.48)], 4, c0, 0.9); };
+  const flower = (k, r) => { const [fx, fy] = at(k); for (let i = 0; i < 5; i++) { const an = i * 2 * PI / 5; circ(fx + Math.cos(an) * r * 0.55, fy + Math.sin(an) * r * 0.55, r * 0.45); fill(c1, 0.9); } circ(fx, fy, r * 0.3); fill(c2); };
+  const leaf = (k, sd) => { const [lx, ly] = at(k, sd * w * 0.22); X.save(); X.translate(lx, ly); X.rotate(Math.atan2(uy, ux) + sd * 0.6); ell(0, 0, w * 0.2, w * 0.09); fill(c0, 0.85); X.restore(); };
+  if (alt) { band(0.2); band(0.3); const [sx2, sy2] = at(0.66); star(sx2, sy2, w * 0.3, c2); return; }
+  if (size === 'full') { band(0.16); band(0.88); flower(0.4, w * 0.36); leaf(0.6, 1); leaf(0.66, -1); }
+  else { flower(0.45, w * 0.34); leaf(0.64, 1); }
 }
 function drawKid(k, x, y, t, o = {}) {
   const s = kidScale(k) * (o.s || 1), L = kidLook(k), mop = L.hair === 'mop';
