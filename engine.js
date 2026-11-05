@@ -419,7 +419,7 @@ function person(x, y, s, L, t, o = {}) {
     const lw = bare ? 26 : 48, shoe = bare ? [0.55, 0.3, 0.25] : [0.13, 0.11, 0.10], lc = bare ? skin : C(L.pants);
     const legInk = L.legTat && (bare || shorts);
     legs.forEach((g, gi) => {
-      if (shorts) line([[g.hx, legHip + 60], [g.kx, g.ky], [g.fx, g.fy]], 38, skin);
+      if (shorts) { line([[g.hx * 0.8, legHip], [g.kx, g.ky]], 50, skin); line([[g.kx, g.ky], [g.fx, g.fy]], 40, skin); }
       else line([[g.hx, legHip], [g.kx, g.ky], [g.fx, g.fy]], lw, lc);
       if (legInk && gi === 1) tattoo([g.kx, g.ky], [g.fx, g.fy], shorts ? 38 : lw, 'small', L.ink);
       X.save(); X.translate(g.fx + (bare ? 6 : 8), g.fy + (bare ? 0 : 4)); X.rotate(walk ? g.fa : 0); ell(0, 0, bare ? 26 : 34, bare ? 12 : 16); fill(shoe); X.restore();
