@@ -77,6 +77,17 @@
         { scene: 'teeth_count', text: 'The dentist counts {child}\u2019s teeth with a little mirror.' },
         { scene: 'dentist_chair', glimpse: true, text: '{child} can put up a hand if {they} need{s} a break.' },
         { scene: 'sticker', text: 'All done! {child} might get a sticker.', say: { who: 'child', words: 'I did it!' } }] } },
+    swim: { label: 'Swimming lessons', blurb: 'Getting changed, the teacher, a kickboard, a towel', endScene: 'pool_towel', story: {
+      title: '{child}\u2019s Swimming Lesson', ending: 'Swimming lessons are fun!', endScene: 'pool_towel', steps: [
+        { scene: 'goto', place: 'Swimming pool', text: 'Today {adult} and {child} are going to a swimming lesson.' },
+        { scene: 'pool_change', text: 'First, {child} gets changed into {their} swimmers.' },
+        { scene: 'pool_walk', text: 'They walk out to the pool. Walking feet, because the floor is wet.' },
+        { scene: 'pool_teacher', text: '{child} meets the swimming teacher.', say: { who: 'helper', words: 'Hi {child}!' } },
+        { scene: 'pool_edge', text: '{child} sits on the edge and puts {their} feet in the water. Kick, kick!' },
+        { scene: 'pool_in', text: 'When {child} is ready, the teacher helps {child} into the water.' },
+        { scene: 'pool_in', glimpse: true, text: 'The teacher holds on, so {child} can feel the water.' },
+        { scene: 'pool_kick', text: '{child} holds a kickboard and kicks {their} legs. Splash!' },
+        { scene: 'pool_towel', text: 'Then it\u2019s time to get out. {adult} has a big warm towel.', say: { who: 'child', words: 'That was fun!' } }] } },
     haircut: { label: 'A haircut', blurb: 'The cape, snip snip, buzzy clippers, the mirror', story: {
       title: '{child} Gets a Haircut', ending: 'Looking good!', steps: [
         { scene: 'goto', place: 'Hairdresser', text: '{adult} and {child} are going to get a haircut.' },
@@ -551,7 +562,7 @@
   }
   let pickFor = null;
   // which place each story belongs to, so the picture picker opens on the right scenes
-  const STORY_PLACE = { playgroup: 'Playgroup room', kinder: 'Kinder or school', siblings: 'Brothers, sisters and babies', baby: 'Brothers, sisters and babies', playdate: 'Brothers, sisters and babies', doctor: 'The doctor', dentist: 'The dentist', haircut: 'Haircut', bedtime: 'Bedtime', bike: 'Learning to ride a bike', food: 'At home' };
+  const STORY_PLACE = { playgroup: 'Playgroup room', kinder: 'Kinder or school', siblings: 'Brothers, sisters and babies', baby: 'Brothers, sisters and babies', playdate: 'Brothers, sisters and babies', doctor: 'The doctor', dentist: 'The dentist', haircut: 'Haircut', swim: 'Swimming lessons', bedtime: 'Bedtime', bike: 'Learning to ride a bike', food: 'At home' };
   function pickScene(st, all) {
     pickFor = st; const g = $('#sceneGrid'); g.innerHTML = '';
     // stories made before this remembered their kind: use the place most of their steps are in
