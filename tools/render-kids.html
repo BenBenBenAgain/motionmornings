@@ -1,0 +1,6 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Kids demo render (test tool)</title><meta name="robots" content="noindex"></head><body style="margin:0;background:#ddd"><div id=g style="display:flex;flex-wrap:wrap;gap:4px"></div>
+<script src="../engine.js"></script><script>
+const K=LSN.KIDS, Q=new URLSearchParams(location.search), k=+(Q.get('k')||0.2), chair=Q.get('chair')==='1';
+['playgroup','doctor'].forEach(id=>{const d=JSON.parse(JSON.stringify(K.DEMOS[id])); if(chair){d.cast.child.chair=true;} const tl=K.timeline(d.story,{});
+for(let i=0;i<10;i++){const T=tl.total*(i+0.5)/10;const c=document.createElement('canvas');c.width=1080;c.height=1920;K.frame(c.getContext('2d'),d.cast,d.story,tl,T);const o=document.createElement('canvas');o.width=1080*k;o.height=1920*k;o.getContext('2d').drawImage(c,0,0,o.width,o.height);document.getElementById('g').appendChild(o);}});
+</script></body></html>
