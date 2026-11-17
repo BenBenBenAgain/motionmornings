@@ -411,19 +411,19 @@ function person(x, y, s, L, t, o = {}) {
     [-1, 1].forEach(sd => {
       line([[sd * 32, -232], [sd * 36, G - 52]], bare ? 28 : shorts ? 36 : 46, lc);
       if (L.legTat && (bare || shorts) && sd > 0) tattoo([sd * 32, -214], [sd * 36, G - 52], bare ? 28 : 36, 'small', L.ink);
-      ell(sd * 42, G - 50, 32, 15); fill(bare ? [0.55, 0.3, 0.25] : [0.13, 0.11, 0.10]);
+      ell(sd * 42, G - 50, L.barefoot ? 26 : 32, L.barefoot ? 12 : 15); fill(L.barefoot ? darken(skin, 0.08) : bare ? [0.55, 0.3, 0.25] : [0.13, 0.11, 0.10]);
     });
     if (skirt) { X.beginPath(); X.moveTo(-84, -276); X.lineTo(84, -276); X.quadraticCurveTo(100, -236, 74, -212); X.lineTo(-74, -212); X.quadraticCurveTo(-100, -236, -84, -276); X.closePath(); fill(lap); }
     else [-1, 1].forEach(sd => { rr(sd * 32 - kw / 2 - 4, -268, kw + 8, 46, 20); fill(dress ? lap : darken(lap, 0.06)); circ(sd * 32, -230, kw / 2 + 4); fill(dress ? skin : lap); });
   } else {
-    const lw = bare ? 26 : 48, shoe = bare ? [0.55, 0.3, 0.25] : [0.13, 0.11, 0.10], lc = bare ? skin : C(L.pants);
+    const lw = bare ? 26 : 48, shoe = L.barefoot ? darken(skin, 0.08) : bare ? [0.55, 0.3, 0.25] : [0.13, 0.11, 0.10], lc = bare ? skin : C(L.pants);
     const legInk = L.legTat && (bare || shorts);
     legs.forEach((g, gi) => {
       // with shorts the legs start just inside the hem, so nothing shows through the slit between the legs
       if (shorts) line([[g.hx + (g.kx - g.hx) * 0.72, legHip + (g.ky - legHip) * 0.72], [g.kx, g.ky], [g.fx, g.fy]], 36, skin);
       else line([[g.hx, legHip], [g.kx, g.ky], [g.fx, g.fy]], lw, lc);
       if (legInk && gi === 1) tattoo([g.kx, g.ky], [g.fx, g.fy], shorts ? 38 : lw, 'small', L.ink);
-      X.save(); X.translate(g.fx + (bare ? 6 : 8), g.fy + (bare ? 0 : 4)); X.rotate(walk ? g.fa : 0); ell(0, 0, bare ? 26 : 34, bare ? 12 : 16); fill(shoe); X.restore();
+      X.save(); X.translate(g.fx + (bare ? 6 : 8), g.fy + (bare ? 0 : 4)); X.rotate(walk ? g.fa : 0); ell(0, 0, bare || L.barefoot ? 26 : 34, bare || L.barefoot ? 12 : 16); fill(shoe); X.restore();
     });
     if (shorts) {
       // shorts: one solid boxy shape from the waist to mid-thigh, a bit wider than the hips,
@@ -2320,8 +2320,8 @@ const KIDS = (() => {
 
   // ---- swimming lessons: an indoor pool with a deck on the far side, and a near deck when people stand on it
   const WATER = () => lin(0, 1000, 0, H, [[0, [0.55, 0.84, 0.92]], [1, [0.27, 0.62, 0.8]]]);
-  // swimmers: a rashie in their top colour and swim shorts. Out of the chair for the water scenes.
-  const swimmers = (k, inWater) => Object.assign({}, k, { outfit: 'tee', bottoms: 'shorts', pants: k.outfit === 'dress' ? k.top : (k.pants || '#30406E'), print: '', chair: inWater ? false : k.chair });
+  // swimmers: a rashie in their top colour, swim shorts and bare feet. Out of the chair for the water scenes.
+  const swimmers = (k, inWater) => Object.assign({}, k, { outfit: 'tee', bottoms: 'shorts', pants: k.outfit === 'dress' ? k.top : (k.pants || '#30406E'), print: '', barefoot: true, chair: inWater ? false : k.chair });
   const swimTeacher = L => Object.assign({}, L, { outfit: 'tee', top: '#E07B66', inner: '#E07B66', bottoms: 'shorts', pants: '#1F2E4D', print: '' });
   const swimCast = (c, inWater) => Object.assign({}, c, { child: swimmers(KID(c), inWater) });
   function shimmer(t, y0, y1) { for (let y = y0 + 30, i = 0; y < y1 - 10; y += 62, i++) { const k = (t * 30 + i * 47) % 200; for (let x = -200; x < W; x += 340) line([[x + k + (i % 2) * 120, y], [x + k + 90 + (i % 2) * 120, y]], 5, [1, 1, 1], 0.35); } }
