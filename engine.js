@@ -2081,6 +2081,7 @@ const KIDS = (() => {
   function buildingKind(sign) {
     const s = String(sign || '').toLowerCase();
     if (/play ?group|kinder|child ?care|day ?care|preschool|creche|nursery/.test(s)) return 'play';
+    if (/pool|swim|aquatic/.test(s)) return 'pool';
     if (/dentist|dental|orthodont/.test(s)) return 'dentist';
     if (/doctor|clinic|hospital|\bgp\b|medical|surgery|nurse|vaccin|health/.test(s)) return 'clinic';
     if (/school|prep\b|primary|class/.test(s)) return 'school';
@@ -2100,6 +2101,17 @@ const KIDS = (() => {
       for (let i = 0; i < 12; i++) { const fx = x - 70 + i * 42; if (fx > x + 120 && fx < x + 230) continue; rr(fx, base - 70, 22, 70, 6); fill(cols[i % 4]); }
       rect(x - 70, base - 46, 500, 8, [1, 0.97, 0.9]);
       signBoard(x, base, sign, 262); return;
+    }
+    if (kind === 'pool') {
+      rect(x - 30, base - 300, 420, 300, [0.93, 0.96, 0.98]);
+      rect(x - 40, base - 320, 440, 28, [0.36, 0.62, 0.78]);
+      rect(x - 10, base - 230, 380, 110, [0.72, 0.86, 0.94]); for (let i = 1; i < 4; i++) line([[x - 10 + i * 95, base - 230], [x - 10 + i * 95, base - 120]], 5, [1, 1, 1]);
+      rect(x + 120, base - 100, 120, 100, [0.72, 0.86, 0.94]); line([[x + 180, base - 100], [x + 180, base]], 5, [1, 1, 1]);
+      circ(x + 180, base - 390, 46); fill([0.36, 0.62, 0.78]);
+      [-14, 8].forEach(dy => { X.beginPath(); for (let i = 0; i <= 20; i++) { const u = i / 20; X.lineTo(x + 152 + 56 * u, base - 390 + dy + 6 * Math.sin(u * 2 * PI * 1.5)); } X.lineWidth = 7; X.lineCap = 'round'; X.strokeStyle = css([1, 1, 1]); X.stroke(); });
+      [[x - 70, base], [x + 430, base]].forEach(([hx, hy]) => { rr(hx - 40, hy - 50, 80, 50, 25); fill([0.4, 0.65, 0.42]); });
+      signBoard(x, base, sign, 300);
+      return;
     }
     if (kind === 'clinic' || kind === 'dentist') {
       rect(x - 20, base - 330, 400, 330, [0.97, 0.98, 0.99]);
@@ -2304,6 +2316,62 @@ const KIDS = (() => {
     b.pedals.forEach(([px, py], i) => { const hx = sx + (i ? -16 : 16) * s; line([[hx, sy], [(hx + px) / 2 + 14, (sy + py) / 2], [px, py]], 40 * s, k.outfit === 'dress' ? k.skin : (k.pants || '#30406E')); ell(px + 6, py, 26 * s, 13 * s); fill([0.13, 0.11, 0.1]); });
     if (o.helmet !== false) { const [hx, hy, hw] = kidHeadAt(k, sx, yy); X.beginPath(); X.arc(hx, hy - hw * 0.15, hw * 1.18, PI, 2 * PI); X.closePath(); fill(o.helmetCol || [0.47, 0.62, 0.95]); rr(hx - hw * 1.2, hy - hw * 0.22, hw * 2.4, hw * 0.22, 6); fill(darken(C(o.helmetCol || [0.47, 0.62, 0.95]), 0.2)); }
     return kidTop(k, sx, yy);
+  }
+
+  // ---- swimming lessons: an indoor pool with a deck on the far side, and a near deck when people stand on it
+  const WATER = () => lin(0, 1000, 0, H, [[0, [0.55, 0.84, 0.92]], [1, [0.27, 0.62, 0.8]]]);
+  // swimmers: a rashie in their top colour and swim shorts. Out of the chair for the water scenes.
+  const swimmers = (k, inWater) => Object.assign({}, k, { outfit: 'tee', bottoms: 'shorts', pants: k.outfit === 'dress' ? k.top : (k.pants || '#30406E'), print: '', chair: inWater ? false : k.chair });
+  const swimTeacher = L => Object.assign({}, L, { outfit: 'tee', top: '#E07B66', inner: '#E07B66', bottoms: 'shorts', pants: '#1F2E4D', print: '' });
+  const swimCast = (c, inWater) => Object.assign({}, c, { child: swimmers(KID(c), inWater) });
+  function shimmer(t, y0, y1) { for (let y = y0 + 30, i = 0; y < y1 - 10; y += 62, i++) { const k = (t * 30 + i * 47) % 200; for (let x = -200; x < W; x += 340) line([[x + k + (i % 2) * 120, y], [x + k + 90 + (i % 2) * 120, y]], 5, [1, 1, 1], 0.35); } }
+  function laneRope(y) { for (let x = 10; x < W; x += 36) { circ(x, y, 12); fill(Math.floor(x / 36) % 4 < 2 ? CORAL : [1, 1, 1]); } }
+  function tiles(y0, y1) { rect(0, y0, W, y1 - y0, [0.94, 0.91, 0.85]); for (let x = 0; x < W; x += 90) line([[x, y0], [x, y1]], 2, [0.85, 0.8, 0.72]); }
+  function poolRoom(t, edge, near) {
+    HATS_OFF = true;
+    rect(0, 0, W, edge - 200, [0.9, 0.95, 0.97]);
+    for (let i = 0; i < 4; i++) { const x = 40 + i * 260; rr(x, 560, 220, Math.min(300, edge - 820), 14); fill([0.75, 0.88, 0.95]); line([[x + 110, 560], [x + 110, 560 + Math.min(300, edge - 820)]], 6, [1, 1, 1]); }
+    rect(0, edge - 230, W, 30, [0.36, 0.62, 0.78]);
+    tiles(edge - 200, edge);
+    rect(0, edge, W, H - edge, WATER());
+    laneRope(edge + (near ? (near - edge) / 2 : 120));
+    shimmer(t, edge, near || H);
+    rect(0, edge - 6, W, 14, [0.98, 0.98, 0.96]);
+    if (near) { tiles(near, H); rect(0, near - 6, W, 14, [0.98, 0.98, 0.96]); }
+  }
+  // the water closes over whatever is below the line, so people look like they're in it
+  function underWater(x0, x1, y, a = 1) { X.save(); X.globalAlpha = a; rect(x0, y, x1 - x0, H - y, WATER()); X.restore(); ell((x0 + x1) / 2, y, (x1 - x0) / 2.6, 10); X.lineWidth = 4; X.strokeStyle = css([1, 1, 1], 0.6); X.stroke(); }
+  function goggles(k, x, y, s, flip = 1) {
+    const [hx, hy, hw] = kidHeadAt(k, x, y, s), ey = hy + hw * 0.12;
+    line([[hx - hw * 1.02, ey], [hx + hw * 1.02, ey]], hw * 0.12, NAVY);
+    [-1, 1].forEach(sd => { ell(hx + sd * hw * 0.38, ey, hw * 0.3, hw * 0.24); fill([0.3, 0.75, 0.85]); X.lineWidth = hw * 0.08; X.strokeStyle = css(NAVY); X.stroke(); });
+  }
+  // a little swimmer side-on, facing right, holding a kickboard; y is the water's surface
+  function kicker(k, x, y, t, s) {
+    const L = swimmers(k, true), skin = C(L.skin);
+    [0, PI].forEach(ph => { const a = Math.sin(t * 9 + ph); line([[x - 180 * s, y + 34 * s], [x - 270 * s, y + 38 * s + 14 * a * s], [x - 340 * s, y + 30 * s + 30 * a * s]], 28 * s, skin); });
+    ell(x - 175 * s, y + 32 * s, 42 * s, 26 * s); fill(L.pants);
+    ell(x - 70 * s, y + 26 * s, 105 * s, 34 * s); fill(L.top);
+    underWater(x - 400 * s, x + 60 * s, y + 4, 0.7);
+    for (let i = 0; i < 6; i++) { const q = (t * 2.4 + i / 6) % 1, dx = x - 350 * s - 50 * s * q + (i % 3) * 14 * s; circ(dx, y - 46 * s * Math.sin(q * PI), (11 - 7 * q) * s); fill([1, 1, 1], 0.85 * (1 - q)); }
+    const sh = [x - 10 * s, y + 4 * s], hand = [x + 120 * s, y - 14 * s];
+    X.save(); X.translate(x + 160 * s, y - 10 * s); X.rotate(-0.05); rr(-70 * s, -18 * s, 150 * s, 34 * s, 16 * s); fill(GOLD); rr(-56 * s, -10 * s, 120 * s, 10 * s, 5 * s); fill([1, 1, 1], 0.35); X.restore();
+    line([sh, [x + 50 * s, y - 6 * s]], 26 * s, L.top); line([[x + 50 * s, y - 6 * s], hand], 22 * s, skin); circ(hand[0], hand[1], 15 * s); fill(skin);
+    const hx = x + 30 * s, hy = y - 44 * s, r = 48 * s;
+    circ(hx, hy, r); fill(skin);
+    X.beginPath(); X.arc(hx, hy, r * 1.04, PI * 0.95, PI * 1.9); X.lineTo(hx - r * 0.2, hy - r * 0.2); X.closePath(); fill(L.hairCol);
+    line([[hx - r * 0.9, hy - r * 0.1], [hx + r * 0.5, hy - r * 0.1]], r * 0.14, NAVY); ell(hx + r * 0.62, hy - r * 0.1, r * 0.22, r * 0.2); fill([0.3, 0.75, 0.85]); X.lineWidth = r * 0.08; X.strokeStyle = css(NAVY); X.stroke();
+    X.beginPath(); X.arc(hx + r * 0.55, hy + r * 0.3, r * 0.22, 0.1 * PI, 0.8 * PI); X.lineWidth = r * 0.09; X.lineCap = 'round'; X.strokeStyle = css([0.55, 0.25, 0.25]); X.stroke();
+    ell(hx, y + 2, r * 1.4, 9 * s); X.lineWidth = 4; X.strokeStyle = css([1, 1, 1], 0.6); X.stroke();
+    return [hx, hy - r - 20];
+  }
+  // a big striped towel wrapped around the child's shoulders
+  function towel(k, x, y, s = 1) {
+    const sc = ks(k, s), [hx, hy, hw] = kidHeadAt(k, x, y + (k.chair ? 92 * sc : 0), s), top = hy + hw * 1.0, bot = k.chair ? y - 150 * sc : y - 120 * sc;
+    X.beginPath(); X.moveTo(hx - hw * 0.7, top); X.quadraticCurveTo(hx - 130 * sc, top + 10 * sc, hx - 120 * sc, bot); X.lineTo(hx + 120 * sc, bot); X.quadraticCurveTo(hx + 130 * sc, top + 10 * sc, hx + hw * 0.7, top); X.closePath(); fill(GOLD);
+    [0.55, 0.75].forEach(f => rect(hx - 124 * sc, top + (bot - top) * f, 248 * sc, 18 * sc, CORAL));
+    line([[hx, top + 20 * sc], [hx + 8 * sc, bot]], 5 * sc, darken(C(GOLD), 0.15));
+    [-1, 1].forEach(sd => { circ(hx + sd * 22 * sc, top + (bot - top) * 0.35, 20 * sc); fill(k.skin); });
   }
 
   // ---- the scenes a story step can use. Each returns where heads are, so a speech bubble can find its speaker.
@@ -2566,6 +2634,75 @@ const KIDS = (() => {
       X.font = '700 46px Poppins, sans-serif'; X.textAlign = 'center'; const n = 1 + Math.floor(t * 1.2) % 10; X.fillStyle = css(NAVY, 0.85); X.fillText(String(n), 760, 1150 - 20 * ((t * 1.2) % 1));
       return { adult: [300, 1000], child: [640, 1130], helper: adultTop(dx, 1720) };
     } },
+    // ---- swimming lessons
+    pool_change: { label: 'Getting changed into swimmers', fn(c, t) {
+      room(PARK, t, { wall: [0.88, 0.94, 0.96], floor: [0.82, 0.85, 0.88] }); HATS_OFF = true;
+      for (let i = 0; i < 8; i++) { const x = 30 + i * 130; rr(x, 640, 120, 800, 8); fill(i % 2 ? [0.47, 0.7, 0.83] : [0.42, 0.64, 0.78]); [700, 720, 740].forEach(y => line([[x + 30, y], [x + 90, y]], 5, [1, 1, 1], 0.5)); rr(x + 92, 1000, 12, 50, 6); fill([0.9, 0.92, 0.95]); }
+      rr(80, 1500, 920, 40, 14); fill([0.72, 0.55, 0.38]); [140, 940].forEach(x => rect(x - 12, 1540, 24, 130, [0.6, 0.6, 0.64]));
+      rr(800, 1420, 150, 90, 24); fill(CORAL); line([[830, 1430], [850, 1380], [900, 1380], [920, 1430]], 8, darken(C(CORAL), 0.2));
+      const k = swimmers(KID(c)), kx = 580, ky = 1720, sk = ks(k), [hx, hy, hw] = kidHeadAt(k, kx, ky + (k.chair ? 92 * sk : 0)), on = t > 1.8;
+      rr(170, 1460, 170, 46, 14); fill(GOLD); rect(170, 1476, 170, 12, CORAL);
+      person(260, 1720, 1, AD(c), t, { armR: reach(260, 1720, 1, 1, 1, kx - 60 * sk, ky + (k.chair ? 92 * sk : 0) - 400 * sk), armL: [0.2, 0.1] });
+      drawKid(k, kx, ky, t, on ? { armL: [0.2, 0.1], armR: wave(t) } : { armL: reach(kx, ky + (k.chair ? 92 * sk : 0), sk, 1, -1, hx - hw, hy, -1), armR: reach(kx, ky + (k.chair ? 92 * sk : 0), sk, 1, 1, hx + hw, hy, -1) });
+      goggles(k, kx, ky + (k.chair ? 92 * sk : 0));
+      return { adult: adultTop(260, 1720), child: kidTop(k, kx, ky) };
+    } },
+    pool_walk: { label: 'Walking out to the pool', fn(c, t, p) {
+      poolRoom(t, 1060, 1400); const q = ease(clamp(p / 0.8));
+      return pair(swimCast(c), lerp(-60, 380, q), 1720, t, q < 0.98 ? 0.6 : 0);
+    } },
+    pool_teacher: { label: 'Meeting the swimming teacher', helper: true, fn(c, t) {
+      poolRoom(t, 1060, 1400);
+      person(820, 1720, 1, swimTeacher(HP(c)), t, { flip: -1, armR: t > 0.8 ? wave(t) : [0.2, 0.1] });
+      const h = pair(swimCast(c), 220, 1720, t, 0, { kidWave: t > 2 });
+      return Object.assign(h, { helper: adultTop(820, 1720) });
+    } },
+    pool_edge: { label: 'Sitting on the edge, feet in', helper: true, fn(c, t) {
+      const edge = 1240; poolRoom(t, edge);
+      person(170, 1210, 0.8, AD(c), t, clap(170, 1210, 0.8, 1, t));
+      const k = swimmers(KID(c), true), zs = 1.4, sk = ks(k, zs), kx = 520, yy = edge + 262 * sk;
+      X.save(); X.beginPath(); X.rect(0, 0, W, edge + 4); X.clip();
+      drawKid(k, kx, yy, t, { s: zs, armL: reach(kx, yy, sk, 1, -1, kx - 90 * sk, edge - 4, -1), armR: reach(kx, yy, sk, 1, 1, kx + 90 * sk, edge - 4, -1) });
+      X.restore(); goggles(k, kx, yy, zs);
+      [-1, 1].forEach(sd => { const kick = Math.sin(t * 7 + (sd > 0 ? PI : 0)), fx = kx + sd * 36 * sk, fy = edge + 150 * sk * (0.78 + 0.22 * kick); rr(kx + sd * 30 * sk - 26 * sk, edge - 6, 52 * sk, 40 * sk, 12 * sk); fill(k.pants); line([[kx + sd * 30 * sk, edge + 20 * sk], [fx, fy]], 36 * sk, k.skin); ell(fx + sd * 6 * sk, fy + 4 * sk, 22 * sk, 14 * sk); fill(k.skin); });
+      underWater(kx - 160, kx + 160, edge + 14, 0.6);
+      [-1, 1].forEach(sd => { const ph = (t * 2.2 + (sd > 0 ? 0.5 : 0)) % 1; for (let i = 0; i < 3; i++) { const a = ph + i * 0.3, x = kx + sd * (40 + 50 * (a % 1)) * sk, y = edge + 14 - 60 * Math.sin((a % 1) * PI) * sk; circ(x, y, 9 * (1 - (a % 1)) + 3); fill([1, 1, 1], 0.8 * (1 - (a % 1))); } });
+      const tl = swimTeacher(HP(c)), tx = 860, ty = 1880;
+      person(tx, ty, 1, tl, t, { flip: -1, armR: reach(tx, ty, 1, -1, 1, kx + 150, 1440, -1), armL: [0.4, 0.6] });
+      underWater(tx - 220, tx + 220, 1560);
+      return { adult: adultTop(170, 1210, 0.8), child: kidTop(k, kx, yy, zs), helper: adultTop(tx, ty) };
+    } },
+    pool_in: { label: 'In the water with the teacher', helper: true, fn(c, t) {
+      const edge = 1100; poolRoom(t, edge);
+      person(170, 1080, 0.8, AD(c), t, clap(170, 1080, 0.8, 1, t));
+      const k = swimmers(KID(c), true), zs = 1.4, sk = ks(k, zs), kx = 560, bob = 8 * Math.sin(t * 2), wl = 1520, ky = wl + 330 * sk + bob, tx = 600, ty = 1810;
+      person(tx, ty, 1, swimTeacher(HP(c)), t, { flip: -1, armR: reach(tx, ty, 1, -1, 1, kx - 70 * sk, ky - 300 * sk, -1), armL: reach(tx, ty, 1, -1, -1, kx + 70 * sk, ky - 300 * sk, -1) });
+      underWater(tx - 260, tx + 260, 1470);
+      drawKid(k, kx, ky, t, { s: zs, armL: [1.3 + 0.15 * Math.sin(t * 4), 1.6], armR: [1.3 + 0.15 * Math.sin(t * 4 + 1), 1.6] });
+      goggles(k, kx, ky, zs);
+      [-1, 1].forEach(sd => { circ(kx + sd * 70 * sk, ky - 300 * sk, 20); fill(HP(c).skin); });
+      underWater(kx - 230, kx + 230, wl);
+      return { adult: adultTop(170, 1080, 0.8), child: kidTop(k, kx, ky, zs), helper: adultTop(tx, ty) };
+    } },
+    pool_kick: { label: 'Kicking with a kickboard', helper: true, fn(c, t, p) {
+      const edge = 1100; poolRoom(t, edge);
+      person(170, 1080, 0.8, AD(c), t, clap(170, 1080, 0.8, 1, t));
+      const x = lerp(470, 640, ease(p)), wl = 1640, tx = x + 260, ty = 1760;
+      person(tx, ty, 0.9, swimTeacher(HP(c)), t, { flip: -1, armR: reach(tx, ty, 0.9, -1, 1, x + 250, wl - 40, -1), armL: [0.3, 0.4] });
+      underWater(tx - 220, tx + 220, 1460);
+      const head = kicker(KID(c), x, wl, t, 1.3);
+      return { adult: adultTop(170, 1080, 0.8), child: head, helper: adultTop(tx, ty, 0.9) };
+    } },
+    pool_towel: { label: 'Out, and a big towel', helper: true, fn(c, t) {
+      poolRoom(t, 1060, 1400);
+      const tl = swimTeacher(HP(c)); person(880, 1430, 0.6, tl, t, { flip: -1, armR: t > 1 ? wave(t) : [0.2, 0.1] }); underWater(700, 1060, 1250); tiles(1400, H); rect(0, 1394, W, 14, [0.98, 0.98, 0.96]);
+      const k = swimmers(KID(c)), kx = 540, ky = 1720;
+      person(270, 1720, 1, AD(c), t, { armR: reach(270, 1720, 1, 1, 1, kx - 50, ky - 330 * ks(k) + (k.chair ? 92 * ks(k) : 0)), armL: [0.2, 0.1] });
+      drawKid(k, kx, ky, t, { armL: [0.15, 0.1], armR: [0.15, 0.1] });
+      towel(k, kx, ky);
+      if (t > 0.8) hearts(kx + 40, 1220, t, 2);
+      return { adult: adultTop(270, 1720), child: kidTop(k, kx, ky), helper: adultTop(880, 1430, 0.6) };
+    } },
     // ---- haircuts
     haircut: { label: 'Snip snip at the hairdresser', helper: true, fn(c, t) {
       salon(t); const k = KID(c), hd = apron(HP(c)), sk = ks(k), kx = 540, seatY = 1460, ky = seatY + 262 * sk;
@@ -2711,6 +2848,7 @@ const KIDS = (() => {
     ['The doctor', ['waiting', 'checkup', 'needle', 'sticker']],
     ['The dentist', ['waiting', 'dentist_chair', 'teeth_count', 'sticker']],
     ['Haircut', ['haircut', 'clippers', 'mirror']],
+    ['Swimming lessons', ['pool_change', 'pool_walk', 'pool_teacher', 'pool_edge', 'pool_in', 'pool_kick', 'pool_towel']],
     ['Bedtime', ['bath', 'brushteeth', 'bedtime', 'sleep']],
     ['Learning to ride a bike', ['helmet', 'bike_held', 'bike_wobble', 'bike_ride']],
     ['Cafe', ['cafe']],
