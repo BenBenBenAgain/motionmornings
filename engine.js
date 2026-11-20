@@ -2436,13 +2436,28 @@ const KIDS = (() => {
     rect(0, 0, W, floorY, [0.97, 0.96, 0.93]);
     rect(0, 420, W, 60, [0.36, 0.62, 0.78]);
     for (let i = 0; i < 9; i++) rect(i * 130 + 30, 0, 60, 18, [1, 1, 0.92]);
-    const cols = [CORAL, GOLD, [0.55, 0.78, 0.5], [0.47, 0.7, 0.83], [0.85, 0.55, 0.75], [1, 1, 1]], r = rng(7);
-    rect(0, 540, W, floorY - 540, [0.85, 0.84, 0.82]);
+    // supermarket shelving: metal bays, and each product in a run of the same thing, the way shops stack them
+    const cols = [CORAL, GOLD, [0.55, 0.78, 0.5], [0.47, 0.7, 0.83], [0.85, 0.55, 0.75], [0.36, 0.62, 0.78]], r = rng(7), sh2 = (floorY - 600) / 4;
+    rect(0, 540, W, floorY - 540, [0.9, 0.91, 0.92]);
     for (let sh = 0; sh < 4; sh++) {
-      const sy = 560 + sh * ((floorY - 600) / 4), sh2 = (floorY - 600) / 4;
-      rect(0, sy + sh2 - 24, W, 18, [0.72, 0.72, 0.74]);
-      for (let x = 10; x < W - 30;) { const w = 40 + r() * 40, h = sh2 * (0.45 + r() * 0.35); rr(x, sy + sh2 - 24 - h, w - 8, h, 6); fill(cols[Math.floor(r() * 6)]); x += w; }
+      const base = 560 + (sh + 1) * sh2 - 30, tags = [];
+      for (let x = 14; x < W - 20;) {
+        const kind = Math.floor(r() * 4), col = cols[Math.floor(r() * 6)], n = 3 + Math.floor(r() * 3), w = [74, 52, 44, 58][kind], runW = n * w;
+        for (let i = 0; i < n && x + i * w + w - 8 < W; i++) {
+          const px = x + i * w, cx = px + (w - 8) / 2;
+          if (kind === 0) { const h = sh2 * 0.72; rr(px, base - h, w - 8, h, 5); fill(col); circ(cx, base - h * 0.6, (w - 8) * 0.26); fill([1, 1, 1], 0.85); rect(px, base - h * 0.22, w - 8, h * 0.1, [1, 1, 1], 0.5); }
+          else if (kind === 1) [0, 1].forEach(j => { const y = base - 58 - j * 60; rect(px, y, w - 8, 56, col); rect(px, y + 18, w - 8, 18, [1, 1, 1], 0.8); rect(px, y, w - 8, 6, [0.75, 0.76, 0.8]); });
+          else if (kind === 2) { const h = sh2 * 0.5; rr(px, base - h, w - 8, h, 10); fill(col); rect(px + (w - 8) / 2 - 8, base - h - 26, 16, 30, col); circ(cx, base - h - 28, 10); fill(NAVY); rect(px, base - h * 0.62, w - 8, h * 0.26, [1, 1, 1], 0.8); }
+          else { rr(px, base - 60, w - 8, 60, 10); fill(col); rr(px - 2, base - 72, w - 4, 16, 5); fill([0.3, 0.32, 0.38]); rect(px, base - 44, w - 8, 20, [1, 1, 1], 0.8); }
+        }
+        // the price tag for the run
+        tags.push(x + runW / 2);
+        x += runW + 18;
+      }
+      rect(0, base, W, 4, [0.62, 0.64, 0.68]); rect(0, base + 2, W, 26, [0.97, 0.97, 0.98], 0.6);
+      tags.forEach(tx => { rr(tx - 26, base + 5, 52, 20, 4); fill(GOLD); });
     }
+    for (let x = 0; x <= W; x += 360) rect(x - 6, 540, 12, floorY - 540, [0.62, 0.64, 0.68]);
     rect(0, floorY, W, H - floorY, [0.9, 0.9, 0.88]);
     for (let x = -200; x < W + 200; x += 160) line([[x, floorY], [x + (x - 540) * 0.6, H]], 2, [0.8, 0.8, 0.78]);
     line([[0, floorY + 160], [W, floorY + 160]], 2, [0.8, 0.8, 0.78]);
