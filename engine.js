@@ -2392,10 +2392,18 @@ const KIDS = (() => {
     line([[x + 20 * s, y - 40 * s], [x + 300 * s, y - 40 * s]], 10 * s, METAL_DK);
     line([[x + 40 * s, y - 40 * s], [x + 40 * s, y - 160 * s]], 9 * s, METAL_DK); line([[x + 270 * s, y - 40 * s], [x + 300 * s, y - 160 * s]], 9 * s, METAL_DK);
     line([[x + 50 * s, y - 86 * s], [x + 280 * s, y - 86 * s]], 6 * s, METAL);
-    const pos = [[0, 100], [3, 260], [1, 160], [2, 220], [4, 110]];
-    pos.slice(0, load).forEach(([i, dx]) => food(i, x + dx * s, y - 316 * s, s));
     const top = y - 340 * s, bot = y - 160 * s, lerpX = (a, b, u) => a + (b - a) * u;
     X.beginPath(); X.moveTo(x + 20 * s, top); X.lineTo(x + 330 * s, top); X.lineTo(x + 300 * s, bot); X.lineTo(x + 40 * s, bot); X.closePath(); fill(METAL, 0.22);
+    // the shopping sits in the basket, packed from the bottom up and showing through the wires; a full trolley heaps a little over the top
+    if (load > 0) {
+      X.save(); X.beginPath(); X.moveTo(x + 20 * s, top - 120 * s); X.lineTo(x + 330 * s, top - 120 * s); X.lineTo(x + 330 * s, top); X.lineTo(x + 300 * s, bot); X.lineTo(x + 40 * s, bot); X.lineTo(x + 20 * s, top); X.closePath(); X.clip();
+      const rows = Math.min(4, 1 + Math.round(load * 0.6)), order = [1, 0, 4, 2, 3, 0, 1, 4, 3, 2, 1, 4];
+      for (let row = 0, n = 0; row < rows; row++) {
+        const fy = bot - 4 * s - row * 58 * s, u = (bot - fy) / (bot - top), x0 = lerpX(x + 40 * s, x + 20 * s, u) + 40 * s, x1 = lerpX(x + 300 * s, x + 330 * s, u) - 40 * s, cnt = 4;
+        for (let i = 0; i < cnt; i++, n++) food(order[(n + row) % order.length], x0 + (x1 - x0) * (i + (row % 2) * 0.5) / (cnt - 0.5), fy, 0.72 * s);
+      }
+      X.restore();
+    }
     for (let i = 1; i < 9; i++) { const u = i / 9; line([[lerpX(x + 20 * s, x + 330 * s, u), top], [lerpX(x + 40 * s, x + 300 * s, u), bot]], 4 * s, METAL); }
     [0.35, 0.7].forEach(u => line([[x + (20 + 20 * u) * s, lerpX(top, bot, u)], [x + (330 - 30 * u) * s, lerpX(top, bot, u)]], 4 * s, METAL));
     X.beginPath(); X.moveTo(x + 20 * s, top); X.lineTo(x + 330 * s, top); X.lineTo(x + 300 * s, bot); X.lineTo(x + 40 * s, bot); X.closePath(); X.lineWidth = 9 * s; X.lineJoin = 'round'; X.strokeStyle = css(METAL_DK); X.stroke();
