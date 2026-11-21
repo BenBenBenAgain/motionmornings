@@ -88,6 +88,15 @@
         { scene: 'pool_in', glimpse: true, text: 'The teacher holds on, so {child} can feel the water.' },
         { scene: 'pool_kick', text: '{child} holds a kickboard and kicks {their} legs. Splash!' },
         { scene: 'pool_towel', text: 'Then it\u2019s time to get out. {adult} has a big warm towel.', say: { who: 'child', words: 'That was fun!' } }] } },
+    shop: { label: 'The supermarket', blurb: 'The trolley, the busy doors, fruit, the checkout', endScene: 'shop_bag', story: {
+      title: '{child} Goes to the Supermarket', ending: 'Shopping done!', endScene: 'shop_bag', steps: [
+        { scene: 'shop_park', text: 'Today {adult} and {child} are going to the supermarket. They park the car and get a trolley.' },
+        { scene: 'shop_busy', text: 'The supermarket can be busy. Lots of people go in and out of the big doors.' },
+        { scene: 'shop_busy', glimpse: true, text: 'It can be a bit noisy too. {child} can stay close to {adult}.' },
+        { scene: 'shop_fruit', text: '{child} can help choose the fruit.', say: { who: 'child', words: 'An apple!' } },
+        { scene: 'shop_queue', text: 'Then they wait in the queue to pay. Sometimes waiting takes a little while.' },
+        { scene: 'shop_beep', text: 'At the checkout, the food goes beep, beep, beep!', say: { who: 'helper', words: 'Hi {child}!' } },
+        { scene: 'shop_bag', text: '{child} helps carry a bag out to the car.', say: { who: 'child', words: 'I can carry it!' } }] } },
     haircut: { label: 'A haircut', blurb: 'The cape, snip snip, buzzy clippers, the mirror', story: {
       title: '{child} Gets a Haircut', ending: 'Looking good!', steps: [
         { scene: 'goto', place: 'Hairdresser', text: '{adult} and {child} are going to get a haircut.' },
@@ -562,7 +571,7 @@
   }
   let pickFor = null;
   // which place each story belongs to, so the picture picker opens on the right scenes
-  const STORY_PLACE = { playgroup: 'Playgroup room', kinder: 'Kinder or school', siblings: 'Brothers, sisters and babies', baby: 'Brothers, sisters and babies', playdate: 'Brothers, sisters and babies', doctor: 'The doctor', dentist: 'The dentist', haircut: 'Haircut', swim: 'Swimming lessons', bedtime: 'Bedtime', bike: 'Learning to ride a bike', food: 'At home' };
+  const STORY_PLACE = { playgroup: 'Playgroup room', kinder: 'Kinder or school', siblings: 'Brothers, sisters and babies', baby: 'Brothers, sisters and babies', playdate: 'Brothers, sisters and babies', doctor: 'The doctor', dentist: 'The dentist', haircut: 'Haircut', shop: 'Supermarket', swim: 'Swimming lessons', bedtime: 'Bedtime', bike: 'Learning to ride a bike', food: 'At home' };
   function pickScene(st, all) {
     pickFor = st; const g = $('#sceneGrid'); g.innerHTML = '';
     // stories made before this remembered their kind: use the place most of their steps are in
