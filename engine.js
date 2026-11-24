@@ -2084,6 +2084,7 @@ const KIDS = (() => {
     if (/pool|swim|aquatic/.test(s)) return 'pool';
     if (/airport|plane|flight|fly/.test(s)) return 'airport';
     if (/dentist|dental|orthodont/.test(s)) return 'dentist';
+    if (/\bvets?\b|veterin|animal hospital/.test(s)) return 'vet';
     if (/doctor|clinic|hospital|\bgp\b|medical|surgery|nurse|vaccin|health/.test(s)) return 'clinic';
     if (/school|prep\b|primary|class/.test(s)) return 'school';
     return 'house';
@@ -2120,7 +2121,7 @@ const KIDS = (() => {
       signBoard(x, base, sign, 230);
       return;
     }
-    if (kind === 'clinic' || kind === 'dentist') {
+    if (kind === 'clinic' || kind === 'dentist' || kind === 'vet') {
       rect(x - 20, base - 330, 400, 330, [0.97, 0.98, 0.99]);
       rect(x - 30, base - 350, 420, 24, [0.82, 0.86, 0.9]);
       rect(x - 20, base - 120, 400, 26, [0.36, 0.62, 0.78]);
@@ -2128,6 +2129,7 @@ const KIDS = (() => {
       rect(x + 115, base - 200, 130, 200, [0.72, 0.86, 0.94]); line([[x + 180, base - 200], [x + 180, base]], 5, [0.82, 0.86, 0.9]); rect(x + 105, base - 212, 150, 14, [0.82, 0.86, 0.9]);
       circ(x + 180, base - 400, 46); fill([0.3, 0.68, 0.66]);
       if (kind === 'dentist') { X.beginPath(); const cx = x + 180, cy = base - 404; X.moveTo(cx - 24, cy - 18); X.quadraticCurveTo(cx, cy - 34, cx + 24, cy - 18); X.quadraticCurveTo(cx + 30, cy + 4, cx + 16, cy + 30); X.quadraticCurveTo(cx + 8, cy + 10, cx, cy + 10); X.quadraticCurveTo(cx - 8, cy + 10, cx - 16, cy + 30); X.quadraticCurveTo(cx - 30, cy + 4, cx - 24, cy - 18); fill([1, 1, 1]); }
+      else if (kind === 'vet') paw(x + 180, base - 398, 34, [1, 1, 1]);
       else { rect(x + 170, base - 428, 20, 56, [1, 1, 1]); rect(x + 152, base - 410, 56, 20, [1, 1, 1]); }
       [[x - 60, base], [x + 420, base]].forEach(([hx, hy]) => { rr(hx - 40, hy - 50, 80, 50, 25); fill([0.4, 0.65, 0.42]); });
       signBoard(x, base, sign, 315);
@@ -2469,6 +2471,82 @@ const KIDS = (() => {
     if (o.extra) o.extra(kx, ky, sk, k);
     X.restore();
     return { adult: zp([ax, seatY - 330]), child: zp(kidTop(k, kx, ky, 1.25)), kx, ky, sk, k, h, seatY, zp };
+  }
+  // ---- the vet: the family's own dog or cat, or a dog when they don't have one
+  const VETDOG = { type: 'dog', coat: '#A14F26', ears: 'floppy', size: 'm', muzzle: 'dark' };
+  const vetPet = c => PETS(c).pets[0] || VETDOG;
+  const scrubs = L => Object.assign({}, L, { outfit: 'tee', top: '#3F7FA3', inner: '#3F7FA3', bottoms: '', pants: '#3F7FA3', print: '' });
+  const SEAC = [0.25, 0.5, 0.64];
+  function drawPet(P, x, y, s, t, o = {}) { if (P.type === 'cat') cat(x, y, s, t, P, o); else dog(x, y, s, t, P, o); }
+  function paw(x, y, r, col) {
+    ell(x, y + r * 0.35, r * 0.62, r * 0.5); fill(col);
+    [[-0.62, -0.25], [-0.22, -0.62], [0.22, -0.62], [0.62, -0.25]].forEach(([dx, dy]) => { ell(x + dx * r, y + dy * r, r * 0.22, r * 0.27); fill(col); });
+  }
+  // a cat's face looking straight out
+  function catFace(x, y, r, P, t) {
+    const coat = C(P.coat || '#C47A3A');
+    [-1, 1].forEach(sd => { X.beginPath(); X.moveTo(x + sd * r * 0.85, y - r * 0.2); X.lineTo(x + sd * r * 0.75, y - r * 1.2); X.lineTo(x + sd * r * 0.2, y - r * 0.8); X.closePath(); fill(coat); });
+    circ(x, y, r); fill(coat);
+    const blink = (t % 4) > 3.85;
+    [-1, 1].forEach(sd => { if (blink) line([[x + sd * r * 0.55, y - r * 0.1], [x + sd * r * 0.2, y - r * 0.1]], r * 0.08, [0.2, 0.3, 0.15]); else { ell(x + sd * r * 0.36, y - r * 0.1, r * 0.14, r * 0.2); fill([0.2, 0.3, 0.15]); } });
+    X.beginPath(); X.moveTo(x - r * 0.12, y + r * 0.2); X.lineTo(x + r * 0.12, y + r * 0.2); X.lineTo(x, y + r * 0.34); X.closePath(); fill([0.93, 0.55, 0.6]);
+    [-1, 1].forEach(sd => { line([[x + sd * r * 0.25, y + r * 0.36], [x + sd * r * 1.1, y + r * 0.26]], r * 0.05, [1, 1, 1], 0.8); line([[x + sd * r * 0.25, y + r * 0.44], [x + sd * r * 1.1, y + r * 0.54]], r * 0.05, [1, 1, 1], 0.8); });
+  }
+  // a pet carrier, side on, with the cat looking out through the bars. x, y is the middle of its base.
+  function carrier(x, y, s, P, t) {
+    const w = 230 * s, h = 160 * s, top = y - h;
+    X.beginPath(); X.moveTo(x - 55 * s, top + 4); X.quadraticCurveTo(x, top - 80 * s, x + 55 * s, top + 4); X.lineWidth = 14 * s; X.lineCap = 'round'; X.strokeStyle = css(darken(SEAC, 0.2)); X.stroke();
+    rr(x - w / 2, top, w, h, 30 * s); fill(SEAC);
+    rr(x - w / 2, top + h * 0.5, w, 10 * s, 5 * s); fill(darken(SEAC, 0.15));
+    const wx = x - 70 * s, wy = top + 24 * s, ww = 140 * s, wh = 108 * s;
+    X.save(); rr(wx, wy, ww, wh, 22 * s); fill([0.16, 0.2, 0.28]); X.clip();
+    catFace(x, wy + wh * 0.62, 40 * s, P, t);
+    X.restore();
+    for (let i = 1; i < 5; i++) line([[wx + i * ww / 5, wy + 4], [wx + i * ww / 5, wy + wh - 4]], 6 * s, [0.86, 0.89, 0.93]);
+    rr(wx, wy, ww, wh, 22 * s); X.lineWidth = 8 * s; X.strokeStyle = css(darken(SEAC, 0.2)); X.stroke();
+  }
+  // a lead from a hand to the dog's collar, hanging loose
+  function lead(hand, P, x, y, s, col = CORAL) {
+    if (P.type === 'cat') return;
+    const k = s * dogSize(P), dc = dogCollar(P), cx = x + dc[0] * k, cy = y + dc[1] * k;
+    X.beginPath(); X.moveTo(hand[0], hand[1]); X.quadraticCurveTo((hand[0] + cx) / 2, Math.max(hand[1], cy) + 60, cx, cy); X.lineWidth = 5; X.lineCap = 'round'; X.strokeStyle = css(col); X.stroke();
+  }
+  // points on the pet, so hands can find them: its back (for a pat), its chest and its mouth
+  function petSpots(P, x, y, s) {
+    if (P.type === 'cat') return { back: [x - 20 * s, y - 146 * s], chest: [x + 60 * s, y - 100 * s], mouth: [x + 116 * s, y - 150 * s] };
+    const g = dogGeo(P), k = s * dogSize(P);
+    return { back: [x - g.B.rx * 0.3 * k, y + (g.by - g.B.ry * 0.8) * k], chest: [x + g.B.rx * 0.8 * k, y + g.by * k], mouth: [x + (g.hx + 70) * k, y + (g.hy + 20) * k] };
+  }
+  // the grown-up and the child walking hand in hand with the pet: a dog on a lead the child holds, or a cat in a carrier the grown-up carries
+  function petWalk(c, x, y, t, walk) {
+    const k = KID(c), P = vetPet(c), kx = x + 160, ky = y + 4, sw = walk ? 5 * Math.sin(t * 7) : 0, hx = x + 106 + sw, hy = y - 228, isCat = P.type === 'cat';
+    const ha = person(x, y, 1, AD(c), t, { walk, armL: isCat ? [0.1, 0.05] : [0.15 - 0.2 * walk * Math.sin(t * 7), 0.1], armR: reach(x, y, 1, 1, 1, hx, hy) });
+    const hk = drawKid(k, kx, ky, t, { walk, speed: 11, armL: reach(kx, ky, ks(k), 1, -1, hx, hy, -1), armR: isCat ? [0.25 + 0.25 * walk * Math.sin(t * 11), 0.2] : [0.6, 0.35] });
+    if (isCat) carrier(ha.L[0], ha.L[1] + 200 * 0.62, 0.62, P, t);
+    else { const dx = kx + 260, dy = y + 40; drawPet(P, dx, dy, 0.6, t, { walk, speed: 13 }); lead(hk.R, P, dx, dy, 0.6); }
+    return { adult: adultTop(x, y), child: kidTop(k, kx, ky) };
+  }
+  function vetRoom(t, waiting) {
+    room(PARK, t, { wall: [0.9, 0.95, 0.9], floor: [0.78, 0.8, 0.8] }); HATS_OFF = false;
+    rr(90, 600, 230, 290, 14); fill([1, 1, 1]); X.lineWidth = 6; X.strokeStyle = css([0.75, 0.8, 0.78]); X.strokeRect(90, 600, 230, 290); paw(205, 760, 70, CORAL);
+    if (waiting) { rr(780, 640, 220, 160, 14); fill([1, 1, 1]); paw(850, 730, 32, SEAC); paw(930, 700, 26, GOLD); }
+    else { rect(80, 1020, 260, 18, [0.9, 0.9, 0.92]); [[110, CORAL], [180, GOLD], [250, SEAC]].forEach(([jx, col]) => { rr(jx, 940, 50, 80, 10); fill(col); rect(jx, 940, 50, 16, [1, 1, 1], 0.6); }); }
+  }
+  // a shiny table at the vet's; returns where its top is
+  function vetTable(x, top) {
+    [-1, 1].forEach(sd => rect(x + sd * 165 - 9, top + 20, 18, 1720 - top - 20, [0.6, 0.62, 0.66]));
+    rect(x - 165, 1640, 330, 12, [0.6, 0.62, 0.66]);
+    rr(x - 200, top - 6, 400, 30, 10); fill([0.8, 0.82, 0.86]); rect(x - 190, top - 2, 380, 6, [1, 1, 1], 0.6);
+  }
+  // the vet scene set-up: the pet on the table, the grown-up and the child on the left, the vet on the right
+  function vetVisit(c, t, o) {
+    vetRoom(t, false); const k = KID(c), P = vetPet(c), sk = ks(k), tx = 610, top = 1560, kx = 470, ky = 1720, ry = ky + (k.chair ? 92 * sk : 0), vx = 840;
+    vetTable(tx, top);
+    person(o.ax, 1720, 1, AD(c), t, o.adult || { armL: [0.2, 0.1], armR: [0.3, 0.2] });
+    const px = tx - 20, ps = P.type === 'cat' ? 0.72 : 0.7, sp = petSpots(P, px, top, ps);
+    drawPet(P, px, top, ps, t, { lookUp: o.lookUp || 0, tongue: o.tongue });
+    drawKid(k, kx, ky, t, o.kid(k, kx, ry, sk, sp));
+    return { k, P, kx, ky, vx, sp, sk };
   }
 
   // ---- the scenes a story step can use. Each returns where heads are, so a speech bubble can find its speaker.
@@ -2892,6 +2970,45 @@ const KIDS = (() => {
       if (p >= td && p < td + 0.2) { const a = 1 - (p - td) / 0.2; [-120, 150].forEach(gx => { circ(x + gx - 40 * (1 - a) - 20, 1660, 24 + 30 * (1 - a)); fill([1, 1, 1], 0.8 * a); }); }
       return { adult: [x, y - 260], child: [x + 120, y - 260] };
     } },
+    // ---- the vet
+    vet_go: { label: 'Taking the pet to the vet', place: true, fn(c, t, p, st) {
+      outdoor(PARK, t, 'day'); building(660, 1330, (st && st.place) || 'Vet');
+      const q = ease(clamp(p / 0.8)); return petWalk(c, lerp(-60, 300, q), 1700, t, q < 0.98 ? 1 : 0);
+    } },
+    vet_wait: { label: 'Waiting with other animals', fn(c, t) {
+      vetRoom(t, true); const k = KID(c), P = vetPet(c), sk = ks(k), isCat = P.type === 'cat';
+      if (!k.chair) chair(420, 1500, 170, [0.47, 0.7, 0.83]); chair(860, 1500, 170, [0.47, 0.7, 0.83]);
+      if (AD(c).chair) person(225, 1720, 1, AD(c), t, { armR: [0.4, 0.9], armL: [0.2, 0.3] }); else { chair(180, 1500, 170, [0.47, 0.7, 0.83]); seated(AD(c), 180, 1500, 1, t, { armR: [0.4, 0.9], armL: [0.2, 0.3] }); }
+      // another family's cat waiting on a chair, and a little dog on the floor
+      carrier(860, 1492, 0.62, { type: 'cat', coat: '#8A8A94' }, t + 1.3);
+      dog(930, 1830, 0.5, t + 0.6, { type: 'dog', coat: '#FBF8F2', fur: 'fluffy', size: 'xs', ears: 'floppy', muzzle: 'same' }, { flip: -1, lookUp: 0.3 });
+      const arm = isCat ? [0.25, 0.15] : [0.5, 0.3];
+      let hk, top;
+      if (k.chair) { hk = drawKid(k, 470, 1720, t, { armL: [0.2, 0.1], armR: arm }); top = kidTop(k, 470, 1720); }
+      else { hk = seatKid(k, 420, 1500, t, { armL: [0.25, 0.15], armR: arm }); top = kidTop(k, 420, 1500 + 262 * sk); }
+      if (isCat) carrier(k.chair ? 650 : 610, 1760, 0.62, P, t);
+      else { drawPet(P, 620, 1800, 0.55, t, { lookUp: 0.3 }); lead(hk.R, P, 620, 1800, 0.55); }
+      return { adult: [180, 1500 - 330], child: top };
+    } },
+    vet_check: { label: 'The vet checks the pet', helper: true, fn(c, t) {
+      const ax = AD(c).chair ? 150 : 200, v = vetVisit(c, t, { ax, kid: (k, kx, ry, sk, sp) => ({ armL: [0.2, 0.1], armR: reach(kx, ry, sk, 1, 1, sp.back[0], sp.back[1] + 8 * Math.sin(t * 4), -1) }) });
+      const dx = v.vx, h = person(dx, 1720, 1, scrubs(HP(c)), t, { flip: -1, armR: reach(dx, 1720, 1, -1, 1, v.sp.chest[0] + 20, v.sp.chest[1], -1), armL: [0.2, 0.1] });
+      line([[dx - 20, 1290], [dx - 40, 1330], [dx, 1360], [dx + 30, 1330], [dx + 20, 1290]], 5, [0.3, 0.3, 0.34]);
+      line([[dx, 1360], [h.R[0], h.R[1]]], 5, [0.3, 0.3, 0.34]); circ(h.R[0] - 14, h.R[1], 14); fill([0.75, 0.76, 0.8]);
+      return { adult: adultTop(ax, 1720), child: kidTop(v.k, v.kx, v.ky), helper: adultTop(dx, 1720) };
+    } },
+    vet_treat: { label: 'A brave pet gets a treat', helper: true, fn(c, t) {
+      const ax = AD(c).chair ? 150 : 200, v = vetVisit(c, t, { ax, tongue: true, adult: clap(ax, 1720, 1, 1, t), kid: (k, kx, ry, sk) => clap(kx, ry, sk, 1, t) });
+      const dx = v.vx, [mx, my] = v.sp.mouth, bob = 6 * Math.sin(t * 3);
+      const h = person(dx, 1720, 1, scrubs(HP(c)), t, { flip: -1, armR: reach(dx, 1720, 1, -1, 1, mx + 46, my + bob, -1), armL: [0.2, 0.1] });
+      X.save(); X.translate(h.R[0] - 26, h.R[1]); X.rotate(-0.3); rect(-22, -6, 44, 12, [0.78, 0.56, 0.36]); [-1, 1].forEach(sd => [-1, 1].forEach(e => { circ(sd * 22, e * 7, 8); fill([0.78, 0.56, 0.36]); })); X.restore();
+      if (t > 0.8) hearts(v.sp.back[0] + 40, 1240, t, 2);
+      return { adult: adultTop(ax, 1720), child: kidTop(v.k, v.kx, v.ky), helper: adultTop(dx, 1720) };
+    } },
+    vet_home: { label: 'Going home with the pet', fn(c, t, p) {
+      outdoor(PARK, t, 'sunset', 960 + 60 * p); const q = ease(clamp(p / 0.9)), m = q > 0 && q < 1 ? 1 : 0;
+      return petWalk(c, lerp(-160, 400, q), 1690, t, m);
+    } },
     // ---- haircuts
     haircut: { label: 'Snip snip at the hairdresser', helper: true, fn(c, t) {
       salon(t); const k = KID(c), hd = apron(HP(c)), sk = ks(k), kx = 540, seatY = 1460, ky = seatY + 262 * sk;
@@ -3036,6 +3153,7 @@ const KIDS = (() => {
     ['Brothers, sisters and babies', ['share', 'tug', 'breathe', 'sorry', 'baby_gentle', 'baby_quiet']],
     ['The doctor', ['waiting', 'checkup', 'needle', 'sticker']],
     ['The dentist', ['waiting', 'dentist_chair', 'teeth_count', 'sticker']],
+    ['The vet', ['vet_go', 'vet_wait', 'vet_check', 'vet_treat', 'vet_home']],
     ['Haircut', ['haircut', 'clippers', 'mirror']],
     ['Swimming lessons', ['pool_change', 'pool_walk', 'pool_teacher', 'pool_edge', 'pool_in', 'pool_kick', 'pool_towel']],
     ['Going on a plane', ['air_checkin', 'air_security', 'air_gate', 'plane_seat', 'plane_takeoff', 'plane_window', 'plane_land']],
@@ -3050,12 +3168,14 @@ const KIDS = (() => {
   function names(text, c) {
     const sx = c2 => c2.sex || (c2.body === 'm' ? 'm' : 'f'), sn = (SB(c).name || '').trim() || ({ m: 'their brother', f: 'their sister', x: 'their sibling' }[sx(SB(c))]), bn = (BB(c).name || '').trim() || 'the baby';
     const fn0 = ((c.friends && c.friends[0] && c.friends[0].name) || '').trim() || 'their friend';
-    text = String(text || '').replace(/\{sibling\}/g, sn).replace(/\{baby\}/g, bn).replace(/\{friend\}/g, fn0);
+    // the family's first dog or cat, by name if it has one; a dog when there's no pet in the cast
+    const P0 = PETS(c).pets[0], pcat = P0 && P0.type === 'cat', pn = ((P0 && P0.name) || '').trim() || (pcat ? 'the cat' : 'the dog');
+    text = String(text || '').replace(/\{sibling\}/g, sn).replace(/\{baby\}/g, bn).replace(/\{friend\}/g, fn0).replace(/\{pet\}/g, pn).replace(/\{petgear\}/g, pcat ? 'in a carrier' : 'on a lead');
     // before names are typed in, stand-ins that still read naturally: "your little one", or "Little One" in a title
     const raw = String(text || ''), isTitle = !/[.!?]\s*$/.test(raw.trim()) && /\{child\}/.test(raw) && /\b[A-Z][a-z]+\b.*\b[A-Z][a-z]+\b/.test(raw.replace(/\{[a-z]+\}/g, ''));
     const kn = (KID(c).name || '').trim() || (isTitle ? 'Little One' : 'your little one'), an = (AD(c).name || '').trim() || ({ m: 'Dad', f: 'Mum', x: 'their grown-up' }[sx(AD(c))]), hn = (HP(c).name || '').trim() || 'a friend';
     let out = raw.replace(/\{child\}/g, kn).replace(/\{adult\}/g, an).replace(/\{helper\}/g, hn);
-    out = out.replace(/\b(Hi|Hello|Bye|Goodbye),? (a friend|their friend|their brother|their sister|their sibling|the baby|your little one)!/gi, '$1!');
+    out = out.replace(/\b(Hi|Hello|Bye|Goodbye),? (a friend|their friend|their brother|their sister|their sibling|the baby|the dog|the cat|your little one)!/gi, '$1!');
     out = out.replace(/,? my name is (your little one|Little One)!/gi, '!');
     // sentences start with a capital
     return out.replace(/(^\s*|[.!?]\s+)([a-z])/g, (m, a, b) => a + b.toUpperCase());

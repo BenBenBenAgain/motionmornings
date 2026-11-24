@@ -77,6 +77,14 @@
         { scene: 'teeth_count', text: 'The dentist counts {child}\u2019s teeth with a little mirror.' },
         { scene: 'dentist_chair', glimpse: true, text: '{child} can put up a hand if {they} need{s} a break.' },
         { scene: 'sticker', text: 'All done! {child} might get a sticker.', say: { who: 'child', words: 'I did it!' } }] } },
+    vet: { label: 'The vet', blurb: 'The pet on a lead or in a carrier, the waiting room, the vet\u2019s table, a treat', endScene: 'vet_home', story: {
+      title: '{child} Goes to the Vet', ending: '{pet} was so brave!', endScene: 'vet_home', steps: [
+        { scene: 'vet_go', place: 'Vet', text: 'Today {adult} and {child} are taking {pet} to the vet.' },
+        { scene: 'vet_go', place: 'Vet', glimpse: true, text: '{pet} goes {petgear} to stay safe.' },
+        { scene: 'vet_wait', text: 'They wait in the waiting room. There might be other animals waiting too!' },
+        { scene: 'vet_check', text: 'The vet checks {pet} on the table. {child} can give {pet} a gentle pat.', say: { who: 'helper', words: 'Hello {pet}!' } },
+        { scene: 'vet_treat', text: '{pet} is very brave, and might even get a treat!', say: { who: 'child', words: 'Good job!' } },
+        { scene: 'vet_home', text: 'Then they all go home together.' }] } },
     swim: { label: 'Swimming lessons', blurb: 'Getting changed, the teacher, a kickboard, a towel', endScene: 'pool_towel', story: {
       title: '{child}\u2019s Swimming Lesson', ending: 'Swimming lessons are fun!', endScene: 'pool_towel', steps: [
         { scene: 'goto', place: 'Swimming pool', text: 'Today {adult} and {child} are going to a swimming lesson.' },
@@ -572,7 +580,7 @@
   }
   let pickFor = null;
   // which place each story belongs to, so the picture picker opens on the right scenes
-  const STORY_PLACE = { playgroup: 'Playgroup room', kinder: 'Kinder or school', siblings: 'Brothers, sisters and babies', baby: 'Brothers, sisters and babies', playdate: 'Brothers, sisters and babies', doctor: 'The doctor', dentist: 'The dentist', haircut: 'Haircut', swim: 'Swimming lessons', plane: 'Going on a plane', bedtime: 'Bedtime', bike: 'Learning to ride a bike', food: 'At home' };
+  const STORY_PLACE = { playgroup: 'Playgroup room', kinder: 'Kinder or school', siblings: 'Brothers, sisters and babies', baby: 'Brothers, sisters and babies', playdate: 'Brothers, sisters and babies', doctor: 'The doctor', dentist: 'The dentist', vet: 'The vet', haircut: 'Haircut', swim: 'Swimming lessons', plane: 'Going on a plane', bedtime: 'Bedtime', bike: 'Learning to ride a bike', food: 'At home' };
   function pickScene(st, all) {
     pickFor = st; const g = $('#sceneGrid'); g.innerHTML = '';
     // stories made before this remembered their kind: use the place most of their steps are in
