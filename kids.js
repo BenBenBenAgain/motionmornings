@@ -96,6 +96,16 @@
         { scene: 'pool_in', glimpse: true, text: 'The teacher holds on, so {child} can feel the water.' },
         { scene: 'pool_kick', text: '{child} holds a kickboard and kicks {their} legs. Splash!' },
         { scene: 'pool_towel', text: 'Then it\u2019s time to get out. {adult} has a big warm towel.', say: { who: 'child', words: 'That was fun!' } }] } },
+    plane: { label: 'Going on a plane', blurb: 'Bags, security, the gate, a seatbelt, the window', endScene: 'plane_land', story: {
+      title: '{child} Goes on a Plane', ending: 'What a big trip!', endScene: 'plane_land', steps: [
+        { scene: 'goto', place: 'Airport', text: 'Today {adult} and {child} are going on a plane!' },
+        { scene: 'air_checkin', text: 'At the airport, they drop off the big bags. The bags get a tag and ride away on a belt.' },
+        { scene: 'air_security', text: 'Next they walk through a big door frame. The bags go through a machine too.', say: { who: 'helper', words: 'Come on through!' } },
+        { scene: 'air_gate', text: 'Then they wait at the gate and watch the planes outside.', say: { who: 'child', words: 'Look, a plane!' } },
+        { scene: 'plane_seat', text: 'On the plane, {child} finds {their} seat and does up the seatbelt. Click!' },
+        { scene: 'plane_takeoff', text: 'The plane goes fast, then up into the sky. {child}\u2019s ears might feel funny. A sip of water can help.' },
+        { scene: 'plane_window', text: '{child} can look out the window at the clouds.' },
+        { scene: 'plane_land', text: 'Then the plane comes down and lands. Bump! They\u2019re there.' }] } },
     shop: { label: 'The supermarket', blurb: 'The trolley, the busy doors, fruit, the checkout', endScene: 'shop_bag', story: {
       title: '{child} Goes to the Supermarket', ending: 'Shopping done!', endScene: 'shop_bag', steps: [
         { scene: 'shop_park', text: 'Today {adult} and {child} are going to the supermarket. They park the car and get a trolley.' },
@@ -579,7 +589,7 @@
   }
   let pickFor = null;
   // which place each story belongs to, so the picture picker opens on the right scenes
-  const STORY_PLACE = { playgroup: 'Playgroup room', kinder: 'Kinder or school', siblings: 'Brothers, sisters and babies', baby: 'Brothers, sisters and babies', playdate: 'Brothers, sisters and babies', doctor: 'The doctor', dentist: 'The dentist', vet: 'The vet', haircut: 'Haircut', shop: 'Supermarket', swim: 'Swimming lessons', bedtime: 'Bedtime', bike: 'Learning to ride a bike', food: 'At home' };
+  const STORY_PLACE = { playgroup: 'Playgroup room', kinder: 'Kinder or school', siblings: 'Brothers, sisters and babies', baby: 'Brothers, sisters and babies', playdate: 'Brothers, sisters and babies', doctor: 'The doctor', dentist: 'The dentist', vet: 'The vet', haircut: 'Haircut', shop: 'Supermarket', swim: 'Swimming lessons', plane: 'Going on a plane', bedtime: 'Bedtime', bike: 'Learning to ride a bike', food: 'At home' };
   function pickScene(st, all) {
     pickFor = st; const g = $('#sceneGrid'); g.innerHTML = '';
     // stories made before this remembered their kind: use the place most of their steps are in

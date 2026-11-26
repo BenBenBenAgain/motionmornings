@@ -2082,6 +2082,7 @@ const KIDS = (() => {
     const s = String(sign || '').toLowerCase();
     if (/play ?group|kinder|child ?care|day ?care|preschool|creche|nursery/.test(s)) return 'play';
     if (/pool|swim|aquatic/.test(s)) return 'pool';
+    if (/airport|plane|flight|fly/.test(s)) return 'airport';
     if (/dentist|dental|orthodont/.test(s)) return 'dentist';
     if (/\bvets?\b|veterin|animal hospital/.test(s)) return 'vet';
     if (/doctor|clinic|hospital|\bgp\b|medical|surgery|nurse|vaccin|health/.test(s)) return 'clinic';
@@ -2112,6 +2113,12 @@ const KIDS = (() => {
       [-14, 8].forEach(dy => { X.beginPath(); for (let i = 0; i <= 20; i++) { const u = i / 20; X.lineTo(x + 152 + 56 * u, base - 390 + dy + 6 * Math.sin(u * 2 * PI * 1.5)); } X.lineWidth = 7; X.lineCap = 'round'; X.strokeStyle = css([1, 1, 1]); X.stroke(); });
       [[x - 70, base], [x + 430, base]].forEach(([hx, hy]) => { rr(hx - 40, hy - 50, 80, 50, 25); fill([0.4, 0.65, 0.42]); });
       signBoard(x, base, sign, 300);
+      return;
+    }
+    if (kind === 'airport') {
+      terminal(x + 100, base, 0.62);
+      jet(x + 330, base - 520, 0.4, -0.25);
+      signBoard(x, base, sign, 230);
       return;
     }
     if (kind === 'clinic' || kind === 'dentist' || kind === 'vet') {
@@ -2376,6 +2383,95 @@ const KIDS = (() => {
     [-1, 1].forEach(sd => { circ(hx + sd * 22 * sc, top + (bot - top) * 0.35, 20 * sc); fill(k.skin); });
   }
 
+  // ---- going on a plane: the airport, the gate and the cabin
+  const SKY = () => lin(0, 0, 0, H, [[0, [0.62, 0.8, 0.93]], [1, [0.86, 0.93, 0.97]]]);
+  // airport staff and the flight crew: a navy jacket with a gold name badge
+  const uniform = L => Object.assign({}, L, { outfit: 'jacket', top: '#22325A', inner: '#F7F3EC', pants: L.outfit === 'dress' ? '#22325A' : (L.pants || '#22325A'), bottoms: '' });
+  const badge = (x, y, s = 1) => { rr(x + 34 * s, y - 420 * s, 34 * s, 18 * s, 4 * s); fill(GOLD); };
+  // in a plane seat everyone has moved across from their wheelchair
+  const outOfChair = L => Object.assign({}, L, { chair: false });
+  // a plane side-on, facing right, wheels down when gear is set
+  function jet(x, y, s, tilt = 0, gear = 0) {
+    X.save(); X.translate(x, y); X.rotate(tilt); X.scale(s, s);
+    X.beginPath(); X.moveTo(-250, -40); X.lineTo(-330, -170); X.lineTo(-270, -170); X.lineTo(-170, -40); X.closePath(); fill(CORAL);
+    if (gear) [[-120, 0], [150, 0]].forEach(([gx]) => { line([[gx, 30], [gx, 30 + 40 * gear]], 10, [0.45, 0.47, 0.52]); circ(gx, 36 + 40 * gear, 16); fill([0.18, 0.18, 0.2]); });
+    X.beginPath(); X.moveTo(-300, -40); X.lineTo(220, -48); X.quadraticCurveTo(330, -44, 340, 6); X.quadraticCurveTo(320, 44, 220, 46); X.lineTo(-260, 46); X.quadraticCurveTo(-320, 30, -300, -40); X.closePath(); fill([1, 1, 1]);
+    X.beginPath(); X.moveTo(-290, 14); X.lineTo(330, 14); X.lineTo(318, 30); X.lineTo(-284, 30); X.closePath(); fill(CORAL);
+    for (let i = 0; i < 9; i++) { circ(-200 + i * 46, -12, 10); fill([0.3, 0.5, 0.66]); }
+    X.beginPath(); X.moveTo(276, -36); X.quadraticCurveTo(312, -32, 324, -6); X.lineTo(282, -8); X.closePath(); fill([0.3, 0.5, 0.66]);
+    X.beginPath(); X.moveTo(-40, 20); X.lineTo(60, 20); X.lineTo(-40, 110); X.lineTo(-90, 110); X.closePath(); fill([0.86, 0.88, 0.92]);
+    rr(-30, 46, 100, 40, 20); fill([0.82, 0.84, 0.88]); ell(70, 66, 8, 18); fill([0.4, 0.42, 0.48]);
+    X.restore();
+  }
+  function cloud(x, y, s, a = 1) { [[0, 0, 60], [60, -20, 70], [130, 0, 55], [65, 18, 60]].forEach(([dx, dy, r]) => { circ(x + dx * s, y + dy * s, r * s); fill([1, 1, 1], a); }); }
+  function runway(y0, t, roll = 0) {
+    rect(0, y0, W, H - y0, [0.62, 0.76, 0.5]);
+    rect(0, y0 + 40, W, 170, [0.44, 0.46, 0.5]);
+    for (let i = -1; i < 7; i++) rect(i * 200 - (roll % 200), y0 + 118, 110, 12, [1, 1, 1]);
+    rect(0, y0 + 40, W, 6, [1, 1, 1]); rect(0, y0 + 204, W, 6, [1, 1, 1]);
+  }
+  // the terminal: a long low building with big windows and a control tower
+  function terminal(x, base, s = 1) {
+    X.save(); X.translate(x, base); X.scale(s, s);
+    rect(-20, -620, 70, 460, [0.88, 0.9, 0.93]); rr(-70, -720, 170, 110, 20); fill([0.42, 0.64, 0.78]); rect(-80, -740, 190, 24, [0.88, 0.9, 0.93]);
+    X.beginPath(); X.moveTo(-200, -200); X.quadraticCurveTo(200, -300, 600, -200); X.lineTo(600, 0); X.lineTo(-200, 0); X.closePath(); fill([0.93, 0.94, 0.96]);
+    rect(-180, -170, 760, 110, [0.6, 0.78, 0.9]); for (let i = 1; i < 8; i++) line([[-180 + i * 95, -170], [-180 + i * 95, -60]], 6, [0.93, 0.94, 0.96]);
+    X.restore();
+  }
+  // inside a building with one wall of big windows looking out at the planes
+  function bigWindows(t, y0, y1, plane) {
+    rect(0, y0, W, y1 - y0, SKY());
+    cloud(160 + ((t * 12) % 300), y0 + 90, 0.8, 0.9); cloud(700 - ((t * 8) % 200), y0 + 150, 0.6, 0.8);
+    rect(0, y1 - 150, W, 150, [0.55, 0.57, 0.6]); rect(0, y1 - 156, W, 8, [0.62, 0.76, 0.5]);
+    if (plane) plane();
+    for (let x = 0; x <= W; x += 270) rect(x - 10, y0, 20, y1 - y0, [0.32, 0.36, 0.42]);
+    rect(0, y0 - 14, W, 22, [0.32, 0.36, 0.42]); rect(0, y1 - 8, W, 22, [0.32, 0.36, 0.42]);
+  }
+  function hall2(t, wall) { room(PARK, t, { wall: wall || [0.93, 0.93, 0.95], floor: [0.8, 0.8, 0.82] }); HATS_OFF = false; for (let x = 0; x < W; x += 180) line([[x, 1460], [x - 60, H]], 3, [0.72, 0.72, 0.75]); }
+  function bag(x, y, col, s = 1) { rr(x - 60 * s, y - 120 * s, 120 * s, 120 * s, 16 * s); fill(col); rr(x - 26 * s, y - 140 * s, 52 * s, 30 * s, 10 * s); X.lineWidth = 7 * s; X.strokeStyle = css([0.2, 0.2, 0.22]); X.stroke(); line([[x - 30 * s, y - 110 * s], [x - 30 * s, y - 10 * s]], 6 * s, darken(C(col), 0.15)); line([[x + 30 * s, y - 110 * s], [x + 30 * s, y - 10 * s]], 6 * s, darken(C(col), 0.15)); }
+  function tag(x, y, s = 1, swing = 0) { X.save(); X.translate(x, y); X.rotate(swing); line([[0, 0], [0, 30 * s]], 3, [0.3, 0.3, 0.32]); rr(-16 * s, 30 * s, 32 * s, 46 * s, 6 * s); fill(GOLD); rect(-10 * s, 44 * s, 20 * s, 4 * s, NAVY); rect(-10 * s, 54 * s, 14 * s, 4 * s, NAVY); X.restore(); }
+  // the cabin, looking down the row towards the seats. tilt leans the whole cabin back for take-off.
+  const SEAT = [0.13, 0.2, 0.36];
+  function cabin(t, view) {
+    rect(0, 0, W, H, [0.95, 0.94, 0.91]);
+    rect(0, 0, W, 300, [0.88, 0.88, 0.86]);
+    rr(-20, 300, W + 40, 220, 30); fill([0.97, 0.97, 0.96]); line([[0, 500], [W, 500]], 6, [0.82, 0.82, 0.8]); for (let x = 260; x < W; x += 360) line([[x, 320], [x, 500]], 4, [0.85, 0.85, 0.83]);
+    [[130, 700], [950, 700]].forEach(([wx, wy]) => {
+      X.save(); rr(wx - 80, wy - 110, 160, 220, 70); X.clip(); rect(wx - 80, wy - 110, 160, 220, SKY()); if (view) view(wx, wy); X.restore();
+      rr(wx - 80, wy - 110, 160, 220, 70); X.lineWidth = 16; X.strokeStyle = css([0.85, 0.85, 0.83]); X.stroke();
+    });
+    rect(0, 1700, W, H - 1700, [0.3, 0.34, 0.44]);
+  }
+  // a plane seat: a tall back with a headrest cover, then the cushion
+  function planeSeat(x, seatY, w = 240) {
+    rr(x - w / 2, seatY - 400, w, 420, 40); fill(SEAT);
+    rr(x - w / 2 + 30, seatY - 400, w - 60, 100, 22); fill([0.95, 0.95, 0.93]);
+    rr(x - w / 2 - 6, seatY - 14, w + 12, 120, 26); fill(darken(SEAT, -0.1));
+  }
+  function armrest(x, seatY) { rr(x - 18, seatY - 110, 36, 130, 14); fill([0.5, 0.52, 0.58]); }
+  // a lap belt: two straps that meet at a buckle; shut goes from 0 (open) to 1 (clicked in)
+  function seatbelt(x, y, s, shut) {
+    const gap = (1 - shut) * 90 * s, col = [0.38, 0.4, 0.46];
+    line([[x - 112 * s, y + 10 * s], [x - 22 * s - gap, y]], 24 * s, col); line([[x + 112 * s, y + 10 * s], [x + 22 * s + gap, y]], 24 * s, col);
+    rr(x - 26 * s - gap, y - 16 * s, 30 * s, 32 * s, 6 * s); fill([0.78, 0.8, 0.84]); rr(x - 4 * s + gap, y - 14 * s, 30 * s, 28 * s, 5 * s); fill([0.66, 0.68, 0.72]);
+  }
+  // the grown-up and the child sitting side by side in a row of plane seats
+  function planeRow(c, t, o = {}) {
+    const seatY = 1440, ax = 290, kx = 610, k = outOfChair(KID(c)), sk = ks(k, 1.25), ky = seatY + 262 * sk;
+    cabin(t, o.view);
+    // seen up close: the row is drawn bigger, about the floor in the middle
+    const Z = 1.4, zp = ([x, y]) => [540 + (x - 540) * Z, 1760 + (y - 1760) * Z];
+    X.save(); X.translate(540, 1760); X.scale(Z, Z); X.translate(-540, -1760);
+    [ax, kx, 930].forEach(x => planeSeat(x, seatY));
+    seated(outOfChair(AD(c)), ax, seatY, 1, t, o.adultArms || { armR: [0.2, 0.3], armL: [0.2, 0.3] });
+    const h = seatKid(k, kx, seatY, t, Object.assign({ s: 1.25 }, o.kidArms ? o.kidArms(kx, ky, sk) : { armL: [0.25, 0.3], armR: [0.25, 0.3] }));
+    seatbelt(kx, seatY - 40 * sk, sk, o.shut == null ? 1 : o.shut);
+    seatbelt(ax, seatY - 40, 1, 1);
+    [450, 770].forEach(x => armrest(x, seatY));
+    if (o.extra) o.extra(kx, ky, sk, k);
+    X.restore();
+    return { adult: zp([ax, seatY - 330]), child: zp(kidTop(k, kx, ky, 1.25)), kx, ky, sk, k, h, seatY, zp };
+  }
   // ---- the supermarket: a car park out the front, a bright shop inside, the checkout
   const METAL = [0.66, 0.69, 0.74], METAL_DK = [0.45, 0.48, 0.54], SEA = [0.25, 0.5, 0.64];
   // a shop worker in the shop's sea-blue top
@@ -2916,6 +3012,98 @@ const KIDS = (() => {
       if (t > 0.8) hearts(kx + 40, 1220, t, 2);
       return { adult: adultTop(270, 1720), child: kidTop(k, kx, ky), helper: adultTop(880, 1430, 0.6) };
     } },
+    // ---- going on a plane
+    air_checkin: { label: 'Dropping off the bags', helper: true, fn(c, t) {
+      hall2(t);
+      rr(80, 560, 520, 230, 18); fill(NAVY); for (let i = 0; i < 4; i++) { rr(120, 600 + i * 46, 180, 24, 6); fill([1, 0.95, 0.85], 0.8); rr(330, 600 + i * 46, 90, 24, 6); fill(GOLD, 0.9); rr(450, 600 + i * 46, 110, 24, 6); fill(i % 2 ? [0.55, 0.78, 0.5] : [1, 0.95, 0.85], 0.8); }
+      const st = uniform(HP(c)), sx = 860; person(sx, 1720, 1, st, t, { flip: -1, armR: t > 0.8 && t < 2.6 ? wave(t) : [0.3, 0.5] }); badge(sx, 1720);
+      const go = ease(clamp((t - 2) / 1.6)), bx = lerp(470, 760, go);
+      rect(380, 1520, 300, 26, [0.36, 0.38, 0.44]); for (let i = 0; i < 6; i++) circ(400 + i * 52 + (t * 40) % 52 * (go > 0 && go < 1 ? 1 : 0), 1533, 8), fill([0.55, 0.57, 0.62]);
+      bag(bx, 1520, [0.3, 0.55, 0.55], 1.2); tag(bx + 24, 1356, 1, 0.15 * Math.sin(t * 3));
+      rr(640, 1300, 440, 40, 14); fill([0.95, 0.95, 0.96]); rect(660, 1340, 420, 380, [0.36, 0.62, 0.78]); rect(660, 1440, 420, 14, [1, 1, 1], 0.4);
+      const k = KID(c), ax = 150, kx = 300, ky = 1724, sk = ks(k), hold = t < 1.8;
+      person(ax, 1720, 1, AD(c), t, { armR: hold ? reach(ax, 1720, 1, 1, 1, bx - 30, 1390) : [0.2, 0.1], armL: [0.2, 0.1] });
+      drawKid(k, kx, ky, t, { armL: [0.2, 0.1], armR: t > 2.4 ? wave(t, 1) : [0.25, 0.2] });
+      return { adult: adultTop(ax, 1720), child: kidTop(k, kx, ky), helper: adultTop(sx, 1720) };
+    } },
+    air_security: { label: 'Walking through security', helper: true, fn(c, t, p) {
+      hall2(t, [0.92, 0.94, 0.96]);
+      rect(0, 1330, W, 30, [0.36, 0.38, 0.44]); rect(0, 1360, W, 120, [0.7, 0.72, 0.76]);
+      [[0, CORAL], [1, GOLD], [2, [0.47, 0.7, 0.83]]].forEach(([i, col]) => { const x = ((t * 90 + i * 380) % (W + 400)) - 200; rr(x - 90, 1300, 180, 36, 8); fill([0.6, 0.62, 0.66]); bag(x, 1306, col, 0.7); });
+      rr(380, 1080, 320, 280, 24); fill([0.88, 0.9, 0.93]); rect(410, 1170, 260, 190, [0.25, 0.28, 0.34]); for (let i = 0; i < 6; i++) rect(414 + i * 43, 1170, 38, 160, [0.2, 0.22, 0.27]); rr(500, 1110, 80, 30, 10); fill([0.55, 0.78, 0.5]);
+      const ex = 540, ew = 470, top = 1720 - 760;
+      rr(ex - ew / 2 - 30, top, 60, 760, 20); fill([0.82, 0.84, 0.88]);
+      const st = uniform(HP(c)), sx = 900; person(sx, 1720, 0.95, st, t, { flip: -1, armR: [1.5, 1.7 + 0.25 * Math.sin(t * 3)], armL: [0.2, 0.1] }); badge(sx, 1720, 0.95);
+      const q = ease(clamp(p / 0.85)), x = lerp(-180, 460, q), h = pair(c, x, 1720, t, q < 0.98 ? 1 : 0);
+      rr(ex + ew / 2 - 30, top, 60, 760, 20); fill([0.82, 0.84, 0.88]);
+      rr(ex - ew / 2 - 30, top - 30, ew + 60, 80, 24); fill([0.82, 0.84, 0.88]); circ(ex, top + 10, 14); fill(q > 0.3 && q < 0.95 ? [0.55, 0.78, 0.5] : [0.7, 0.72, 0.76]);
+      return Object.assign(h, { helper: adultTop(sx, 1720, 0.95) });
+    } },
+    air_gate: { label: 'Waiting at the gate, watching planes', fn(c, t) {
+      room(PARK, t, { wall: [0.9, 0.91, 0.93], floor: [0.62, 0.66, 0.74] }); HATS_OFF = false;
+      bigWindows(t, 300, 1250, () => { jet(-500 + ((t * 120) % 2100), 1130, 0.95, 0, 1); jet(820, 1000, 0.45, -0.12); });
+      const k = KID(c), ad = AD(c), sk = ks(k), seatY = 1500, ax = 260, kx = 560;
+      [ax, kx, 860].forEach((x, i) => { if ((i === 0 && ad.chair) || (i === 1 && k.chair)) return; chair(x, seatY, 220, [0.42, 0.62, 0.78]); });
+      bag(860, 1490, CORAL, 0.8);
+      if (ad.chair) person(ax, 1720, 1, ad, t, { armR: [0.2, 0.3], armL: [0.2, 0.3] }); else seated(ad, ax, seatY, 1, t, { armR: [0.2, 0.3], armL: [0.2, 0.3] });
+      const point = { armL: [0.25, 0.2], armR: t > 1 ? [2.2, 2.5 + 0.1 * Math.sin(t * 4)] : [0.25, 0.2] };
+      let head;
+      if (k.chair) { drawKid(k, kx, 1724, t, point); head = kidTop(k, kx, 1724); }
+      else { seatKid(k, kx, seatY, t, point); head = kidTop(k, kx, seatY + 262 * sk); }
+      return { adult: ad.chair ? adultTop(ax, 1720) : [ax, seatY - 330], child: head };
+    } },
+    plane_seat: { label: 'Finding the seat, seatbelt on', fn(c, t) {
+      const shut = ease(clamp((t - 0.8) / 1.4));
+      const r = planeRow(c, t, { shut, kidArms: (kx, ky, sk) => { const by = 1440 - 40 * sk, g = (1 - shut) * 90 * sk; return { armL: reach(kx, ky, sk, 1, -1, kx - 20 * sk - g, by, -1), armR: reach(kx, ky, sk, 1, 1, kx + 20 * sk + g, by, -1) }; } });
+      if (t > 2.2 && t < 3.4) { const a = 1 - (t - 2.2) / 1.2; X.font = '700 64px Poppins, sans-serif'; X.textAlign = 'center'; X.lineJoin = 'round'; const [cx, cy] = r.zp([r.kx, 1440 - 40 * r.sk]), yy = cy - 120 - 40 * (1 - a); X.lineWidth = 12; X.strokeStyle = css([1, 1, 1], a); X.strokeText('Click!', cx + 250, yy); X.fillStyle = css(CORAL, a); X.fillText('Click!', cx + 250, yy); }
+      return { adult: r.adult, child: r.child };
+    } },
+    plane_takeoff: { label: 'Taking off, ears popping', fn(c, t, p) {
+      const up = ease(clamp(t / 2.5)), lean = -0.06 * up;
+      X.save(); X.translate(540, 1100); X.rotate(lean); X.translate(-540, -1100);
+      const r = planeRow(c, t, {
+        view: (wx, wy) => { const g = wy + 60 + 300 * up; rect(wx - 90, g, 180, 300, [0.55, 0.72, 0.5]); for (let i = 0; i < 4; i++) rect(wx - 90 + ((i * 50 + t * 160 * (1 - up * 0.7)) % 200) - 20, g + 20, 26, 10, [0.9, 0.88, 0.8]); cloud(wx - 60, wy - 60 + 30 * up, 0.5, 0.9); },
+        kidArms: (kx, ky, sk) => { const [hx, hy, hw] = kidHeadAt(outOfChair(KID(c)), kx, ky, 1.25); return { armL: [0.25, 0.3], armR: reach(kx, ky, sk, 1, 1, hx + hw * 0.4, hy + hw * 1.1, -1) }; },
+        adultArms: { armR: [0.2, 0.3], armL: [0.2, 0.3] },
+        extra: (kx, ky, sk, k) => {
+          const [hx, hy, hw] = kidHeadAt(k, kx, ky, 1.25);
+          X.save(); X.translate(hx + hw * 0.5, hy + hw * 0.75); X.rotate(-0.5); rr(-14, -60, 28, 66, 10); fill([0.7, 0.86, 0.95]); rr(-14, -30, 28, 36, 8); fill([0.47, 0.7, 0.83]); rr(-8, -74, 16, 16, 4); fill(CORAL); X.restore();
+          if (t > 1.5) [-1, 1].forEach(sd => { const q = ((t - 1.5) * 0.8 + (sd > 0 ? 0.5 : 0)) % 1; circ(hx + sd * (hw + 14 + 30 * q), hy, 8 + 18 * q); X.lineWidth = 4; X.strokeStyle = css([0.47, 0.7, 0.83], 0.7 * (1 - q)); X.stroke(); });
+        } });
+      X.restore();
+      return { adult: r.adult, child: r.child };
+    } },
+    plane_window: { label: 'Looking out the window', fn(c, t) {
+      rect(0, 0, W, H, [0.95, 0.94, 0.91]); rr(-20, 160, W + 40, 260, 40); fill([0.97, 0.97, 0.96]); line([[0, 400], [W, 400]], 6, [0.82, 0.82, 0.8]);
+      const wx = 340, wy = 900, ww = 440, wh = 600;
+      X.save(); rr(wx - ww / 2, wy - wh / 2, ww, wh, 200); X.clip();
+      rect(wx - ww / 2, wy - wh / 2, ww, wh, SKY());
+      const fy = wy + 120; rect(wx - ww / 2, fy, ww, 400, [0.55, 0.72, 0.5]);
+      for (let i = 0; i < 8; i++) { const fx = wx - ww / 2 + ((i * 130 - t * 30) % 1040 + 1040) % 1040 - 200; rr(fx, fy + 30 + (i % 3) * 70, 110, 50, 8); fill(i % 2 ? [0.72, 0.8, 0.5] : [0.85, 0.78, 0.5]); }
+      for (let i = 0; i < 4; i++) { const cx = wx + 300 - ((t * 60 + i * 220) % 900); cloud(cx, wy - 180 + i * 70, 0.7 + 0.15 * (i % 2), 0.95); }
+      X.restore();
+      rr(wx - ww / 2, wy - wh / 2, ww, wh, 200); X.lineWidth = 34; X.strokeStyle = css([0.86, 0.86, 0.84]); X.stroke();
+      rect(0, 1700, W, H - 1700, [0.3, 0.34, 0.44]);
+      const k = outOfChair(KID(c)), zs = 1.5, sk = ks(k, zs), seatY = 1560, kx = 790, ky = seatY + 262 * sk;
+      planeSeat(kx, seatY, 360);
+      seatKid(k, kx, seatY, t, { s: zs, armL: reach(kx, ky, sk, 1, -1, kx - 230 * sk, ky - 400 * sk + 8 * Math.sin(t * 2), 1), armR: [0.25, 0.3] });
+      seatbelt(kx, seatY - 40 * sk, sk, 1);
+      return { adult: [960, 1000], child: kidTop(k, kx, ky, zs) };
+    } },
+    plane_land: { label: 'Landing, bump!', fn(c, t, p) {
+      rect(0, 0, W, 1500, SKY());
+      cloud(120, 380, 1, 0.9); cloud(760, 260, 0.8, 0.85);
+      X.beginPath(); X.moveTo(0, 1500); X.quadraticCurveTo(300, 1300, 600, 1440); X.quadraticCurveTo(850, 1340, W, 1460); X.lineTo(W, 1500); X.closePath(); fill([0.55, 0.72, 0.55]);
+      terminal(700, 1500, 0.8);
+      const td = 0.5, q = clamp(p / td), after = clamp((p - td) / (1 - td));
+      const x = p < td ? lerp(-200, 520, ease(q) * 0.9 + q * 0.1) : lerp(520, 720, 1 - (1 - after) * (1 - after)), roll = p < td ? 0 : (after * 900);
+      const y = p < td ? lerp(900, 1640, 1 - (1 - q) * (1 - q)) : 1640;
+      runway(1500, t, roll);
+      const bump = p >= td && p < td + 0.05 ? -10 * Math.sin((p - td) / 0.05 * PI) : 0;
+      jet(x, y + bump - 86, 1, p < td ? -0.08 * (1 - q) : 0, 1);
+      if (p >= td && p < td + 0.2) { const a = 1 - (p - td) / 0.2; [-120, 150].forEach(gx => { circ(x + gx - 40 * (1 - a) - 20, 1660, 24 + 30 * (1 - a)); fill([1, 1, 1], 0.8 * a); }); }
+      return { adult: [x, y - 260], child: [x + 120, y - 260] };
+    } },
     // ---- the supermarket
     shop_park: { label: 'Parking and getting a trolley', fn(c, t, p) {
       shopOut(t, 1180, 0); carPark(1180);
@@ -3175,6 +3363,7 @@ const KIDS = (() => {
     ['The vet', ['vet_go', 'vet_wait', 'vet_check', 'vet_treat', 'vet_home']],
     ['Haircut', ['haircut', 'clippers', 'mirror']],
     ['Swimming lessons', ['pool_change', 'pool_walk', 'pool_teacher', 'pool_edge', 'pool_in', 'pool_kick', 'pool_towel']],
+    ['Going on a plane', ['air_checkin', 'air_security', 'air_gate', 'plane_seat', 'plane_takeoff', 'plane_window', 'plane_land']],
     ['Supermarket', ['shop_park', 'shop_busy', 'shop_fruit', 'shop_queue', 'shop_beep', 'shop_bag']],
     ['Bedtime', ['bath', 'brushteeth', 'bedtime', 'sleep']],
     ['Learning to ride a bike', ['helmet', 'bike_held', 'bike_wobble', 'bike_ride']],
