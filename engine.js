@@ -2472,6 +2472,140 @@ const KIDS = (() => {
     X.restore();
     return { adult: zp([ax, seatY - 330]), child: zp(kidTop(k, kx, ky, 1.25)), kx, ky, sk, k, h, seatY, zp };
   }
+  // ---- the supermarket: a car park out the front, a bright shop inside, the checkout
+  const METAL = [0.66, 0.69, 0.74], METAL_DK = [0.45, 0.48, 0.54], SEA = [0.25, 0.5, 0.64];
+  // a shop worker in the shop's sea-blue top
+  const shopWorker = L => Object.assign({}, L, { outfit: 'jacket', top: '#3F7FA3', inner: L.outfit === 'dress' ? L.top : (L.inner || L.top), pants: L.outfit === 'dress' ? '#1F2E4D' : L.pants });
+  // the food in the trolley or on the belt, one item each
+  function food(i, x, y, s = 1) {
+    if (i === 0) { rr(x - 50 * s, y - 34 * s, 100 * s, 54 * s, 24 * s); fill([0.86, 0.62, 0.32]); [-20, 0, 20].forEach(d => line([[x + (d - 8) * s, y - 22 * s], [x + (d + 6) * s, y - 4 * s]], 5 * s, [0.72, 0.48, 0.24])); }
+    else if (i === 1) { rect(x - 26 * s, y - 80 * s, 52 * s, 100 * s, [1, 1, 1]); X.beginPath(); X.moveTo(x - 26 * s, y - 80 * s); X.lineTo(x, y - 104 * s); X.lineTo(x + 26 * s, y - 80 * s); X.closePath(); fill([0.92, 0.92, 0.94]); rect(x - 26 * s, y - 40 * s, 52 * s, 26 * s, SEA); }
+    else if (i === 2) [[-24, 0], [22, 2], [0, -34]].forEach(([dx, dy]) => { circ(x + dx * s, y + dy * s, 24 * s); fill([0.85, 0.27, 0.24]); line([[x + dx * s, y + (dy - 22) * s], [x + (dx + 4) * s, y + (dy - 34) * s]], 4 * s, [0.4, 0.28, 0.2]); });
+    else if (i === 3) { [0, 1, 2].forEach(j => { X.beginPath(); X.arc(x + (j * 10 - 10) * s, y - 70 * s, 70 * s, 0.25 * PI, 0.75 * PI); X.lineWidth = 22 * s; X.lineCap = 'round'; X.strokeStyle = css([0.98, 0.84, 0.32]); X.stroke(); }); }
+    else { rect(x - 32 * s, y - 60 * s, 64 * s, 80 * s, CORAL); rect(x - 32 * s, y - 40 * s, 64 * s, 30 * s, [1, 0.95, 0.85]); }
+  }
+  // a shopping trolley side-on, facing right; x is the handle end, y the floor. Returns where the handle is.
+  function trolley(x, y, s = 1, load = 0) {
+    [x + 40 * s, x + 270 * s].forEach(wx => { circ(wx, y - 16 * s, 16 * s); fill([0.2, 0.2, 0.24]); });
+    line([[x + 20 * s, y - 40 * s], [x + 300 * s, y - 40 * s]], 10 * s, METAL_DK);
+    line([[x + 40 * s, y - 40 * s], [x + 40 * s, y - 160 * s]], 9 * s, METAL_DK); line([[x + 270 * s, y - 40 * s], [x + 300 * s, y - 160 * s]], 9 * s, METAL_DK);
+    line([[x + 50 * s, y - 86 * s], [x + 280 * s, y - 86 * s]], 6 * s, METAL);
+    const top = y - 340 * s, bot = y - 160 * s, lerpX = (a, b, u) => a + (b - a) * u;
+    X.beginPath(); X.moveTo(x + 20 * s, top); X.lineTo(x + 330 * s, top); X.lineTo(x + 300 * s, bot); X.lineTo(x + 40 * s, bot); X.closePath(); fill(METAL, 0.22);
+    // the shopping sits in the basket, packed from the bottom up and showing through the wires; a full trolley heaps a little over the top
+    if (load > 0) {
+      X.save(); X.beginPath(); X.moveTo(x + 20 * s, top - 120 * s); X.lineTo(x + 330 * s, top - 120 * s); X.lineTo(x + 330 * s, top); X.lineTo(x + 300 * s, bot); X.lineTo(x + 40 * s, bot); X.lineTo(x + 20 * s, top); X.closePath(); X.clip();
+      const rows = Math.min(4, 1 + Math.round(load * 0.6)), order = [1, 0, 4, 2, 3, 0, 1, 4, 3, 2, 1, 4];
+      for (let row = 0, n = 0; row < rows; row++) {
+        const fy = bot - 4 * s - row * 58 * s, u = (bot - fy) / (bot - top), x0 = lerpX(x + 40 * s, x + 20 * s, u) + 40 * s, x1 = lerpX(x + 300 * s, x + 330 * s, u) - 40 * s, cnt = 4;
+        for (let i = 0; i < cnt; i++, n++) food(order[(n + row) % order.length], x0 + (x1 - x0) * (i + (row % 2) * 0.5) / (cnt - 0.5), fy, 0.72 * s);
+      }
+      X.restore();
+    }
+    for (let i = 1; i < 9; i++) { const u = i / 9; line([[lerpX(x + 20 * s, x + 330 * s, u), top], [lerpX(x + 40 * s, x + 300 * s, u), bot]], 4 * s, METAL); }
+    [0.35, 0.7].forEach(u => line([[x + (20 + 20 * u) * s, lerpX(top, bot, u)], [x + (330 - 30 * u) * s, lerpX(top, bot, u)]], 4 * s, METAL));
+    X.beginPath(); X.moveTo(x + 20 * s, top); X.lineTo(x + 330 * s, top); X.lineTo(x + 300 * s, bot); X.lineTo(x + 40 * s, bot); X.closePath(); X.lineWidth = 9 * s; X.lineJoin = 'round'; X.strokeStyle = css(METAL_DK); X.stroke();
+    line([[x + 20 * s, top], [x - 14 * s, top - 36 * s]], 10 * s, METAL_DK);
+    circ(x - 16 * s, top - 38 * s, 17 * s); fill(CORAL);
+    return [x - 16 * s, top - 38 * s];
+  }
+  // a little car side-on, facing right
+  function car(x, y, col, s = 1) {
+    X.beginPath(); X.moveTo(x + 70 * s, y - 140 * s); X.lineTo(x + 120 * s, y - 228 * s); X.lineTo(x + 280 * s, y - 228 * s); X.lineTo(x + 340 * s, y - 140 * s); X.closePath(); fill(col);
+    [[x + 128 * s, x + 196 * s], [x + 210 * s, x + 278 * s]].forEach(([a, b], i) => { X.beginPath(); X.moveTo(a - (i ? 0 : 24 * s), y - 146 * s); X.lineTo(a, y - 212 * s); X.lineTo(b, y - 212 * s); X.lineTo(b + (i ? 34 * s : 0), y - 146 * s); X.closePath(); fill([0.78, 0.9, 0.96]); });
+    rr(x, y - 150 * s, 420 * s, 110 * s, 40 * s); fill(col);
+    rr(x + 380 * s, y - 128 * s, 34 * s, 20 * s, 8 * s); fill([1, 0.92, 0.6]); rr(x + 6 * s, y - 128 * s, 24 * s, 20 * s, 8 * s); fill([0.9, 0.35, 0.3]);
+    [x + 90 * s, x + 330 * s].forEach(wx => { circ(wx, y - 40 * s, 44 * s); fill([0.18, 0.18, 0.22]); circ(wx, y - 40 * s, 18 * s); fill([0.75, 0.76, 0.8]); });
+  }
+  // the shop from the car park: a long low building with big glass doors in the middle
+  function shopOut(t, base, doors = 0) {
+    outdoor(CITY, t, 'day');
+    rect(0, base - 420, W, 420, [0.97, 0.95, 0.9]);
+    rect(0, base - 440, W, 40, [0.36, 0.62, 0.78]);
+    rr(250, base - 400, 580, 92, 18); fill(NAVY);
+    rainbowText('SUPERMARKET', 540, base - 336, signFit('SUPERMARKET', 520, 60));
+    [[20, 190], [870, 190]].forEach(([wx, ww]) => { rect(wx, base - 280, ww, 200, [0.72, 0.86, 0.94]); [0.3, 0.65].forEach(f => rect(wx + ww * f, base - 280, 6, 200, [1, 1, 1])); });
+    rect(330, base - 290, 420, 290, [0.3, 0.38, 0.45]);
+    const o = 105 * doors;
+    [[330 - o, -1], [540 + o, 1]].forEach(([dx]) => { rect(dx, base - 290, 210, 290, [0.72, 0.86, 0.94], 0.85); rect(dx + 6, base - 284, 198, 6, [1, 1, 1], 0.6); X.lineWidth = 8; X.strokeStyle = css([0.82, 0.85, 0.88]); X.strokeRect(dx, base - 290, 210, 290); });
+    rect(310, base - 300, 460, 14, [0.82, 0.85, 0.88]); rect(0, base - 10, W, 10, [0.82, 0.85, 0.88]);
+  }
+  // the car park in front: grey asphalt with white bay lines
+  function carPark(y0) {
+    rect(0, y0, W, H - y0, [0.6, 0.61, 0.64]);
+    for (let x = 30; x < W; x += 280) line([[x, y0 + 20], [x - 40, y0 + 200]], 8, [1, 1, 1], 0.85);
+    line([[0, y0 + 280], [W, y0 + 280]], 6, [1, 1, 1], 0.4);
+  }
+  // inside the shop: shelves of colourful packets along the back and a shiny floor
+  function shopIn(t, floorY = 1400) {
+    HATS_OFF = true;
+    rect(0, 0, W, floorY, [0.97, 0.96, 0.93]);
+    rect(0, 420, W, 60, [0.36, 0.62, 0.78]);
+    for (let i = 0; i < 9; i++) rect(i * 130 + 30, 0, 60, 18, [1, 1, 0.92]);
+    // supermarket shelving: metal bays, and each product in a run of the same thing, the way shops stack them
+    const cols = [CORAL, GOLD, [0.55, 0.78, 0.5], [0.47, 0.7, 0.83], [0.85, 0.55, 0.75], [0.36, 0.62, 0.78]], r = rng(7), sh2 = (floorY - 600) / 4;
+    rect(0, 540, W, floorY - 540, [0.9, 0.91, 0.92]);
+    for (let sh = 0; sh < 4; sh++) {
+      const base = 560 + (sh + 1) * sh2 - 30, tags = [];
+      for (let x = 14; x < W - 20;) {
+        const kind = Math.floor(r() * 4), col = cols[Math.floor(r() * 6)], n = 3 + Math.floor(r() * 3), w = [74, 52, 44, 58][kind], runW = n * w;
+        for (let i = 0; i < n && x + i * w + w - 8 < W; i++) {
+          const px = x + i * w, cx = px + (w - 8) / 2;
+          if (kind === 0) { const h = sh2 * 0.72; rr(px, base - h, w - 8, h, 5); fill(col); circ(cx, base - h * 0.6, (w - 8) * 0.26); fill([1, 1, 1], 0.85); rect(px, base - h * 0.22, w - 8, h * 0.1, [1, 1, 1], 0.5); }
+          else if (kind === 1) [0, 1].forEach(j => { const y = base - 58 - j * 60; rect(px, y, w - 8, 56, col); rect(px, y + 18, w - 8, 18, [1, 1, 1], 0.8); rect(px, y, w - 8, 6, [0.75, 0.76, 0.8]); });
+          else if (kind === 2) { const h = sh2 * 0.5; rr(px, base - h, w - 8, h, 10); fill(col); rect(px + (w - 8) / 2 - 8, base - h - 26, 16, 30, col); circ(cx, base - h - 28, 10); fill(NAVY); rect(px, base - h * 0.62, w - 8, h * 0.26, [1, 1, 1], 0.8); }
+          else { rr(px, base - 60, w - 8, 60, 10); fill(col); rr(px - 2, base - 72, w - 4, 16, 5); fill([0.3, 0.32, 0.38]); rect(px, base - 44, w - 8, 20, [1, 1, 1], 0.8); }
+        }
+        // the price tag for the run
+        tags.push(x + runW / 2);
+        x += runW + 18;
+      }
+      rect(0, base, W, 4, [0.62, 0.64, 0.68]); rect(0, base + 2, W, 26, [0.97, 0.97, 0.98], 0.6);
+      tags.forEach(tx => { rr(tx - 26, base + 5, 52, 20, 4); fill(GOLD); });
+    }
+    for (let x = 0; x <= W; x += 360) rect(x - 6, 540, 12, floorY - 540, [0.62, 0.64, 0.68]);
+    rect(0, floorY, W, H - floorY, [0.9, 0.9, 0.88]);
+    for (let x = -200; x < W + 200; x += 160) line([[x, floorY], [x + (x - 540) * 0.6, H]], 2, [0.8, 0.8, 0.78]);
+    line([[0, floorY + 160], [W, floorY + 160]], 2, [0.8, 0.8, 0.78]);
+  }
+  // a little "beep!" that pops off the scanner
+  function beep(x, y, k) { if (k <= 0 || k >= 1) return; X.save(); X.globalAlpha = 1 - k; X.font = '700 60px Poppins, sans-serif'; X.textAlign = 'center'; X.lineWidth = 10; X.lineJoin = 'round'; X.strokeStyle = css([1, 1, 1]); X.strokeText('beep!', x, y - 60 * k); X.fillStyle = css(CORAL); X.fillText('beep!', x, y - 60 * k); X.restore(); }
+
+  // a fruit stand: two tiers of crates heaped with fruit, a wooden front
+  function fruitStand(x0, x1, top, floor) {
+    const r = rng(11), w = (x1 - x0) / 2, fr = [[0.85, 0.27, 0.24], [0.98, 0.62, 0.2], [0.55, 0.78, 0.5], [0.98, 0.84, 0.32]];
+    [[top, 0], [top + 100, 2]].forEach(([ty, f0], tier) => [0, 1].forEach(j => {
+      const cx = x0 + j * w, col = fr[f0 + j];
+      for (let row = 0; row < 3; row++) for (let i = 0; i < 6; i++) { const fx = cx + 30 + i * (w - 60) / 5 + (row % 2) * 14, fy = ty + 30 - row * 26 + (r() - 0.5) * 6; if (col === fr[3]) { X.beginPath(); X.arc(fx, fy + 30, 34, 1.15 * PI, 1.85 * PI); X.lineWidth = 16; X.lineCap = 'round'; X.strokeStyle = css(col); X.stroke(); } else { circ(fx, fy, 24); fill(col); circ(fx - 7, fy - 8, 6); fill([1, 1, 1], 0.35); } }
+      rect(cx + 8, ty + 40, w - 16, 60, [0.78, 0.6, 0.4]); line([[cx + 8, ty + 70], [cx + w - 8, ty + 70]], 4, [0.66, 0.48, 0.3]);
+    }));
+    rect(x0, top + 200, x1 - x0, floor - top - 200, [0.72, 0.55, 0.38]);
+    for (let y = top + 250; y < floor; y += 70) line([[x0, y], [x1, y]], 4, [0.62, 0.46, 0.3]);
+  }
+  // a shopping bag hanging from a hand at (x, y)
+  function tote(x, y, s = 1) {
+    X.beginPath(); X.arc(x, y + 40 * s, 30 * s, PI, 2 * PI); X.lineWidth = 7 * s; X.strokeStyle = css(darken(C(SEA), 0.15)); X.stroke();
+    rr(x - 14 * s, y + 10 * s, 26 * s, 60 * s, 8 * s); fill([0.98, 0.84, 0.32]);
+    [[-24, 0.85, 0.27, 0.24]].forEach(() => { circ(x + 26 * s, y + 34 * s, 20 * s); fill([0.85, 0.27, 0.24]); });
+    rr(x - 55 * s, y + 36 * s, 110 * s, 100 * s, 14 * s); fill(SEA);
+    rr(x - 55 * s, y + 36 * s, 110 * s, 16 * s, 8 * s); fill(darken(C(SEA), 0.15));
+  }
+  // the grown-up pushing the trolley, the child holding their other hand
+  function withTrolley(c, x, y, t, walk = 0, load = 0) {
+    const k = KID(c), kx = x - 170, ky = y + 4, sw = walk ? 5 * Math.sin(t * 7) : 0, hx = x - 106 + sw, hy = y - 228, hd = [x + 134, y - 378];
+    drawKid(k, kx, ky, t, { walk, speed: 11, armR: reach(kx, ky, ks(k), 1, 1, hx, hy, -1), armL: [0.25 + 0.25 * walk * Math.sin(t * 11), 0.2] });
+    person(x, y, 1, AD(c), t, { walk, armL: reach(x, y, 1, 1, -1, hx, hy), armR: reach(x, y, 1, 1, 1, hd[0], hd[1], -1) });
+    trolley(x + 150, y, 1, load);
+    return { adult: adultTop(x, y), child: kidTop(k, kx, ky) };
+  }
+  // shoppers coming and going past the doors
+  function shoppers(t, y, s) {
+    [[MUM2, 1, 0], [DAD1, -1, 0.35], [MUM3, 1, 0.6], [DAD2, -1, 0.15], [MUM4, -1, 0.8]].forEach(([L, d, o], i) => {
+      const u = ((t * 0.09 + o) % 1), x = d > 0 ? -160 + u * 1400 : 1240 - u * 1400;
+      person(x, y + (i % 2) * 30, s, L, t + i, { flip: d, walk: 1, armL: [0.15, 0.1], armR: [0.2 - 0.2 * Math.sin(t * 7 + i), 0.1] });
+    });
+  }
+
   // ---- the vet: the family's own dog or cat, or a dog when they don't have one
   const VETDOG = { type: 'dog', coat: '#A14F26', ears: 'floppy', size: 'm', muzzle: 'dark' };
   const vetPet = c => PETS(c).pets[0] || VETDOG;
@@ -2970,6 +3104,79 @@ const KIDS = (() => {
       if (p >= td && p < td + 0.2) { const a = 1 - (p - td) / 0.2; [-120, 150].forEach(gx => { circ(x + gx - 40 * (1 - a) - 20, 1660, 24 + 30 * (1 - a)); fill([1, 1, 1], 0.8 * a); }); }
       return { adult: [x, y - 260], child: [x + 120, y - 260] };
     } },
+    // ---- the supermarket
+    shop_park: { label: 'Parking and getting a trolley', fn(c, t, p) {
+      shopOut(t, 1180, 0); carPark(1180);
+      rr(60, 1250, 260, 120, 10); fill([0.82, 0.85, 0.88]); [0, 1, 2].forEach(i => { X.save(); X.globalAlpha = 0.9; trolley(90 + i * 34, 1360, 0.42); X.restore(); });
+      car(580, 1520, CORAL);
+      const q = ease(clamp(p / 0.8));
+      return withTrolley(c, lerp(110, 340, q), 1730, t, q < 0.98 ? 1 : 0);
+    } },
+    shop_busy: { label: 'The busy shop doors', fn(c, t) {
+      shopOut(t, 1320, clamp(0.5 + 0.8 * Math.sin(t * 1.3)));
+      shoppers(t, 1520, 0.78);
+      noise(540, 1100, t, 0.8);
+      return withTrolley(c, 310, 1760, t, 0);
+    } },
+    shop_fruit: { label: 'Choosing the fruit', fn(c, t) {
+      shopIn(t, 1400);
+      const ad = AD(c), ax = 150, ay = 1690, hd = [ax + 134, ay - 378];
+      person(ax, ay, 1, ad, t, { armL: [0.15, 0.1], armR: reach(ax, ay, 1, 1, 1, hd[0], hd[1], -1) });
+      trolley(ax + 150, ay, 1, 2);
+      fruitStand(660, 1080, 1220, 1720);
+      const k = KID(c), zs = 1.3, kx = 560, ky = 1800, sk = ks(k, zs), pick = [720, 1236], up = t > 2.2;
+      const u = ease(clamp((t - 0.6) / 0.8));
+      const target = up ? [kx + 50 * sk, ky - 470 * sk] : [lerp(kx + 80 * sk, pick[0], u), lerp(ky - 260 * sk, pick[1], u)];
+      const h = drawKid(k, kx, ky, t, { s: zs, armL: [0.2, 0.1], armR: up ? [2.6, 3.0] : reach(kx, ky, sk, 1, 1, target[0], target[1], -1) });
+      const held = t > 1.4, ap = held && h && h.R ? h.R : pick;
+      circ(ap[0], ap[1] - (held ? 10 : 0), 26); fill([0.85, 0.27, 0.24]); line([[ap[0], ap[1] - (held ? 34 : 24)], [ap[0] + 4, ap[1] - (held ? 46 : 36)]], 5, [0.4, 0.28, 0.2]);
+      if (up && t > 2.6) hearts(kx, 1200, t - 2.6, 1);
+      return { adult: adultTop(ax, ay), child: kidTop(k, kx, ky, zs) };
+    } },
+    shop_queue: { label: 'Waiting in the queue', helper: true, fn(c, t) {
+      shopIn(t, 1400);
+      const cx = 920, cy = 1700;
+      person(cx, cy, 0.95, shopWorker(HP(c)), t, { flip: -1, armR: [0.6 + 0.3 * Math.sin(t * 3), 1.2], armL: [0.2, 0.1] });
+      rect(760, 1380, 320, 340, [0.36, 0.62, 0.78]); rect(740, 1360, 340, 30, [0.24, 0.26, 0.3]); rect(760, 1440, 320, 10, [1, 1, 1], 0.4);
+      line([[1040, 1360], [1040, 1180]], 10, METAL_DK); rr(990, 1110, 110, 80, 10); fill([0.24, 0.26, 0.3]); rr(1002, 1122, 86, 56, 6); fill([0.6, 0.85, 0.75]);
+      person(680, 1700, 0.95, MUM3, t + 1, { armR: reach(680, 1700, 0.95, 1, 1, 780, 1350, -1), armL: [0.2, 0.1] });
+      const ax = 110, ay = 1710, hd = [ax + 134, ay - 378];
+      person(ax, ay, 1, AD(c), t, { armL: [0.15, 0.1], armR: reach(ax, ay, 1, 1, 1, hd[0], hd[1], -1) });
+      trolley(ax + 150, ay, 1, 4);
+      const k = KID(c), zs = 1.3, kx = 400, ky = 1880 + 3 * Math.sin(t * 2), sk = ks(k, zs);
+      drawKid(k, kx, ky, t, { s: zs, armL: [0.2 + 0.08 * Math.sin(t * 2), 0.1], armR: k.chair ? [0.3, 0.2] : reach(kx, ky, sk, 1, 1, kx + 80 * sk, 1420, -1) });
+      return { adult: adultTop(ax, ay), child: kidTop(k, kx, ky, zs), helper: adultTop(cx, cy, 0.95) };
+    } },
+    shop_beep: { label: 'The beeping checkout', helper: true, fn(c, t) {
+      shopIn(t, 1360);
+      const cx = 880, cy = 1700, P = 1.6, n = Math.floor(t / P), ph = t - n * P, slide = clamp(ph / 0.6);
+      const cur = ph < 0.6 ? lerp(560, 700, slide) : ph < 0.9 ? 700 : lerp(700, 960, clamp((ph - 0.9) / 0.5));
+      const busy = cur > 600 && cur < 950;
+      person(cx, cy, 1, shopWorker(HP(c)), t, { flip: -1, armR: busy ? reach(cx, cy, 1, -1, 1, cur + 30, 1330, -1) : [0.3, 0.3], armL: [0.2, 0.1] });
+      rect(0, 1360, W, 360, [0.36, 0.62, 0.78]); rect(0, 1440, W, 10, [1, 1, 1], 0.4);
+      rect(40, 1336, 600, 36, [0.18, 0.19, 0.23]); for (let x = 40 + ((t * 80) % 60); x < 640; x += 60) line([[x, 1340], [x, 1368]], 4, [0.3, 0.31, 0.36]);
+      rect(640, 1340, 440, 30, [0.82, 0.85, 0.88]);
+      rr(660, 1336, 90, 20, 6); fill([0.24, 0.26, 0.3]); rect(672, 1340, 66, 8, [0.95, 0.3, 0.3], 0.6 + 0.4 * Math.sin(t * 20));
+      for (let j = 1; j <= 3; j++) food((n + j) % 5, 560 - 140 * j + 140 * slide, 1350, 0.8);
+      food(n % 5, cur, 1350 - (busy ? 20 : 0), 0.8);
+      beep(705, 1250, (ph - 0.65) / 0.7);
+      line([[1020, 1340], [1020, 1160]], 10, METAL_DK); rr(970, 1090, 110, 80, 10); fill([0.24, 0.26, 0.3]); rr(982, 1102, 86, 56, 6); fill([0.6, 0.85, 0.75]);
+      const k = KID(c), zs = 1.3, kx = 420, ky = 1860;
+      person(140, 1800, 1, AD(c), t, { armR: reach(140, 1800, 1, 1, 1, 330, 1352, -1), armL: [0.2, 0.1] });
+      drawKid(k, kx, ky, t, { s: zs, armL: [0.2, 0.1], armR: t > 1.2 ? wave(t) : [0.3, 0.2] });
+      return { adult: adultTop(140, 1800), child: kidTop(k, kx, ky, zs), helper: adultTop(cx, cy) };
+    } },
+    shop_bag: { label: 'Carrying a bag out', fn(c, t, p) {
+      shopOut(t, 1180, 0); carPark(1180);
+      car(640, 1500, CORAL);
+      const q = ease(clamp(p / 0.85)), m = q < 0.98 ? 1 : 0, ax = lerp(-60, 250, q), ay = 1700, hd = [ax + 134, ay - 378];
+      person(ax, ay, 1, AD(c), t, { walk: m, armL: [0.15 - 0.2 * m * Math.sin(t * 7), 0.1], armR: reach(ax, ay, 1, 1, 1, hd[0], hd[1], -1) });
+      trolley(ax + 150, ay, 1, 5);
+      const k = KID(c), kx = ax + 380, ky = 1800, sk = ks(k);
+      const h = drawKid(k, kx, ky, t, { walk: m, speed: 11, armL: [0.25 + 0.25 * m * Math.sin(t * 11), 0.2], armR: k.chair ? [0.3, 0.2] : [0.15, 0.05] });
+      if (k.chair) tote(kx + 10 * sk, ky - 300 * sk, sk * 1.3); else if (h && h.R) tote(h.R[0], h.R[1], sk * 1.3);
+      return { adult: adultTop(ax, ay), child: kidTop(k, kx, ky) };
+    } },
     // ---- the vet
     vet_go: { label: 'Taking the pet to the vet', place: true, fn(c, t, p, st) {
       outdoor(PARK, t, 'day'); building(660, 1330, (st && st.place) || 'Vet');
@@ -3157,6 +3364,7 @@ const KIDS = (() => {
     ['Haircut', ['haircut', 'clippers', 'mirror']],
     ['Swimming lessons', ['pool_change', 'pool_walk', 'pool_teacher', 'pool_edge', 'pool_in', 'pool_kick', 'pool_towel']],
     ['Going on a plane', ['air_checkin', 'air_security', 'air_gate', 'plane_seat', 'plane_takeoff', 'plane_window', 'plane_land']],
+    ['Supermarket', ['shop_park', 'shop_busy', 'shop_fruit', 'shop_queue', 'shop_beep', 'shop_bag']],
     ['Bedtime', ['bath', 'brushteeth', 'bedtime', 'sleep']],
     ['Learning to ride a bike', ['helmet', 'bike_held', 'bike_wobble', 'bike_ride']],
     ['Cafe', ['cafe']],
